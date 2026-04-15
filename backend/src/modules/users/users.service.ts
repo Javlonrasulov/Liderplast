@@ -16,6 +16,11 @@ const DEFAULT_WORKER_LOGIN_PERMISSIONS = [
   'manage_shift_workers',
 ];
 
+function normalizeStir(value?: string | null) {
+  const digits = value?.replace(/\D/g, '') ?? '';
+  return digits || null;
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -108,6 +113,7 @@ export class UsersService {
         fullName: dto.fullName,
         position: dto.position,
         cardNumber: dto.cardNumber,
+        stir: normalizeStir(dto.stir),
         phone,
         login: dto.login?.trim() || null,
         customRoleLabel: dto.customRoleLabel?.trim() || null,
@@ -117,6 +123,7 @@ export class UsersService {
         role,
         salaryType: dto.salaryType,
         salaryRate: dto.salaryRate ?? 0,
+        preferredShiftNumber: dto.preferredShiftNumber ?? null,
         isActive: dto.isActive ?? true,
       },
       omit: {
@@ -174,6 +181,9 @@ export class UsersService {
     }
 
     const updateData: Record<string, unknown> = { ...dto };
+    if ('stir' in dto) {
+      updateData.stir = normalizeStir(dto.stir);
+    }
 
     if (dto.password) {
       updateData.passwordHash = await bcrypt.hash(dto.password, 10);

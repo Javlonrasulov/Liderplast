@@ -29,6 +29,14 @@ export const SalaryType = {
 export type SalaryType = (typeof SalaryType)[keyof typeof SalaryType]
 
 
+export const EmployeeRateType = {
+  FIXED: 'FIXED',
+  PERCENT: 'PERCENT'
+} as const
+
+export type EmployeeRateType = (typeof EmployeeRateType)[keyof typeof EmployeeRateType]
+
+
 export const InventoryItemType = {
   RAW_MATERIAL: 'RAW_MATERIAL',
   SEMI_PRODUCT: 'SEMI_PRODUCT',
@@ -73,6 +81,24 @@ export const UploadStatus = {
 } as const
 
 export type UploadStatus = (typeof UploadStatus)[keyof typeof UploadStatus]
+
+
+export const BankVedomostStatus = {
+  DRAFT: 'DRAFT',
+  PARSED: 'PARSED',
+  CONFIRMED: 'CONFIRMED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type BankVedomostStatus = (typeof BankVedomostStatus)[keyof typeof BankVedomostStatus]
+
+
+export const BankTransactionType = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
+} as const
+
+export type BankTransactionType = (typeof BankTransactionType)[keyof typeof BankTransactionType]
 
 
 export const ProductionStage = {

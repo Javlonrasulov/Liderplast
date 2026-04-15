@@ -410,7 +410,10 @@ export const ModelName = {
   Expense: 'Expense',
   SalarySetting: 'SalarySetting',
   EmployeeProduction: 'EmployeeProduction',
+  EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
+  BankVedomost: 'BankVedomost',
+  BankTransaction: 'BankTransaction',
   UploadedFile: 'UploadedFile',
   UploadJob: 'UploadJob'
 } as const
@@ -428,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expense" | "salarySetting" | "employeeProduction" | "salaryRecord" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expense" | "salarySetting" | "employeeProduction" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2356,6 +2359,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmployeeProductRate: {
+      payload: Prisma.$EmployeeProductRatePayload<ExtArgs>
+      fields: Prisma.EmployeeProductRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeeProductRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeeProductRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeeProductRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeeProductRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        findMany: {
+          args: Prisma.EmployeeProductRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>[]
+        }
+        create: {
+          args: Prisma.EmployeeProductRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        createMany: {
+          args: Prisma.EmployeeProductRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmployeeProductRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>[]
+        }
+        delete: {
+          args: Prisma.EmployeeProductRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        update: {
+          args: Prisma.EmployeeProductRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeeProductRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeeProductRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmployeeProductRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.EmployeeProductRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductRatePayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeeProductRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeProductRate>
+        }
+        groupBy: {
+          args: Prisma.EmployeeProductRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeProductRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeeProductRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeProductRateCountAggregateOutputType> | number
+        }
+      }
+    }
     SalaryRecord: {
       payload: Prisma.$SalaryRecordPayload<ExtArgs>
       fields: Prisma.SalaryRecordFieldRefs
@@ -2427,6 +2504,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SalaryRecordCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SalaryRecordCountAggregateOutputType> | number
+        }
+      }
+    }
+    BankVedomost: {
+      payload: Prisma.$BankVedomostPayload<ExtArgs>
+      fields: Prisma.BankVedomostFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BankVedomostFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BankVedomostFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        findFirst: {
+          args: Prisma.BankVedomostFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BankVedomostFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        findMany: {
+          args: Prisma.BankVedomostFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>[]
+        }
+        create: {
+          args: Prisma.BankVedomostCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        createMany: {
+          args: Prisma.BankVedomostCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BankVedomostCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>[]
+        }
+        delete: {
+          args: Prisma.BankVedomostDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        update: {
+          args: Prisma.BankVedomostUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        deleteMany: {
+          args: Prisma.BankVedomostDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BankVedomostUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BankVedomostUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>[]
+        }
+        upsert: {
+          args: Prisma.BankVedomostUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankVedomostPayload>
+        }
+        aggregate: {
+          args: Prisma.BankVedomostAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBankVedomost>
+        }
+        groupBy: {
+          args: Prisma.BankVedomostGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankVedomostGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BankVedomostCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankVedomostCountAggregateOutputType> | number
+        }
+      }
+    }
+    BankTransaction: {
+      payload: Prisma.$BankTransactionPayload<ExtArgs>
+      fields: Prisma.BankTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BankTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BankTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.BankTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BankTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.BankTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.BankTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.BankTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BankTransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.BankTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        update: {
+          args: Prisma.BankTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.BankTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BankTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BankTransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.BankTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.BankTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBankTransaction>
+        }
+        groupBy: {
+          args: Prisma.BankTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BankTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankTransactionCountAggregateOutputType> | number
         }
       }
     }
@@ -2628,6 +2853,7 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   position: 'position',
   cardNumber: 'cardNumber',
+  stir: 'stir',
   role: 'role',
   salaryType: 'salaryType',
   salaryRate: 'salaryRate',
@@ -3008,6 +3234,20 @@ export const EmployeeProductionScalarFieldEnum = {
 export type EmployeeProductionScalarFieldEnum = (typeof EmployeeProductionScalarFieldEnum)[keyof typeof EmployeeProductionScalarFieldEnum]
 
 
+export const EmployeeProductRateScalarFieldEnum = {
+  id: 'id',
+  workerId: 'workerId',
+  productLabel: 'productLabel',
+  rateType: 'rateType',
+  rateValue: 'rateValue',
+  baseAmount: 'baseAmount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeeProductRateScalarFieldEnum = (typeof EmployeeProductRateScalarFieldEnum)[keyof typeof EmployeeProductRateScalarFieldEnum]
+
+
 export const SalaryRecordScalarFieldEnum = {
   id: 'id',
   workerId: 'workerId',
@@ -3030,6 +3270,43 @@ export const SalaryRecordScalarFieldEnum = {
 } as const
 
 export type SalaryRecordScalarFieldEnum = (typeof SalaryRecordScalarFieldEnum)[keyof typeof SalaryRecordScalarFieldEnum]
+
+
+export const BankVedomostScalarFieldEnum = {
+  id: 'id',
+  fileName: 'fileName',
+  totalIncome: 'totalIncome',
+  totalExpense: 'totalExpense',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankVedomostScalarFieldEnum = (typeof BankVedomostScalarFieldEnum)[keyof typeof BankVedomostScalarFieldEnum]
+
+
+export const BankTransactionScalarFieldEnum = {
+  id: 'id',
+  bankVedomostId: 'bankVedomostId',
+  type: 'type',
+  amount: 'amount',
+  documentDate: 'documentDate',
+  documentNumber: 'documentNumber',
+  operationDate: 'operationDate',
+  receiverName: 'receiverName',
+  receiverAccount: 'receiverAccount',
+  receiverBankName: 'receiverBankName',
+  receiverStir: 'receiverStir',
+  paymentPurpose: 'paymentPurpose',
+  isSalary: 'isSalary',
+  employeeId: 'employeeId',
+  clientId: 'clientId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
 
 
 export const UploadedFileScalarFieldEnum = {
@@ -3383,6 +3660,48 @@ export type ListEnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'EmployeeRateType'
+ */
+export type EnumEmployeeRateTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmployeeRateType'>
+    
+
+
+/**
+ * Reference to a field of type 'EmployeeRateType[]'
+ */
+export type ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmployeeRateType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankVedomostStatus'
+ */
+export type EnumBankVedomostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankVedomostStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BankVedomostStatus[]'
+ */
+export type ListEnumBankVedomostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankVedomostStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankTransactionType'
+ */
+export type EnumBankTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankTransactionType'>
+    
+
+
+/**
+ * Reference to a field of type 'BankTransactionType[]'
+ */
+export type ListEnumBankTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankTransactionType[]'>
+    
+
+
+/**
  * Reference to a field of type 'UploadStatus'
  */
 export type EnumUploadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UploadStatus'>
@@ -3516,7 +3835,10 @@ export type GlobalOmitConfig = {
   expense?: Prisma.ExpenseOmit
   salarySetting?: Prisma.SalarySettingOmit
   employeeProduction?: Prisma.EmployeeProductionOmit
+  employeeProductRate?: Prisma.EmployeeProductRateOmit
   salaryRecord?: Prisma.SalaryRecordOmit
+  bankVedomost?: Prisma.BankVedomostOmit
+  bankTransaction?: Prisma.BankTransactionOmit
   uploadedFile?: Prisma.UploadedFileOmit
   uploadJob?: Prisma.UploadJobOmit
 }

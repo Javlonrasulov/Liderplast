@@ -269,12 +269,24 @@ export interface Employee {
   fullName: string;
   position: string;
   cardNumber: string;
+  stir?: string;
   phone?: string;
   /** Asosiy smena (1–20), backend User.preferredShiftNumber */
   preferredShiftNumber?: number | null;
   salaryType: 'fixed' | 'per_piece' | 'hybrid';
   salaryAmount: number;
   createdAt: string;
+}
+
+export interface EmployeeProductRate {
+  id: string;
+  employeeId: string;
+  productType: string;
+  rateType: 'fixed' | 'percent';
+  rateValue: number;
+  baseAmount?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface EmployeeProduction {
@@ -305,6 +317,71 @@ export interface SalaryRow {
   createdAt: string;
 }
 
+export interface SalaryPaymentSummary {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  amount: number;
+  requiredAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  period: string;
+  status: 'pending' | 'partial' | 'paid';
+  transactionsCount: number;
+  lastPaymentDate?: string | null;
+}
+
+export interface BankTransaction {
+  id: string;
+  bankVedomostId: string;
+  type: 'income' | 'expense';
+  amount: number;
+  documentDate?: string | null;
+  documentNumber?: string | null;
+  operationDate: string;
+  receiverName?: string | null;
+  receiverAccount?: string | null;
+  receiverBankName?: string | null;
+  receiverStir?: string | null;
+  paymentPurpose?: string | null;
+  isSalary: boolean;
+  employeeId?: string | null;
+  employeeName?: string | null;
+  clientId?: string | null;
+  clientName?: string | null;
+}
+
+export interface BankVedomost {
+  id: string;
+  fileName: string;
+  totalIncome: number;
+  totalExpense: number;
+  status: 'draft' | 'parsed' | 'confirmed' | 'rejected';
+  errorMessage?: string | null;
+  transactionsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  transactions?: BankTransaction[];
+  unresolvedEmployees?: Array<{
+    receiverName?: string | null;
+    receiverStir?: string | null;
+    paymentPurpose?: string | null;
+    totalAmount: number;
+    transactionIds: string[];
+  }>;
+  unresolvedClients?: Array<{
+    receiverName?: string | null;
+    receiverAccount?: string | null;
+    receiverBankName?: string | null;
+    totalAmount: number;
+    transactionIds: string[];
+  }>;
+  warnings?: {
+    unresolvedEmployeesCount: number;
+    unresolvedClientsCount: number;
+  };
+}
+
 export interface PayrollSettings {
   incomeTaxPercent: number;
   npsPercent: number;
@@ -328,8 +405,12 @@ export interface ERPState {
   shiftRecords: ShiftRecord[];
   workers: string[];
   employees: Employee[];
+  employeeProductRates: EmployeeProductRate[];
   employeeProductions: EmployeeProduction[];
   salaryVedomost: SalaryRow[];
+  salaryPaymentSummaries: SalaryPaymentSummary[];
+  bankVedomosts: BankVedomost[];
+  selectedBankVedomost: BankVedomost | null;
   payrollSettings: PayrollSettings;
   payments: Payment[];
 }
@@ -474,13 +555,21 @@ type ERPAction =
   | { type: 'DELETE_MACHINE'; payload: string }
   | { type: 'TOGGLE_MACHINE'; payload: string }
   | { type: 'ADD_EMPLOYEE'; payload: Omit<Employee, 'id' | 'createdAt'> }
+  | { type: 'UPDATE_EMPLOYEE'; payload: { id: string; fullName: string; position: string; cardNumber: string; stir: string; salaryType: Employee['salaryType']; salaryAmount: number } }
   | { type: 'DELETE_EMPLOYEE'; payload: string }
+  | { type: 'UPSERT_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string; rateType: EmployeeProductRate['rateType']; rateValue: number; baseAmount?: number } }
+  | { type: 'DELETE_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string } }
   | { type: 'ADD_EMPLOYEE_PRODUCTION'; payload: Omit<EmployeeProduction, 'id'> }
   | { type: 'DELETE_EMPLOYEE_PRODUCTION'; payload: string }
   | { type: 'GENERATE_VEDOMOST'; payload: { month: string } }
   | { type: 'UPDATE_SALARY_ROW'; payload: { id: string; bonus?: number; workedDays?: number } }
   | { type: 'SET_SALARY_STATUS'; payload: { id: string; status: 'paid' | 'unpaid' } }
   | { type: 'UPDATE_PAYROLL_SETTINGS'; payload: Partial<PayrollSettings> }
+  | { type: 'UPLOAD_OBOROTKA'; payload: { file: File } }
+  | { type: 'SELECT_BANK_VEDOMOST'; payload: { id: string } }
+  | { type: 'CREATE_EMPLOYEE_FROM_BANK_TRANSACTION'; payload: { transactionId: string; bankVedomostId: string } }
+  | { type: 'CREATE_CLIENT_FROM_BANK_TRANSACTION'; payload: { transactionId: string; bankVedomostId: string } }
+  | { type: 'RECONCILE_BANK_VEDOMOST'; payload: { id: string } }
   | { type: 'ADD_PAYMENT'; payload: Omit<Payment, 'id' | 'createdAt'> }
   | { type: 'DELETE_PAYMENT'; payload: string }
   | { type: 'SET_MONTH_STATUS'; payload: { month: string; status: 'paid' | 'unpaid' } };
@@ -513,8 +602,12 @@ const emptyState: ERPState = {
   shiftRecords: [],
   workers: [],
   employees: [],
+  employeeProductRates: [],
   employeeProductions: [],
   salaryVedomost: [],
+  salaryPaymentSummaries: [],
+  bankVedomosts: [],
+  selectedBankVedomost: null,
   payrollSettings: {
     incomeTaxPercent: 12,
     npsPercent: 0,
@@ -722,6 +815,7 @@ type BackendUser = {
   fullName: string;
   position?: string | null;
   cardNumber?: string | null;
+  stir?: string | null;
   phone: string;
   login?: string | null;
   customRoleLabel?: string | null;
@@ -742,6 +836,17 @@ type BackendEmployeeProduction = {
   rate: number;
   totalAmount: number;
   producedAt: string;
+};
+
+type BackendEmployeeProductRate = {
+  id: string;
+  workerId: string;
+  productLabel: string;
+  rateType: 'FIXED' | 'PERCENT';
+  rateValue: number;
+  baseAmount?: number | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type BackendSalarySettings = {
@@ -768,6 +873,71 @@ type BackendSalaryRow = {
   createdAt: string;
 };
 
+type BackendSalaryPaymentSummary = {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  amount: number;
+  requiredAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  period: string;
+  status: 'pending' | 'partial' | 'paid';
+  transactionsCount: number;
+  lastPaymentDate?: string | null;
+};
+
+type BackendBankTransaction = {
+  id: string;
+  bankVedomostId: string;
+  type: 'INCOME' | 'EXPENSE';
+  amount: number;
+  documentDate?: string | null;
+  documentNumber?: string | null;
+  operationDate: string;
+  receiverName?: string | null;
+  receiverAccount?: string | null;
+  receiverBankName?: string | null;
+  receiverStir?: string | null;
+  paymentPurpose?: string | null;
+  isSalary: boolean;
+  employeeId?: string | null;
+  employee?: { fullName: string } | null;
+  clientId?: string | null;
+  client?: { name: string } | null;
+};
+
+type BackendBankVedomost = {
+  id: string;
+  fileName: string;
+  totalIncome: number;
+  totalExpense: number;
+  status: 'DRAFT' | 'PARSED' | 'CONFIRMED' | 'REJECTED';
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { transactions: number };
+  transactions?: BackendBankTransaction[];
+  unresolvedEmployees?: Array<{
+    receiverName?: string | null;
+    receiverStir?: string | null;
+    paymentPurpose?: string | null;
+    totalAmount: number;
+    transactionIds: string[];
+  }>;
+  unresolvedClients?: Array<{
+    receiverName?: string | null;
+    receiverAccount?: string | null;
+    receiverBankName?: string | null;
+    totalAmount: number;
+    transactionIds: string[];
+  }>;
+  warnings?: {
+    unresolvedEmployeesCount: number;
+    unresolvedClientsCount: number;
+  };
+};
+
 function normalizeSemiType(name?: string | null): '18g' | '20g' {
   return name?.includes('20') ? '20g' : '18g';
 }
@@ -784,6 +954,53 @@ function normalizeSalaryType(
   if (salaryType === 'PER_PRODUCT') return 'per_piece';
   if (salaryType === 'HYBRID') return 'hybrid';
   return 'fixed';
+}
+
+function normalizeBankVedomostStatus(
+  status: BackendBankVedomost['status'],
+): BankVedomost['status'] {
+  return status.toLowerCase() as BankVedomost['status'];
+}
+
+function mapBankTransaction(item: BackendBankTransaction): BankTransaction {
+  return {
+    id: item.id,
+    bankVedomostId: item.bankVedomostId,
+    type: item.type === 'INCOME' ? 'income' : 'expense',
+    amount: item.amount,
+    documentDate: item.documentDate ?? null,
+    documentNumber: item.documentNumber ?? null,
+    operationDate: item.operationDate,
+    receiverName: item.receiverName ?? null,
+    receiverAccount: item.receiverAccount ?? null,
+    receiverBankName: item.receiverBankName ?? null,
+    receiverStir: item.receiverStir ?? null,
+    paymentPurpose: item.paymentPurpose ?? null,
+    isSalary: item.isSalary,
+    employeeId: item.employeeId ?? null,
+    employeeName: item.employee?.fullName ?? null,
+    clientId: item.clientId ?? null,
+    clientName: item.client?.name ?? null,
+  };
+}
+
+function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
+  return {
+    id: item.id,
+    fileName: item.fileName,
+    totalIncome: item.totalIncome,
+    totalExpense: item.totalExpense,
+    status: normalizeBankVedomostStatus(item.status),
+    errorMessage: item.errorMessage ?? null,
+    transactionsCount:
+      item._count?.transactions ?? item.transactions?.length ?? 0,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    transactions: item.transactions?.map(mapBankTransaction),
+    unresolvedEmployees: item.unresolvedEmployees,
+    unresolvedClients: item.unresolvedClients,
+    warnings: item.warnings,
+  };
 }
 
 function computeDebt(client: BackendClient) {
@@ -969,9 +1186,12 @@ async function loadStateFromApi() {
     payments,
     expenses,
     users,
+    employeeProductRates,
     employeeProductions,
     salarySettings,
     salaryRows,
+    bankVedomosts,
+    salaryPaymentSummaries,
   ] = await Promise.all([
     apiRequest<CatalogResponse>('/warehouse/catalog'),
     apiRequest<WarehouseStockItem[]>('/warehouse/stock'),
@@ -987,9 +1207,12 @@ async function loadStateFromApi() {
     apiRequest<BackendPayment[]>('/payments'),
     apiRequest<BackendExpense[]>('/finance/expenses'),
     apiRequest<BackendUser[]>('/users'),
+    apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
     apiRequest<BackendEmployeeProduction[]>('/finance/employee-productions'),
     apiRequest<BackendSalarySettings>('/finance/salary-settings'),
     apiRequest<BackendSalaryRow[]>('/finance/salary'),
+    apiRequest<BackendBankVedomost[]>('/finance/vedomosts'),
+    apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
   ]);
 
   const rawHistoryEntries: RawMaterialEntry[] = history
@@ -1181,6 +1404,7 @@ async function loadStateFromApi() {
     fullName: user.fullName,
     position: user.position ?? '',
     cardNumber: user.cardNumber ?? '',
+    stir: user.stir ?? '',
     phone: user.phone,
     preferredShiftNumber: user.preferredShiftNumber ?? null,
     salaryType: normalizeSalaryType(user.salaryType),
@@ -1196,6 +1420,17 @@ async function loadStateFromApi() {
     quantity: item.quantity,
     pricePerUnit: item.rate,
     totalAmount: item.totalAmount,
+  }));
+
+  const employeeProductRatesState: EmployeeProductRate[] = employeeProductRates.map((item) => ({
+    id: item.id,
+    employeeId: item.workerId,
+    productType: item.productLabel,
+    rateType: item.rateType === 'PERCENT' ? 'percent' : 'fixed',
+    rateValue: item.rateValue,
+    baseAmount: item.baseAmount ?? undefined,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
   }));
 
   const salaryVedomost: SalaryRow[] = salaryRows.map((row) => ({
@@ -1215,6 +1450,12 @@ async function loadStateFromApi() {
     status: row.isPaid ? 'paid' : 'unpaid',
     createdAt: row.createdAt,
   }));
+
+  const mappedBankVedomosts = bankVedomosts.map(mapBankVedomost);
+  const selectedBankVedomost =
+    mappedBankVedomosts.find((item) => item.transactions && item.transactions.length > 0) ??
+    mappedBankVedomosts[0] ??
+    null;
 
   const logs = buildLogs(rawMaterialEntries, productions, sales, mappedExpenses, mappedShifts);
 
@@ -1247,8 +1488,12 @@ async function loadStateFromApi() {
       ]),
     ),
     employees,
+    employeeProductRates: employeeProductRatesState,
     employeeProductions: employeeProductionsState,
     salaryVedomost,
+    salaryPaymentSummaries: salaryPaymentSummaries,
+    bankVedomosts: mappedBankVedomosts,
+    selectedBankVedomost,
     payrollSettings: salarySettings ?? emptyState.payrollSettings,
     payments: mappedPayments,
   };
@@ -1280,14 +1525,16 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       setState(next.state);
       setLookups(next.lookups);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Backend load failed');
+      const nextError = err instanceof Error ? err : new Error('Backend load failed');
+      setError(nextError.message);
+      throw nextError;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void refresh();
+    void refresh().catch(() => undefined);
   }, [refresh]);
 
   const dispatch = useCallback(
@@ -1453,9 +1700,29 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               fullName: action.payload.fullName,
               position: action.payload.position,
               cardNumber: action.payload.cardNumber,
+              stir: action.payload.stir,
               phone,
               password: 'Worker123',
               role,
+              salaryType:
+                action.payload.salaryType === 'per_piece'
+                  ? 'PER_PRODUCT'
+                  : action.payload.salaryType === 'hybrid'
+                    ? 'HYBRID'
+                    : 'FIXED',
+              salaryRate: action.payload.salaryAmount,
+            }),
+          });
+          break;
+        }
+        case 'UPDATE_EMPLOYEE': {
+          await apiRequest(`/users/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              fullName: action.payload.fullName,
+              position: action.payload.position,
+              cardNumber: action.payload.cardNumber,
+              stir: action.payload.stir,
               salaryType:
                 action.payload.salaryType === 'per_piece'
                   ? 'PER_PRODUCT'
@@ -1471,6 +1738,28 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           await apiRequest(`/users/${action.payload}`, {
             method: 'DELETE',
           });
+          break;
+        case 'UPSERT_EMPLOYEE_PRODUCT_RATE':
+          await apiRequest('/finance/employee-product-rates', {
+            method: 'PUT',
+            body: JSON.stringify({
+              workerId: action.payload.employeeId,
+              productLabel: action.payload.productType,
+              rateType: action.payload.rateType === 'percent' ? 'PERCENT' : 'FIXED',
+              rateValue: action.payload.rateValue,
+              baseAmount: action.payload.rateType === 'percent'
+                ? (action.payload.baseAmount ?? 0)
+                : undefined,
+            }),
+          });
+          break;
+        case 'DELETE_EMPLOYEE_PRODUCT_RATE':
+          await apiRequest(
+            `/finance/employee-product-rates/${action.payload.employeeId}/${encodeURIComponent(action.payload.productType)}`,
+            {
+              method: 'DELETE',
+            },
+          );
           break;
         case 'ADD_EMPLOYEE_PRODUCTION':
           await apiRequest('/finance/employee-productions', {
@@ -1529,6 +1818,89 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             }),
           });
           break;
+        case 'UPLOAD_OBOROTKA': {
+          const formData = new FormData();
+          formData.append('file', action.payload.file);
+          await apiRequest('/finance/upload-oborotka', {
+            method: 'POST',
+            body: formData,
+          });
+          break;
+        }
+        case 'SELECT_BANK_VEDOMOST': {
+          const detail = await apiRequest<BackendBankVedomost>(
+            `/finance/vedomost/${action.payload.id}`,
+          );
+          const mappedDetail = mapBankVedomost(detail);
+          setState((prev) => ({
+            ...prev,
+            bankVedomosts: prev.bankVedomosts.map((item) =>
+              item.id === mappedDetail.id ? mappedDetail : item,
+            ),
+            selectedBankVedomost: mappedDetail,
+          }));
+          return;
+        }
+        case 'CREATE_EMPLOYEE_FROM_BANK_TRANSACTION': {
+          await apiRequest(
+            `/finance/transactions/${action.payload.transactionId}/create-employee`,
+            {
+              method: 'POST',
+            },
+          );
+          const detail = await apiRequest<BackendBankVedomost>(
+            `/finance/vedomost/${action.payload.bankVedomostId}`,
+          );
+          const mappedDetail = mapBankVedomost(detail);
+          setState((prev) => ({
+            ...prev,
+            bankVedomosts: prev.bankVedomosts.map((item) =>
+              item.id === mappedDetail.id ? mappedDetail : item,
+            ),
+            selectedBankVedomost: mappedDetail,
+          }));
+          await refresh();
+          return;
+        }
+        case 'CREATE_CLIENT_FROM_BANK_TRANSACTION': {
+          await apiRequest(
+            `/finance/transactions/${action.payload.transactionId}/create-client`,
+            {
+              method: 'POST',
+            },
+          );
+          const detail = await apiRequest<BackendBankVedomost>(
+            `/finance/vedomost/${action.payload.bankVedomostId}`,
+          );
+          const mappedDetail = mapBankVedomost(detail);
+          setState((prev) => ({
+            ...prev,
+            bankVedomosts: prev.bankVedomosts.map((item) =>
+              item.id === mappedDetail.id ? mappedDetail : item,
+            ),
+            selectedBankVedomost: mappedDetail,
+          }));
+          await refresh();
+          return;
+        }
+        case 'RECONCILE_BANK_VEDOMOST': {
+          const detail = await apiRequest<BackendBankVedomost>(
+            `/finance/vedomost/${action.payload.id}/reconcile`,
+            {
+              method: 'POST',
+            },
+          );
+          const mappedDetail = mapBankVedomost(detail);
+          setState((prev) => ({
+            ...prev,
+            bankVedomosts: prev.bankVedomosts.map((item) =>
+              item.id === mappedDetail.id ? mappedDetail : item,
+            ),
+            selectedBankVedomost: mappedDetail,
+          }));
+          await refresh();
+          return;
+        }
         case 'ADD_SHIFT_RECORD': {
           const workerId = lookups.usersByName.get(action.payload.workerName);
           if (!workerId) break;

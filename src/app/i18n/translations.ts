@@ -485,6 +485,7 @@ export interface T {
   navPayroll: string;
   prTitle: string;
   prTabVedomost: string;
+  prTabBank: string;
   prTabEmployees: string;
   prTabProduction: string;
   prTabSettings: string;
@@ -493,6 +494,7 @@ export interface T {
   prFullName: string;
   prPosition: string;
   prCardNumber: string;
+  prStir: string;
   prSalaryType: string;
   prFixed: string;
   prPerPiece: string;
@@ -518,6 +520,18 @@ export interface T {
   prSocialTaxPct: string;
   prNpsPct: string;
   prAddEmployee: string;
+  prEditEmployee: string;
+  prEmployeeRates: string;
+  prRateType: string;
+  prRateFixed: string;
+  prRatePercent: string;
+  prRateValue: string;
+  prRateBaseAmount: string;
+  prNoEmployeeRates: string;
+  prRateConfiguredHint: string;
+  prDeleteEmployeeTitle: string;
+  prDeleteEmployeeConfirm: string;
+  prDeleteEmployeeAction: string;
   prWorkedDays: string;
   prPricePerUnit: string;
   prProductType: string;
@@ -540,6 +554,43 @@ export interface T {
   prIncomeTaxOnly: string;
   prNpsNote: string;
   prSocialNote: string;
+  prBankUploadTitle: string;
+  prBankUploadHint: string;
+  prBankUploadAction: string;
+  prBankUploadSuccess: string;
+  prBankVedomostList: string;
+  prBankNoVedomost: string;
+  prBankTransactions: string;
+  prBankNoTransactions: string;
+  prBankNoSelection: string;
+  prBankIncome: string;
+  prBankExpense: string;
+  prBankDocNumber: string;
+  prBankReceiver: string;
+  prBankPurpose: string;
+  prBankMatched: string;
+  prBankUnmatched: string;
+  prBankSalarySummary: string;
+  prBankSalarySummaryHint: string;
+  prBankRequired: string;
+  prBankPaid: string;
+  prBankRemaining: string;
+  prBankTotalVedomost: string;
+  prBankSalaryMatched: string;
+  prBankSelected: string;
+  prBankWarningTitle: string;
+  prBankWarningDesc: string;
+  prBankUnknownClients: string;
+  prBankUnknownEmployees: string;
+  prBankUnknownClientsDesc: string;
+  prBankUnknownEmployeesDesc: string;
+  prBankAddClient: string;
+  prBankAddEmployee: string;
+  prBankCreateClientTitle: string;
+  prBankCreateClientDesc: string;
+  prBankCreateEmployeeTitle: string;
+  prBankCreateEmployeeDesc: string;
+  prBankCreateWarning: string;
 }
 
 // ======================== UZBEK CYRILLIC ========================
@@ -1009,9 +1060,10 @@ const uz_cyrillic: T = {
   pmAddSuccess: 'Тўлов муваффақиятли қўшилди!',
   pmDeleteConfirm: 'Тўловни ўчиришни тасдиқлайсизми?',
 
-  navPayroll: 'Иш ҳақи ведомости',
-  prTitle: 'Ишчилар Ведомости',
+  navPayroll: 'Бухгалтерия',
+  prTitle: 'Бухгалтерия',
   prTabVedomost: 'Ведомост',
+  prTabBank: 'Банк',
   prTabEmployees: 'Ишчилар',
   prTabProduction: 'Иш ҳажми',
   prTabSettings: 'Солиқ созламалари',
@@ -1020,6 +1072,7 @@ const uz_cyrillic: T = {
   prFullName: 'Ф.И.Ш.',
   prPosition: 'Лавозим',
   prCardNumber: 'Карта рақами',
+  prStir: 'СТИР',
   prSalaryType: 'Иш ҳақи тури',
   prFixed: 'Белгиланган',
   prPerPiece: 'Дона бошига',
@@ -1045,6 +1098,18 @@ const uz_cyrillic: T = {
   prSocialTaxPct: 'Ижтимоий солиқ (%)',
   prNpsPct: 'НПС (%)',
   prAddEmployee: 'Ишчи қўшиш',
+  prEditEmployee: 'Ишчи маълумотларини ўзгартириш',
+  prEmployeeRates: 'Маҳсулот бўйича ставка',
+  prRateType: 'Ставка тури',
+  prRateFixed: 'Сўм',
+  prRatePercent: 'Фоиз',
+  prRateValue: 'Ставка',
+  prRateBaseAmount: 'База сумма',
+  prNoEmployeeRates: 'Бу ишчи учун маҳсулот ставкалари ҳали киритилмаган.',
+  prRateConfiguredHint: 'Ставка бугалтерияда белгиланган',
+  prDeleteEmployeeTitle: 'Ишчини ўчириш',
+  prDeleteEmployeeConfirm: '"{name}" ни ўчиришни тасдиқлайсизми?',
+  prDeleteEmployeeAction: 'Ҳа, ўчириш',
   prWorkedDays: 'Иш кунлари',
   prPricePerUnit: 'Нарх (дона)',
   prProductType: 'Маҳсулот тури',
@@ -1067,6 +1132,43 @@ const uz_cyrillic: T = {
   prIncomeTaxOnly: 'Фақат даромад солиғи чегирилади',
   prNpsNote: 'НПС — чегирилмайди',
   prSocialNote: 'Ижт. солиқ — чегирилмайди',
+  prBankUploadTitle: 'Обортка юклаш',
+  prBankUploadHint: 'Биринчи sheet автоматик ўқилади',
+  prBankUploadAction: '.xlsx файл танлаш',
+  prBankUploadSuccess: 'Обортка файли муваффақиятли юкланди',
+  prBankVedomostList: 'Банк ведомостлари',
+  prBankNoVedomost: 'Ҳозирча банк ведомости йўқ',
+  prBankTransactions: 'Транзакциялар',
+  prBankNoTransactions: 'Транзакциялар топилмади',
+  prBankNoSelection: 'Ведомост танланмаган',
+  prBankIncome: 'Кирим',
+  prBankExpense: 'Чиқим',
+  prBankDocNumber: 'Ҳужжат рақами',
+  prBankReceiver: 'Олувчи',
+  prBankPurpose: 'Тўлов мақсади',
+  prBankMatched: 'Ойликка мос',
+  prBankUnmatched: 'Мос эмас',
+  prBankSalarySummary: 'Ойлик reconciliation',
+  prBankSalarySummaryHint: 'Нетто сумма ва банк тўловлари кесимида',
+  prBankRequired: 'Керакли сумма',
+  prBankPaid: 'Тўланган',
+  prBankRemaining: 'Қолган',
+  prBankTotalVedomost: 'Жами ведомост',
+  prBankSalaryMatched: 'Ойликка мос тўловлар',
+  prBankSelected: 'Танланган чиқим',
+  prBankWarningTitle: 'Тизимда топилмаган ўтказмалар бор',
+  prBankWarningDesc: 'Агар уларни клиeнт ёки ходим сифатида қўшмасангиз, пул ҳаракатлари ҳисобида номувофиқликлар қолиши мумкин.',
+  prBankUnknownClients: 'номаълум клиент',
+  prBankUnknownEmployees: 'номаълум ходим',
+  prBankUnknownClientsDesc: 'Кирим тўловларида тизимда йўқ клиентлар аниқланди.',
+  prBankUnknownEmployeesDesc: 'Ойликка тегишли, лекин тизимда йўқ ходимлар аниқланди.',
+  prBankAddClient: 'Клиент қўшиш',
+  prBankAddEmployee: 'Ходим қўшиш',
+  prBankCreateClientTitle: 'Клиентни тизимга қўшиш',
+  prBankCreateClientDesc: 'Ушбу пул ўтказган томонни клиент сифатида қўшасизми?',
+  prBankCreateEmployeeTitle: 'Ходимни тизимга қўшиш',
+  prBankCreateEmployeeDesc: 'Ушбу олувчини ходим сифатида қўшасизми?',
+  prBankCreateWarning: 'Рад этсангиз, ушбу ўтказма тизимда клиент/ходимга боғланмайди ва кейинги ҳисоботлар ҳамда солиштиришларда номувофиқлик қолиши мумкин.',
 };
 
 // ======================== UZBEK LATIN ========================
@@ -1536,9 +1638,10 @@ const uz_latin: T = {
   pmAddSuccess: 'To\'lov muvaffaqiyatli qo\'shildi!',
   pmDeleteConfirm: 'To\'lovni o\'chirishni tasdiqlarasizmi?',
 
-  navPayroll: 'Ish haqi vedomosti',
-  prTitle: 'Ishchilar Vedomosti',
+  navPayroll: 'Buxgalteriya',
+  prTitle: 'Buxgalteriya',
   prTabVedomost: 'Vedomost',
+  prTabBank: 'Bank',
   prTabEmployees: 'Ishchilar',
   prTabProduction: 'Ish hajmi',
   prTabSettings: 'Soliq sozlamalari',
@@ -1547,6 +1650,7 @@ const uz_latin: T = {
   prFullName: 'F.I.Sh.',
   prPosition: 'Lavozim',
   prCardNumber: 'Karta raqami',
+  prStir: 'STIR',
   prSalaryType: 'Ish haqi turi',
   prFixed: 'Belgilangan',
   prPerPiece: 'Dona boshiga',
@@ -1572,6 +1676,18 @@ const uz_latin: T = {
   prSocialTaxPct: 'Ijtimoiy soliq (%)',
   prNpsPct: 'NPS (%)',
   prAddEmployee: "Ishchi qo'shish",
+  prEditEmployee: "Ishchi ma'lumotlarini o'zgartirish",
+  prEmployeeRates: "Mahsulot bo'yicha stavka",
+  prRateType: 'Stavka turi',
+  prRateFixed: "So'm",
+  prRatePercent: 'Foiz',
+  prRateValue: 'Stavka',
+  prRateBaseAmount: 'Baza summa',
+  prNoEmployeeRates: "Bu ishchi uchun mahsulot stavkalari hali kiritilmagan.",
+  prRateConfiguredHint: 'Stavka buxgalteriyada belgilangan',
+  prDeleteEmployeeTitle: "Ishchini o'chirish",
+  prDeleteEmployeeConfirm: '"{name}" ni o\'chirishni tasdiqlaysizmi?',
+  prDeleteEmployeeAction: "Ha, o'chirish",
   prWorkedDays: 'Ish kunlari',
   prPricePerUnit: 'Narx (dona)',
   prProductType: 'Mahsulot turi',
@@ -1594,6 +1710,43 @@ const uz_latin: T = {
   prIncomeTaxOnly: "Faqat daromad solig'i chegiriladi",
   prNpsNote: "NPS — chegirilamaydi",
   prSocialNote: "Ijt. soliq — chegirilamaydi",
+  prBankUploadTitle: 'Oborotka yuklash',
+  prBankUploadHint: 'Birinchi sheet avtomatik o‘qiladi',
+  prBankUploadAction: '.xlsx fayl tanlash',
+  prBankUploadSuccess: 'Oborotka fayli muvaffaqiyatli yuklandi',
+  prBankVedomostList: 'Bank vedemostlar',
+  prBankNoVedomost: 'Hozircha bank vedemosti yo‘q',
+  prBankTransactions: 'Tranzaksiyalar',
+  prBankNoTransactions: 'Tranzaksiyalar topilmadi',
+  prBankNoSelection: 'Vedomost tanlanmagan',
+  prBankIncome: 'Kirim',
+  prBankExpense: 'Chiqim',
+  prBankDocNumber: 'Hujjat raqami',
+  prBankReceiver: 'Oluvchi',
+  prBankPurpose: 'To‘lov maqsadi',
+  prBankMatched: 'Oylikka mos',
+  prBankUnmatched: 'Mos emas',
+  prBankSalarySummary: 'Oylik reconciliation',
+  prBankSalarySummaryHint: 'Netto summa va bank to‘lovlari kesimida',
+  prBankRequired: 'Kerakli summa',
+  prBankPaid: 'To‘langan',
+  prBankRemaining: 'Qolgan',
+  prBankTotalVedomost: 'Jami vedemost',
+  prBankSalaryMatched: 'Oylikka mos to‘lovlar',
+  prBankSelected: 'Tanlangan chiqim',
+  prBankWarningTitle: 'Tizimda topilmagan o‘tkazmalar bor',
+  prBankWarningDesc: 'Agar ularni klient yoki xodim sifatida qo‘shmasangiz, pul harakati hisobi va keyingi reconciliationlarda nomuvofiqlik qolishi mumkin.',
+  prBankUnknownClients: 'noma’lum klient',
+  prBankUnknownEmployees: 'noma’lum xodim',
+  prBankUnknownClientsDesc: 'Kirim to‘lovlarida tizimda yo‘q klientlar aniqlandi.',
+  prBankUnknownEmployeesDesc: 'Oylikka tegishli, lekin tizimda yo‘q xodimlar aniqlandi.',
+  prBankAddClient: 'Klient qo‘shish',
+  prBankAddEmployee: 'Xodim qo‘shish',
+  prBankCreateClientTitle: 'Klientni tizimga qo‘shish',
+  prBankCreateClientDesc: 'Ushbu pul o‘tkazgan tomonni klient sifatida qo‘shasizmi?',
+  prBankCreateEmployeeTitle: 'Xodimni tizimga qo‘shish',
+  prBankCreateEmployeeDesc: 'Ushbu oluvchini xodim sifatida qo‘shasizmi?',
+  prBankCreateWarning: 'Yo‘q desangiz, ushbu o‘tkazma tizimda klient/xodimga bog‘lanmaydi va keyingi hisobotlar hamda solishtirishlarda xatolik xavfi saqlanib qoladi.',
 };
 
 // ======================== RUSSIAN ========================
@@ -2063,9 +2216,10 @@ const ru: T = {
   pmAddSuccess: 'Платёж успешно добавлен!',
   pmDeleteConfirm: 'Подтвердите удаление платежа?',
 
-  navPayroll: 'Ведомость зарплат',
-  prTitle: 'Ведомость заработной платы',
+  navPayroll: 'Бухгалтерия',
+  prTitle: 'Бухгалтерия',
   prTabVedomost: 'Ведомость',
+  prTabBank: 'Банк',
   prTabEmployees: 'Сотрудники',
   prTabProduction: 'Выработка',
   prTabSettings: 'Налоговые ставки',
@@ -2074,6 +2228,7 @@ const ru: T = {
   prFullName: 'Ф.И.О.',
   prPosition: 'Должность',
   prCardNumber: 'Номер карты',
+  prStir: 'СТИР',
   prSalaryType: 'Тип оклада',
   prFixed: 'Фиксированный',
   prPerPiece: 'Сдельный',
@@ -2099,6 +2254,18 @@ const ru: T = {
   prSocialTaxPct: 'Социальный налог (%)',
   prNpsPct: 'НПФГ (%)',
   prAddEmployee: 'Добавить сотрудника',
+  prEditEmployee: 'Изменить данные сотрудника',
+  prEmployeeRates: 'Ставка по продукту',
+  prRateType: 'Тип ставки',
+  prRateFixed: 'Сумма',
+  prRatePercent: 'Процент',
+  prRateValue: 'Ставка',
+  prRateBaseAmount: 'Базовая сумма',
+  prNoEmployeeRates: 'Для этого сотрудника ставки по продуктам ещё не заданы.',
+  prRateConfiguredHint: 'Ставка задана в бухгалтерии',
+  prDeleteEmployeeTitle: 'Удалить сотрудника',
+  prDeleteEmployeeConfirm: 'Подтвердите удаление сотрудника "{name}"?',
+  prDeleteEmployeeAction: 'Да, удалить',
   prWorkedDays: 'Рабочих дней',
   prPricePerUnit: 'Цена (шт)',
   prProductType: 'Тип продукта',
@@ -2121,6 +2288,43 @@ const ru: T = {
   prIncomeTaxOnly: 'Только подоходный налог вычитается',
   prNpsNote: 'НПС — не вычитается',
   prSocialNote: 'Соц. налог — не вычитается',
+  prBankUploadTitle: 'Загрузка оборотки',
+  prBankUploadHint: 'Автоматически читается первый лист',
+  prBankUploadAction: 'Выбрать .xlsx файл',
+  prBankUploadSuccess: 'Файл оборотки успешно загружен',
+  prBankVedomostList: 'Банковские ведомости',
+  prBankNoVedomost: 'Банковские ведомости пока отсутствуют',
+  prBankTransactions: 'Транзакции',
+  prBankNoTransactions: 'Транзакции не найдены',
+  prBankNoSelection: 'Ведомость не выбрана',
+  prBankIncome: 'Приход',
+  prBankExpense: 'Расход',
+  prBankDocNumber: 'Номер документа',
+  prBankReceiver: 'Получатель',
+  prBankPurpose: 'Назначение платежа',
+  prBankMatched: 'Связано с зарплатой',
+  prBankUnmatched: 'Не связано',
+  prBankSalarySummary: 'Сверка зарплаты',
+  prBankSalarySummaryHint: 'По сумме нетто и банковским выплатам',
+  prBankRequired: 'Требуется',
+  prBankPaid: 'Оплачено',
+  prBankRemaining: 'Остаток',
+  prBankTotalVedomost: 'Всего ведомостей',
+  prBankSalaryMatched: 'Совпавшие зарплатные выплаты',
+  prBankSelected: 'Расход по выбранной',
+  prBankWarningTitle: 'Есть переводы, которых нет в системе',
+  prBankWarningDesc: 'Если не добавить их как клиента или сотрудника, в учёте движений денег и последующей сверке останутся расхождения.',
+  prBankUnknownClients: 'неизвестных клиентов',
+  prBankUnknownEmployees: 'неизвестных сотрудников',
+  prBankUnknownClientsDesc: 'Обнаружены входящие платежи от клиентов, которых нет в системе.',
+  prBankUnknownEmployeesDesc: 'Обнаружены зарплатные платежи сотрудникам, которых нет в системе.',
+  prBankAddClient: 'Добавить клиента',
+  prBankAddEmployee: 'Добавить сотрудника',
+  prBankCreateClientTitle: 'Добавить клиента в систему',
+  prBankCreateClientDesc: 'Добавить этого отправителя платежа как клиента?',
+  prBankCreateEmployeeTitle: 'Добавить сотрудника в систему',
+  prBankCreateEmployeeDesc: 'Добавить этого получателя как сотрудника?',
+  prBankCreateWarning: 'Если отказаться, перевод останется не связанным с клиентом/сотрудником и это может вызвать ошибки или расхождения в отчётах и сверке.',
 };
 
 export const translations: Record<Language, T> = {

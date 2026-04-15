@@ -21,6 +21,11 @@ enum SalaryType {
   HYBRID
 }
 
+enum EmployeeRateType {
+  FIXED
+  PERCENT
+}
+
 enum InventoryItemType {
   RAW_MATERIAL
   SEMI_PRODUCT
@@ -50,6 +55,18 @@ enum UploadStatus {
   PENDING
   PROCESSING
   COMPLETED
+}
+
+enum BankVedomostStatus {
+  DRAFT
+  PARSED
+  CONFIRMED
+  REJECTED
+}
+
+enum BankTransactionType {
+  INCOME
+  EXPENSE
 }
 
 enum ProductionStage {
@@ -113,6 +130,7 @@ model User {
   passwordHash        String
   position            String?
   cardNumber          String?
+  stir                String?
   role                Role                @default(WORKER)
   salaryType          SalaryType          @default(FIXED)
   salaryRate          Float               @default(0)
@@ -125,6 +143,7 @@ model User {
   productions         ProductionRecord[]  @relation("WorkerProductions")
   shiftRecords        ShiftRecord[]
   employeeProductions EmployeeProduction[]
+  employeeProductRates EmployeeProductRate[]
   salaryRecords       SalaryRecord[]
   createdOrders       Order[]             @relation("OrderCreator")
   createdExpenses     Expense[]           @relation("ExpenseCreator")
@@ -133,6 +152,9 @@ model User {
   bagAuditLogs        BagAuditLog[]       @relation("BagAuditCreator")
   bagWriteoffs        BagWriteoff[]       @relation("BagWriteoffCreator")
   productAuditLogs    ProductAuditLog[]   @relation("ProductAuditActor")
+  bankTransactions    BankTransaction[]
+
+  @@index([stir])
 }
 
 model RefreshToken {
@@ -449,6 +471,7 @@ model Client {
   updatedAt DateTime     @updatedAt
   orders    Order[]
   payments  Payment[]
+  bankTransactions BankTransaction[]
 }
 
 model Order {
@@ -531,6 +554,21 @@ model EmployeeProduction {
   createdAt   DateTime     @default(now())
 }
 
+model EmployeeProductRate {
+  id          String           @id @default(cuid())
+  workerId    String
+  worker      User             @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  productLabel String
+  rateType    EmployeeRateType @default(FIXED)
+  rateValue   Float
+  baseAmount  Float?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([workerId, productLabel])
+  @@index([workerId])
+}
+
 model SalaryRecord {
   id              String       @id @default(cuid())
   workerId        String
@@ -553,6 +591,47 @@ model SalaryRecord {
   updatedAt       DateTime     @updatedAt
 
   @@unique([workerId, month])
+}
+
+model BankVedomost {
+  id           String              @id @default(cuid())
+  fileName     String
+  totalIncome  Float               @default(0)
+  totalExpense Float               @default(0)
+  status       BankVedomostStatus  @default(DRAFT)
+  errorMessage String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  transactions BankTransaction[]
+}
+
+model BankTransaction {
+  id               String              @id @default(cuid())
+  bankVedomostId   String
+  bankVedomost     BankVedomost        @relation(fields: [bankVedomostId], references: [id], onDelete: Cascade)
+  type             BankTransactionType
+  amount           Float
+  documentDate     DateTime?
+  documentNumber   String?
+  operationDate    DateTime
+  receiverName     String?
+  receiverAccount  String?
+  receiverBankName String?
+  receiverStir     String?
+  paymentPurpose   String?
+  isSalary         Boolean             @default(false)
+  employeeId       String?
+  employee         User?               @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  clientId         String?
+  client           Client?             @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([bankVedomostId, operationDate])
+  @@index([employeeId, isSalary])
+  @@index([clientId])
+  @@index([documentNumber, amount])
+  @@index([receiverStir])
 }
 
 model UploadedFile {

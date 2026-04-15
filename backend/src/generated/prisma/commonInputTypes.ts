@@ -545,6 +545,57 @@ export type EnumExpenseTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
 }
 
+export type EnumEmployeeRateTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmployeeRateType | Prisma.EnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel> | $Enums.EmployeeRateType
+}
+
+export type EnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmployeeRateType | Prisma.EnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel> | $Enums.EmployeeRateType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
+}
+
+export type EnumBankVedomostStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel> | $Enums.BankVedomostStatus
+}
+
+export type EnumBankVedomostStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankVedomostStatusWithAggregatesFilter<$PrismaModel> | $Enums.BankVedomostStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel>
+}
+
+export type EnumBankTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel> | $Enums.BankTransactionType
+}
+
+export type EnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.BankTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
+}
+
 export type EnumUploadStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.UploadStatus | Prisma.EnumUploadStatusFieldRefInput<$PrismaModel>
   in?: $Enums.UploadStatus[] | Prisma.ListEnumUploadStatusFieldRefInput<$PrismaModel>
@@ -1055,6 +1106,57 @@ export type NestedEnumExpenseTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumEmployeeRateTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmployeeRateType | Prisma.EnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel> | $Enums.EmployeeRateType
+}
+
+export type NestedEnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EmployeeRateType | Prisma.EnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel> | $Enums.EmployeeRateType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumBankVedomostStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel> | $Enums.BankVedomostStatus
+}
+
+export type NestedEnumBankVedomostStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankVedomostStatusWithAggregatesFilter<$PrismaModel> | $Enums.BankVedomostStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumBankTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel> | $Enums.BankTransactionType
+}
+
+export type NestedEnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.BankTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumUploadStatusFilter<$PrismaModel = never> = {

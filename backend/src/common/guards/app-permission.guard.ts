@@ -164,6 +164,22 @@ function requiredPermissionGroups(
       method: 'PATCH',
       anyOf: ['create_vedemost'],
     },
+    {
+      test: /^\/finance\/upload-oborotka$/,
+      method: 'POST',
+      anyOf: ['create_vedemost'],
+    },
+    { test: /^\/finance\/vedomosts$/, method: 'GET', anyOf: ['view_vedemost'] },
+    {
+      test: /^\/finance\/vedomost\/[^/]+$/,
+      method: 'GET',
+      anyOf: ['view_vedemost'],
+    },
+    {
+      test: /^\/finance\/salary-vedomost$/,
+      method: 'GET',
+      anyOf: ['view_vedemost'],
+    },
 
     { test: /^\/users$/, method: 'GET', anyOf: ['manage_users', 'view_payroll'] },
     {

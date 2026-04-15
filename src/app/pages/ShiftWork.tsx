@@ -482,9 +482,7 @@ export function ShiftWork() {
   const [error, setError] = useState('');
   const [newWorker, setNewWorker] = useState('');
   const [newWorkerShift, setNewWorkerShift] = useState(1);
-  const [newWorkerPhone, setNewWorkerPhone] = useState('');
-  const [newWorkerPosition, setNewWorkerPosition] = useState('');
-  const [newWorkerCard, setNewWorkerCard] = useState('');
+  const [newWorkerPhone, setNewWorkerPhone] = useState('+998');
   const [workerFormError, setWorkerFormError] = useState('');
   const [workerInputOpen, setWorkerInputOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -719,15 +717,11 @@ export function ShiftWork() {
         payload: {
           fullName: name,
           preferredShiftNumber: newWorkerShift,
-          phone: newWorkerPhone.trim() || undefined,
-          position: newWorkerPosition.trim() || undefined,
-          cardNumber: newWorkerCard.trim() || undefined,
+          phone: newWorkerPhone.trim().length > 4 ? newWorkerPhone.trim() : undefined,
         },
       });
       setNewWorker('');
-      setNewWorkerPhone('');
-      setNewWorkerPosition('');
-      setNewWorkerCard('');
+      setNewWorkerPhone('+998');
     } catch (err) {
       setWorkerFormError(err instanceof Error ? err.message : 'Error');
     }
@@ -1460,22 +1454,26 @@ export function ShiftWork() {
                   placeholder={t.workerPreferredShift}
                 />
               </div>
-              <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPhone} ({t.workerOptional})</label>
-                  <input type="tel" value={newWorkerPhone} onChange={e => setNewWorkerPhone(e.target.value)} placeholder="+998..."
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPositionShort} ({t.workerOptional})</label>
-                  <input type="text" value={newWorkerPosition} onChange={e => setNewWorkerPosition(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm" />
-                </div>
-              </div>
               <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerCardShort} ({t.workerOptional})</label>
-                <input type="text" value={newWorkerCard} onChange={e => setNewWorkerCard(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm" />
+                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPhone} ({t.workerOptional})</label>
+                <input
+                  type="tel"
+                  value={newWorkerPhone}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (!raw || raw === '+') {
+                      setNewWorkerPhone('+998');
+                      return;
+                    }
+                    if (raw.startsWith('+998')) {
+                      setNewWorkerPhone(raw);
+                      return;
+                    }
+                    setNewWorkerPhone(`+998${raw.replace(/^\+/, '')}`);
+                  }}
+                  placeholder="+998"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
+                />
               </div>
               {workerFormError ? (
                 <div className="p-2.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">{workerFormError}</div>

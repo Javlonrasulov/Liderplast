@@ -69,12 +69,15 @@ export async function apiRequest<T>(
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`;
     try {
-      const errorPayload = await response.json();
-      const nested = errorPayload?.error?.message;
-      message =
-        (Array.isArray(nested) ? nested.join(', ') : nested) ??
-        errorPayload?.message ??
-        message;
+      const raw = await response.text();
+      if (raw.trim()) {
+        const errorPayload = JSON.parse(raw);
+        const nested = errorPayload?.error?.message;
+        message =
+          (Array.isArray(nested) ? nested.join(', ') : nested) ??
+          errorPayload?.message ??
+          message;
+      }
     } catch {
       // ignore parse errors
     }
@@ -85,5 +88,10 @@ export async function apiRequest<T>(
     return undefined as T;
   }
 
-  return response.json() as Promise<T>;
+  const raw = await response.text();
+  if (!raw.trim()) {
+    return undefined as T;
+  }
+
+  return JSON.parse(raw) as T;
 }

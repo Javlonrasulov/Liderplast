@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsPhoneNumber,
@@ -23,6 +24,10 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   cardNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  stir?: string;
 
   @IsOptional()
   @IsPhoneNumber('UZ')
@@ -64,6 +69,11 @@ export class CreateUserDto {
   @IsNumber()
   @Min(0)
   salaryRate?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  preferredShiftNumber?: number;
 
   @IsOptional()
   @IsBoolean()

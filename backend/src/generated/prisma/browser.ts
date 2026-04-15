@@ -148,10 +148,25 @@ export type SalarySetting = Prisma.SalarySettingModel
  */
 export type EmployeeProduction = Prisma.EmployeeProductionModel
 /**
+ * Model EmployeeProductRate
+ * 
+ */
+export type EmployeeProductRate = Prisma.EmployeeProductRateModel
+/**
  * Model SalaryRecord
  * 
  */
 export type SalaryRecord = Prisma.SalaryRecordModel
+/**
+ * Model BankVedomost
+ * 
+ */
+export type BankVedomost = Prisma.BankVedomostModel
+/**
+ * Model BankTransaction
+ * 
+ */
+export type BankTransaction = Prisma.BankTransactionModel
 /**
  * Model UploadedFile
  * 

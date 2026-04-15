@@ -10,8 +10,9 @@ export class CreateClientDto {
   @MinLength(2)
   name!: string;
 
+  @IsOptional()
   @IsPhoneNumber('UZ')
-  phone!: string;
+  phone?: string;
 
   @IsOptional()
   @IsString()

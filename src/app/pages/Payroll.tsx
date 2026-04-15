@@ -1,14 +1,39 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
-  UploadCloud, CheckCircle2, Info, Minus
+  UploadCloud, CheckCircle2, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatCurrency, formatNumber, TODAY } from '../utils/format';
-import type { Employee } from '../store/erp-store';
+import type { Employee, EmployeeProductRate } from '../store/erp-store';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
+import {
+  Select as RadixSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 // ======================== HELPERS ========================
 
@@ -48,12 +73,30 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+function StyledSelect({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  placeholder?: string;
+}) {
   return (
-    <select
-      {...props}
-      className={`w-full h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition ${props.className ?? ''}`}
-    />
+    <RadixSelect value={value} onValueChange={onValueChange}>
+      <SelectTrigger className="h-9 w-full rounded-xl border-slate-200 bg-white text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </RadixSelect>
   );
 }
 
@@ -559,18 +602,622 @@ function VedomostTab() {
   );
 }
 
+function BankTab() {
+  const { state, dispatch } = useERP();
+  const { t } = useApp();
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [modalState, setModalState] = useState<null | {
+    kind: 'employee' | 'client';
+    transactionId: string;
+    bankVedomostId: string;
+    title: string;
+    description: string;
+  }>(null);
+  const [submittingModal, setSubmittingModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedVedomost =
+    state.selectedBankVedomost ??
+    state.bankVedomosts[0] ??
+    null;
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadMessage('');
+    try {
+      await dispatch({ type: 'UPLOAD_OBOROTKA', payload: { file } });
+      setUploadMessage(t.prBankUploadSuccess);
+    } catch (error) {
+      setUploadMessage(error instanceof Error ? error.message : t.whRequestError);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSelectVedomost = async (id: string) => {
+    await dispatch({ type: 'SELECT_BANK_VEDOMOST', payload: { id } });
+  };
+
+  const openCreateModal = (
+    kind: 'employee' | 'client',
+    transactionId: string,
+    title: string,
+    description: string,
+  ) => {
+    if (!selectedVedomost) return;
+    setModalState({
+      kind,
+      transactionId,
+      bankVedomostId: selectedVedomost.id,
+      title,
+      description,
+    });
+  };
+
+  const handleConfirmCreate = async () => {
+    if (!modalState) return;
+    setSubmittingModal(true);
+    try {
+      if (modalState.kind === 'employee') {
+        await dispatch({
+          type: 'CREATE_EMPLOYEE_FROM_BANK_TRANSACTION',
+          payload: {
+            transactionId: modalState.transactionId,
+            bankVedomostId: modalState.bankVedomostId,
+          },
+        });
+      } else {
+        await dispatch({
+          type: 'CREATE_CLIENT_FROM_BANK_TRANSACTION',
+          payload: {
+            transactionId: modalState.transactionId,
+            bankVedomostId: modalState.bankVedomostId,
+          },
+        });
+      }
+      setModalState(null);
+    } finally {
+      setSubmittingModal(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <UploadCloud size={16} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.prBankUploadTitle}
+                </h3>
+                <p className="text-xs text-slate-400">{t.prBankUploadHint}</p>
+              </div>
+            </div>
+
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300 px-4 py-6 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20">
+              <UploadCloud size={16} />
+              <span>{uploading ? t.authLoading : t.prBankUploadAction}</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept=".xlsx"
+                onChange={handleUpload}
+                disabled={uploading}
+              />
+            </label>
+
+            {uploadMessage && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-300">
+                {uploadMessage}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="border-b border-slate-100 px-4 py-3 dark:border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                {t.prBankVedomostList}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {state.bankVedomosts.length} {t.totalRecords}
+              </p>
+            </div>
+
+            {state.bankVedomosts.length === 0 ? (
+              <div className="p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                {t.prBankNoVedomost}
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {state.bankVedomosts.map((item) => {
+                  const active = selectedVedomost?.id === item.id;
+                  const statusColor =
+                    item.status === 'parsed'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                      : item.status === 'confirmed'
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        : item.status === 'rejected'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => void handleSelectVedomost(item.id)}
+                      className={`w-full px-4 py-3 text-left transition-colors ${
+                        active
+                          ? 'bg-indigo-50 dark:bg-indigo-900/20'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                            {item.fileName}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-400">
+                            {item.transactionsCount} {t.prBankTransactions}
+                          </p>
+                        </div>
+                        <span className={`rounded-lg px-2 py-1 text-[10px] font-semibold uppercase ${statusColor}`}>
+                          {item.status}
+                        </span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        <div className="rounded-xl bg-emerald-50 px-2 py-1 dark:bg-emerald-900/10">
+                          <span className="text-slate-400">{t.prBankIncome}</span>
+                          <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(item.totalIncome)}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-rose-50 px-2 py-1 dark:bg-rose-900/10">
+                          <span className="text-slate-400">{t.prBankExpense}</span>
+                          <p className="font-semibold text-rose-600 dark:text-rose-400">
+                            {formatCurrency(item.totalExpense)}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {selectedVedomost?.warnings &&
+            (selectedVedomost.warnings.unresolvedEmployeesCount > 0 ||
+              selectedVedomost.warnings.unresolvedClientsCount > 0) && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-800 shadow-sm dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle size={18} className="mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold">{t.prBankWarningTitle}</p>
+                    <p className="text-xs">
+                      {t.prBankWarningDesc}
+                    </p>
+                    <p className="text-xs">
+                      {selectedVedomost.warnings.unresolvedClientsCount} {t.prBankUnknownClients},
+                      {' '}
+                      {selectedVedomost.warnings.unresolvedEmployeesCount} {t.prBankUnknownEmployees}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <StatCard
+              label={t.prBankTotalVedomost}
+              value={String(state.bankVedomosts.length)}
+              sub={t.prBankVedomostList}
+              color="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+            />
+            <StatCard
+              label={t.prBankSalaryMatched}
+              value={String(
+                selectedVedomost?.transactions?.filter((item) => item.isSalary).length ?? 0,
+              )}
+              sub={t.prBankTransactions}
+              color="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+            />
+            <StatCard
+              label={t.prBankSelected}
+              value={selectedVedomost ? formatCurrency(selectedVedomost.totalExpense) : formatCurrency(0)}
+              sub={t.prBankExpense}
+              color="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.prBankTransactions}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {selectedVedomost?.fileName ?? t.prBankNoSelection}
+                </p>
+              </div>
+              {selectedVedomost?.errorMessage && (
+                <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                  {selectedVedomost.errorMessage}
+                </span>
+              )}
+            </div>
+
+            {!selectedVedomost ? (
+              <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                {t.prBankNoSelection}
+              </div>
+            ) : selectedVedomost.transactions && selectedVedomost.transactions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-700/50">
+                      {[t.labelDate, t.prBankDocNumber, t.prBankReceiver, t.prBankPurpose, t.labelAmount, t.prStatusLabel].map((head) => (
+                        <th
+                          key={head}
+                          className="whitespace-nowrap px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400"
+                        >
+                          {head}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedVedomost.transactions.map((transaction, index) => (
+                      <tr
+                        key={transaction.id}
+                        className={`border-t border-slate-100 dark:border-slate-700 ${
+                          index % 2 !== 0 ? 'bg-slate-50/30 dark:bg-slate-800/30' : ''
+                        }`}
+                      >
+                        <td className="px-3 py-2.5 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                          {transaction.operationDate.slice(0, 10)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                          {transaction.documentNumber || '—'}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="min-w-[180px]">
+                            <p className="font-medium text-slate-700 dark:text-slate-200">
+                              {transaction.receiverName || '—'}
+                            </p>
+                            <p className="text-[10px] text-slate-400">
+                              {transaction.employeeName || transaction.receiverStir || '—'}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">
+                          <div className="max-w-[320px] truncate">
+                            {transaction.paymentPurpose || '—'}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 font-semibold ${
+                              transaction.type === 'income'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-rose-600 dark:text-rose-400'
+                            }`}
+                          >
+                            {transaction.type === 'income' ? (
+                              <ArrowDownLeft size={12} />
+                            ) : (
+                              <ArrowUpRight size={12} />
+                            )}
+                            {formatCurrency(transaction.amount)}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
+                              transaction.isSalary
+                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            {transaction.isSalary ? <CheckCircle size={11} /> : <Minus size={11} />}
+                            {transaction.isSalary ? t.prBankMatched : t.prBankUnmatched}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                {t.prBankNoTransactions}
+              </div>
+            )}
+          </div>
+
+          {selectedVedomost?.unresolvedClients && selectedVedomost.unresolvedClients.length > 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.prBankUnknownClients}
+                </h3>
+                <p className="text-xs text-slate-400">{t.prBankUnknownClientsDesc}</p>
+              </div>
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {selectedVedomost.unresolvedClients.map((item, index) => (
+                  <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-800 dark:text-slate-200">
+                        {item.receiverName || '—'}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {item.receiverBankName || '—'} · {item.receiverAccount || '—'}
+                      </p>
+                      <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                        {formatCurrency(item.totalAmount)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openCreateModal(
+                          'client',
+                          item.transactionIds[0],
+                          t.prBankCreateClientTitle,
+                          t.prBankCreateClientDesc,
+                        )
+                      }
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+                    >
+                      <Building2 size={14} />
+                      {t.prBankAddClient}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selectedVedomost?.unresolvedEmployees && selectedVedomost.unresolvedEmployees.length > 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.prBankUnknownEmployees}
+                </h3>
+                <p className="text-xs text-slate-400">{t.prBankUnknownEmployeesDesc}</p>
+              </div>
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {selectedVedomost.unresolvedEmployees.map((item, index) => (
+                  <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-800 dark:text-slate-200">
+                        {item.receiverName || '—'}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {item.receiverStir || '—'} · {item.paymentPurpose || '—'}
+                      </p>
+                      <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                        {formatCurrency(item.totalAmount)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openCreateModal(
+                          'employee',
+                          item.transactionIds[0],
+                          t.prBankCreateEmployeeTitle,
+                          t.prBankCreateEmployeeDesc,
+                        )
+                      }
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+                    >
+                      <UserPlus size={14} />
+                      {t.prBankAddEmployee}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                {t.prBankSalarySummary}
+              </h3>
+              <p className="text-xs text-slate-400">{t.prBankSalarySummaryHint}</p>
+            </div>
+
+            {state.salaryPaymentSummaries.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                {t.prNoVedomost}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-700/50">
+                      {[t.prFullName, t.prMonth, t.prBankRequired, t.prBankPaid, t.prBankRemaining, t.prStatusLabel].map((head) => (
+                        <th
+                          key={head}
+                          className="whitespace-nowrap px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400"
+                        >
+                          {head}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {state.salaryPaymentSummaries.map((row, index) => {
+                      const badgeClass =
+                        row.status === 'paid'
+                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                          : row.status === 'partial'
+                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
+                      return (
+                        <tr
+                          key={row.id}
+                          className={`border-t border-slate-100 dark:border-slate-700 ${
+                            index % 2 !== 0 ? 'bg-slate-50/30 dark:bg-slate-800/30' : ''
+                          }`}
+                        >
+                          <td className="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">
+                            {row.employeeName}
+                          </td>
+                          <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">
+                            {monthLabel(row.period)}
+                          </td>
+                          <td className="px-3 py-2.5 font-semibold text-slate-700 dark:text-slate-200">
+                            {formatCurrency(row.requiredAmount)}
+                          </td>
+                          <td className="px-3 py-2.5 text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(row.paidAmount)}
+                          </td>
+                          <td className="px-3 py-2.5 text-rose-600 dark:text-rose-400">
+                            {formatCurrency(row.remainingAmount)}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span className={`inline-flex rounded-lg px-2.5 py-1 text-[11px] font-semibold ${badgeClass}`}>
+                              {row.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Dialog open={Boolean(modalState)} onOpenChange={(open) => !open && setModalState(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{modalState?.title}</DialogTitle>
+            <DialogDescription>{modalState?.description}</DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+            <div className="flex items-start gap-2">
+              <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+              <p>{t.prBankCreateWarning}</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setModalState(null)}
+              className="h-10 rounded-xl border border-slate-200 px-4 text-sm text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {t.btnCancel}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleConfirmCreate()}
+              disabled={submittingModal}
+              className="h-10 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {submittingModal ? t.authLoading : t.btnAdd}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ======================== EMPLOYEES TAB ========================
 
 function EmployeesTab() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
-  const [form, setForm] = useState({ fullName: '', position: '', cardNumber: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
+  const PRODUCT_TYPES = ['18g Қолип', '20g Қолип', '0.5L Бакалашка', '1L Бакалашка', '5L Бакалашка'];
+  const [form, setForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [employeeForm, setEmployeeForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
+  const [deleteEmployeeTarget, setDeleteEmployeeTarget] = useState<Employee | null>(null);
+  const [rateForm, setRateForm] = useState({
+    productType: PRODUCT_TYPES[0],
+    rateType: 'fixed' as EmployeeProductRate['rateType'],
+    rateValue: 0,
+    baseAmount: 0,
+  });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.fullName.trim()) return;
     dispatch({ type: 'ADD_EMPLOYEE', payload: form });
-    setForm({ fullName: '', position: '', cardNumber: '', salaryType: 'fixed', salaryAmount: 0 });
+    setForm({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed', salaryAmount: 0 });
+  };
+
+  useEffect(() => {
+    if (!selectedEmployeeId && state.employees[0]?.id) {
+      setSelectedEmployeeId(state.employees[0].id);
+    }
+  }, [selectedEmployeeId, state.employees]);
+
+  const selectedEmployee =
+    state.employees.find((emp) => emp.id === selectedEmployeeId) ?? null;
+
+  useEffect(() => {
+    if (!selectedEmployee) return;
+    setEmployeeForm({
+      fullName: selectedEmployee.fullName,
+      position: selectedEmployee.position,
+      cardNumber: selectedEmployee.cardNumber,
+      stir: selectedEmployee.stir ?? '',
+      salaryType: selectedEmployee.salaryType,
+      salaryAmount: selectedEmployee.salaryAmount,
+    });
+  }, [selectedEmployee]);
+
+  const selectedEmployeeRates = useMemo(
+    () => state.employeeProductRates.filter((item) => item.employeeId === selectedEmployeeId),
+    [selectedEmployeeId, state.employeeProductRates],
+  );
+
+  const handleEmployeeUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmployee) return;
+    dispatch({
+      type: 'UPDATE_EMPLOYEE',
+      payload: {
+        id: selectedEmployee.id,
+        ...employeeForm,
+      },
+    });
+  };
+
+  const handleUpsertRate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmployee) return;
+    dispatch({
+      type: 'UPSERT_EMPLOYEE_PRODUCT_RATE',
+      payload: {
+        employeeId: selectedEmployee.id,
+        productType: rateForm.productType,
+        rateType: rateForm.rateType,
+        rateValue: rateForm.rateValue,
+        baseAmount: rateForm.rateType === 'percent' ? rateForm.baseAmount : undefined,
+      },
+    });
+    setRateForm((prev) => ({ ...prev, rateValue: 0, baseAmount: 0 }));
   };
 
   const SALARY_TYPE_COLORS: Record<string, string> = {
@@ -581,7 +1228,7 @@ function EmployeesTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-      <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
+      <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
             <Plus size={16} className="text-indigo-600 dark:text-indigo-400" />
@@ -602,12 +1249,20 @@ function EmployeesTab() {
             <Input value={form.cardNumber} onChange={e => setForm(p => ({ ...p, cardNumber: e.target.value }))} placeholder="8600 0000 0000 0000" />
           </div>
           <div>
+            <Label>{t.prStir}</Label>
+            <Input value={form.stir} onChange={e => setForm(p => ({ ...p, stir: e.target.value }))} placeholder="123456789" />
+          </div>
+          <div>
             <Label>{t.prSalaryType}</Label>
-            <Select value={form.salaryType} onChange={e => setForm(p => ({ ...p, salaryType: e.target.value as Employee['salaryType'] }))}>
-              <option value="fixed">{t.prFixed}</option>
-              <option value="per_piece">{t.prPerPiece}</option>
-              <option value="hybrid">{t.prHybrid}</option>
-            </Select>
+            <StyledSelect
+              value={form.salaryType}
+              onValueChange={(value) => setForm(p => ({ ...p, salaryType: value as Employee['salaryType'] }))}
+              options={[
+                { value: 'fixed', label: t.prFixed },
+                { value: 'per_piece', label: t.prPerPiece },
+                { value: 'hybrid', label: t.prHybrid },
+              ]}
+            />
           </div>
           {form.salaryType !== 'per_piece' && (
             <div>
@@ -619,6 +1274,141 @@ function EmployeesTab() {
             <Plus size={15} /> {t.prAddEmployee}
           </button>
         </form>
+
+        {selectedEmployee && (
+          <>
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <Edit3 size={16} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prEditEmployee}</h3>
+              </div>
+              <div className="mb-3">
+                <Label>{t.prEmployee}</Label>
+                <StyledSelect
+                  value={selectedEmployeeId}
+                  onValueChange={setSelectedEmployeeId}
+                  options={state.employees.map((emp) => ({ value: emp.id, label: emp.fullName }))}
+                />
+              </div>
+              <form onSubmit={handleEmployeeUpdate} className="space-y-3">
+                <div>
+                  <Label>{t.prFullName}</Label>
+                  <Input value={employeeForm.fullName} onChange={e => setEmployeeForm(p => ({ ...p, fullName: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>{t.prPosition}</Label>
+                  <Input value={employeeForm.position} onChange={e => setEmployeeForm(p => ({ ...p, position: e.target.value }))} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>{t.prCardNumber}</Label>
+                    <Input value={employeeForm.cardNumber} onChange={e => setEmployeeForm(p => ({ ...p, cardNumber: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>{t.prStir}</Label>
+                    <Input value={employeeForm.stir} onChange={e => setEmployeeForm(p => ({ ...p, stir: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>{t.prSalaryType}</Label>
+                    <StyledSelect
+                      value={employeeForm.salaryType}
+                      onValueChange={(value) => setEmployeeForm(p => ({ ...p, salaryType: value as Employee['salaryType'] }))}
+                      options={[
+                        { value: 'fixed', label: t.prFixed },
+                        { value: 'per_piece', label: t.prPerPiece },
+                        { value: 'hybrid', label: t.prHybrid },
+                      ]}
+                    />
+                  </div>
+                  <div>
+                    <Label>{t.prSalaryAmount} (so'm)</Label>
+                    <Input type="number" value={employeeForm.salaryAmount || ''} onChange={e => setEmployeeForm(p => ({ ...p, salaryAmount: Number(e.target.value) }))} min={0} step={50000} />
+                  </div>
+                </div>
+                <button type="submit" className="w-full h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                  <Save size={15} /> {t.prSaveSettings}
+                </button>
+              </form>
+            </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Factory size={16} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prEmployeeRates}</h3>
+              </div>
+              <form onSubmit={handleUpsertRate} className="space-y-3">
+                <div>
+                  <Label>{t.prProductType}</Label>
+                  <StyledSelect
+                    value={rateForm.productType}
+                    onValueChange={(value) => setRateForm(p => ({ ...p, productType: value }))}
+                    options={PRODUCT_TYPES.map((pt) => ({ value: pt, label: pt }))}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>{t.prRateType}</Label>
+                    <StyledSelect
+                      value={rateForm.rateType}
+                      onValueChange={(value) => setRateForm(p => ({ ...p, rateType: value as EmployeeProductRate['rateType'] }))}
+                      options={[
+                        { value: 'fixed', label: t.prRateFixed },
+                        { value: 'percent', label: t.prRatePercent },
+                      ]}
+                    />
+                  </div>
+                  <div>
+                    <Label>{rateForm.rateType === 'percent' ? `${t.prRatePercent} (%)` : `${t.prRateFixed} / dona`}</Label>
+                    <Input type="number" value={rateForm.rateValue || ''} onChange={e => setRateForm(p => ({ ...p, rateValue: Number(e.target.value) }))} min={0} step={rateForm.rateType === 'percent' ? 0.1 : 1} />
+                  </div>
+                </div>
+                {rateForm.rateType === 'percent' && (
+                  <div>
+                    <Label>{t.prRateBaseAmount} (so'm)</Label>
+                    <Input type="number" value={rateForm.baseAmount || ''} onChange={e => setRateForm(p => ({ ...p, baseAmount: Number(e.target.value) }))} min={0} step={1} />
+                  </div>
+                )}
+                <button type="submit" className="w-full h-9 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                  <Save size={15} /> Saqlash
+                </button>
+              </form>
+
+              <div className="mt-4 space-y-2">
+                {selectedEmployeeRates.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-3 text-xs text-slate-500 dark:text-slate-400">
+                    {t.prNoEmployeeRates}
+                  </div>
+                ) : (
+                  selectedEmployeeRates.map((rate) => (
+                    <div key={rate.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2">
+                      <div>
+                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{rate.productType}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {rate.rateType === 'percent'
+                            ? `${rate.rateValue}%${rate.baseAmount ? ` · baza ${formatCurrency(rate.baseAmount)}` : ''}`
+                            : `${formatCurrency(rate.rateValue)} / dona`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => dispatch({ type: 'DELETE_EMPLOYEE_PRODUCT_RATE', payload: { employeeId: rate.employeeId, productType: rate.productType } })}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="lg:col-span-3 space-y-3">
@@ -643,11 +1433,12 @@ function EmployeesTab() {
                 <p className="text-slate-400 text-xs">{emp.position}</p>
                 <div className="flex items-center gap-4 mt-1">
                   <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || '—'}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || '—'}</span>
                   {emp.salaryAmount > 0 && <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(emp.salaryAmount)}</span>}
                 </div>
               </div>
               <button
-                onClick={() => { if (confirm(`"${emp.fullName}" o'chirilsinmi?`)) dispatch({ type: 'DELETE_EMPLOYEE', payload: emp.id }); }}
+                onClick={() => setDeleteEmployeeTarget(emp)}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <Trash2 size={14} />
@@ -656,6 +1447,33 @@ function EmployeesTab() {
           ))
         )}
       </div>
+
+      <AlertDialog
+        open={Boolean(deleteEmployeeTarget)}
+        onOpenChange={(open) => !open && setDeleteEmployeeTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.prDeleteEmployeeTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.prDeleteEmployeeConfirm.replace('{name}', deleteEmployeeTarget?.fullName ?? '')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!deleteEmployeeTarget) return;
+                dispatch({ type: 'DELETE_EMPLOYEE', payload: deleteEmployeeTarget.id });
+                setDeleteEmployeeTarget(null);
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {t.prDeleteEmployeeAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -681,6 +1499,22 @@ function ProductionTab() {
   };
 
   const PRODUCT_TYPES = ['18g Қолип', '20g Қолип', '0.5L Бакалашка', '1L Бакалашка', '5L Бакалашка'];
+  const configuredRate = useMemo(
+    () =>
+      state.employeeProductRates.find(
+        (item) => item.employeeId === form.employeeId && item.productType === form.productType,
+      ) ?? null,
+    [form.employeeId, form.productType, state.employeeProductRates],
+  );
+
+  useEffect(() => {
+    if (!configuredRate) return;
+    const nextPrice =
+      configuredRate.rateType === 'percent'
+        ? ((configuredRate.baseAmount ?? 0) * configuredRate.rateValue) / 100
+        : configuredRate.rateValue;
+    setForm((prev) => ({ ...prev, pricePerUnit: Number(nextPrice.toFixed(2)) }));
+  }, [configuredRate]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -695,10 +1529,12 @@ function ProductionTab() {
         <form onSubmit={handleAdd} className="space-y-3">
           <div>
             <Label>{t.prEmployee}</Label>
-            <Select value={form.employeeId} onChange={e => setForm(p => ({ ...p, employeeId: e.target.value }))} required>
-              <option value="">— Tanlang —</option>
-              {state.employees.map(e => <option key={e.id} value={e.id}>{e.fullName}</option>)}
-            </Select>
+            <StyledSelect
+              value={form.employeeId}
+              onValueChange={(value) => setForm(p => ({ ...p, employeeId: value }))}
+              options={state.employees.map((employee) => ({ value: employee.id, label: employee.fullName }))}
+              placeholder="— Tanlang —"
+            />
           </div>
           <div>
             <Label>{t.labelDate}</Label>
@@ -706,9 +1542,11 @@ function ProductionTab() {
           </div>
           <div>
             <Label>{t.prProductType}</Label>
-            <Select value={form.productType} onChange={e => setForm(p => ({ ...p, productType: e.target.value }))}>
-              {PRODUCT_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
-            </Select>
+            <StyledSelect
+              value={form.productType}
+              onValueChange={(value) => setForm(p => ({ ...p, productType: value }))}
+              options={PRODUCT_TYPES.map((pt) => ({ value: pt, label: pt }))}
+            />
           </div>
           <div>
             <Label>{t.labelAmount} (dona)</Label>
@@ -716,8 +1554,26 @@ function ProductionTab() {
           </div>
           <div>
             <Label>{t.prPricePerUnit} (so'm)</Label>
-            <Input type="number" value={form.pricePerUnit || ''} onChange={e => setForm(p => ({ ...p, pricePerUnit: +e.target.value }))} placeholder="20" min={0} />
+            <Input
+              type="number"
+              value={form.pricePerUnit || ''}
+              onChange={e => setForm(p => ({ ...p, pricePerUnit: +e.target.value }))}
+              placeholder="20"
+              min={0}
+              readOnly={Boolean(configuredRate)}
+            />
           </div>
+          {configuredRate && (
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
+              <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                {t.prRateConfiguredHint}:
+                {' '}
+                {configuredRate.rateType === 'percent'
+                  ? `${configuredRate.rateValue}%${configuredRate.baseAmount ? ` · baza ${formatCurrency(configuredRate.baseAmount)}` : ''}`
+                  : `${formatCurrency(configuredRate.rateValue)} / dona`}
+              </p>
+            </div>
+          )}
           {form.quantity > 0 && form.pricePerUnit > 0 && (
             <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-700">
               <p className="text-xs text-indigo-600 dark:text-indigo-400">Jami summa: <strong>{formatCurrency(form.quantity * form.pricePerUnit)}</strong></p>
@@ -870,10 +1726,11 @@ function SettingsTab() {
 
 export function Payroll() {
   const { t } = useApp();
-  const [activeTab, setActiveTab] = useState<'vedomost' | 'employees' | 'production' | 'settings'>('vedomost');
+  const [activeTab, setActiveTab] = useState<'vedomost' | 'bank' | 'employees' | 'production' | 'settings'>('vedomost');
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
+    { key: 'bank', label: t.prTabBank, icon: Landmark },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
     { key: 'production', label: t.prTabProduction, icon: Factory },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
@@ -907,6 +1764,7 @@ export function Payroll() {
 
       {/* Tab content */}
       {activeTab === 'vedomost' && <VedomostTab />}
+      {activeTab === 'bank' && <BankTab />}
       {activeTab === 'employees' && <EmployeesTab />}
       {activeTab === 'production' && <ProductionTab />}
       {activeTab === 'settings' && <SettingsTab />}

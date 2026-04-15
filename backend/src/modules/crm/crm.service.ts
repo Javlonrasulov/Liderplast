@@ -24,6 +24,18 @@ export class CrmService {
     private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
+  private async allocatePlaceholderPhone(): Promise<string> {
+    for (let i = 0; i < 50; i += 1) {
+      const suffix = `${90000000 + Math.floor(Math.random() * 9999999)}`.slice(0, 8);
+      const phone = `+99888${suffix}`;
+      const exists = await this.prisma.client.findUnique({ where: { phone } });
+      if (!exists) {
+        return phone;
+      }
+    }
+    throw new ConflictException('Could not allocate unique client phone');
+  }
+
   async deletePayment(id: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id },
@@ -60,8 +72,10 @@ export class CrmService {
   }
 
   async createClient(dto: CreateClientDto) {
+    const phone = dto.phone?.trim() || (await this.allocatePlaceholderPhone());
+
     const existing = await this.prisma.client.findUnique({
-      where: { phone: dto.phone },
+      where: { phone },
     });
 
     if (existing) {
@@ -69,7 +83,10 @@ export class CrmService {
     }
 
     return this.prisma.client.create({
-      data: dto,
+      data: {
+        ...dto,
+        phone,
+      },
     });
   }
 

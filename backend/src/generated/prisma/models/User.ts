@@ -46,6 +46,7 @@ export type UserMinAggregateOutputType = {
   passwordHash: string | null
   position: string | null
   cardNumber: string | null
+  stir: string | null
   role: $Enums.Role | null
   salaryType: $Enums.SalaryType | null
   salaryRate: number | null
@@ -65,6 +66,7 @@ export type UserMaxAggregateOutputType = {
   passwordHash: string | null
   position: string | null
   cardNumber: string | null
+  stir: string | null
   role: $Enums.Role | null
   salaryType: $Enums.SalaryType | null
   salaryRate: number | null
@@ -85,6 +87,7 @@ export type UserCountAggregateOutputType = {
   passwordHash: number
   position: number
   cardNumber: number
+  stir: number
   role: number
   salaryType: number
   salaryRate: number
@@ -116,6 +119,7 @@ export type UserMinAggregateInputType = {
   passwordHash?: true
   position?: true
   cardNumber?: true
+  stir?: true
   role?: true
   salaryType?: true
   salaryRate?: true
@@ -135,6 +139,7 @@ export type UserMaxAggregateInputType = {
   passwordHash?: true
   position?: true
   cardNumber?: true
+  stir?: true
   role?: true
   salaryType?: true
   salaryRate?: true
@@ -155,6 +160,7 @@ export type UserCountAggregateInputType = {
   passwordHash?: true
   position?: true
   cardNumber?: true
+  stir?: true
   role?: true
   salaryType?: true
   salaryRate?: true
@@ -262,6 +268,7 @@ export type UserGroupByOutputType = {
   passwordHash: string
   position: string | null
   cardNumber: string | null
+  stir: string | null
   role: $Enums.Role
   salaryType: $Enums.SalaryType
   salaryRate: number
@@ -305,6 +312,7 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringFilter<"User"> | string
   position?: Prisma.StringNullableFilter<"User"> | string | null
   cardNumber?: Prisma.StringNullableFilter<"User"> | string | null
+  stir?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFilter<"User"> | $Enums.SalaryType
   salaryRate?: Prisma.FloatFilter<"User"> | number
@@ -316,6 +324,7 @@ export type UserWhereInput = {
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
   employeeProductions?: Prisma.EmployeeProductionListRelationFilter
+  employeeProductRates?: Prisma.EmployeeProductRateListRelationFilter
   salaryRecords?: Prisma.SalaryRecordListRelationFilter
   createdOrders?: Prisma.OrderListRelationFilter
   createdExpenses?: Prisma.ExpenseListRelationFilter
@@ -324,6 +333,7 @@ export type UserWhereInput = {
   bagAuditLogs?: Prisma.BagAuditLogListRelationFilter
   bagWriteoffs?: Prisma.BagWriteoffListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
+  bankTransactions?: Prisma.BankTransactionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -337,6 +347,7 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
   cardNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  stir?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   salaryType?: Prisma.SortOrder
   salaryRate?: Prisma.SortOrder
@@ -348,6 +359,7 @@ export type UserOrderByWithRelationInput = {
   productions?: Prisma.ProductionRecordOrderByRelationAggregateInput
   shiftRecords?: Prisma.ShiftRecordOrderByRelationAggregateInput
   employeeProductions?: Prisma.EmployeeProductionOrderByRelationAggregateInput
+  employeeProductRates?: Prisma.EmployeeProductRateOrderByRelationAggregateInput
   salaryRecords?: Prisma.SalaryRecordOrderByRelationAggregateInput
   createdOrders?: Prisma.OrderOrderByRelationAggregateInput
   createdExpenses?: Prisma.ExpenseOrderByRelationAggregateInput
@@ -356,6 +368,7 @@ export type UserOrderByWithRelationInput = {
   bagAuditLogs?: Prisma.BagAuditLogOrderByRelationAggregateInput
   bagWriteoffs?: Prisma.BagWriteoffOrderByRelationAggregateInput
   productAuditLogs?: Prisma.ProductAuditLogOrderByRelationAggregateInput
+  bankTransactions?: Prisma.BankTransactionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -372,6 +385,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringFilter<"User"> | string
   position?: Prisma.StringNullableFilter<"User"> | string | null
   cardNumber?: Prisma.StringNullableFilter<"User"> | string | null
+  stir?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFilter<"User"> | $Enums.SalaryType
   salaryRate?: Prisma.FloatFilter<"User"> | number
@@ -383,6 +397,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
   employeeProductions?: Prisma.EmployeeProductionListRelationFilter
+  employeeProductRates?: Prisma.EmployeeProductRateListRelationFilter
   salaryRecords?: Prisma.SalaryRecordListRelationFilter
   createdOrders?: Prisma.OrderListRelationFilter
   createdExpenses?: Prisma.ExpenseListRelationFilter
@@ -391,6 +406,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   bagAuditLogs?: Prisma.BagAuditLogListRelationFilter
   bagWriteoffs?: Prisma.BagWriteoffListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
+  bankTransactions?: Prisma.BankTransactionListRelationFilter
 }, "id" | "phone" | "login">
 
 export type UserOrderByWithAggregationInput = {
@@ -404,6 +420,7 @@ export type UserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
   cardNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  stir?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   salaryType?: Prisma.SortOrder
   salaryRate?: Prisma.SortOrder
@@ -432,6 +449,7 @@ export type UserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
   position?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   cardNumber?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  stir?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeWithAggregatesFilter<"User"> | $Enums.SalaryType
   salaryRate?: Prisma.FloatWithAggregatesFilter<"User"> | number
@@ -452,6 +470,7 @@ export type UserCreateInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -463,6 +482,7 @@ export type UserCreateInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -471,6 +491,7 @@ export type UserCreateInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -484,6 +505,7 @@ export type UserUncheckedCreateInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -495,6 +517,7 @@ export type UserUncheckedCreateInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -503,6 +526,7 @@ export type UserUncheckedCreateInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUpdateInput = {
@@ -516,6 +540,7 @@ export type UserUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -527,6 +552,7 @@ export type UserUpdateInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -535,6 +561,7 @@ export type UserUpdateInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -548,6 +575,7 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -559,6 +587,7 @@ export type UserUncheckedUpdateInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -567,6 +596,7 @@ export type UserUncheckedUpdateInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -580,6 +610,7 @@ export type UserCreateManyInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -600,6 +631,7 @@ export type UserUpdateManyMutationInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -620,6 +652,7 @@ export type UserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -648,6 +681,7 @@ export type UserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   position?: Prisma.SortOrder
   cardNumber?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   role?: Prisma.SortOrder
   salaryType?: Prisma.SortOrder
   salaryRate?: Prisma.SortOrder
@@ -672,6 +706,7 @@ export type UserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   position?: Prisma.SortOrder
   cardNumber?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   role?: Prisma.SortOrder
   salaryType?: Prisma.SortOrder
   salaryRate?: Prisma.SortOrder
@@ -691,6 +726,7 @@ export type UserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   position?: Prisma.SortOrder
   cardNumber?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   role?: Prisma.SortOrder
   salaryType?: Prisma.SortOrder
   salaryRate?: Prisma.SortOrder
@@ -916,6 +952,20 @@ export type UserUpdateOneRequiredWithoutEmployeeProductionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmployeeProductionsInput, Prisma.UserUpdateWithoutEmployeeProductionsInput>, Prisma.UserUncheckedUpdateWithoutEmployeeProductionsInput>
 }
 
+export type UserCreateNestedOneWithoutEmployeeProductRatesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedCreateWithoutEmployeeProductRatesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmployeeProductRatesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutEmployeeProductRatesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedCreateWithoutEmployeeProductRatesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmployeeProductRatesInput
+  upsert?: Prisma.UserUpsertWithoutEmployeeProductRatesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmployeeProductRatesInput, Prisma.UserUpdateWithoutEmployeeProductRatesInput>, Prisma.UserUncheckedUpdateWithoutEmployeeProductRatesInput>
+}
+
 export type UserCreateNestedOneWithoutSalaryRecordsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSalaryRecordsInput, Prisma.UserUncheckedCreateWithoutSalaryRecordsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSalaryRecordsInput
@@ -928,6 +978,22 @@ export type UserUpdateOneRequiredWithoutSalaryRecordsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutSalaryRecordsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSalaryRecordsInput, Prisma.UserUpdateWithoutSalaryRecordsInput>, Prisma.UserUncheckedUpdateWithoutSalaryRecordsInput>
+}
+
+export type UserCreateNestedOneWithoutBankTransactionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankTransactionsInput, Prisma.UserUncheckedCreateWithoutBankTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutBankTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankTransactionsInput, Prisma.UserUncheckedCreateWithoutBankTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankTransactionsInput
+  upsert?: Prisma.UserUpsertWithoutBankTransactionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBankTransactionsInput, Prisma.UserUpdateWithoutBankTransactionsInput>, Prisma.UserUncheckedUpdateWithoutBankTransactionsInput>
 }
 
 export type UserCreateNestedOneWithoutUploadedFilesInput = {
@@ -957,6 +1023,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -967,6 +1034,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -975,6 +1043,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -988,6 +1057,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -998,6 +1068,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1006,6 +1077,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -1035,6 +1107,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1045,6 +1118,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1053,6 +1127,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -1066,6 +1141,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1076,6 +1152,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1084,6 +1161,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutInventoryMovementsInput = {
@@ -1097,6 +1175,7 @@ export type UserCreateWithoutInventoryMovementsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1108,6 +1187,7 @@ export type UserCreateWithoutInventoryMovementsInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1115,6 +1195,7 @@ export type UserCreateWithoutInventoryMovementsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutInventoryMovementsInput = {
@@ -1128,6 +1209,7 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1139,6 +1221,7 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1146,6 +1229,7 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutInventoryMovementsInput = {
@@ -1175,6 +1259,7 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1186,6 +1271,7 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1193,6 +1279,7 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
@@ -1206,6 +1293,7 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1217,6 +1305,7 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1224,6 +1313,7 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutProductAuditLogsInput = {
@@ -1237,6 +1327,7 @@ export type UserCreateWithoutProductAuditLogsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1248,6 +1339,7 @@ export type UserCreateWithoutProductAuditLogsInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1255,6 +1347,7 @@ export type UserCreateWithoutProductAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutProductAuditLogsInput = {
@@ -1268,6 +1361,7 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1279,6 +1373,7 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1286,6 +1381,7 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutProductAuditLogsInput = {
@@ -1315,6 +1411,7 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1326,6 +1423,7 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1333,6 +1431,7 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
@@ -1346,6 +1445,7 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1357,6 +1457,7 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1364,6 +1465,7 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutBagWriteoffsInput = {
@@ -1377,6 +1479,7 @@ export type UserCreateWithoutBagWriteoffsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1388,6 +1491,7 @@ export type UserCreateWithoutBagWriteoffsInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1395,6 +1499,7 @@ export type UserCreateWithoutBagWriteoffsInput = {
   inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutBagWriteoffsInput = {
@@ -1408,6 +1513,7 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1419,6 +1525,7 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1426,6 +1533,7 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutBagWriteoffsInput = {
@@ -1455,6 +1563,7 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1466,6 +1575,7 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1473,6 +1583,7 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
@@ -1486,6 +1597,7 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1497,6 +1609,7 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1504,6 +1617,7 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutBagAuditLogsInput = {
@@ -1517,6 +1631,7 @@ export type UserCreateWithoutBagAuditLogsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1528,6 +1643,7 @@ export type UserCreateWithoutBagAuditLogsInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1535,6 +1651,7 @@ export type UserCreateWithoutBagAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutBagAuditLogsInput = {
@@ -1548,6 +1665,7 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1559,6 +1677,7 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1566,6 +1685,7 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutBagAuditLogsInput = {
@@ -1595,6 +1715,7 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1606,6 +1727,7 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1613,6 +1735,7 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
@@ -1626,6 +1749,7 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1637,6 +1761,7 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1644,6 +1769,7 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutProductionsInput = {
@@ -1657,6 +1783,7 @@ export type UserCreateWithoutProductionsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1667,6 +1794,7 @@ export type UserCreateWithoutProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1675,6 +1803,7 @@ export type UserCreateWithoutProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutProductionsInput = {
@@ -1688,6 +1817,7 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1698,6 +1828,7 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1706,6 +1837,7 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutProductionsInput = {
@@ -1735,6 +1867,7 @@ export type UserUpdateWithoutProductionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1745,6 +1878,7 @@ export type UserUpdateWithoutProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1753,6 +1887,7 @@ export type UserUpdateWithoutProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductionsInput = {
@@ -1766,6 +1901,7 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1776,6 +1912,7 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1784,6 +1921,7 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutShiftRecordsInput = {
@@ -1797,6 +1935,7 @@ export type UserCreateWithoutShiftRecordsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1807,6 +1946,7 @@ export type UserCreateWithoutShiftRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -1815,6 +1955,7 @@ export type UserCreateWithoutShiftRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutShiftRecordsInput = {
@@ -1828,6 +1969,7 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1838,6 +1980,7 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1846,6 +1989,7 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutShiftRecordsInput = {
@@ -1875,6 +2019,7 @@ export type UserUpdateWithoutShiftRecordsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1885,6 +2030,7 @@ export type UserUpdateWithoutShiftRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -1893,6 +2039,7 @@ export type UserUpdateWithoutShiftRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShiftRecordsInput = {
@@ -1906,6 +2053,7 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1916,6 +2064,7 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1924,6 +2073,7 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutCreatedOrdersInput = {
@@ -1937,6 +2087,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1948,6 +2099,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
@@ -1955,6 +2107,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
@@ -1968,6 +2121,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -1979,6 +2133,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
@@ -1986,6 +2141,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -2015,6 +2171,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2026,6 +2183,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
@@ -2033,6 +2191,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
@@ -2046,6 +2205,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2057,6 +2217,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -2064,6 +2225,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutCreatedExpensesInput = {
@@ -2077,6 +2239,7 @@ export type UserCreateWithoutCreatedExpensesInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2088,6 +2251,7 @@ export type UserCreateWithoutCreatedExpensesInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
@@ -2095,6 +2259,7 @@ export type UserCreateWithoutCreatedExpensesInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutCreatedExpensesInput = {
@@ -2108,6 +2273,7 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2119,6 +2285,7 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
@@ -2126,6 +2293,7 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutCreatedExpensesInput = {
@@ -2155,6 +2323,7 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2166,6 +2335,7 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
@@ -2173,6 +2343,7 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
@@ -2186,6 +2357,7 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2197,6 +2369,7 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -2204,6 +2377,7 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutEmployeeProductionsInput = {
@@ -2217,6 +2391,7 @@ export type UserCreateWithoutEmployeeProductionsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2227,6 +2402,7 @@ export type UserCreateWithoutEmployeeProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -2235,6 +2411,7 @@ export type UserCreateWithoutEmployeeProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
@@ -2248,6 +2425,7 @@ export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2258,6 +2436,7 @@ export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2266,6 +2445,7 @@ export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutEmployeeProductionsInput = {
@@ -2295,6 +2475,7 @@ export type UserUpdateWithoutEmployeeProductionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2305,6 +2486,7 @@ export type UserUpdateWithoutEmployeeProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -2313,6 +2495,7 @@ export type UserUpdateWithoutEmployeeProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
@@ -2326,6 +2509,7 @@ export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2336,6 +2520,7 @@ export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2344,6 +2529,159 @@ export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserCreateWithoutEmployeeProductRatesInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserCreateOrConnectWithoutEmployeeProductRatesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedCreateWithoutEmployeeProductRatesInput>
+}
+
+export type UserUpsertWithoutEmployeeProductRatesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedUpdateWithoutEmployeeProductRatesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedCreateWithoutEmployeeProductRatesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEmployeeProductRatesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedUpdateWithoutEmployeeProductRatesInput>
+}
+
+export type UserUpdateWithoutEmployeeProductRatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutSalaryRecordsInput = {
@@ -2357,6 +2695,7 @@ export type UserCreateWithoutSalaryRecordsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2368,6 +2707,7 @@ export type UserCreateWithoutSalaryRecordsInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
@@ -2375,6 +2715,7 @@ export type UserCreateWithoutSalaryRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutSalaryRecordsInput = {
@@ -2388,6 +2729,7 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2399,6 +2741,7 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
   uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
@@ -2406,6 +2749,7 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutSalaryRecordsInput = {
@@ -2435,6 +2779,7 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2446,6 +2791,7 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
@@ -2453,6 +2799,7 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
@@ -2466,6 +2813,7 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2477,6 +2825,160 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserCreateWithoutBankTransactionsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutBankTransactionsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutBankTransactionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankTransactionsInput, Prisma.UserUncheckedCreateWithoutBankTransactionsInput>
+}
+
+export type UserUpsertWithoutBankTransactionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBankTransactionsInput, Prisma.UserUncheckedUpdateWithoutBankTransactionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankTransactionsInput, Prisma.UserUncheckedCreateWithoutBankTransactionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBankTransactionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBankTransactionsInput, Prisma.UserUncheckedUpdateWithoutBankTransactionsInput>
+}
+
+export type UserUpdateWithoutBankTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBankTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -2497,6 +2999,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2508,6 +3011,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -2515,6 +3019,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutUploadedFilesInput = {
@@ -2528,6 +3033,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   passwordHash: string
   position?: string | null
   cardNumber?: string | null
+  stir?: string | null
   role?: $Enums.Role
   salaryType?: $Enums.SalaryType
   salaryRate?: number
@@ -2539,6 +3045,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2546,6 +3053,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutUploadedFilesInput = {
@@ -2575,6 +3083,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2586,6 +3095,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -2593,6 +3103,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedFilesInput = {
@@ -2606,6 +3117,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -2617,6 +3129,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2624,6 +3137,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 
@@ -2636,6 +3150,7 @@ export type UserCountOutputType = {
   productions: number
   shiftRecords: number
   employeeProductions: number
+  employeeProductRates: number
   salaryRecords: number
   createdOrders: number
   createdExpenses: number
@@ -2644,6 +3159,7 @@ export type UserCountOutputType = {
   bagAuditLogs: number
   bagWriteoffs: number
   productAuditLogs: number
+  bankTransactions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2651,6 +3167,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   productions?: boolean | UserCountOutputTypeCountProductionsArgs
   shiftRecords?: boolean | UserCountOutputTypeCountShiftRecordsArgs
   employeeProductions?: boolean | UserCountOutputTypeCountEmployeeProductionsArgs
+  employeeProductRates?: boolean | UserCountOutputTypeCountEmployeeProductRatesArgs
   salaryRecords?: boolean | UserCountOutputTypeCountSalaryRecordsArgs
   createdOrders?: boolean | UserCountOutputTypeCountCreatedOrdersArgs
   createdExpenses?: boolean | UserCountOutputTypeCountCreatedExpensesArgs
@@ -2659,6 +3176,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   bagAuditLogs?: boolean | UserCountOutputTypeCountBagAuditLogsArgs
   bagWriteoffs?: boolean | UserCountOutputTypeCountBagWriteoffsArgs
   productAuditLogs?: boolean | UserCountOutputTypeCountProductAuditLogsArgs
+  bankTransactions?: boolean | UserCountOutputTypeCountBankTransactionsArgs
 }
 
 /**
@@ -2697,6 +3215,13 @@ export type UserCountOutputTypeCountShiftRecordsArgs<ExtArgs extends runtime.Typ
  */
 export type UserCountOutputTypeCountEmployeeProductionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.EmployeeProductionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEmployeeProductRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmployeeProductRateWhereInput
 }
 
 /**
@@ -2755,6 +3280,13 @@ export type UserCountOutputTypeCountProductAuditLogsArgs<ExtArgs extends runtime
   where?: Prisma.ProductAuditLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBankTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankTransactionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2767,6 +3299,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordHash?: boolean
   position?: boolean
   cardNumber?: boolean
+  stir?: boolean
   role?: boolean
   salaryType?: boolean
   salaryRate?: boolean
@@ -2778,6 +3311,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   productions?: boolean | Prisma.User$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.User$shiftRecordsArgs<ExtArgs>
   employeeProductions?: boolean | Prisma.User$employeeProductionsArgs<ExtArgs>
+  employeeProductRates?: boolean | Prisma.User$employeeProductRatesArgs<ExtArgs>
   salaryRecords?: boolean | Prisma.User$salaryRecordsArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
   createdExpenses?: boolean | Prisma.User$createdExpensesArgs<ExtArgs>
@@ -2786,6 +3320,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   bagAuditLogs?: boolean | Prisma.User$bagAuditLogsArgs<ExtArgs>
   bagWriteoffs?: boolean | Prisma.User$bagWriteoffsArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.User$productAuditLogsArgs<ExtArgs>
+  bankTransactions?: boolean | Prisma.User$bankTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2800,6 +3335,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   position?: boolean
   cardNumber?: boolean
+  stir?: boolean
   role?: boolean
   salaryType?: boolean
   salaryRate?: boolean
@@ -2820,6 +3356,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   position?: boolean
   cardNumber?: boolean
+  stir?: boolean
   role?: boolean
   salaryType?: boolean
   salaryRate?: boolean
@@ -2840,6 +3377,7 @@ export type UserSelectScalar = {
   passwordHash?: boolean
   position?: boolean
   cardNumber?: boolean
+  stir?: boolean
   role?: boolean
   salaryType?: boolean
   salaryRate?: boolean
@@ -2849,12 +3387,13 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "phone" | "login" | "customRoleLabel" | "permissions" | "canLogin" | "passwordHash" | "position" | "cardNumber" | "role" | "salaryType" | "salaryRate" | "preferredShiftNumber" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "phone" | "login" | "customRoleLabel" | "permissions" | "canLogin" | "passwordHash" | "position" | "cardNumber" | "stir" | "role" | "salaryType" | "salaryRate" | "preferredShiftNumber" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   productions?: boolean | Prisma.User$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.User$shiftRecordsArgs<ExtArgs>
   employeeProductions?: boolean | Prisma.User$employeeProductionsArgs<ExtArgs>
+  employeeProductRates?: boolean | Prisma.User$employeeProductRatesArgs<ExtArgs>
   salaryRecords?: boolean | Prisma.User$salaryRecordsArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
   createdExpenses?: boolean | Prisma.User$createdExpensesArgs<ExtArgs>
@@ -2863,6 +3402,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   bagAuditLogs?: boolean | Prisma.User$bagAuditLogsArgs<ExtArgs>
   bagWriteoffs?: boolean | Prisma.User$bagWriteoffsArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.User$productAuditLogsArgs<ExtArgs>
+  bankTransactions?: boolean | Prisma.User$bankTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2875,6 +3415,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     productions: Prisma.$ProductionRecordPayload<ExtArgs>[]
     shiftRecords: Prisma.$ShiftRecordPayload<ExtArgs>[]
     employeeProductions: Prisma.$EmployeeProductionPayload<ExtArgs>[]
+    employeeProductRates: Prisma.$EmployeeProductRatePayload<ExtArgs>[]
     salaryRecords: Prisma.$SalaryRecordPayload<ExtArgs>[]
     createdOrders: Prisma.$OrderPayload<ExtArgs>[]
     createdExpenses: Prisma.$ExpensePayload<ExtArgs>[]
@@ -2883,6 +3424,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     bagAuditLogs: Prisma.$BagAuditLogPayload<ExtArgs>[]
     bagWriteoffs: Prisma.$BagWriteoffPayload<ExtArgs>[]
     productAuditLogs: Prisma.$ProductAuditLogPayload<ExtArgs>[]
+    bankTransactions: Prisma.$BankTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2895,6 +3437,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordHash: string
     position: string | null
     cardNumber: string | null
+    stir: string | null
     role: $Enums.Role
     salaryType: $Enums.SalaryType
     salaryRate: number
@@ -3303,6 +3846,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   productions<T extends Prisma.User$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shiftRecords<T extends Prisma.User$shiftRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shiftRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   employeeProductions<T extends Prisma.User$employeeProductionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$employeeProductionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  employeeProductRates<T extends Prisma.User$employeeProductRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$employeeProductRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeProductRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   salaryRecords<T extends Prisma.User$salaryRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$salaryRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdOrders<T extends Prisma.User$createdOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdExpenses<T extends Prisma.User$createdExpensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdExpensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3311,6 +3855,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   bagAuditLogs<T extends Prisma.User$bagAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bagAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BagAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bagWriteoffs<T extends Prisma.User$bagWriteoffsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bagWriteoffsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BagWriteoffPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productAuditLogs<T extends Prisma.User$productAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankTransactions<T extends Prisma.User$bankTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bankTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3350,6 +3895,7 @@ export interface UserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly position: Prisma.FieldRef<"User", 'String'>
   readonly cardNumber: Prisma.FieldRef<"User", 'String'>
+  readonly stir: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly salaryType: Prisma.FieldRef<"User", 'SalaryType'>
   readonly salaryRate: Prisma.FieldRef<"User", 'Float'>
@@ -3846,6 +4392,30 @@ export type User$employeeProductionsArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * User.employeeProductRates
+ */
+export type User$employeeProductRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmployeeProductRate
+   */
+  select?: Prisma.EmployeeProductRateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmployeeProductRate
+   */
+  omit?: Prisma.EmployeeProductRateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmployeeProductRateInclude<ExtArgs> | null
+  where?: Prisma.EmployeeProductRateWhereInput
+  orderBy?: Prisma.EmployeeProductRateOrderByWithRelationInput | Prisma.EmployeeProductRateOrderByWithRelationInput[]
+  cursor?: Prisma.EmployeeProductRateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmployeeProductRateScalarFieldEnum | Prisma.EmployeeProductRateScalarFieldEnum[]
+}
+
+/**
  * User.salaryRecords
  */
 export type User$salaryRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4035,6 +4605,30 @@ export type User$productAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ProductAuditLogScalarFieldEnum | Prisma.ProductAuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.bankTransactions
+ */
+export type User$bankTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankTransaction
+   */
+  select?: Prisma.BankTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankTransaction
+   */
+  omit?: Prisma.BankTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankTransactionInclude<ExtArgs> | null
+  where?: Prisma.BankTransactionWhereInput
+  orderBy?: Prisma.BankTransactionOrderByWithRelationInput | Prisma.BankTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.BankTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankTransactionScalarFieldEnum | Prisma.BankTransactionScalarFieldEnum[]
 }
 
 /**

@@ -21,7 +21,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(Role.DIRECTOR, Role.MANAGER, Role.ADMIN)
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER, Role.ADMIN)
   create(
     @Body() dto: CreateUserDto,
     @CurrentUser() token: JwtUserPayload,
@@ -33,6 +33,7 @@ export class UsersController {
     if (!isShiftWorker) {
       const ok =
         token.role === Role.ADMIN ||
+        token.role === Role.ACCOUNTANT ||
         Boolean(token.permissions?.includes('manage_users'));
       if (!ok) {
         throw new ForbiddenException();
@@ -54,7 +55,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(Role.DIRECTOR, Role.MANAGER, Role.ADMIN)
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER, Role.ADMIN)
   update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
@@ -62,6 +63,7 @@ export class UsersController {
   ) {
     const ok =
       token.role === Role.ADMIN ||
+      token.role === Role.ACCOUNTANT ||
       Boolean(token.permissions?.includes('manage_users'));
     if (!ok) {
       throw new ForbiddenException();
