@@ -1,6 +1,5 @@
+import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
-  IsArray,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -9,9 +8,8 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { InventoryItemType } from '../../../generated/prisma/enums.js';
-import { ProductRawMaterialInputDto } from './create-product.dto.js';
+import { ProductRelationsDto } from './product-relations.dto.js';
 
 export class UpdateProductDto {
   @IsOptional()
@@ -32,31 +30,19 @@ export class UpdateProductDto {
   unit?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  @Min(0)
+  @Min(0.01)
   weightGram?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  @Min(0)
+  @Min(0.01)
   volumeLiter?: number;
 
   @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
-  @Type(() => ProductRawMaterialInputDto)
-  rawMaterials?: ProductRawMaterialInputDto[];
-
-  @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  semiProductIds?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  machineIds?: string[];
+  @ValidateNested()
+  @Type(() => ProductRelationsDto)
+  relations?: ProductRelationsDto;
 }

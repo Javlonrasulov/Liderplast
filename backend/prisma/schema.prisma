@@ -96,6 +96,12 @@ enum ProductAuditActionType {
   DELETED
 }
 
+enum ProductAuditEntityType {
+  RAW_MATERIAL
+  SEMI_PRODUCT
+  FINISHED_PRODUCT
+}
+
 model User {
   id                  String              @id @default(cuid())
   fullName            String
@@ -145,6 +151,7 @@ model RawMaterial {
   name         String                  @unique
   unit         String                  @default("kg")
   description  String?
+  isDeleted    Boolean                 @default(false)
   status       EntityStatus            @default(COMPLETED)
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
@@ -153,7 +160,8 @@ model RawMaterial {
   consumptions ProductionConsumption[] @relation("ConsumedRawMaterial")
   bags         RawMaterialBag[]
   bagAuditLogs BagAuditLog[]
-  semiProducts SemiProductRawMaterial[]
+  semiProductLinks SemiProductRawMaterial[]
+  productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
 }
 
 model SemiProduct {
@@ -170,8 +178,9 @@ model SemiProduct {
   consumptions   ProductionConsumption[] @relation("ConsumedSemiProduct")
   outputBatches  ProductionRecord[]      @relation("OutputSemiProduct")
   orderItems     OrderItem[]             @relation("OrderSemiProduct")
-  rawMaterials   SemiProductRawMaterial[]
-  finishedProducts FinishedProductSemiProduct[]
+  rawMaterialLinks SemiProductRawMaterial[]
+  finishedProductLinks FinishedProductSemiProduct[]
+  productAuditLogs ProductAuditLog[]     @relation("ProductAuditSemiProduct")
 }
 
 model FinishedProduct {
@@ -187,46 +196,9 @@ model FinishedProduct {
   movements     InventoryMovement[]  @relation("FinishedProductMovement")
   outputBatches ProductionRecord[]   @relation("OutputFinishedProduct")
   orderItems    OrderItem[]          @relation("OrderFinishedProduct")
-  semiProducts  FinishedProductSemiProduct[]
-  machines      FinishedProductMachine[]
-}
-
-model SemiProductRawMaterial {
-  id            String      @id @default(cuid())
-  semiProductId String
-  semiProduct   SemiProduct @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
-  rawMaterialId String
-  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
-  amountGram    Float
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  @@unique([semiProductId, rawMaterialId])
-  @@index([rawMaterialId])
-}
-
-model FinishedProductSemiProduct {
-  id                String          @id @default(cuid())
-  finishedProductId String
-  finishedProduct   FinishedProduct @relation(fields: [finishedProductId], references: [id], onDelete: Cascade)
-  semiProductId     String
-  semiProduct       SemiProduct     @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
-  createdAt         DateTime        @default(now())
-
-  @@unique([finishedProductId, semiProductId])
-  @@index([semiProductId])
-}
-
-model FinishedProductMachine {
-  id                String          @id @default(cuid())
-  finishedProductId String
-  finishedProduct   FinishedProduct @relation(fields: [finishedProductId], references: [id], onDelete: Cascade)
-  machineId         String
-  machine           Machine         @relation(fields: [machineId], references: [id], onDelete: Cascade)
-  createdAt         DateTime        @default(now())
-
-  @@unique([finishedProductId, machineId])
-  @@index([machineId])
+  semiProductLinks FinishedProductSemiProduct[]
+  machineLinks  FinishedProductMachine[]
+  productAuditLogs ProductAuditLog[] @relation("ProductAuditFinishedProduct")
 }
 
 model InventoryBalance {
@@ -280,7 +252,66 @@ model Machine {
   productions        ProductionRecord[]
   shiftRecords       ShiftRecord[]
   bagSessions        BagConnectionSession[]
-  finishedProducts   FinishedProductMachine[]
+  finishedProductLinks FinishedProductMachine[]
+}
+
+model SemiProductRawMaterial {
+  id            String      @id @default(cuid())
+  semiProductId String
+  semiProduct   SemiProduct @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
+  rawMaterialId String
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  amountGram    Float
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([semiProductId, rawMaterialId])
+  @@index([rawMaterialId])
+}
+
+model FinishedProductSemiProduct {
+  id                String          @id @default(cuid())
+  finishedProductId String
+  finishedProduct   FinishedProduct @relation(fields: [finishedProductId], references: [id], onDelete: Cascade)
+  semiProductId     String
+  semiProduct       SemiProduct     @relation(fields: [semiProductId], references: [id], onDelete: Restrict)
+  createdAt         DateTime        @default(now())
+
+  @@unique([finishedProductId, semiProductId])
+  @@index([semiProductId])
+}
+
+model FinishedProductMachine {
+  id                String          @id @default(cuid())
+  finishedProductId String
+  finishedProduct   FinishedProduct @relation(fields: [finishedProductId], references: [id], onDelete: Cascade)
+  machineId         String
+  machine           Machine         @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  createdAt         DateTime        @default(now())
+
+  @@unique([finishedProductId, machineId])
+  @@index([machineId])
+}
+
+model ProductAuditLog {
+  id                String                 @id @default(cuid())
+  entityType        ProductAuditEntityType
+  actionType        ProductAuditActionType
+  entityId          String
+  actorId           String?
+  actor             User?                  @relation("ProductAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  rawMaterialId     String?
+  rawMaterial       RawMaterial?           @relation("ProductAuditRawMaterial", fields: [rawMaterialId], references: [id], onDelete: SetNull)
+  semiProductId     String?
+  semiProduct       SemiProduct?           @relation("ProductAuditSemiProduct", fields: [semiProductId], references: [id], onDelete: SetNull)
+  finishedProductId String?
+  finishedProduct   FinishedProduct?       @relation("ProductAuditFinishedProduct", fields: [finishedProductId], references: [id], onDelete: SetNull)
+  previousData      Json?
+  nextData          Json?
+  createdAt         DateTime               @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
 }
 
 model RawMaterialBag {
@@ -353,22 +384,6 @@ model BagAuditLog {
   @@index([bagId, createdAt])
   @@index([rawMaterialId, createdAt])
   @@index([referenceType, referenceId])
-}
-
-model ProductAuditLog {
-  id         String                 @id @default(cuid())
-  itemType   InventoryItemType
-  entityId   String
-  actionType ProductAuditActionType
-  actorId    String?
-  actor      User?                  @relation("ProductAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
-  oldData    Json?
-  newData    Json?
-  metadata   Json?
-  createdAt  DateTime               @default(now())
-
-  @@index([itemType, entityId, createdAt])
-  @@index([actorId, createdAt])
 }
 
 model ProductionRecord {

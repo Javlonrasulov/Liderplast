@@ -9,10 +9,6 @@ import React, {
   useState,
 } from 'react';
 import { apiRequest } from '../api/http';
-import { getErpApiLoadPlan } from '../api/erp-load-policy';
-import { useAuth } from '../auth/auth-context';
-import type { SessionUser } from '../auth/auth-context';
-import type { AppPermissionKey } from '../auth/permission-keys';
 
 export interface RawMaterialEntry {
   id: string;
@@ -102,21 +98,6 @@ export type WarehouseItemType =
   | 'SEMI_PRODUCT'
   | 'FINISHED_PRODUCT';
 
-export interface WarehouseAuditActor {
-  id: string;
-  fullName: string;
-  role: string;
-}
-
-export interface WarehouseProductAudit {
-  createdAt?: string | null;
-  createdBy?: WarehouseAuditActor | null;
-  updatedAt?: string | null;
-  updatedBy?: WarehouseAuditActor | null;
-  deletedAt?: string | null;
-  deletedBy?: WarehouseAuditActor | null;
-}
-
 interface WarehouseProductBase {
   id: string;
   itemType: WarehouseItemType;
@@ -124,7 +105,6 @@ interface WarehouseProductBase {
   description?: string;
   createdAt?: string;
   updatedAt?: string;
-  audit?: WarehouseProductAudit;
 }
 
 export interface RawMaterialProduct extends WarehouseProductBase {
@@ -135,28 +115,11 @@ export interface RawMaterialProduct extends WarehouseProductBase {
 export interface SemiProductCatalogItem extends WarehouseProductBase {
   itemType: 'SEMI_PRODUCT';
   weightGram: number;
-  rawMaterials: Array<{
-    rawMaterialId: string;
-    rawMaterialName: string;
-    rawMaterialUnit: string;
-    amountGram: number;
-  }>;
 }
 
 export interface FinishedProductCatalogItem extends WarehouseProductBase {
   itemType: 'FINISHED_PRODUCT';
   volumeLiter: number;
-  semiProducts: Array<{
-    semiProductId: string;
-    semiProductName: string;
-    weightGram: number;
-  }>;
-  machines: Array<{
-    machineId: string;
-    machineName: string;
-    stage: 'SEMI' | 'FINISHED';
-    isActive: boolean;
-  }>;
 }
 
 export type WarehouseProduct =
@@ -343,31 +306,18 @@ type ERPAction =
         unit?: string;
         weightGram?: number;
         volumeLiter?: number;
-        rawMaterials?: Array<{
-          rawMaterialId: string;
-          amountGram: number;
-        }>;
-        semiProductIds?: string[];
-        machineIds?: string[];
       };
     }
   | {
       type: 'UPDATE_WAREHOUSE_PRODUCT';
       payload: {
         id: string;
-        currentItemType: WarehouseItemType;
         itemType: WarehouseItemType;
         name?: string;
         description?: string;
         unit?: string;
         weightGram?: number;
         volumeLiter?: number;
-        rawMaterials?: Array<{
-          rawMaterialId: string;
-          amountGram: number;
-        }>;
-        semiProductIds?: string[];
-        machineIds?: string[];
       };
     }
   | {
@@ -519,7 +469,6 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
-    audit?: WarehouseProductAudit;
   }>;
   semiProducts: Array<{
     id: string;
@@ -528,16 +477,6 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
-    rawMaterials: Array<{
-      rawMaterialId: string;
-      amountGram: number;
-      rawMaterial: {
-        id: string;
-        name: string;
-        unit: string;
-      };
-    }>;
-    audit?: WarehouseProductAudit;
   }>;
   finishedProducts: Array<{
     id: string;
@@ -546,24 +485,6 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
-    semiProducts: Array<{
-      semiProductId: string;
-      semiProduct: {
-        id: string;
-        name: string;
-        weightGram: number;
-      };
-    }>;
-    machines: Array<{
-      machineId: string;
-      machine: {
-        id: string;
-        name: string;
-        stage: 'SEMI' | 'FINISHED';
-        isActive: boolean;
-      };
-    }>;
-    audit?: WarehouseProductAudit;
   }>;
 };
 
@@ -962,18 +883,7 @@ type LookupMap = {
   usersByName: Map<string, string>;
 };
 
-const EMPTY_CATALOG: CatalogResponse = {
-  rawMaterials: [],
-  semiProducts: [],
-  finishedProducts: [],
-};
-
-async function loadStateFromApi(
-  user: SessionUser,
-  hasPermission: (key: AppPermissionKey) => boolean,
-) {
-  const plan = getErpApiLoadPlan(user, hasPermission);
-
+async function loadStateFromApi() {
   const [
     catalog,
     stock,
@@ -993,49 +903,23 @@ async function loadStateFromApi(
     salarySettings,
     salaryRows,
   ] = await Promise.all([
-    plan.warehouseCatalog
-      ? apiRequest<CatalogResponse>('/warehouse/catalog')
-      : Promise.resolve(EMPTY_CATALOG),
-    plan.warehouseStock
-      ? apiRequest<WarehouseStockItem[]>('/warehouse/stock')
-      : Promise.resolve([]),
-    plan.warehouseHistory
-      ? apiRequest<WarehouseHistoryItem[]>('/warehouse/history')
-      : Promise.resolve([]),
-    plan.rawMaterialBags
-      ? apiRequest<BackendRawMaterialBag[]>('/raw-material-bags')
-      : Promise.resolve([]),
-    plan.rawMaterialBags
-      ? apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active')
-      : Promise.resolve(null),
-    plan.rawMaterialBags
-      ? apiRequest<BackendBagLog[]>('/raw-material-bags/logs')
-      : Promise.resolve([]),
-    plan.production
-      ? apiRequest<BackendProductionRecord[]>('/production')
-      : Promise.resolve([]),
-    plan.machines
-      ? apiRequest<BackendMachine[]>('/production/machines')
-      : Promise.resolve([]),
-    plan.shifts
-      ? apiRequest<BackendShiftRecord[]>('/production/shifts')
-      : Promise.resolve([]),
-    plan.clients ? apiRequest<BackendClient[]>('/clients') : Promise.resolve([]),
-    plan.orders ? apiRequest<BackendOrder[]>('/orders') : Promise.resolve([]),
-    plan.payments ? apiRequest<BackendPayment[]>('/payments') : Promise.resolve([]),
-    plan.expenses
-      ? apiRequest<BackendExpense[]>('/finance/expenses')
-      : Promise.resolve([]),
-    plan.users ? apiRequest<BackendUser[]>('/users') : Promise.resolve([]),
-    plan.employeeProductions
-      ? apiRequest<BackendEmployeeProduction[]>('/finance/employee-productions')
-      : Promise.resolve([]),
-    plan.salarySettings
-      ? apiRequest<BackendSalarySettings>('/finance/salary-settings')
-      : Promise.resolve(null),
-    plan.salaryRows
-      ? apiRequest<BackendSalaryRow[]>('/finance/salary')
-      : Promise.resolve([]),
+    apiRequest<CatalogResponse>('/warehouse/catalog'),
+    apiRequest<WarehouseStockItem[]>('/warehouse/stock'),
+    apiRequest<WarehouseHistoryItem[]>('/warehouse/history'),
+    apiRequest<BackendRawMaterialBag[]>('/raw-material-bags'),
+    apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active'),
+    apiRequest<BackendBagLog[]>('/raw-material-bags/logs'),
+    apiRequest<BackendProductionRecord[]>('/production'),
+    apiRequest<BackendMachine[]>('/production/machines'),
+    apiRequest<BackendShiftRecord[]>('/production/shifts'),
+    apiRequest<BackendClient[]>('/clients'),
+    apiRequest<BackendOrder[]>('/orders'),
+    apiRequest<BackendPayment[]>('/payments'),
+    apiRequest<BackendExpense[]>('/finance/expenses'),
+    apiRequest<BackendUser[]>('/users'),
+    apiRequest<BackendEmployeeProduction[]>('/finance/employee-productions'),
+    apiRequest<BackendSalarySettings>('/finance/salary-settings'),
+    apiRequest<BackendSalaryRow[]>('/finance/salary'),
   ]);
 
   const rawHistoryEntries: RawMaterialEntry[] = history
@@ -1088,7 +972,6 @@ async function loadStateFromApi(
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      audit: item.audit,
     })),
     ...catalog.semiProducts.map((item) => ({
       id: item.id,
@@ -1098,13 +981,6 @@ async function loadStateFromApi(
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      rawMaterials: item.rawMaterials.map((relation) => ({
-        rawMaterialId: relation.rawMaterialId,
-        rawMaterialName: relation.rawMaterial.name,
-        rawMaterialUnit: relation.rawMaterial.unit,
-        amountGram: relation.amountGram,
-      })),
-      audit: item.audit,
     })),
     ...catalog.finishedProducts.map((item) => ({
       id: item.id,
@@ -1114,18 +990,6 @@ async function loadStateFromApi(
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      semiProducts: item.semiProducts.map((relation) => ({
-        semiProductId: relation.semiProductId,
-        semiProductName: relation.semiProduct.name,
-        weightGram: relation.semiProduct.weightGram,
-      })),
-      machines: item.machines.map((relation) => ({
-        machineId: relation.machineId,
-        machineName: relation.machine.name,
-        stage: relation.machine.stage,
-        isActive: relation.machine.isActive,
-      })),
-      audit: item.audit,
     })),
   ];
 
@@ -1317,7 +1181,6 @@ async function loadStateFromApi(
 }
 
 export function ERPProvider({ children }: { children: ReactNode }) {
-  const { user, hasPermission } = useAuth();
   const [state, setState] = useState<ERPState>(emptyState);
   const [lookups, setLookups] = useState<LookupMap>({
     rawByName: new Map(),
@@ -1334,14 +1197,10 @@ export function ERPProvider({ children }: { children: ReactNode }) {
   lookupsRef.current = lookups;
 
   const refresh = useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
     setIsLoading(true);
     setError('');
     try {
-      const next = await loadStateFromApi(user, hasPermission);
+      const next = await loadStateFromApi();
       setState(next.state);
       setLookups(next.lookups);
     } catch (err) {
@@ -1349,7 +1208,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [user, hasPermission]);
+  }, []);
 
   useEffect(() => {
     void refresh();
@@ -1383,8 +1242,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         case 'UPDATE_WAREHOUSE_PRODUCT': {
-          const { id, currentItemType, ...body } = action.payload;
-          await apiRequest(`/warehouse/products/${currentItemType}/${id}`, {
+          const { id, itemType, ...body } = action.payload;
+          await apiRequest(`/warehouse/products/${itemType}/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(body),
           });
