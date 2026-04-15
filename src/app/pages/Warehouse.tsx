@@ -47,6 +47,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '../components/ui/drawer';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
 
@@ -511,17 +518,21 @@ export function Warehouse() {
           <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
             {t.whProductType}
           </label>
-          <select
+          <Select
             value={form.itemType}
-            onChange={(e) => setFormType(e.target.value as ProductFormType)}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            onValueChange={(value) => setFormType(value as ProductFormType)}
           >
-            {typeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label} ({option.count})
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {typeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label} ({option.count})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">

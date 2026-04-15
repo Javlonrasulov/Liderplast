@@ -296,6 +296,10 @@ export interface T {
   whSold: string;
   whRemaining: string;
   whByType: string;
+  whUnit: string;
+  whWeightGram: string;
+  whVolumeLiter: string;
+  whProductsList: string;
   whCreatedAt: string;
   whCreatedBy: string;
   whUpdatedBy: string;
@@ -812,8 +816,8 @@ const uz_cyrillic: T = {
 
   whTitle: 'Омбор',
   whMaterial: 'ПЭТ Сиро',
-  whSemi: 'Қолиплар',
-  whFinal: 'Бакалашкалар',
+  whSemi: 'Ярим тайёр (қолип)',
+  whFinal: 'Тайёр маҳсулот (бакалашка)',
   whTotalProd: 'Жами маҳсулот',
   whInWarehouse: 'Омборда',
   whDetailed: 'Батафсил Омбор Ҳолати',
@@ -824,6 +828,10 @@ const uz_cyrillic: T = {
   whSold: 'Сотилган',
   whRemaining: 'Омборда қолган',
   whByType: 'Тоифалар бўйича:',
+  whUnit: 'Ўлчов',
+  whWeightGram: 'Оғирлиги (грамм)',
+  whVolumeLiter: 'Ҳажми (литр)',
+  whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
   whUpdatedBy: 'Янгилаган',
@@ -1335,8 +1343,8 @@ const uz_latin: T = {
 
   whTitle: 'Ombor',
   whMaterial: 'PET Siro',
-  whSemi: 'Qoliplar',
-  whFinal: 'Bakalashkalar',
+  whSemi: 'Yarim tayyor (qolip)',
+  whFinal: 'Tayyor mahsulot (bakalashka)',
   whTotalProd: 'Jami mahsulot',
   whInWarehouse: 'Omborda',
   whDetailed: 'Batafsil Ombor Holati',
@@ -1347,6 +1355,10 @@ const uz_latin: T = {
   whSold: 'Sotilgan',
   whRemaining: 'Omborda qolgan',
   whByType: 'Toifalar bo\'yicha:',
+  whUnit: 'O\'lchov',
+  whWeightGram: 'Og\'irligi (gramm)',
+  whVolumeLiter: 'Hajmi (litr)',
+  whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
   whUpdatedBy: 'Yangilagan',
@@ -1858,8 +1870,8 @@ const ru: T = {
 
   whTitle: 'Склад',
   whMaterial: 'ПЭТ Сырьё',
-  whSemi: 'Заготовки',
-  whFinal: 'Бутылки',
+  whSemi: 'Полуфабрикат (заготовка)',
+  whFinal: 'Готовый продукт (бутылка)',
   whTotalProd: 'Всего продукции',
   whInWarehouse: 'На складе',
   whDetailed: 'Подробное состояние склада',
@@ -1870,6 +1882,10 @@ const ru: T = {
   whSold: 'Продано',
   whRemaining: 'Остаток на складе',
   whByType: 'По категориям:',
+  whUnit: 'Единица',
+  whWeightGram: 'Вес (грамм)',
+  whVolumeLiter: 'Объём (литр)',
+  whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',
   whUpdatedBy: 'Обновил',
