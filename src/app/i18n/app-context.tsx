@@ -1,0 +1,153 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { Language, T, translations } from './translations';
+import { TODAY } from '../utils/format';
+
+// ======================== DATE FILTER ========================
+
+export type DatePreset = 'today' | 'week' | 'month' | 'all' | 'custom';
+
+export interface DateFilter {
+  preset: DatePreset;
+  from: string;
+  to: string;
+}
+
+function getPresetRange(preset: DatePreset): { from: string; to: string } {
+  const today = new Date(TODAY);
+
+  if (preset === 'today') {
+    return { from: TODAY, to: TODAY };
+  }
+
+  if (preset === 'week') {
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - today.getDay() + 1);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return {
+      from: monday.toISOString().split('T')[0],
+      to: sunday.toISOString().split('T')[0],
+    };
+  }
+
+  if (preset === 'month') {
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return {
+      from: firstDay.toISOString().split('T')[0],
+      to: lastDay.toISOString().split('T')[0],
+    };
+  }
+
+  // 'all' and 'custom' default
+  return { from: '', to: '' };
+}
+
+export function filterByDateRange<T extends { date: string }>(
+  items: T[],
+  filter: DateFilter
+): T[] {
+  if (filter.preset === 'all' || (!filter.from && !filter.to)) return items;
+  return items.filter(item => {
+    if (filter.from && item.date < filter.from) return false;
+    if (filter.to && item.date > filter.to) return false;
+    return true;
+  });
+}
+
+// ======================== FONT SIZE ========================
+
+export type FontSize = 'sm' | 'md' | 'lg' | 'xl';
+
+const FONT_SIZE_MAP: Record<FontSize, string> = {
+  sm: '13px',
+  md: '15px',
+  lg: '17px',
+  xl: '19px',
+};
+
+// ======================== CONTEXT ========================
+
+interface AppContextValue {
+  lang: Language;
+  setLang: (l: Language) => void;
+  t: T;
+  dateFilter: DateFilter;
+  setPreset: (preset: DatePreset) => void;
+  setCustomRange: (from: string, to: string) => void;
+  filterData: <I extends { date: string }>(items: I[]) => I[];
+  filterLabel: string;
+  fontSize: FontSize;
+  setFontSize: (size: FontSize) => void;
+}
+
+const AppContext = createContext<AppContextValue | null>(null);
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [lang, setLang] = useState<Language>('uz_cyrillic');
+  const [dateFilter, setDateFilter] = useState<DateFilter>({
+    preset: 'all',
+    from: '',
+    to: '',
+  });
+  const [fontSize, setFontSizeState] = useState<FontSize>(() => {
+    try {
+      return (localStorage.getItem('erp_font_size') as FontSize) || 'md';
+    } catch {
+      return 'md';
+    }
+  });
+
+  const t = translations[lang];
+
+  // Apply font size to <html> on mount and change
+  useEffect(() => {
+    try {
+      document.documentElement.style.fontSize = FONT_SIZE_MAP[fontSize];
+      localStorage.setItem('erp_font_size', fontSize);
+    } catch {
+      // ignore
+    }
+  }, [fontSize]);
+
+  const setFontSize = (size: FontSize) => setFontSizeState(size);
+
+  const setPreset = (preset: DatePreset) => {
+    if (preset === 'custom') {
+      setDateFilter(prev => ({ ...prev, preset: 'custom' }));
+      return;
+    }
+    const range = getPresetRange(preset);
+    setDateFilter({ preset, ...range });
+  };
+
+  const setCustomRange = (from: string, to: string) => {
+    setDateFilter({ preset: 'custom', from, to });
+  };
+
+  const filterData = <I extends { date: string }>(items: I[]): I[] => {
+    return filterByDateRange(items, dateFilter);
+  };
+
+  const filterLabel = useMemo(() => {
+    if (dateFilter.preset === 'all' || (!dateFilter.from && !dateFilter.to)) return t.dfAllTime;
+    if (dateFilter.preset === 'today') return t.dfToday;
+    if (dateFilter.preset === 'week') return t.dfWeek;
+    if (dateFilter.preset === 'month') return t.dfMonth;
+    if (dateFilter.from && dateFilter.to) return `${dateFilter.from} — ${dateFilter.to}`;
+    if (dateFilter.from) return `${t.dfFrom} ${dateFilter.from}`;
+    return t.dfAllTime;
+  }, [dateFilter, t]);
+
+  return (
+    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, filterLabel, fontSize, setFontSize }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
+
+export function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used within AppProvider');
+  return ctx;
+}

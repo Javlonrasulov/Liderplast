@@ -1,0 +1,18 @@
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+
+export class CreatePaymentDto {
+  @IsString()
+  clientId!: string;
+
+  @IsOptional()
+  @IsString()
+  orderId?: string;
+
+  @IsNumber()
+  @Min(0.01)
+  amount!: number;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}

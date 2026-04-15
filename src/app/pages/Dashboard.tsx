@@ -1,0 +1,422 @@
+import React, { useMemo, useState, useEffect } from 'react';
+import { Droplets, Factory, Package, ShoppingCart, TrendingUp, TrendingDown, AlertTriangle, ArrowUpRight, Clock, Boxes, RefreshCw } from 'lucide-react';
+import { SimpleBarChart, SimpleAreaChart } from '../components/charts';
+import { useERP } from '../store/erp-store';
+import { useApp } from '../i18n/app-context';
+import { formatNumber, formatCurrency, getLast7Days, shortDate, TODAY, formatDateTime } from '../utils/format';
+
+// ======================== KPI CARD ========================
+function KpiCard({ title, value, unit, icon: Icon, color, trend, trendVal, warning }: {
+  title: string; value: string; unit?: string; icon: any; color: string;
+  trend?: 'up' | 'neutral'; trendVal?: string; warning?: boolean;
+}) {
+  return (
+    <div className={`bg-white dark:bg-slate-800 rounded-2xl border p-5 shadow-sm hover:shadow-md transition-all ${warning ? 'border-amber-300 dark:border-amber-600' : 'border-slate-200 dark:border-slate-700'}`}>
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${color}`}>
+          <Icon size={20} className="text-white" />
+        </div>
+        {warning ? (
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-700">
+            <AlertTriangle size={12} className="text-amber-500" />
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">!</span>
+          </div>
+        ) : trend && trendVal ? (
+          <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+            <ArrowUpRight size={12} />{trendVal}
+          </div>
+        ) : null}
+      </div>
+      <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">{title}</p>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-slate-900 dark:text-white text-2xl font-bold">{value}</span>
+        {unit && <span className="text-slate-400 text-sm">{unit}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ======================== LOG STYLES ========================
+const LOG_ICONS: Record<string, string> = {
+  raw_material_in: '📥', raw_material_out: '📤', semi_production: '🏭',
+  final_production: '🍼', sale: '💰', expense: '⚡', adjustment: '✏️', shift: '🔧',
+};
+const LOG_COLORS: Record<string, string> = {
+  raw_material_in: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  raw_material_out: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  semi_production: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  final_production: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+  sale: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  expense: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  adjustment: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+  shift: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+};
+
+// ======================== CBU EXCHANGE RATES ========================
+interface CBUCurrency {
+  Ccy: string;
+  Rate: string;
+  Diff: string;
+  Date: string;
+}
+
+function useCBURates() {
+  const [data, setData] = useState<{ usd: CBUCurrency | null; eur: CBUCurrency | null }>({ usd: null, eur: null });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState('');
+
+  const fetchRates = () => {
+    setLoading(true);
+    setError(false);
+    fetch('https://cbu.uz/uz/arkhiv-kursov-valyut/json/')
+      .then(r => r.json())
+      .then((list: CBUCurrency[]) => {
+        const usd = list.find(c => c.Ccy === 'USD') || null;
+        const eur = list.find(c => c.Ccy === 'EUR') || null;
+        setData({ usd, eur });
+        if (usd) setUpdatedAt(usd.Date);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => { fetchRates(); }, []);
+
+  return { data, loading, error, updatedAt, refetch: fetchRates };
+}
+
+function fmtRate(val: string) {
+  return parseFloat(val).toLocaleString('uz-UZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function diffColor(diff: string) {
+  const v = parseFloat(diff);
+  if (v > 0) return 'text-red-500 dark:text-red-400';
+  if (v < 0) return 'text-emerald-500 dark:text-emerald-400';
+  return 'text-slate-400';
+}
+
+function DiffIcon({ diff }: { diff: string }) {
+  const v = parseFloat(diff);
+  if (v > 0) return <TrendingUp size={13} className="text-red-500" />;
+  if (v < 0) return <TrendingDown size={13} className="text-emerald-500" />;
+  return null;
+}
+
+function CurrencyRateWidget() {
+  const { t } = useApp();
+  const { data, loading, error, updatedAt, refetch } = useCBURates();
+
+  const currencies = [
+    { key: 'usd', flag: '🇺🇸', name: 'USD', obj: data.usd },
+    { key: 'eur', flag: '🇪🇺', name: 'EUR', obj: data.eur },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 shadow-sm">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        {/* Left: label */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-base">
+            🏦
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t.dashCbuTitle}</p>
+            <p className="text-xs text-slate-400">{updatedAt ? updatedAt : t.dashCbuSource}</p>
+          </div>
+        </div>
+
+        {/* Center: currency rates */}
+        <div className="flex items-center gap-8 flex-wrap flex-1 justify-center">
+          {loading ? (
+            <div className="flex items-center gap-2 text-slate-400 text-xs">
+              <RefreshCw size={13} className="animate-spin" />
+              <span>{t.authLoading}</span>
+            </div>
+          ) : error ? (
+            <div className="flex items-center gap-2 text-xs">
+              <AlertTriangle size={13} className="text-amber-500" />
+              <span className="text-slate-500 dark:text-slate-400">{t.dashCbuFetchError}</span>
+              <button type="button" onClick={refetch} className="text-indigo-500 hover:underline">
+                {t.dashCbuRetry}
+              </button>
+            </div>
+          ) : (
+            currencies.map(({ key, flag, name, obj }) =>
+              obj ? (
+                <div key={key} className="flex items-center gap-4 py-1 px-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600">
+                  {/* Flag + name */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl leading-none">{flag}</span>
+                    <div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 leading-none mb-0.5">{name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">1 {name === 'USD' ? '$' : '€'}</p>
+                    </div>
+                  </div>
+                  {/* Divider */}
+                  <div className="h-8 w-px bg-slate-200 dark:bg-slate-600" />
+                  {/* Rate */}
+                  <div>
+                    <p className="text-base font-bold text-slate-800 dark:text-white leading-tight">
+                      {fmtRate(obj.Rate)}
+                      <span className="text-xs font-normal text-slate-400 ml-1">so'm</span>
+                    </p>
+                    <div className={`flex items-center gap-0.5 text-xs mt-0.5 ${diffColor(obj.Diff)}`}>
+                      <DiffIcon diff={obj.Diff} />
+                      <span>{parseFloat(obj.Diff) > 0 ? '+' : ''}{fmtRate(obj.Diff)}</span>
+                      <span className="text-slate-400 ml-1">{t.dashCbuChangeToday}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : null
+            )
+          )}
+        </div>
+
+        {/* Right: refresh */}
+        <button
+          onClick={refetch}
+          disabled={loading}
+          className="p-2 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors disabled:opacity-40 shrink-0"
+          title={t.dashCbuRefresh}
+        >
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ======================== CHART COMPONENTS ========================
+const ProductionChart = React.memo(function ProductionChart({
+  data, unitPiece,
+}: { data: { date: string; Qolip: number; Bakalashka: number }[]; unitPiece: string }) {
+  return (
+    <SimpleAreaChart
+      data={data}
+      height={200}
+      formatValue={v => v.toLocaleString() + ' ' + unitPiece}
+      series={[
+        { dataKey: 'Qolip', name: 'Qolip', color: '#818cf8', gradId: 'dash-qolip' },
+        { dataKey: 'Bakalashka', name: 'Bakalashka', color: '#22d3ee', gradId: 'dash-bakalashka' },
+      ]}
+    />
+  );
+});
+
+const MaterialChart = React.memo(function MaterialChart({
+  data, unitKg, nameIn, nameOut,
+}: { data: { date: string; incoming: number; outgoing: number }[]; unitKg: string; nameIn: string; nameOut: string }) {
+  return (
+    <SimpleBarChart
+      data={data}
+      height={200}
+      formatValue={v => v.toLocaleString() + ' ' + unitKg}
+      series={[
+        { dataKey: 'incoming', name: nameIn, color: '#3b82f6' },
+        { dataKey: 'outgoing', name: nameOut, color: '#f97316' },
+      ]}
+    />
+  );
+});
+
+// ======================== DASHBOARD ========================
+export function Dashboard() {
+  const { state, rawMaterialStock, semiProductStock, finalProductStock } = useERP();
+  const { t, filterLabel, dateFilter } = useApp();
+
+  const todayProduction = useMemo(() => {
+    const semi = state.semiProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    const final = state.finalProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    return { semi, final, total: semi + final };
+  }, [state]);
+
+  const todaySales = useMemo(() => state.sales.filter(s => s.date === TODAY).reduce((sum, s) => sum + s.total, 0), [state]);
+
+  const last7Days = useMemo(() => getLast7Days(), []);
+
+  const productionChartData = useMemo(() => last7Days.map(date => ({
+    date: shortDate(date),
+    Qolip: state.semiProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0),
+    Bakalashka: state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0),
+  })), [state, last7Days]);
+
+  const materialChartData = useMemo(() => last7Days.map(date => ({
+    date: shortDate(date),
+    incoming: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'incoming').reduce((s, e) => s + e.amount, 0),
+    outgoing: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'outgoing').reduce((s, e) => s + e.amount, 0),
+  })), [state, last7Days]);
+
+  const totalSemiStock = semiProductStock['18g'] + semiProductStock['20g'];
+  const totalFinalStock = finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
+  const lowStock = rawMaterialStock < 1000;
+
+  const filteredLogs = useMemo(() => {
+    const logs = [...state.logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    if (dateFilter.preset === 'all' || !dateFilter.from) return logs.slice(0, 8);
+    return logs.filter(l => {
+      const d = l.timestamp.split('T')[0];
+      if (dateFilter.from && d < dateFilter.from) return false;
+      if (dateFilter.to && d > dateFilter.to) return false;
+      return true;
+    }).slice(0, 8);
+  }, [state.logs, dateFilter]);
+
+  return (
+    <div className="p-4 lg:p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-slate-900 dark:text-white text-xl font-bold">{t.dashTitle}</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{t.dashTodayDate} — {t.dashSubtitle}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {dateFilter.preset !== 'all' && (
+            <div className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl">
+              <span className="text-indigo-700 dark:text-indigo-400 text-xs font-medium">{t.dfShowing} {filterLabel}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-emerald-700 dark:text-emerald-400 text-xs font-medium">{t.dashSystemActive}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* CBU Currency Exchange Rates */}
+      <CurrencyRateWidget />
+
+      {/* Low stock alert */}
+      {lowStock && (
+        <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl">
+          <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle size={20} className="text-white" />
+          </div>
+          <div>
+            <p className="text-amber-800 dark:text-amber-300 font-semibold text-sm">{t.dashLowAlert}</p>
+            <p className="text-amber-700 dark:text-amber-400 text-xs mt-0.5">
+              {t.rmRemaining}: <strong>{formatNumber(rawMaterialStock)} kg</strong> — {t.dashLowDesc}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <KpiCard title={t.dashKpiMaterial} value={formatNumber(rawMaterialStock)} unit={t.unitKg} icon={Droplets} color="bg-blue-500" warning={lowStock} />
+        <KpiCard title={t.dashKpiSemi} value={formatNumber(totalSemiStock)} unit={t.unitPiece} icon={Factory} color="bg-purple-500" trend="up" trendVal="+5k" />
+        <KpiCard title={t.dashKpiFinal} value={formatNumber(totalFinalStock)} unit={t.unitPiece} icon={Package} color="bg-cyan-500" trend="up" trendVal="+5k" />
+        <KpiCard title={t.dashKpiTodayProd} value={formatNumber(todayProduction.total)} unit={t.unitPiece} icon={TrendingUp} color="bg-indigo-500" trend="neutral" />
+        <KpiCard title={t.dashKpiTodaySales} value={formatNumber(todaySales)} unit={t.unitSum} icon={ShoppingCart} color="bg-emerald-500" trend="up" trendVal={t.dfToday} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashChartProd}</h3>
+              <p className="text-slate-400 text-xs mt-0.5">{t.dashChartLast7}</p>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-slate-400"><Clock size={12} /></div>
+          </div>
+          {/* Custom legend */}
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">Qolip</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">Bakalashka</span></div>
+          </div>
+          <ProductionChart data={productionChartData} unitPiece={t.unitPiece} />
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashChartMaterial}</h3>
+              <p className="text-slate-400 text-xs mt-0.5">{t.dashChartLast7} ({t.dashChartKg})</p>
+            </div>
+            <Droplets size={16} className="text-blue-400" />
+          </div>
+          {/* Custom legend */}
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.rmIncoming.replace('↓ ', '')}</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.rmOutgoing.replace('↑ ', '')}</span></div>
+          </div>
+          <MaterialChart
+            data={materialChartData}
+            unitKg={t.unitKg}
+            nameIn={t.rmIncoming.replace('↓ ', '')}
+            nameOut={t.rmOutgoing.replace('↑ ', '')}
+          />
+        </div>
+      </div>
+
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stock overview */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Boxes size={16} className="text-slate-500" />
+            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashStockTitle}</h3>
+          </div>
+          <div className="space-y-4">
+            {[
+              { label: 'PET Siro', val: rawMaterialStock, max: 3500, unit: 'kg', color: lowStock ? 'bg-amber-500' : 'bg-blue-500', textColor: lowStock ? 'text-amber-500' : 'text-blue-600' },
+              { label: '18g Qolip', val: semiProductStock['18g'], max: 100000, unit: t.unitPiece, color: 'bg-purple-500', textColor: 'text-purple-600' },
+              { label: '20g Qolip', val: semiProductStock['20g'], max: 60000, unit: t.unitPiece, color: 'bg-violet-500', textColor: 'text-violet-600' },
+              { label: '0.5L+1L+5L', val: totalFinalStock, max: 30000, unit: t.unitPiece, color: 'bg-cyan-500', textColor: 'text-cyan-600' },
+            ].map(item => (
+              <div key={item.label}>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-slate-600 dark:text-slate-400 text-xs">{item.label}</span>
+                  <span className={`text-xs font-semibold ${item.textColor} dark:opacity-90`}>{formatNumber(item.val)} {item.unit}</span>
+                </div>
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${item.color}`} style={{ width: `${Math.min(100, (item.val / item.max) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-slate-500" />
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashActivityTitle}</h3>
+            </div>
+            {filteredLogs.length === 0 && (
+              <span className="text-xs text-slate-400">{t.noData}</span>
+            )}
+          </div>
+          {filteredLogs.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-slate-400 text-sm">{t.noData}</div>
+          ) : (
+            <div className="space-y-2.5">
+              {filteredLogs.map(log => (
+                <div key={log.id} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0 ${LOG_COLORS[log.type] || LOG_COLORS.adjustment}`}>
+                    {LOG_ICONS[log.type] || '📋'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-700 dark:text-slate-300 text-xs font-medium truncate">{log.description}</p>
+                    <p className="text-slate-400 text-xs mt-0.5">{formatDateTime(log.timestamp)}</p>
+                  </div>
+                  {log.amount != null && log.amount > 0 && (
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex-shrink-0">
+                      {log.type === 'sale' ? formatCurrency(log.amount) : formatNumber(log.amount) + (log.unit === 'kg' ? ' kg' : ' ' + t.unitPiece)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
