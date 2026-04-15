@@ -1,343 +1,955 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Boxes,
   Droplets,
   Factory,
   Package,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
   TrendingDown,
   TrendingUp,
-  Plus,
-  Pencil,
-  Trash2,
-  Save,
   X,
 } from 'lucide-react';
+import { useAuth } from '../auth/auth-context';
 import {
+  type FinishedProductCatalogItem,
+  type SemiProductCatalogItem,
   useERP,
-  type WarehouseItemType,
   type WarehouseProduct,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatDate, formatNumber, calcPercent } from '../utils/format';
+import { calcPercent, formatDate, formatNumber } from '../utils/format';
+import { Button } from '../components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '../components/ui/drawer';
 
-function StockItem({ label, value, max, unit, color, bgColor, icon, warning }: {
-  label: string; value: number; max: number; unit: string; color: string; bgColor: string; icon: React.ReactNode; warning?: boolean;
+type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+
+type ProductFormState = {
+  itemType: ProductFormType;
+  name: string;
+  description: string;
+  weightGram: string;
+  volumeLiter: string;
+  rawMaterials: Array<{
+    rawMaterialId: string;
+    amountGram: string;
+  }>;
+  semiProductIds: string[];
+  machineIds: string[];
+};
+
+const DEFAULT_FORM: ProductFormState = {
+  itemType: 'SEMI_PRODUCT',
+  name: '',
+  description: '',
+  weightGram: '',
+  volumeLiter: '',
+  rawMaterials: [{ rawMaterialId: '', amountGram: '' }],
+  semiProductIds: [],
+  machineIds: [],
+};
+
+function StockItem({
+  label,
+  value,
+  max,
+  unit,
+  color,
+  bgColor,
+  icon,
+  warning,
+  maxLabel,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  unit: string;
+  color: string;
+  bgColor: string;
+  icon: React.ReactNode;
+  warning?: boolean;
+  maxLabel: string;
 }) {
   const pct = calcPercent(value, max);
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-2xl border p-5 shadow-sm ${warning ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'}`}>
-      <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-xl ${bgColor} flex items-center justify-center`}>{icon}</div>
-        <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${pct < 20 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : pct < 40 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>{pct.toFixed(0)}%</span>
+    <div
+      className={`rounded-2xl border bg-white p-5 shadow-sm dark:bg-slate-800 ${
+        warning
+          ? 'border-amber-300 dark:border-amber-700'
+          : 'border-slate-200 dark:border-slate-700'
+      }`}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${bgColor}`}
+        >
+          {icon}
+        </div>
+        <span
+          className={`rounded-lg px-2 py-1 text-xs font-semibold ${
+            pct < 20
+              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+              : pct < 40
+                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+          }`}
+        >
+          {pct.toFixed(0)}%
+        </span>
       </div>
-      <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">{label}</p>
-      <p className="text-slate-900 dark:text-white text-2xl font-bold">{formatNumber(value)} <span className="text-sm font-normal text-slate-400">{unit}</span></p>
-      <div className="mt-3 h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${pct}%` }} />
+      <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-2xl font-bold text-slate-900 dark:text-white">
+        {formatNumber(value)}{' '}
+        <span className="text-sm font-normal text-slate-400">{unit}</span>
+      </p>
+      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${color}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <div className="flex justify-between mt-1.5">
+      <div className="mt-1.5 flex justify-between">
         <span className="text-xs text-slate-400">0</span>
-        <span className="text-xs text-slate-400">Max: {formatNumber(max)} {unit}</span>
+        <span className="text-xs text-slate-400">
+          {maxLabel}: {formatNumber(max)} {unit}
+        </span>
       </div>
     </div>
   );
 }
 
-type ProductFormState = {
-  itemType: WarehouseItemType;
-  name: string;
-  description: string;
-  unit: string;
-  weightGram: string;
-  volumeLiter: string;
-};
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
 
-const DEFAULT_FORM: ProductFormState = {
-  itemType: 'RAW_MATERIAL',
-  name: '',
-  description: '',
-  unit: 'kg',
-  weightGram: '',
-  volumeLiter: '',
-};
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const apply = () => setIsMobile(mediaQuery.matches);
+    apply();
+    mediaQuery.addEventListener('change', apply);
+    return () => mediaQuery.removeEventListener('change', apply);
+  }, []);
+
+  return isMobile;
+}
 
 function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
-  switch (product.itemType) {
-    case 'RAW_MATERIAL':
-      return `${t.whUnit}: ${product.unit}`;
-    case 'SEMI_PRODUCT':
-      return `${t.whWeightGram}: ${formatNumber(product.weightGram)} g`;
-    case 'FINISHED_PRODUCT':
-      return `${t.whVolumeLiter}: ${formatNumber(product.volumeLiter)} L`;
-    default:
-      return '';
+  if (product.itemType === 'SEMI_PRODUCT') {
+    const recipeCount = product.rawMaterials.length;
+    return `${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}`;
   }
+  if (product.itemType === 'FINISHED_PRODUCT') {
+    return `${t.whVolumeLiter}: ${formatNumber(product.volumeLiter)} L, ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
+  }
+  return `${t.whUnit}: ${product.unit}`;
+}
+
+function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
+  const createdBy = product.audit?.createdByName;
+  const updatedBy = product.audit?.updatedByName;
+  const createdAt = product.createdAt ? formatDate(product.createdAt.slice(0, 10)) : '—';
+
+  if (updatedBy) {
+    return `${t.whUpdatedBy}: ${updatedBy}`;
+  }
+  if (createdBy) {
+    return `${t.whCreatedBy}: ${createdBy}`;
+  }
+  return `${t.whCreatedAt}: ${createdAt}`;
 }
 
 export function Warehouse() {
-  const {
-    state,
-    rawMaterialStock,
-    semiProductStock,
-    finalProductStock,
-    dispatch,
-  } = useERP();
+  const { state, rawMaterialStock, semiProductStock, finalProductStock, dispatch } =
+    useERP();
+  const { user } = useAuth();
   const { t, filterData } = useApp();
+  const isMobile = useIsMobile();
+
   const [form, setForm] = useState<ProductFormState>(DEFAULT_FORM);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<
+    SemiProductCatalogItem | FinishedProductCatalogItem | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<
+    SemiProductCatalogItem | FinishedProductCatalogItem | null
+  >(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const warehouseProducts = state.warehouseProducts ?? [];
-
-  const totalSemi = semiProductStock['18g'] + semiProductStock['20g'];
-  const totalFinal = finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
-  const totalSemiProduced = state.semiProductBatches.reduce((s, b) => s + b.quantity, 0);
-  const totalFinalProduced = state.finalProductBatches.reduce((s, b) => s + b.quantity, 0);
-  const totalSemiSold = state.sales.filter(s => s.productCategory === 'semi').reduce((s, sale) => s + sale.quantity, 0);
-  const totalFinalSold = state.sales.filter(s => s.productCategory === 'final').reduce((s, sale) => s + sale.quantity, 0);
-  const productTypeCounts = useMemo(
-    () => ({
-      RAW_MATERIAL: warehouseProducts.filter((item) => item.itemType === 'RAW_MATERIAL').length,
-      SEMI_PRODUCT: warehouseProducts.filter((item) => item.itemType === 'SEMI_PRODUCT').length,
-      FINISHED_PRODUCT: warehouseProducts.filter((item) => item.itemType === 'FINISHED_PRODUCT').length,
-    }),
-    [warehouseProducts],
+  const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
+  const rawMaterials = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (item): item is Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> =>
+          item.itemType === 'RAW_MATERIAL',
+      ),
+    [state.warehouseProducts],
+  );
+  const productCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (
+          item,
+        ): item is SemiProductCatalogItem | FinishedProductCatalogItem =>
+          item.itemType === 'SEMI_PRODUCT' || item.itemType === 'FINISHED_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+  const semiProducts = useMemo(
+    () =>
+      productCatalog.filter(
+        (item): item is SemiProductCatalogItem => item.itemType === 'SEMI_PRODUCT',
+      ),
+    [productCatalog],
+  );
+  const availableFinalMachines = useMemo(
+    () => state.machines.filter((machine) => machine.type === 'final'),
+    [state.machines],
   );
 
+  const totalSemi = semiProductStock['18g'] + semiProductStock['20g'];
+  const totalFinal =
+    finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
+  const totalSemiProduced = state.semiProductBatches.reduce(
+    (sum, batch) => sum + batch.quantity,
+    0,
+  );
+  const totalFinalProduced = state.finalProductBatches.reduce(
+    (sum, batch) => sum + batch.quantity,
+    0,
+  );
+  const totalSemiSold = state.sales
+    .filter((sale) => sale.productCategory === 'semi')
+    .reduce((sum, sale) => sum + sale.quantity, 0);
+  const totalFinalSold = state.sales
+    .filter((sale) => sale.productCategory === 'final')
+    .reduce((sum, sale) => sum + sale.quantity, 0);
+
   const filteredProducts = useMemo(() => {
-    const items = warehouseProducts.map((item) => ({
+    const items = productCatalog.map((item) => ({
       ...item,
       date: item.createdAt?.slice(0, 10) ?? '1970-01-01',
     }));
 
     return filterData(items).sort(
       (left, right) =>
-        new Date(right.createdAt ?? 0).getTime() - new Date(left.createdAt ?? 0).getTime(),
+        new Date(right.createdAt ?? 0).getTime() -
+        new Date(left.createdAt ?? 0).getTime(),
     );
-  }, [filterData, warehouseProducts]);
+  }, [filterData, productCatalog]);
 
-  const resetForm = (itemType: WarehouseItemType = 'RAW_MATERIAL') => {
+  const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> = [
+    {
+      value: 'SEMI_PRODUCT',
+      label: t.whSemi,
+      count: semiProducts.length,
+    },
+    {
+      value: 'FINISHED_PRODUCT',
+      label: t.whFinal,
+      count: productCatalog.filter((item) => item.itemType === 'FINISHED_PRODUCT').length,
+    },
+  ];
+
+  const resetForm = (itemType: ProductFormType = 'SEMI_PRODUCT') => {
     setForm({
       ...DEFAULT_FORM,
       itemType,
-      unit: itemType === 'RAW_MATERIAL' ? 'kg' : DEFAULT_FORM.unit,
+      rawMaterials:
+        itemType === 'SEMI_PRODUCT'
+          ? [{ rawMaterialId: '', amountGram: '' }]
+          : [],
     });
-    setEditingProductId(null);
+    setEditingProduct(null);
   };
 
-  const startEdit = (product: WarehouseProduct) => {
-    setEditingProductId(product.id);
+  const openCreate = () => {
+    resetForm('SEMI_PRODUCT');
+    setError('');
+    setSuccess('');
+    setIsEditorOpen(true);
+  };
+
+  const startEdit = (product: SemiProductCatalogItem | FinishedProductCatalogItem) => {
+    setEditingProduct(product);
     setError('');
     setSuccess('');
     setForm({
       itemType: product.itemType,
       name: product.name,
       description: product.description ?? '',
-      unit: product.itemType === 'RAW_MATERIAL' ? product.unit : 'kg',
       weightGram:
         product.itemType === 'SEMI_PRODUCT' ? String(product.weightGram) : '',
       volumeLiter:
         product.itemType === 'FINISHED_PRODUCT' ? String(product.volumeLiter) : '',
+      rawMaterials:
+        product.itemType === 'SEMI_PRODUCT'
+          ? product.rawMaterials.map((item) => ({
+              rawMaterialId: item.rawMaterialId,
+              amountGram: String(item.amountGram),
+            }))
+          : [],
+      semiProductIds:
+        product.itemType === 'FINISHED_PRODUCT'
+          ? product.semiProducts.map((item) => item.semiProductId)
+          : [],
+      machineIds:
+        product.itemType === 'FINISHED_PRODUCT'
+          ? product.machines.map((item) => item.machineId)
+          : [],
     });
+    setIsEditorOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const closeEditor = () => {
+    setIsEditorOpen(false);
+    resetForm(editingProduct?.itemType === 'FINISHED_PRODUCT' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT');
+  };
 
+  const setFormType = (itemType: ProductFormType) => {
+    setForm((prev) => ({
+      ...DEFAULT_FORM,
+      itemType,
+      name: prev.name,
+      description: prev.description,
+      rawMaterials:
+        itemType === 'SEMI_PRODUCT'
+          ? prev.rawMaterials.length > 0
+            ? prev.rawMaterials
+            : [{ rawMaterialId: '', amountGram: '' }]
+          : [],
+      semiProductIds: itemType === 'FINISHED_PRODUCT' ? prev.semiProductIds : [],
+      machineIds: itemType === 'FINISHED_PRODUCT' ? prev.machineIds : [],
+    }));
+  };
+
+  const addIngredientRow = () => {
+    setForm((prev) => ({
+      ...prev,
+      rawMaterials: [...prev.rawMaterials, { rawMaterialId: '', amountGram: '' }],
+    }));
+  };
+
+  const removeIngredientRow = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      rawMaterials:
+        prev.rawMaterials.length === 1
+          ? [{ rawMaterialId: '', amountGram: '' }]
+          : prev.rawMaterials.filter((_, currentIndex) => currentIndex !== index),
+    }));
+  };
+
+  const toggleSelection = (
+    field: 'semiProductIds' | 'machineIds',
+    id: string,
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: prev[field].includes(id)
+        ? prev[field].filter((currentId) => currentId !== id)
+        : [...prev[field], id],
+    }));
+  };
+
+  const buildPayload = () => {
     if (!form.name.trim()) {
-      setError(t.whNameRequired);
-      return;
+      throw new Error(t.whNameRequired);
     }
 
     if (form.itemType === 'SEMI_PRODUCT') {
       const weightGram = Number(form.weightGram);
       if (!Number.isFinite(weightGram) || weightGram <= 0) {
-        setError(t.whMetricRequired);
-        return;
+        throw new Error(t.whMetricRequired);
       }
+
+      const rawMaterialsPayload = form.rawMaterials
+        .map((item) => ({
+          rawMaterialId: item.rawMaterialId.trim(),
+          amountGram: Number(item.amountGram),
+        }))
+        .filter((item) => item.rawMaterialId);
+
+      if (rawMaterialsPayload.length === 0) {
+        throw new Error(t.whRawMaterialRequired);
+      }
+      if (
+        rawMaterialsPayload.some(
+          (item) => !Number.isFinite(item.amountGram) || item.amountGram <= 0,
+        )
+      ) {
+        throw new Error(t.whAmountGramRequired);
+      }
+
+      return {
+        itemType: 'SEMI_PRODUCT' as const,
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+        weightGram,
+        relations: { rawMaterials: rawMaterialsPayload },
+      };
     }
 
-    if (form.itemType === 'FINISHED_PRODUCT') {
-      const volumeLiter = Number(form.volumeLiter);
-      if (!Number.isFinite(volumeLiter) || volumeLiter <= 0) {
-        setError(t.whMetricRequired);
-        return;
-      }
+    const volumeLiter = Number(form.volumeLiter);
+    if (!Number.isFinite(volumeLiter) || volumeLiter <= 0) {
+      throw new Error(t.whMetricRequired);
+    }
+    if (form.semiProductIds.length === 0) {
+      throw new Error(t.whSemiProductRequired);
+    }
+    if (form.machineIds.length === 0) {
+      throw new Error(t.whMachineRequired);
     }
 
+    return {
+      itemType: 'FINISHED_PRODUCT' as const,
+      name: form.name.trim(),
+      description: form.description.trim() || undefined,
+      volumeLiter,
+      relations: {
+        semiProductIds: form.semiProductIds,
+        machineIds: form.machineIds,
+      },
+    };
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setSuccess('');
     setSubmitting(true);
+
     try {
-      if (editingProductId) {
+      const payload = buildPayload();
+
+      if (editingProduct) {
         await dispatch({
           type: 'UPDATE_WAREHOUSE_PRODUCT',
           payload: {
-            id: editingProductId,
-            itemType: form.itemType,
-            name: form.name.trim(),
-            description: form.description.trim() || undefined,
-            unit:
-              form.itemType === 'RAW_MATERIAL'
-                ? form.unit.trim() || 'kg'
-                : undefined,
-            weightGram:
-              form.itemType === 'SEMI_PRODUCT'
-                ? Number(form.weightGram)
-                : undefined,
-            volumeLiter:
-              form.itemType === 'FINISHED_PRODUCT'
-                ? Number(form.volumeLiter)
-                : undefined,
+            id: editingProduct.id,
+            currentItemType: editingProduct.itemType,
+            ...payload,
           },
         });
         setSuccess(t.whProductUpdated);
       } else {
         await dispatch({
           type: 'ADD_WAREHOUSE_PRODUCT',
-          payload: {
-            itemType: form.itemType,
-            name: form.name.trim(),
-            description: form.description.trim() || undefined,
-            unit:
-              form.itemType === 'RAW_MATERIAL'
-                ? form.unit.trim() || 'kg'
-                : undefined,
-            weightGram:
-              form.itemType === 'SEMI_PRODUCT'
-                ? Number(form.weightGram)
-                : undefined,
-            volumeLiter:
-              form.itemType === 'FINISHED_PRODUCT'
-                ? Number(form.volumeLiter)
-                : undefined,
-          },
+          payload,
         });
         setSuccess(t.whProductAdded);
       }
-      resetForm(form.itemType);
+
+      closeEditor();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Warehouse product error');
+      setError(err instanceof Error ? err.message : t.whRequestError);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (product: WarehouseProduct) => {
-    if (!window.confirm(`${product.name} — ${t.whDeleteConfirm}`)) {
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
     setError('');
     setSuccess('');
+    setSubmitting(true);
+
     try {
       await dispatch({
         type: 'DELETE_WAREHOUSE_PRODUCT',
-        payload: { id: product.id, itemType: product.itemType },
+        payload: { id: deleteTarget.id, itemType: deleteTarget.itemType },
       });
-      if (editingProductId === product.id) {
-        resetForm(form.itemType);
-      }
       setSuccess(t.whProductDeleted);
+      setDeleteTarget(null);
+      if (editingProduct?.id === deleteTarget.id) {
+        closeEditor();
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Warehouse product error');
+      setError(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const typeOptions: Array<{
-    value: WarehouseItemType;
-    label: string;
-    count: number;
-  }> = [
-    {
-      value: 'RAW_MATERIAL',
-      label: t.whMaterial,
-      count: productTypeCounts.RAW_MATERIAL,
-    },
-    {
-      value: 'SEMI_PRODUCT',
-      label: t.whSemi,
-      count: productTypeCounts.SEMI_PRODUCT,
-    },
-    {
-      value: 'FINISHED_PRODUCT',
-      label: t.whFinal,
-      count: productTypeCounts.FINISHED_PRODUCT,
-    },
-  ];
+  const renderEditorBody = () => (
+    <form
+      id="warehouse-product-form"
+      data-warehouse-editor="true"
+      onSubmit={handleSubmit}
+      className="space-y-5"
+    >
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+            {t.whProductType}
+          </label>
+          <select
+            value={form.itemType}
+            onChange={(e) => setFormType(e.target.value as ProductFormType)}
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+          >
+            {typeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label} ({option.count})
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+            {t.labelName}
+          </label>
+          <input
+            value={form.name}
+            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {form.itemType === 'SEMI_PRODUCT' ? (
+          <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {t.whWeightGram}
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.weightGram}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, weightGram: e.target.value }))
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+          </div>
+        ) : (
+          <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {t.whVolumeLiter}
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={form.volumeLiter}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, volumeLiter: e.target.value }))
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+            {t.labelDesc}
+          </label>
+          <textarea
+            rows={3}
+            value={form.description}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, description: e.target.value }))
+            }
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+          />
+        </div>
+      </div>
+
+      {form.itemType === 'SEMI_PRODUCT' ? (
+        <div className="space-y-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                {t.whIngredientsTitle}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t.whIngredientsSubtitle}
+              </p>
+            </div>
+            <Button type="button" variant="outline" onClick={addIngredientRow}>
+              <Plus size={14} />
+              {t.whAddIngredient}
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {form.rawMaterials.map((item, index) => (
+              <div
+                key={`${index}-${item.rawMaterialId}`}
+                className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
+              >
+                <select
+                  value={item.rawMaterialId}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      rawMaterials: prev.rawMaterials.map((current, currentIndex) =>
+                        currentIndex === index
+                          ? { ...current, rawMaterialId: e.target.value }
+                          : current,
+                      ),
+                    }))
+                  }
+                  className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                >
+                  <option value="">{t.whSelectRawMaterial}</option>
+                  {rawMaterials.map((rawMaterial) => (
+                    <option key={rawMaterial.id} value={rawMaterial.id}>
+                      {rawMaterial.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.amountGram}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      rawMaterials: prev.rawMaterials.map((current, currentIndex) =>
+                        currentIndex === index
+                          ? { ...current, amountGram: e.target.value }
+                          : current,
+                      ),
+                    }))
+                  }
+                  placeholder={t.whAmountGram}
+                  className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeIngredientRow(index)}
+                  aria-label={t.whRemoveIngredient}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            ))}
+          </div>
+          {rawMaterials.length === 0 && (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {t.whNoRawMaterials}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+            <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+              {t.whSemiSelectionTitle}
+            </p>
+            <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
+              {semiProducts
+                .filter((item) => item.id !== editingProduct?.id)
+                .map((item) => (
+                  <label
+                    key={item.id}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.semiProductIds.includes(item.id)}
+                      onChange={() => toggleSelection('semiProductIds', item.id)}
+                    />
+                    <span className="flex-1 text-slate-700 dark:text-slate-200">
+                      {item.name}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {formatNumber(item.weightGram)} g
+                    </span>
+                  </label>
+                ))}
+              {semiProducts.filter((item) => item.id !== editingProduct?.id).length === 0 && (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {t.whNoSemiProducts}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+            <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+              {t.whMachineSelectionTitle}
+            </p>
+            <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
+              {availableFinalMachines.map((machine) => (
+                <label
+                  key={machine.id}
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.machineIds.includes(machine.id)}
+                    onChange={() => toggleSelection('machineIds', machine.id)}
+                  />
+                  <span className="flex-1 text-slate-700 dark:text-slate-200">
+                    {machine.name}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {machine.isActive ? t.statusActive : t.statusCritical}
+                  </span>
+                </label>
+              ))}
+              {availableFinalMachines.length === 0 && (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {t.whNoMachines}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isMobile && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={closeEditor}>
+            {t.btnCancel}
+          </Button>
+          <Button type="submit" disabled={submitting}>
+            {editingProduct ? <Save size={16} /> : <Plus size={16} />}
+            {submitting ? t.authLoading : editingProduct ? t.btnSave : t.whAddProduct}
+          </Button>
+        </div>
+      )}
+    </form>
+  );
+
+  const overlayTitle = editingProduct ? t.whDrawerEditTitle : t.whDrawerCreateTitle;
+  const overlayDescription = editingProduct
+    ? t.whDrawerEditDescription
+    : t.whDrawerCreateDescription;
+  const handleEditorOpenChange = (open: boolean) => {
+    setIsEditorOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  };
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
-      {/* Overview header */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-6 p-4 lg:p-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { label: t.whMaterial, sub: `${calcPercent(rawMaterialStock, 5000).toFixed(0)}% ${t.whInWarehouse}`, val: `${formatNumber(rawMaterialStock)} kg`, from: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-200 dark:shadow-blue-900/30', icon: Droplets },
-          { label: t.whSemi, sub: '18g + 20g', val: `${formatNumber(totalSemi)} ${t.unitPiece}`, from: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-200 dark:shadow-purple-900/30', icon: Factory },
-          { label: t.whFinal, sub: '0.5L + 1L + 5L', val: `${formatNumber(totalFinal)} ${t.unitPiece}`, from: 'from-cyan-500 to-cyan-600', shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30', icon: Package },
-          { label: t.whTotalProd, sub: t.whInWarehouse, val: `${formatNumber(totalSemi + totalFinal)} ${t.unitPiece}`, from: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-200 dark:shadow-emerald-900/30', icon: Boxes },
-        ].map(card => (
-          <div key={card.label} className={`bg-gradient-to-br ${card.from} rounded-2xl p-5 text-white shadow-lg ${card.shadow}`}>
+          {
+            label: t.whMaterial,
+            sub: `${calcPercent(rawMaterialStock, 5000).toFixed(0)}% ${t.whInWarehouse}`,
+            val: `${formatNumber(rawMaterialStock)} ${t.unitKg}`,
+            from: 'from-blue-500 to-blue-600',
+            shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
+            icon: Droplets,
+          },
+          {
+            label: t.whSemi,
+            sub: `${t.whSemi18Label} + ${t.whSemi20Label}`,
+            val: `${formatNumber(totalSemi)} ${t.unitPiece}`,
+            from: 'from-purple-500 to-purple-600',
+            shadow: 'shadow-purple-200 dark:shadow-purple-900/30',
+            icon: Factory,
+          },
+          {
+            label: t.whFinal,
+            sub: `${t.whFinal05Label} + ${t.whFinal1Label} + ${t.whFinal5Label}`,
+            val: `${formatNumber(totalFinal)} ${t.unitPiece}`,
+            from: 'from-cyan-500 to-cyan-600',
+            shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30',
+            icon: Package,
+          },
+          {
+            label: t.whTotalProd,
+            sub: t.whInWarehouse,
+            val: `${formatNumber(totalSemi + totalFinal)} ${t.unitPiece}`,
+            from: 'from-emerald-500 to-emerald-600',
+            shadow: 'shadow-emerald-200 dark:shadow-emerald-900/30',
+            icon: Boxes,
+          },
+        ].map((card) => (
+          <div
+            key={card.label}
+            className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
+          >
             <card.icon size={20} className="mb-3 opacity-80" />
-            <p className="text-white/80 text-xs mb-1">{card.label}</p>
+            <p className="mb-1 text-xs text-white/80">{card.label}</p>
             <p className="text-2xl font-bold">{card.val}</p>
-            <p className="text-white/70 text-xs mt-1">{card.sub}</p>
+            <p className="mt-1 text-xs text-white/70">{card.sub}</p>
           </div>
         ))}
       </div>
 
-      {/* Detailed stock */}
       <div>
-        <h3 className="text-slate-700 dark:text-slate-300 font-semibold text-sm mb-4">{t.whDetailed}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StockItem label={t.whMaterial} value={rawMaterialStock} max={5000} unit="kg" color={rawMaterialStock < 1000 ? 'bg-amber-500' : 'bg-blue-500'} bgColor="bg-blue-100 dark:bg-blue-900/30" icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />} warning={rawMaterialStock < 1000} />
-          <StockItem label="18g Qolip" value={semiProductStock['18g']} max={100000} unit={t.unitPiece} color="bg-purple-500" bgColor="bg-purple-100 dark:bg-purple-900/30" icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />} />
-          <StockItem label="20g Qolip" value={semiProductStock['20g']} max={60000} unit={t.unitPiece} color="bg-violet-500" bgColor="bg-violet-100 dark:bg-violet-900/30" icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />} />
-          <StockItem label="0.5L" value={finalProductStock['0.5L']} max={20000} unit={t.unitPiece} color="bg-cyan-500" bgColor="bg-cyan-100 dark:bg-cyan-900/30" icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />} />
-          <StockItem label="1L" value={finalProductStock['1L']} max={15000} unit={t.unitPiece} color="bg-teal-500" bgColor="bg-teal-100 dark:bg-teal-900/30" icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />} />
-          <StockItem label="5L" value={finalProductStock['5L']} max={5000} unit={t.unitPiece} color="bg-blue-500" bgColor="bg-blue-100 dark:bg-blue-900/30" icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />} />
+        <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {t.whDetailed}
+        </h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StockItem
+            label={t.whMaterial}
+            value={rawMaterialStock}
+            max={5000}
+            unit={t.unitKg}
+            color={rawMaterialStock < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
+            bgColor="bg-blue-100 dark:bg-blue-900/30"
+            icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
+            warning={rawMaterialStock < 1000}
+            maxLabel={t.whMaxLabel}
+          />
+          <StockItem
+            label={t.whSemi18Label}
+            value={semiProductStock['18g']}
+            max={100000}
+            unit={t.unitPiece}
+            color="bg-purple-500"
+            bgColor="bg-purple-100 dark:bg-purple-900/30"
+            icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />}
+            maxLabel={t.whMaxLabel}
+          />
+          <StockItem
+            label={t.whSemi20Label}
+            value={semiProductStock['20g']}
+            max={60000}
+            unit={t.unitPiece}
+            color="bg-violet-500"
+            bgColor="bg-violet-100 dark:bg-violet-900/30"
+            icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />}
+            maxLabel={t.whMaxLabel}
+          />
+          <StockItem
+            label={t.whFinal05Label}
+            value={finalProductStock['0.5L']}
+            max={20000}
+            unit={t.unitPiece}
+            color="bg-cyan-500"
+            bgColor="bg-cyan-100 dark:bg-cyan-900/30"
+            icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />}
+            maxLabel={t.whMaxLabel}
+          />
+          <StockItem
+            label={t.whFinal1Label}
+            value={finalProductStock['1L']}
+            max={15000}
+            unit={t.unitPiece}
+            color="bg-teal-500"
+            bgColor="bg-teal-100 dark:bg-teal-900/30"
+            icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />}
+            maxLabel={t.whMaxLabel}
+          />
+          <StockItem
+            label={t.whFinal5Label}
+            value={finalProductStock['5L']}
+            max={5000}
+            unit={t.unitPiece}
+            color="bg-blue-500"
+            bgColor="bg-blue-100 dark:bg-blue-900/30"
+            icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
+            maxLabel={t.whMaxLabel}
+          />
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4"><TrendingUp size={16} className="text-emerald-500" /><h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.whSemiStats}</h3></div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="mb-4 flex items-center gap-2">
+            <TrendingUp size={16} className="text-emerald-500" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+              {t.whSemiStats}
+            </h3>
+          </div>
           <div className="space-y-3">
             {[
               { label: t.whProduced, value: totalSemiProduced, color: 'text-purple-600 dark:text-purple-400' },
-              { label: t.whUsedInFinal, value: state.finalProductBatches.reduce((s, b) => s + b.semiProductUsed, 0), color: 'text-cyan-600 dark:text-cyan-400' },
+              {
+                label: t.whUsedInFinal,
+                value: state.finalProductBatches.reduce(
+                  (sum, batch) => sum + batch.semiProductUsed,
+                  0,
+                ),
+                color: 'text-cyan-600 dark:text-cyan-400',
+              },
               { label: t.whSold, value: totalSemiSold, color: 'text-emerald-600 dark:text-emerald-400' },
               { label: t.whRemaining, value: totalSemi, color: 'text-slate-800 dark:text-white' },
-            ].map(item => (
-              <div key={item.label} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
-                <span className="text-slate-500 dark:text-slate-400 text-sm">{item.label}</span>
-                <span className={`font-bold text-sm ${item.color}`}>{formatNumber(item.value)} {t.unitPiece}</span>
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
+              >
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {item.label}
+                </span>
+                <span className={`text-sm font-bold ${item.color}`}>
+                  {formatNumber(item.value)} {t.unitPiece}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4"><TrendingDown size={16} className="text-cyan-500" /><h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.whFinalStats}</h3></div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="mb-4 flex items-center gap-2">
+            <TrendingDown size={16} className="text-cyan-500" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+              {t.whFinalStats}
+            </h3>
+          </div>
           <div className="space-y-3">
             {[
               { label: t.whProduced, value: totalFinalProduced, color: 'text-cyan-600 dark:text-cyan-400' },
               { label: t.whSold, value: totalFinalSold, color: 'text-emerald-600 dark:text-emerald-400' },
               { label: t.whRemaining, value: totalFinal, color: 'text-slate-800 dark:text-white' },
-            ].map(item => (
-              <div key={item.label} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
-                <span className="text-slate-500 dark:text-slate-400 text-sm">{item.label}</span>
-                <span className={`font-bold text-sm ${item.color}`}>{formatNumber(item.value)} {t.unitPiece}</span>
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
+              >
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {item.label}
+                </span>
+                <span className={`text-sm font-bold ${item.color}`}>
+                  {formatNumber(item.value)} {t.unitPiece}
+                </span>
               </div>
             ))}
-            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-              <p className="text-xs text-slate-400 mb-2">{t.whByType}</p>
-              {(['0.5L', '1L', '5L'] as const).map(type => (
-                <div key={type} className="flex items-center justify-between py-1">
-                  <span className="text-slate-500 text-xs">{type}</span>
-                  <span className="text-slate-700 dark:text-slate-300 text-xs font-semibold">{formatNumber(finalProductStock[type])} {t.unitPiece}</span>
+            <div className="mt-2 border-t border-slate-100 pt-2 dark:border-slate-700">
+              <p className="mb-2 text-xs text-slate-400">{t.whByType}</p>
+              {[
+                { label: t.whFinal05Label, value: finalProductStock['0.5L'] },
+                { label: t.whFinal1Label, value: finalProductStock['1L'] },
+                { label: t.whFinal5Label, value: finalProductStock['5L'] },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between py-1">
+                  <span className="text-xs text-slate-500">{item.label}</span>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    {formatNumber(item.value)} {t.unitPiece}
+                  </span>
                 </div>
               ))}
             </div>
@@ -345,238 +957,198 @@ export function Warehouse() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4"
+      {(error || success) && (
+        <div
+          className={`rounded-2xl border px-4 py-3 text-sm ${
+            error
+              ? 'border-red-200 text-red-600 dark:border-red-900 dark:text-red-400'
+              : 'border-emerald-200 text-emerald-600 dark:border-emerald-900 dark:text-emerald-400'
+          }`}
         >
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-slate-900 dark:text-white font-semibold text-sm">
-                {t.whManageTitle}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t.whManageSubtitle}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 flex items-center justify-center">
-              {editingProductId ? <Pencil size={18} /> : <Plus size={18} />}
-            </div>
+          {error || success}
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+            {t.whRawMaterialListTitle}
+          </h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {rawMaterials.length} {t.totalRecords}
+          </p>
+        </div>
+
+        {rawMaterials.length === 0 ? (
+          <div className="flex h-28 items-center justify-center px-4 text-sm text-slate-500 dark:text-slate-400">
+            {t.whNoRawMaterials}
           </div>
-
-          <div>
-            <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-              {t.whProductType}
-            </label>
-            <select
-              value={form.itemType}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...DEFAULT_FORM,
-                  ...prev,
-                  itemType: e.target.value as WarehouseItemType,
-                  unit: e.target.value === 'RAW_MATERIAL' ? 'kg' : 'kg',
-                  weightGram: e.target.value === 'SEMI_PRODUCT' ? prev.weightGram : '',
-                  volumeLiter: e.target.value === 'FINISHED_PRODUCT' ? prev.volumeLiter : '',
-                }))
-              }
-              disabled={Boolean(editingProductId)}
-              className="w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              {typeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label} ({option.count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-              {t.labelName}
-            </label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          {form.itemType === 'RAW_MATERIAL' && (
-            <div>
-              <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-                {t.whUnit}
-              </label>
-              <input
-                value={form.unit}
-                onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                className="w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-          )}
-
-          {form.itemType === 'SEMI_PRODUCT' && (
-            <div>
-              <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-                {t.whWeightGram}
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.weightGram}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, weightGram: e.target.value }))
-                }
-                className="w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-          )}
-
-          {form.itemType === 'FINISHED_PRODUCT' && (
-            <div>
-              <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-                {t.whVolumeLiter}
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={form.volumeLiter}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, volumeLiter: e.target.value }))
-                }
-                className="w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
-              {t.labelDesc}
-            </label>
-            <textarea
-              value={form.description}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, description: e.target.value }))
-              }
-              rows={3}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-            />
-          </div>
-
-          {(error || success) && (
-            <div
-              className={`rounded-xl px-3 py-2 text-sm border ${
-                error
-                  ? 'border-red-200 dark:border-red-900 text-red-600 dark:text-red-400'
-                  : 'border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
-              }`}
-            >
-              {error || success}
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium flex items-center justify-center gap-2"
-            >
-              {editingProductId ? <Save size={16} /> : <Plus size={16} />}
-              {submitting
-                ? t.authLoading
-                : editingProductId
-                  ? t.btnSave
-                  : t.btnAdd}
-            </button>
-            {editingProductId && (
-              <button
-                type="button"
-                onClick={() => resetForm()}
-                className="h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium flex items-center justify-center gap-2"
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            {rawMaterials.map((rawMaterial) => (
+              <div
+                key={rawMaterial.id}
+                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
               >
-                <X size={16} />
-                {t.btnCancel}
-              </button>
-            )}
-          </div>
-        </form>
-
-        <div className="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <div>
-              <h3 className="text-slate-900 dark:text-white font-semibold text-sm">
-                {t.whProductsList}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {filteredProducts.length} {t.totalRecords}
-              </p>
-            </div>
-          </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="h-40 flex items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-              {t.whNoProducts}
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-[640px] overflow-y-auto">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-slate-900 dark:text-white truncate">
-                        {product.name}
-                      </p>
-                      <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
-                        {
-                          typeOptions.find((option) => option.value === product.itemType)
-                            ?.label
-                        }
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                      {productMetric(product, t)}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-semibold text-slate-900 dark:text-white">
+                      {rawMaterial.name}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {t.whCreatedAt}:{' '}
-                      {product.createdAt
-                        ? formatDate(product.createdAt.slice(0, 10))
-                        : '—'}
-                    </p>
-                    {product.description && (
-                      <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
-                        {product.description}
-                      </p>
-                    )}
+                    <span className="inline-flex items-center rounded-lg bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      {t.whMaterial}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    {t.whUnit}: {rawMaterial.unit}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {auditLine(rawMaterial, t)}
+                  </p>
+                  {rawMaterial.description && (
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                      {rawMaterial.description}
+                    </p>
+                  )}
+                </div>
+                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  {t.whIncludedInWarehouse}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              {t.whProductsList}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {filteredProducts.length} {t.totalRecords}
+            </p>
+          </div>
+          {canManage ? (
+            <Button onClick={openCreate}>
+              <Plus size={16} />
+              {t.whAddProduct}
+            </Button>
+          ) : (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {t.whManageReadOnly}
+            </p>
+          )}
+        </div>
+
+        {filteredProducts.length === 0 ? (
+          <div className="flex h-40 items-center justify-center px-4 text-sm text-slate-500 dark:text-slate-400">
+            {t.whNoProducts}
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="flex flex-col gap-4 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 sm:p-5 lg:flex-row lg:items-center"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-semibold text-slate-900 dark:text-white">
+                      {product.name}
+                    </p>
+                    <span className="inline-flex items-center rounded-lg bg-indigo-100 px-2 py-1 text-[11px] font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                      {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    {productMetric(product, t)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {auditLine(product, t)}
+                  </p>
+                  {product.description && (
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                      {product.description}
+                    </p>
+                  )}
+                </div>
+                {canManage && (
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => startEdit(product)}
-                      className="h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700"
                     >
                       <Pencil size={14} />
                       {t.whEdit}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
-                      onClick={() => void handleDelete(product)}
-                      className="h-10 px-3 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30"
+                      variant="destructive"
+                      onClick={() => setDeleteTarget(product)}
                     >
                       <Trash2 size={14} />
                       {t.suDelete}
-                    </button>
+                    </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {isMobile ? (
+        <Drawer open={isEditorOpen} onOpenChange={handleEditorOpenChange} direction="right">
+          <DrawerContent className="right-0 h-full w-full max-w-md border-l">
+            <DrawerHeader>
+              <DrawerTitle>{overlayTitle}</DrawerTitle>
+              <DrawerDescription>{overlayDescription}</DrawerDescription>
+            </DrawerHeader>
+            <div className="overflow-y-auto px-4 pb-4">{renderEditorBody()}</div>
+            <DrawerFooter>
+              <Button type="button" variant="outline" onClick={closeEditor}>
+                {t.btnCancel}
+              </Button>
+              <Button
+                type="submit"
+                form="warehouse-product-form"
+                disabled={submitting}
+              >
+                {editingProduct ? <Save size={16} /> : <Plus size={16} />}
+                {submitting ? t.authLoading : editingProduct ? t.btnSave : t.whAddProduct}
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={isEditorOpen} onOpenChange={handleEditorOpenChange}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>{overlayTitle}</DialogTitle>
+              <DialogDescription>{overlayDescription}</DialogDescription>
+            </DialogHeader>
+            {renderEditorBody()}
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.whDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.whDeleteConfirm}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              {t.whDeleteAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

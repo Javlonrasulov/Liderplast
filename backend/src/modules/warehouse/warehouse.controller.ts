@@ -25,30 +25,35 @@ export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Post('products')
-  @Roles(Role.DIRECTOR, Role.MANAGER)
-  createProduct(@Body() dto: CreateProductDto) {
-    return this.warehouseService.createProduct(dto);
+  @Roles(Role.ADMIN, Role.DIRECTOR)
+  createProduct(
+    @Body() dto: CreateProductDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.warehouseService.createProduct(dto, userId);
   }
 
   @Patch('products/:itemType/:id')
-  @Roles(Role.DIRECTOR, Role.MANAGER)
+  @Roles(Role.ADMIN, Role.DIRECTOR)
   updateProduct(
     @Param('itemType', new ParseEnumPipe(InventoryItemType))
     itemType: InventoryItemType,
     @Param('id') id: string,
     @Body() dto: UpdateProductDto,
+    @CurrentUser('sub') userId?: string,
   ) {
-    return this.warehouseService.updateProduct(itemType, id, dto);
+    return this.warehouseService.updateProduct(itemType, id, dto, userId);
   }
 
   @Delete('products/:itemType/:id')
-  @Roles(Role.DIRECTOR, Role.MANAGER)
+  @Roles(Role.ADMIN, Role.DIRECTOR)
   deleteProduct(
     @Param('itemType', new ParseEnumPipe(InventoryItemType))
     itemType: InventoryItemType,
     @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
   ) {
-    return this.warehouseService.deleteProduct(itemType, id);
+    return this.warehouseService.deleteProduct(itemType, id, userId);
   }
 
   @Post('incoming')

@@ -98,6 +98,18 @@ export type WarehouseItemType =
   | 'SEMI_PRODUCT'
   | 'FINISHED_PRODUCT';
 
+export interface ProductAuditInfo {
+  createdAt?: string;
+  createdById?: string;
+  createdByName?: string;
+  updatedAt?: string;
+  updatedById?: string;
+  updatedByName?: string;
+  deletedAt?: string;
+  deletedById?: string;
+  deletedByName?: string;
+}
+
 interface WarehouseProductBase {
   id: string;
   itemType: WarehouseItemType;
@@ -105,6 +117,7 @@ interface WarehouseProductBase {
   description?: string;
   createdAt?: string;
   updatedAt?: string;
+  audit?: ProductAuditInfo;
 }
 
 export interface RawMaterialProduct extends WarehouseProductBase {
@@ -112,14 +125,40 @@ export interface RawMaterialProduct extends WarehouseProductBase {
   unit: string;
 }
 
+export interface SemiProductRawMaterialRelation {
+  id: string;
+  rawMaterialId: string;
+  name: string;
+  unit: string;
+  amountGram: number;
+}
+
 export interface SemiProductCatalogItem extends WarehouseProductBase {
   itemType: 'SEMI_PRODUCT';
   weightGram: number;
+  rawMaterials: SemiProductRawMaterialRelation[];
+}
+
+export interface FinishedProductSemiRelation {
+  id: string;
+  semiProductId: string;
+  name: string;
+  weightGram: number;
+}
+
+export interface FinishedProductMachineRelation {
+  id: string;
+  machineId: string;
+  name: string;
+  stage: 'SEMI' | 'FINISHED';
+  isActive: boolean;
 }
 
 export interface FinishedProductCatalogItem extends WarehouseProductBase {
   itemType: 'FINISHED_PRODUCT';
   volumeLiter: number;
+  semiProducts: FinishedProductSemiRelation[];
+  machines: FinishedProductMachineRelation[];
 }
 
 export type WarehouseProduct =
@@ -296,7 +335,15 @@ export interface ERPState {
 }
 
 type ERPAction =
-  | { type: 'ADD_RAW_MATERIAL'; payload: { amount: number; description: string; date: string } }
+  | {
+      type: 'ADD_RAW_MATERIAL';
+      payload: {
+        rawMaterialId: string;
+        amount: number;
+        description: string;
+        date: string;
+      };
+    }
   | {
       type: 'ADD_WAREHOUSE_PRODUCT';
       payload: {
@@ -306,18 +353,35 @@ type ERPAction =
         unit?: string;
         weightGram?: number;
         volumeLiter?: number;
+        relations?: {
+          rawMaterials?: Array<{
+            rawMaterialId: string;
+            amountGram: number;
+          }>;
+          semiProductIds?: string[];
+          machineIds?: string[];
+        };
       };
     }
   | {
       type: 'UPDATE_WAREHOUSE_PRODUCT';
       payload: {
         id: string;
-        itemType: WarehouseItemType;
+        currentItemType: WarehouseItemType;
+        itemType?: WarehouseItemType;
         name?: string;
         description?: string;
         unit?: string;
         weightGram?: number;
         volumeLiter?: number;
+        relations?: {
+          rawMaterials?: Array<{
+            rawMaterialId: string;
+            amountGram: number;
+          }>;
+          semiProductIds?: string[];
+          machineIds?: string[];
+        };
       };
     }
   | {
@@ -469,6 +533,7 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
+    audit?: ProductAuditInfo;
   }>;
   semiProducts: Array<{
     id: string;
@@ -477,6 +542,8 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
+    rawMaterials: SemiProductRawMaterialRelation[];
+    audit?: ProductAuditInfo;
   }>;
   finishedProducts: Array<{
     id: string;
@@ -485,6 +552,9 @@ type CatalogResponse = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
+    semiProducts: FinishedProductSemiRelation[];
+    machines: FinishedProductMachineRelation[];
+    audit?: ProductAuditInfo;
   }>;
 };
 
@@ -972,6 +1042,7 @@ async function loadStateFromApi() {
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      audit: item.audit,
     })),
     ...catalog.semiProducts.map((item) => ({
       id: item.id,
@@ -981,6 +1052,8 @@ async function loadStateFromApi() {
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      rawMaterials: item.rawMaterials,
+      audit: item.audit,
     })),
     ...catalog.finishedProducts.map((item) => ({
       id: item.id,
@@ -990,6 +1063,9 @@ async function loadStateFromApi() {
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      semiProducts: item.semiProducts,
+      machines: item.machines,
+      audit: item.audit,
     })),
   ];
 
@@ -1220,9 +1296,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       const state = stateRef.current;
       switch (action.type) {
         case 'ADD_RAW_MATERIAL': {
-          const rawMaterialId =
-            lookups.rawByName.values().next().value ??
-            state.rawMaterialEntries[0]?.id;
+          const rawMaterialId = action.payload.rawMaterialId;
           if (!rawMaterialId) break;
           await apiRequest('/warehouse/incoming', {
             method: 'POST',
@@ -1242,8 +1316,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         case 'UPDATE_WAREHOUSE_PRODUCT': {
-          const { id, itemType, ...body } = action.payload;
-          await apiRequest(`/warehouse/products/${itemType}/${id}`, {
+          const { id, currentItemType, ...body } = action.payload;
+          await apiRequest(`/warehouse/products/${currentItemType}/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(body),
           });

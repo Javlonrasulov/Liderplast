@@ -28,7 +28,14 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Dashboard },
       { path: 'raw-material', Component: RawMaterial },
-      { path: 'warehouse', Component: Warehouse },
+      {
+        path: 'warehouse',
+        element: (
+          <RouteGuard permission="view_warehouse">
+            <Warehouse />
+          </RouteGuard>
+        ),
+      },
       { path: 'sales', Component: Sales },
       { path: 'expenses', Component: Expenses },
       { path: 'employees', element: <Navigate to="/payroll" replace /> },

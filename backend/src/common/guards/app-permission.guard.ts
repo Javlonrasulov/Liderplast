@@ -44,6 +44,16 @@ function requiredPermissionGroups(
       method: 'POST',
       anyOf: ['view_warehouse'],
     },
+    {
+      test: /^\/warehouse\/products\/[^/]+\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_warehouse'],
+    },
+    {
+      test: /^\/warehouse\/products\/[^/]+\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['view_warehouse'],
+    },
 
     {
       test: /^\/raw-material-bags$/,

@@ -38,6 +38,7 @@ export function RawMaterial() {
   const { state, dispatch, rawMaterialStock } = useERP();
   const { t, filterData } = useApp();
   const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
+  const [createForm, setCreateForm] = useState({ name: '', description: '' });
   const [bagForm, setBagForm] = useState({ rawMaterialId: '', name: '', initialQuantityKg: '' });
   const [quickForm, setQuickForm] = useState({
     pieceCount: '',
@@ -62,12 +63,41 @@ export function RawMaterial() {
   const totalIncoming = state.rawMaterialEntries.filter(e => e.type === 'incoming').reduce((s, e) => s + e.amount, 0);
   const totalOutgoing = state.rawMaterialEntries.filter(e => e.type === 'outgoing').reduce((s, e) => s + e.amount, 0);
 
+  const handleCreateRawMaterial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const name = createForm.name.trim();
+    if (!name) {
+      setError(t.rmCreateNameRequired);
+      return;
+    }
+
+    try {
+      await dispatch({
+        type: 'ADD_WAREHOUSE_PRODUCT',
+        payload: {
+          itemType: 'RAW_MATERIAL',
+          name,
+          description: createForm.description.trim() || undefined,
+          unit: 'kg',
+        },
+      });
+      setCreateForm({ name: '', description: '' });
+      setSuccess(t.rmCreatedSuccess);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.rmCreateError);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const rawMaterialId = availableRawMaterials[0]?.id;
     const amountKg = form.unit === 'ton' ? parseFloat(form.amount) * 1000 : parseFloat(form.amount);
+    if (!rawMaterialId) { setError(t.rmSelectRawMaterialRequired); return; }
     if (!form.amount || isNaN(amountKg) || amountKg <= 0) { setError(t.labelAmount + '!'); return; }
-    dispatch({ type: 'ADD_RAW_MATERIAL', payload: { amount: amountKg, description: form.description || 'PET siro kirimi', date: form.date } });
+    dispatch({ type: 'ADD_RAW_MATERIAL', payload: { rawMaterialId, amount: amountKg, description: form.description || t.rmDefaultIncomingNote, date: form.date } });
     setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
     setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
     setTimeout(() => setSuccess(''), 3000);
@@ -86,6 +116,11 @@ export function RawMaterial() {
 
   const availableRawMaterials = useMemo(() => {
     const names = new Map<string, string>();
+    for (const item of state.warehouseProducts) {
+      if (item.itemType === 'RAW_MATERIAL') {
+        names.set(item.id, item.name);
+      }
+    }
     for (const bag of state.rawMaterialBags) {
       names.set(bag.rawMaterialId, bag.rawMaterialName);
     }
@@ -126,6 +161,7 @@ export function RawMaterial() {
   const quickConsumeKg = quickForm.quantityKg
     ? parseFloat(quickForm.quantityKg || '0')
     : ((parseFloat(quickForm.pieceCount || '0') || 0) * (parseFloat(quickForm.gramPerUnit || '0') || 0)) / 1000;
+  const selectedIncomingRawMaterialId = availableRawMaterials[0]?.id ?? '';
 
   const handleCreateBag = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,61 +316,115 @@ export function RawMaterial() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-              <Plus size={16} className="text-white" />
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                <Droplets size={16} className="text-white" />
+              </div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmCreateTypeTitle}</h3>
             </div>
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmNewEntry}</h3>
+
+            <form onSubmit={handleCreateRawMaterial} className="space-y-4">
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelName}</label>
+                <input
+                  type="text"
+                  value={createForm.name}
+                  onChange={e => setCreateForm({ ...createForm, name: e.target.value })}
+                  placeholder={t.rmCreateTypePlaceholder}
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
+                <textarea
+                  rows={3}
+                  value={createForm.description}
+                  onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
+                  placeholder={t.rmCreateTypeDescPlaceholder}
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                />
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} /> {t.rmCreateTypeButton}
+              </button>
+            </form>
           </div>
 
-          {success && (
-            <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl">
-              <p className="text-emerald-700 dark:text-emerald-400 text-sm">{success}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
-              <SingleDatePicker
-                value={form.date}
-                onChange={(date) => setForm({ ...form, date })}
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelAmount}</label>
-              <div className="flex gap-2">
-                <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="0" min="0"
-                  className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                <SelectField value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} className="w-[110px]">
-                  <option value="kg">{t.unitKg}</option>
-                  <option value="ton">{t.unitTon}</option>
-                </SelectField>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                <Plus size={16} className="text-white" />
               </div>
-              {form.amount && form.unit === 'ton' && (
-                <p className="text-xs text-indigo-500 mt-1">= {formatNumber(amountKg)} {t.unitKg}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
-              <input type="text" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t.rmPlaceholderDesc}
-                className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmNewEntry}</h3>
             </div>
 
-            {form.amount && amountKg > 0 && (
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
-                <p className="text-blue-700 dark:text-blue-400 text-xs font-medium">{t.rmPreviewAdd}</p>
-                <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatNumber(amountKg)} {t.unitKg}</p>
-                <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">{t.rmPreviewBalance} {formatNumber(rawMaterialStock + amountKg)} {t.unitKg}</p>
+            {success && (
+              <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl">
+                <p className="text-emerald-700 dark:text-emerald-400 text-sm">{success}</p>
               </div>
             )}
-            {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl"><p className="text-red-600 dark:text-red-400 text-sm">{error}</p></div>}
 
-            <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
-              <Plus size={16} /> {t.rmAddBtn}
-            </button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagRawMaterial}</label>
+                <SelectField
+                  value={selectedIncomingRawMaterialId}
+                  onChange={() => undefined}
+                  disabled
+                >
+                  {availableRawMaterials.length === 0 ? (
+                    <option value="">{t.rmBagSelectRawMaterial}</option>
+                  ) : (
+                    availableRawMaterials.map((item) => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))
+                  )}
+                </SelectField>
+                <p className="text-xs text-slate-400 mt-1">{t.rmIncomingHint}</p>
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
+                <SingleDatePicker
+                  value={form.date}
+                  onChange={(date) => setForm({ ...form, date })}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelAmount}</label>
+                <div className="flex gap-2">
+                  <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="0" min="0"
+                    className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  <SelectField value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} className="w-[110px]">
+                    <option value="kg">{t.unitKg}</option>
+                    <option value="ton">{t.unitTon}</option>
+                  </SelectField>
+                </div>
+                {form.amount && form.unit === 'ton' && (
+                  <p className="text-xs text-indigo-500 mt-1">= {formatNumber(amountKg)} {t.unitKg}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
+                <input type="text" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t.rmPlaceholderDesc}
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              </div>
+
+              {form.amount && amountKg > 0 && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                  <p className="text-blue-700 dark:text-blue-400 text-xs font-medium">{t.rmPreviewAdd}</p>
+                  <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatNumber(amountKg)} {t.unitKg}</p>
+                  <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">{t.rmPreviewBalance} {formatNumber(rawMaterialStock + amountKg)} {t.unitKg}</p>
+                </div>
+              )}
+              {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl"><p className="text-red-600 dark:text-red-400 text-sm">{error}</p></div>}
+
+              <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} /> {t.rmAddBtn}
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Table */}

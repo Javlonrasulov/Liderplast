@@ -233,6 +233,16 @@ export interface T {
   rmLogDepleted: string;
   rmLogWrittenOff: string;
   rmNoLogNote: string;
+  rmCreateTypeTitle: string;
+  rmCreateTypeButton: string;
+  rmCreateTypePlaceholder: string;
+  rmCreateTypeDescPlaceholder: string;
+  rmCreateNameRequired: string;
+  rmCreateError: string;
+  rmCreatedSuccess: string;
+  rmSelectRawMaterialRequired: string;
+  rmDefaultIncomingNote: string;
+  rmIncomingHint: string;
 
   // Semi Production
   spTitle: string;
@@ -286,6 +296,53 @@ export interface T {
   whSold: string;
   whRemaining: string;
   whByType: string;
+  whCreatedAt: string;
+  whCreatedBy: string;
+  whUpdatedBy: string;
+  whEdit: string;
+  whNoProducts: string;
+  whAddProduct: string;
+  whManageReadOnly: string;
+  whDeleteTitle: string;
+  whDeleteConfirm: string;
+  whDeleteAction: string;
+  whProductAdded: string;
+  whProductUpdated: string;
+  whProductDeleted: string;
+  whProductType: string;
+  whNameRequired: string;
+  whMetricRequired: string;
+  whRequestError: string;
+  whSemi18Label: string;
+  whSemi20Label: string;
+  whFinal05Label: string;
+  whFinal1Label: string;
+  whFinal5Label: string;
+  whMaxLabel: string;
+  whDrawerCreateTitle: string;
+  whDrawerCreateDescription: string;
+  whDrawerEditTitle: string;
+  whDrawerEditDescription: string;
+  whIngredientsTitle: string;
+  whIngredientsSubtitle: string;
+  whIngredientsShort: string;
+  whSemiShort: string;
+  whMachinesShort: string;
+  whAddIngredient: string;
+  whRemoveIngredient: string;
+  whSelectRawMaterial: string;
+  whAmountGram: string;
+  whAmountGramRequired: string;
+  whRawMaterialRequired: string;
+  whNoRawMaterials: string;
+  whSemiSelectionTitle: string;
+  whSemiProductRequired: string;
+  whNoSemiProducts: string;
+  whMachineSelectionTitle: string;
+  whMachineRequired: string;
+  whNoMachines: string;
+  whRawMaterialListTitle: string;
+  whIncludedInWarehouse: string;
 
   // Sales
   slTitle: string;
@@ -663,6 +720,16 @@ const uz_cyrillic: T = {
   rmLogDepleted: 'Тугаган',
   rmLogWrittenOff: 'Чиқимга чиқарилди',
   rmNoLogNote: 'Изоҳ йўқ',
+  rmCreateTypeTitle: 'Сиро турини яратиш',
+  rmCreateTypeButton: 'Сиро турини сақлаш',
+  rmCreateTypePlaceholder: 'Масалан: PET 9921',
+  rmCreateTypeDescPlaceholder: 'Сиро ҳақида қисқача изоҳ',
+  rmCreateNameRequired: 'Сиро номи мажбурий',
+  rmCreateError: 'Сиро турини яратишда хатолик юз берди',
+  rmCreatedSuccess: 'Сиро тури муваффақиятли яратилди',
+  rmSelectRawMaterialRequired: 'Аввал камида битта сиро турини яратинг',
+  rmDefaultIncomingNote: 'Сиро кирими',
+  rmIncomingHint: 'Кирим яратилган биринчи сиро турига ёзилади',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -757,6 +824,53 @@ const uz_cyrillic: T = {
   whSold: 'Сотилган',
   whRemaining: 'Омборда қолган',
   whByType: 'Тоифалар бўйича:',
+  whCreatedAt: 'Яратилган сана',
+  whCreatedBy: 'Яратган',
+  whUpdatedBy: 'Янгилаган',
+  whEdit: 'Таҳрирлаш',
+  whNoProducts: 'Маҳсулотлар ҳозирча мавжуд эмас',
+  whAddProduct: 'Маҳсулот қўшиш',
+  whManageReadOnly: 'Сизда фақат кўриш ҳуқуқи мавжуд',
+  whDeleteTitle: 'Маҳсулотни ўчириш',
+  whDeleteConfirm: 'Ҳақиқатан ҳам ушбу маҳсулотни ўчирмоқчимисиз?',
+  whDeleteAction: 'Ҳа, ўчириш',
+  whProductAdded: 'Маҳсулот муваффақиятли қўшилди',
+  whProductUpdated: 'Маҳсулот муваффақиятли янгиланди',
+  whProductDeleted: 'Маҳсулот муваффақиятли ўчирилди',
+  whProductType: 'Маҳсулот тури',
+  whNameRequired: 'Маҳсулот номи мажбурий',
+  whMetricRequired: 'Ўлчам майдонини тўғри киритинг',
+  whRequestError: 'Маҳсулот амалиётида хатолик юз берди',
+  whSemi18Label: '18g қолип',
+  whSemi20Label: '20g қолип',
+  whFinal05Label: '0.5L',
+  whFinal1Label: '1L',
+  whFinal5Label: '5L',
+  whMaxLabel: 'Макс',
+  whDrawerCreateTitle: 'Янги маҳсулот',
+  whDrawerCreateDescription: 'Ярим тайёр ёки тайёр маҳсулот қўшинг',
+  whDrawerEditTitle: 'Маҳсулотни таҳрирлаш',
+  whDrawerEditDescription: 'Маҳсулот ва унинг боғланишларини янгиланг',
+  whIngredientsTitle: 'Хомашё таркиби',
+  whIngredientsSubtitle: 'Ҳар бир хомашё учун грамм миқдорини киритинг',
+  whIngredientsShort: 'таркиб',
+  whSemiShort: 'қолип',
+  whMachinesShort: 'аппарат',
+  whAddIngredient: 'Хомашё қўшиш',
+  whRemoveIngredient: 'Қаторни ўчириш',
+  whSelectRawMaterial: 'Хомашёни танланг',
+  whAmountGram: 'Миқдор (грамм)',
+  whAmountGramRequired: 'Ҳар бир хомашё учун мусбат грамм киритинг',
+  whRawMaterialRequired: 'Камида битта хомашё танланиши шарт',
+  whNoRawMaterials: 'Хомашё рўйхати бўш',
+  whSemiSelectionTitle: 'Ярим тайёр маҳсулотлар',
+  whSemiProductRequired: 'Камида битта ярим тайёр маҳсулот танланиши шарт',
+  whNoSemiProducts: 'Ярим тайёр маҳсулотлар топилмади',
+  whMachineSelectionTitle: 'Аппаратлар',
+  whMachineRequired: 'Камида битта аппарат танланиши шарт',
+  whNoMachines: 'Аппаратлар топилмади',
+  whRawMaterialListTitle: 'Омбордаги сиро турлари',
+  whIncludedInWarehouse: 'Омборда кўринади',
 
   slTitle: 'Сотув',
   slTotalRevenue: 'Жами Сотув',
@@ -1129,6 +1243,16 @@ const uz_latin: T = {
   rmLogDepleted: 'Tugagan',
   rmLogWrittenOff: 'Chiqimga chiqarildi',
   rmNoLogNote: 'Izoh yo‘q',
+  rmCreateTypeTitle: 'Siro turini yaratish',
+  rmCreateTypeButton: 'Siro turini saqlash',
+  rmCreateTypePlaceholder: 'Masalan: PET 9921',
+  rmCreateTypeDescPlaceholder: 'Siro haqida qisqacha izoh',
+  rmCreateNameRequired: 'Siro nomi majburiy',
+  rmCreateError: 'Siro turini yaratishda xatolik yuz berdi',
+  rmCreatedSuccess: 'Siro turi muvaffaqiyatli yaratildi',
+  rmSelectRawMaterialRequired: 'Avval kamida bitta siro turini yarating',
+  rmDefaultIncomingNote: 'Siro kirimi',
+  rmIncomingHint: 'Kirim yaratilgan birinchi siro turiga yoziladi',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -1223,6 +1347,53 @@ const uz_latin: T = {
   whSold: 'Sotilgan',
   whRemaining: 'Omborda qolgan',
   whByType: 'Toifalar bo\'yicha:',
+  whCreatedAt: 'Yaratilgan sana',
+  whCreatedBy: 'Yaratgan',
+  whUpdatedBy: 'Yangilagan',
+  whEdit: 'Tahrirlash',
+  whNoProducts: 'Mahsulotlar hozircha mavjud emas',
+  whAddProduct: 'Mahsulot qo\'shish',
+  whManageReadOnly: 'Sizda faqat ko\'rish huquqi mavjud',
+  whDeleteTitle: 'Mahsulotni o\'chirish',
+  whDeleteConfirm: 'Haqiqatan ham ushbu mahsulotni o\'chirmoqchimisiz?',
+  whDeleteAction: 'Ha, o\'chirish',
+  whProductAdded: 'Mahsulot muvaffaqiyatli qo\'shildi',
+  whProductUpdated: 'Mahsulot muvaffaqiyatli yangilandi',
+  whProductDeleted: 'Mahsulot muvaffaqiyatli o\'chirildi',
+  whProductType: 'Mahsulot turi',
+  whNameRequired: 'Mahsulot nomi majburiy',
+  whMetricRequired: 'O\'lcham maydonini to\'g\'ri kiriting',
+  whRequestError: 'Mahsulot amaliyotida xatolik yuz berdi',
+  whSemi18Label: '18g qolip',
+  whSemi20Label: '20g qolip',
+  whFinal05Label: '0.5L',
+  whFinal1Label: '1L',
+  whFinal5Label: '5L',
+  whMaxLabel: 'Max',
+  whDrawerCreateTitle: 'Yangi mahsulot',
+  whDrawerCreateDescription: 'Yarim tayyor yoki tayyor mahsulot qo\'shing',
+  whDrawerEditTitle: 'Mahsulotni tahrirlash',
+  whDrawerEditDescription: 'Mahsulot va uning bog\'lanishlarini yangilang',
+  whIngredientsTitle: 'Xomashyo tarkibi',
+  whIngredientsSubtitle: 'Har bir xomashyo uchun gramm miqdorini kiriting',
+  whIngredientsShort: 'tarkib',
+  whSemiShort: 'qolip',
+  whMachinesShort: 'apparat',
+  whAddIngredient: 'Xomashyo qo\'shish',
+  whRemoveIngredient: 'Qatorni o\'chirish',
+  whSelectRawMaterial: 'Xomashyoni tanlang',
+  whAmountGram: 'Miqdor (gramm)',
+  whAmountGramRequired: 'Har bir xomashyo uchun musbat gramm kiriting',
+  whRawMaterialRequired: 'Kamida bitta xomashyo tanlanishi shart',
+  whNoRawMaterials: 'Xomashyo ro\'yxati bo\'sh',
+  whSemiSelectionTitle: 'Yarim tayyor mahsulotlar',
+  whSemiProductRequired: 'Kamida bitta yarim tayyor mahsulot tanlanishi shart',
+  whNoSemiProducts: 'Yarim tayyor mahsulotlar topilmadi',
+  whMachineSelectionTitle: 'Apparatlar',
+  whMachineRequired: 'Kamida bitta apparat tanlanishi shart',
+  whNoMachines: 'Apparatlar topilmadi',
+  whRawMaterialListTitle: 'Ombordagi siro turlari',
+  whIncludedInWarehouse: 'Omborda ko‘rinadi',
 
   slTitle: 'Sotuv',
   slTotalRevenue: 'Jami Sotuv',
@@ -1595,6 +1766,16 @@ const ru: T = {
   rmLogDepleted: 'Закончился',
   rmLogWrittenOff: 'Списан',
   rmNoLogNote: 'Без примечания',
+  rmCreateTypeTitle: 'Создать тип сырья',
+  rmCreateTypeButton: 'Сохранить тип сырья',
+  rmCreateTypePlaceholder: 'Например: PET 9921',
+  rmCreateTypeDescPlaceholder: 'Краткое описание сырья',
+  rmCreateNameRequired: 'Название сырья обязательно',
+  rmCreateError: 'Произошла ошибка при создании типа сырья',
+  rmCreatedSuccess: 'Тип сырья успешно создан',
+  rmSelectRawMaterialRequired: 'Сначала создайте хотя бы один тип сырья',
+  rmDefaultIncomingNote: 'Поступление сырья',
+  rmIncomingHint: 'Поступление будет записано на первый созданный тип сырья',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',
@@ -1689,6 +1870,53 @@ const ru: T = {
   whSold: 'Продано',
   whRemaining: 'Остаток на складе',
   whByType: 'По категориям:',
+  whCreatedAt: 'Дата создания',
+  whCreatedBy: 'Создал',
+  whUpdatedBy: 'Обновил',
+  whEdit: 'Изменить',
+  whNoProducts: 'Продукты пока отсутствуют',
+  whAddProduct: 'Добавить продукт',
+  whManageReadOnly: 'У вас есть только право просмотра',
+  whDeleteTitle: 'Удаление продукта',
+  whDeleteConfirm: 'Вы действительно хотите удалить этот продукт?',
+  whDeleteAction: 'Да, удалить',
+  whProductAdded: 'Продукт успешно добавлен',
+  whProductUpdated: 'Продукт успешно обновлён',
+  whProductDeleted: 'Продукт успешно удалён',
+  whProductType: 'Тип продукта',
+  whNameRequired: 'Название продукта обязательно',
+  whMetricRequired: 'Корректно заполните поле объёма или веса',
+  whRequestError: 'Произошла ошибка при операции с продуктом',
+  whSemi18Label: 'Заготовка 18g',
+  whSemi20Label: 'Заготовка 20g',
+  whFinal05Label: '0.5L',
+  whFinal1Label: '1L',
+  whFinal5Label: '5L',
+  whMaxLabel: 'Макс',
+  whDrawerCreateTitle: 'Новый продукт',
+  whDrawerCreateDescription: 'Добавьте полуфабрикат или готовый продукт',
+  whDrawerEditTitle: 'Редактирование продукта',
+  whDrawerEditDescription: 'Обновите продукт и его связи',
+  whIngredientsTitle: 'Состав сырья',
+  whIngredientsSubtitle: 'Укажите граммовку для каждого сырья',
+  whIngredientsShort: 'ингр.',
+  whSemiShort: 'заг.',
+  whMachinesShort: 'апп.',
+  whAddIngredient: 'Добавить сырьё',
+  whRemoveIngredient: 'Удалить строку',
+  whSelectRawMaterial: 'Выберите сырьё',
+  whAmountGram: 'Количество (грамм)',
+  whAmountGramRequired: 'Укажите положительное количество грамм для каждого сырья',
+  whRawMaterialRequired: 'Нужно выбрать хотя бы одно сырьё',
+  whNoRawMaterials: 'Список сырья пуст',
+  whSemiSelectionTitle: 'Полуфабрикаты',
+  whSemiProductRequired: 'Нужно выбрать хотя бы один полуфабрикат',
+  whNoSemiProducts: 'Полуфабрикаты не найдены',
+  whMachineSelectionTitle: 'Аппараты',
+  whMachineRequired: 'Нужно выбрать хотя бы один аппарат',
+  whNoMachines: 'Аппараты не найдены',
+  whRawMaterialListTitle: 'Типы сырья на складе',
+  whIncludedInWarehouse: 'Отображается на складе',
 
   slTitle: 'Продажи',
   slTotalRevenue: 'Общий объём продаж',
