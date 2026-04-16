@@ -235,13 +235,8 @@ export interface T {
   rmNoLogNote: string;
   rmCreateTypeTitle: string;
   rmCreateTypeButton: string;
-  rmCreatePaintButton: string;
   rmCreateTypePlaceholder: string;
   rmCreateTypeDescPlaceholder: string;
-  rmKindLabel: string;
-  rmKindSiro: string;
-  rmKindPaint: string;
-  rmPaintHint: string;
   rmCreateNameRequired: string;
   rmCreateError: string;
   rmCreatedSuccess: string;
@@ -338,8 +333,6 @@ export interface T {
   whErrDeleteStockRemains: string;
   /** Xomashyoga bog‘langan qoplar bor */
   whErrDeleteRawBags: string;
-  /** Nest: property rawMaterialKind should not exist — server DTO eski yoki xabar */
-  whApiErrRawMaterialKindForbidden: string;
   whSemi18Label: string;
   whSemi20Label: string;
   whFinal05Label: string;
@@ -804,16 +797,10 @@ const uz_cyrillic: T = {
   rmLogDepleted: 'Тугаган',
   rmLogWrittenOff: 'Чиқимга чиқарилди',
   rmNoLogNote: 'Изоҳ йўқ',
-  rmCreateTypeTitle: 'Сиро турини яратиш (маҳсулот)',
+  rmCreateTypeTitle: 'Сиро турини яратиш',
   rmCreateTypeButton: 'Сиро турини сақлаш',
-  rmCreatePaintButton: 'Краскани сақлаш',
   rmCreateTypePlaceholder: 'Масалан: PET 9921',
-  rmCreateTypeDescPlaceholder: 'маҳсулот ҳақида қисқача изоҳ',
-  rmKindLabel: 'Хомашё тури',
-  rmKindSiro: 'PET сиро / оддий хомашё',
-  rmKindPaint: 'Краска / бўёқ',
-  rmPaintHint:
-    'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
+  rmCreateTypeDescPlaceholder: 'Сиро ҳақида қисқача изоҳ',
   rmCreateNameRequired: 'Сиро номи мажбурий',
   rmCreateError: 'Сиро турини яратишда хатолик юз берди',
   rmCreatedSuccess: 'Сиро тури муваффақиятли яратилди',
@@ -951,8 +938,6 @@ const uz_cyrillic: T = {
     'Омборда қолдиқ бор. Аввал қолдиқни нолга туширинг, кейин ўчиринг.',
   whErrDeleteRawBags:
     'Бу хомашё турига боғланган қоплар мавжуд. Аввал қопларни ёпинг ёки бошқа турига уланг.',
-  whApiErrRawMaterialKindForbidden:
-    'Сервер «хомашё тури» (`rawMaterialKind`) майдонини қабул қилмади. Backendни охирги код билан қайта йиғинг (`npm run build`) ва қайта ишга туширинг.',
   whSemi18Label: '18g қолип',
   whSemi20Label: '20g қолип',
   whFinal05Label: '0.5L',
@@ -1412,16 +1397,10 @@ const uz_latin: T = {
   rmLogDepleted: 'Tugagan',
   rmLogWrittenOff: 'Chiqimga chiqarildi',
   rmNoLogNote: 'Izoh yo‘q',
-  rmCreateTypeTitle: 'Siro turini yaratish (mahsulot)',
+  rmCreateTypeTitle: 'Siro turini yaratish',
   rmCreateTypeButton: 'Siro turini saqlash',
-  rmCreatePaintButton: 'Kraskani saqlash',
   rmCreateTypePlaceholder: 'Masalan: PET 9921',
-  rmCreateTypeDescPlaceholder: 'mahsulot haqida qisqacha izoh',
-  rmKindLabel: 'Xomashyo turi',
-  rmKindSiro: 'PET siro / oddiy xomashyo',
-  rmKindPaint: "Kraska / bo'yoq",
-  rmPaintHint:
-    'Turni «kraska» deb belgilang — smenada faqat shu turdagi pozitsiyalar tanlanadi.',
+  rmCreateTypeDescPlaceholder: 'Siro haqida qisqacha izoh',
   rmCreateNameRequired: 'Siro nomi majburiy',
   rmCreateError: 'Siro turini yaratishda xatolik yuz berdi',
   rmCreatedSuccess: 'Siro turi muvaffaqiyatli yaratildi',
@@ -1559,8 +1538,6 @@ const uz_latin: T = {
     'Omborda qoldiq bor. Avval qoldiqni nolga tushiring, keyin o‘chiring.',
   whErrDeleteRawBags:
     'Bu xomashyo turiga bog‘langan qoplar mavjud. Avval qoplarni yoping yoki boshqa turga ulang.',
-  whApiErrRawMaterialKindForbidden:
-    'Server «xomashyo turi» (`rawMaterialKind`) maydonini qabul qilmadi. Backendni oxirgi kod bilan qayta yig\'ing (`npm run build`) va qayta ishga tushiring.',
   whSemi18Label: '18g qolip',
   whSemi20Label: '20g qolip',
   whFinal05Label: '0.5L',
@@ -2020,16 +1997,10 @@ const ru: T = {
   rmLogDepleted: 'Закончился',
   rmLogWrittenOff: 'Списан',
   rmNoLogNote: 'Без примечания',
-  rmCreateTypeTitle: 'Создать тип сырья (продукт)',
+  rmCreateTypeTitle: 'Создать тип сырья',
   rmCreateTypeButton: 'Сохранить тип сырья',
-  rmCreatePaintButton: 'Сохранить краску',
   rmCreateTypePlaceholder: 'Например: PET 9921',
-  rmCreateTypeDescPlaceholder: 'краткое описание продукта',
-  rmKindLabel: 'Тип сырья',
-  rmKindSiro: 'PET / обычное сырьё',
-  rmKindPaint: 'Краска / краситель',
-  rmPaintHint:
-    'Отметьте тип «краска» — в смене будут доступны только такие позиции.',
+  rmCreateTypeDescPlaceholder: 'Краткое описание сырья',
   rmCreateNameRequired: 'Название сырья обязательно',
   rmCreateError: 'Произошла ошибка при создании типа сырья',
   rmCreatedSuccess: 'Тип сырья успешно создан',
@@ -2167,8 +2138,6 @@ const ru: T = {
     'На складе есть остаток. Сначала обнулите остаток, затем удалите.',
   whErrDeleteRawBags:
     'Есть мешки, привязанные к этому сырью. Сначала закройте мешки или переключите на другой тип.',
-  whApiErrRawMaterialKindForbidden:
-    'Сервер отклонил поле типа сырья (`rawMaterialKind`). Пересоберите backend из актуального кода (`npm run build`) и перезапустите.',
   whSemi18Label: 'Заготовка 18g',
   whSemi20Label: 'Заготовка 20g',
   whFinal05Label: '0.5L',

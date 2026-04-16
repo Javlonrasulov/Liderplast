@@ -358,6 +358,11 @@ export class WarehouseService {
   }
 
   async createMovement(dto: InventoryMovementDto, createdById?: string) {
+    if (dto.movementType == null) {
+      throw new BadRequestException('movementType is required');
+    }
+    const movementType = dto.movementType;
+
     const result = await this.prisma.$transaction(async (tx) => {
       const balance = await this.getBalanceRecord(tx, dto);
       if (!balance) {
@@ -366,8 +371,8 @@ export class WarehouseService {
 
       const previousQuantity = balance.quantity;
       const delta =
-        dto.movementType === MovementType.INCOMING ||
-        dto.movementType === MovementType.PRODUCTION_OUTPUT
+        movementType === MovementType.INCOMING ||
+        movementType === MovementType.PRODUCTION_OUTPUT
           ? dto.quantity
           : -dto.quantity;
       const nextQuantity = previousQuantity + delta;
@@ -387,7 +392,7 @@ export class WarehouseService {
       const movement = await tx.inventoryMovement.create({
         data: {
           itemType: dto.itemType,
-          movementType: dto.movementType,
+          movementType,
           quantity: dto.quantity,
           previousQuantity,
           newQuantity: nextQuantity,
@@ -402,7 +407,7 @@ export class WarehouseService {
 
       if (
         dto.itemType === InventoryItemType.RAW_MATERIAL &&
-        dto.movementType === MovementType.INCOMING &&
+        movementType === MovementType.INCOMING &&
         dto.rawMaterialId
       ) {
         await this.rawMaterialBagsService.createAutoBagsForIncomingTx(tx, {
