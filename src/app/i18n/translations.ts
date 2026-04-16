@@ -251,6 +251,8 @@ export interface T {
   rmIncomingBagWeightHint: string;
   rmAutoBagPreview: string;
   rmAutoBagMissingHint: string;
+  rmAlertsTitle: string;
+  rmAlertsSubtitle: string;
 
   // Semi Production
   spTitle: string;
@@ -813,6 +815,8 @@ const uz_cyrillic: T = {
   rmIncomingBagWeightHint: 'Авто қоп яратиш: ҳар бир қоп {weight} {unit}',
   rmAutoBagPreview: 'Киримдан кейин автоматик {count} қоп яратилади. Одатий қоп: {weight} кг, охиргиси: {lastWeight} кг',
   rmAutoBagMissingHint: 'Бу сиро турида авто қоп яратиш учун бир қопдаги миқдор белгиланмаган',
+  rmAlertsTitle: 'Сиро турлари бўйича огоҳлантириш',
+  rmAlertsSubtitle: 'Ҳар бир сиро тури қолдиғи алоҳида назорат қилинади',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -1411,6 +1415,8 @@ const uz_latin: T = {
   rmIncomingBagWeightHint: 'Avto qop yaratish: har bir qop {weight} {unit}',
   rmAutoBagPreview: 'Kirimdan keyin avtomatik {count} qop yaratiladi. Odatdagi qop: {weight} kg, oxirgisi: {lastWeight} kg',
   rmAutoBagMissingHint: 'Bu siro turida avto qop yaratish uchun bir qopdagi miqdor belgilanmagan',
+  rmAlertsTitle: 'Siro turlari bo‘yicha ogohlantirish',
+  rmAlertsSubtitle: 'Har bir siro turi qoldig‘i alohida nazorat qilinadi',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -2009,6 +2015,8 @@ const ru: T = {
   rmIncomingBagWeightHint: 'Автосоздание мешков: каждый мешок по {weight} {unit}',
   rmAutoBagPreview: 'После поступления автоматически создастся {count} мешков. Обычный мешок: {weight} кг, последний: {lastWeight} кг',
   rmAutoBagMissingHint: 'Для этого типа сырья не задан вес одного мешка для автосоздания',
+  rmAlertsTitle: 'Предупреждения по типам сырья',
+  rmAlertsSubtitle: 'Остаток каждого типа сырья контролируется отдельно',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatDate, TODAY, calcPercent } from '../utils/format';
+import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
   Select,
@@ -62,8 +62,6 @@ export function RawMaterial() {
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const MAX_STOCK = 5000;
-  const stockPercent = calcPercent(rawMaterialStock, MAX_STOCK);
   const lowStock = rawMaterialStock < 1000;
   const criticalStock = rawMaterialStock < 500;
   const activeBag = state.activeRawMaterialBag;
@@ -132,6 +130,34 @@ export function RawMaterial() {
     }
     return Array.from(names.entries()).map(([id, name]) => ({ id, name }));
   }, [state.warehouseProducts, state.rawMaterialBags, state.rawMaterialEntries]);
+
+  const rawMaterialAlerts = useMemo(() => {
+    const stockById = new Map<string, number>();
+    for (const item of state.warehouseStock) {
+      if (item.itemType === 'RAW_MATERIAL') {
+        stockById.set(item.id, item.quantity);
+      }
+    }
+
+    return state.warehouseProducts
+      .filter(
+        (item): item is Extract<typeof item, { itemType: 'RAW_MATERIAL' }> =>
+          item.itemType === 'RAW_MATERIAL',
+      )
+      .map((item) => {
+        const quantityKg = stockById.get(item.id) ?? 0;
+        const level =
+          quantityKg < 500 ? 'critical' : quantityKg < 1000 ? 'warning' : 'ok';
+        return {
+          id: item.id,
+          name: item.name,
+          quantityKg,
+          level,
+        };
+      })
+      .filter((item) => item.level !== 'ok')
+      .sort((a, b) => a.quantityKg - b.quantityKg);
+  }, [state.warehouseProducts, state.warehouseStock]);
 
   const resolvedIncomingRawMaterialId = useMemo(() => {
     if (availableRawMaterials.length === 0) return '';
@@ -348,22 +374,51 @@ export function RawMaterial() {
         </div>
       </div>
 
-      {/* Stock level bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmStockLevel}</h3>
-          <span className="text-slate-500 dark:text-slate-400 text-sm">{stockPercent.toFixed(1)}% ({formatNumber(rawMaterialStock)} / {formatNumber(MAX_STOCK)} {t.unitKg})</span>
+      {rawMaterialAlerts.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+              <AlertTriangle size={18} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {rawMaterialAlerts.map((item) => (
+              <div
+                key={item.id}
+                className={`rounded-xl border px-4 py-3 ${
+                  item.level === 'critical'
+                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                      {item.name}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {formatNumber(item.quantityKg)} {t.unitKg}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                      item.level === 'critical'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                    }`}
+                  >
+                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-700 ${criticalStock ? 'bg-red-500' : lowStock ? 'bg-amber-500' : stockPercent > 60 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${stockPercent}%` }} />
-        </div>
-        <div className="flex justify-between text-xs text-slate-400 mt-1.5">
-          <span>0 {t.unitKg}</span>
-          <span className="text-red-400">{t.rmCritical}</span>
-          <span className="text-amber-400">{t.rmWarning}</span>
-          <span>{formatNumber(MAX_STOCK)} {t.unitKg}</span>
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
@@ -594,9 +649,9 @@ export function RawMaterial() {
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="grid flex-1 grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 flex flex-col gap-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex-1">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmActiveBagTitle}</h3>
@@ -864,13 +919,13 @@ export function RawMaterial() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 xl:min-h-0">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex flex-1 flex-col min-h-[240px]">
+        <div className="flex flex-col gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <RefreshCw size={16} className="text-indigo-500" />
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagsTitle}</h3>
             </div>
-            <div className="space-y-3 flex-1 overflow-y-auto pr-1">
+            <div className="space-y-3">
               {state.rawMaterialBags.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
               ) : (
@@ -901,12 +956,12 @@ export function RawMaterial() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex flex-1 flex-col min-h-[240px]">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <History size={16} className="text-indigo-500" />
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagLogsTitle}</h3>
             </div>
-            <div className="space-y-3 flex-1 overflow-y-auto pr-1">
+            <div className="space-y-3">
               {filteredBagLogs.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
               ) : (

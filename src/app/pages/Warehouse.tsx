@@ -76,6 +76,12 @@ type ProductFormState = {
   machineIds: string[];
 };
 
+type RawMaterialEditState = {
+  name: string;
+  description: string;
+  defaultBagWeightKg: string;
+};
+
 const DEFAULT_FORM: ProductFormState = {
   itemType: 'SEMI_PRODUCT',
   name: '',
@@ -215,6 +221,13 @@ export function Warehouse() {
   >(null);
   const [blockedDeleteTarget, setBlockedDeleteTarget] =
     useState<Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> | null>(null);
+  const [editingRawMaterial, setEditingRawMaterial] =
+    useState<Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> | null>(null);
+  const [rawMaterialForm, setRawMaterialForm] = useState<RawMaterialEditState>({
+    name: '',
+    description: '',
+    defaultBagWeightKg: '',
+  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -665,6 +678,75 @@ export function Warehouse() {
     setDeleteTarget(rawMaterial);
   };
 
+  const openRawMaterialEdit = (
+    rawMaterial: Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }>,
+  ) => {
+    setEditingRawMaterial(rawMaterial);
+    setRawMaterialForm({
+      name: rawMaterial.name,
+      description: rawMaterial.description ?? '',
+      defaultBagWeightKg:
+        rawMaterial.defaultBagWeightKg != null
+          ? String(rawMaterial.defaultBagWeightKg)
+          : '',
+    });
+    setError('');
+    setSuccess('');
+  };
+
+  const closeRawMaterialEdit = () => {
+    setEditingRawMaterial(null);
+    setRawMaterialForm({
+      name: '',
+      description: '',
+      defaultBagWeightKg: '',
+    });
+  };
+
+  const handleRawMaterialSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editingRawMaterial) return;
+
+    setError('');
+    setSuccess('');
+
+    const defaultBagWeightKg = Number(rawMaterialForm.defaultBagWeightKg);
+    if (!rawMaterialForm.name.trim()) {
+      setError(t.whNameRequired);
+      return;
+    }
+    if (!Number.isFinite(defaultBagWeightKg) || defaultBagWeightKg <= 0) {
+      setError(t.rmDefaultBagWeightRequired);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await dispatch({
+        type: 'UPDATE_WAREHOUSE_PRODUCT',
+        payload: {
+          id: editingRawMaterial.id,
+          currentItemType: 'RAW_MATERIAL',
+          itemType: 'RAW_MATERIAL',
+          name: rawMaterialForm.name.trim(),
+          description: rawMaterialForm.description.trim() || undefined,
+          unit: editingRawMaterial.unit,
+          defaultBagWeightKg,
+        },
+      });
+      setSuccess(t.whProductUpdated);
+      closeRawMaterialEdit();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const renderEditorBody = () => (
     <form
       id="warehouse-product-form"
@@ -947,6 +1029,7 @@ export function Warehouse() {
   const overlayDescription = editingProduct
     ? t.whDrawerEditDescription
     : t.whDrawerCreateDescription;
+  const rawMaterialOverlayTitle = `${t.whEdit}: ${t.whMaterial}`;
   const handleEditorOpenChange = (open: boolean) => {
     setIsEditorOpen(open);
     if (!open) {
@@ -1230,6 +1313,11 @@ export function Warehouse() {
                   <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     {t.whUnit}: {rawMaterial.unit}
                   </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {rawMaterial.defaultBagWeightKg
+                      ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
+                      : t.rmDefaultBagWeightHint}
+                  </p>
                   <p className="mt-1 text-xs text-slate-400">
                     {auditLine(rawMaterial, t)}
                   </p>
@@ -1244,14 +1332,24 @@ export function Warehouse() {
                     {t.whIncludedInWarehouse}
                   </div>
                   {canManage && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() => attemptDeleteRawMaterial(rawMaterial)}
-                    >
-                      <Trash2 size={14} />
-                      {t.suDelete}
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => openRawMaterialEdit(rawMaterial)}
+                      >
+                        <Pencil size={14} />
+                        {t.whEdit}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => attemptDeleteRawMaterial(rawMaterial)}
+                      >
+                        <Trash2 size={14} />
+                        {t.suDelete}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1371,6 +1469,159 @@ export function Warehouse() {
               <DialogDescription>{overlayDescription}</DialogDescription>
             </DialogHeader>
             {renderEditorBody()}
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isMobile ? (
+        <Drawer
+          open={Boolean(editingRawMaterial)}
+          onOpenChange={(open) => !open && closeRawMaterialEdit()}
+          direction="right"
+        >
+          <DrawerContent className="right-0 h-full w-full max-w-md border-l">
+            <DrawerHeader>
+              <DrawerTitle>{rawMaterialOverlayTitle}</DrawerTitle>
+              <DrawerDescription>{t.rmDefaultBagWeightHint}</DrawerDescription>
+            </DrawerHeader>
+            <form
+              id="warehouse-raw-material-form"
+              onSubmit={handleRawMaterialSubmit}
+              className="space-y-5 overflow-y-auto px-4 pb-4"
+            >
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.labelName}
+                </label>
+                <input
+                  value={rawMaterialForm.name}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.rmDefaultBagWeight}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.0001"
+                  value={rawMaterialForm.defaultBagWeightKg}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({
+                      ...prev,
+                      defaultBagWeightKg: e.target.value,
+                    }))
+                  }
+                  placeholder={t.rmDefaultBagWeightPlaceholder}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+                <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.labelDesc}
+                </label>
+                <textarea
+                  rows={3}
+                  value={rawMaterialForm.description}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+              </div>
+            </form>
+            <DrawerFooter>
+              <Button type="button" variant="outline" onClick={closeRawMaterialEdit}>
+                {t.btnCancel}
+              </Button>
+              <Button
+                type="submit"
+                form="warehouse-raw-material-form"
+                disabled={submitting}
+              >
+                <Save size={16} />
+                {submitting ? t.authLoading : t.btnSave}
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog
+          open={Boolean(editingRawMaterial)}
+          onOpenChange={(open) => !open && closeRawMaterialEdit()}
+        >
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle>{rawMaterialOverlayTitle}</DialogTitle>
+              <DialogDescription>{t.rmDefaultBagWeightHint}</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleRawMaterialSubmit} className="space-y-5">
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.labelName}
+                </label>
+                <input
+                  value={rawMaterialForm.name}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.rmDefaultBagWeight}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.0001"
+                  value={rawMaterialForm.defaultBagWeightKg}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({
+                      ...prev,
+                      defaultBagWeightKg: e.target.value,
+                    }))
+                  }
+                  placeholder={t.rmDefaultBagWeightPlaceholder}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+                <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.labelDesc}
+                </label>
+                <textarea
+                  rows={3}
+                  value={rawMaterialForm.description}
+                  onChange={(e) =>
+                    setRawMaterialForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+                />
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" onClick={closeRawMaterialEdit}>
+                  {t.btnCancel}
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  <Save size={16} />
+                  {submitting ? t.authLoading : t.btnSave}
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
       )}
