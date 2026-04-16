@@ -8,5 +8,12 @@ export function translateWarehouseApiError(message: string, t: T): string {
   const code = message.trim();
   if (code === WAREHOUSE_ERR_STOCK_REMAINS) return t.whErrDeleteStockRemains;
   if (code === WAREHOUSE_ERR_RAW_BAGS) return t.whErrDeleteRawBags;
+  const lower = code.toLowerCase();
+  if (
+    lower.includes('rawmaterialkind') &&
+    (lower.includes('should not exist') || lower.includes('should not be'))
+  ) {
+    return t.whApiErrRawMaterialKindForbidden;
+  }
   return message;
 }

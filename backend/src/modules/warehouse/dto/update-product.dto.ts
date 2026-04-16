@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -10,7 +11,7 @@ import {
 } from 'class-validator';
 import {
   InventoryItemType,
-  RawMaterialKind,
+  type RawMaterialKind,
 } from '../../../generated/prisma/enums.js';
 import { ProductRelationsDto } from './product-relations.dto.js';
 
@@ -51,7 +52,7 @@ export class UpdateProductDto {
   defaultBagWeightKg?: number;
 
   @IsOptional()
-  @IsEnum(RawMaterialKind)
+  @IsIn(['SIRO', 'PAINT'])
   rawMaterialKind?: RawMaterialKind;
 
   @IsOptional()

@@ -338,6 +338,8 @@ export interface T {
   whErrDeleteStockRemains: string;
   /** Xomashyoga bog‘langan qoplar bor */
   whErrDeleteRawBags: string;
+  /** Nest: property rawMaterialKind should not exist — server DTO eski yoki xabar */
+  whApiErrRawMaterialKindForbidden: string;
   whSemi18Label: string;
   whSemi20Label: string;
   whFinal05Label: string;
@@ -949,6 +951,8 @@ const uz_cyrillic: T = {
     'Омборда қолдиқ бор. Аввал қолдиқни нолга туширинг, кейин ўчиринг.',
   whErrDeleteRawBags:
     'Бу хомашё турига боғланган қоплар мавжуд. Аввал қопларни ёпинг ёки бошқа турига уланг.',
+  whApiErrRawMaterialKindForbidden:
+    'Сервер «хомашё тури» (`rawMaterialKind`) майдонини қабул қилмади. Backendни охирги код билан қайта йиғинг (`npm run build`) ва қайта ишга туширинг.',
   whSemi18Label: '18g қолип',
   whSemi20Label: '20g қолип',
   whFinal05Label: '0.5L',
@@ -1555,6 +1559,8 @@ const uz_latin: T = {
     'Omborda qoldiq bor. Avval qoldiqni nolga tushiring, keyin o‘chiring.',
   whErrDeleteRawBags:
     'Bu xomashyo turiga bog‘langan qoplar mavjud. Avval qoplarni yoping yoki boshqa turga ulang.',
+  whApiErrRawMaterialKindForbidden:
+    'Server «xomashyo turi» (`rawMaterialKind`) maydonini qabul qilmadi. Backendni oxirgi kod bilan qayta yig\'ing (`npm run build`) va qayta ishga tushiring.',
   whSemi18Label: '18g qolip',
   whSemi20Label: '20g qolip',
   whFinal05Label: '0.5L',
@@ -2161,6 +2167,8 @@ const ru: T = {
     'На складе есть остаток. Сначала обнулите остаток, затем удалите.',
   whErrDeleteRawBags:
     'Есть мешки, привязанные к этому сырью. Сначала закройте мешки или переключите на другой тип.',
+  whApiErrRawMaterialKindForbidden:
+    'Сервер отклонил поле типа сырья (`rawMaterialKind`). Пересоберите backend из актуального кода (`npm run build`) и перезапустите.',
   whSemi18Label: 'Заготовка 18g',
   whSemi20Label: 'Заготовка 20g',
   whFinal05Label: '0.5L',

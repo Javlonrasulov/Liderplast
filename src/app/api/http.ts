@@ -72,11 +72,14 @@ export async function apiRequest<T>(
       const raw = await response.text();
       if (raw.trim()) {
         const errorPayload = JSON.parse(raw);
+        const pickMsg = (v: unknown): string | undefined => {
+          if (Array.isArray(v)) return v.map(String).join(', ');
+          if (typeof v === 'string' && v.trim()) return v;
+          return undefined;
+        };
         const nested = errorPayload?.error?.message;
-        message =
-          (Array.isArray(nested) ? nested.join(', ') : nested) ??
-          errorPayload?.message ??
-          message;
+        const top = errorPayload?.message;
+        message = pickMsg(nested) ?? pickMsg(top) ?? message;
       }
     } catch {
       // ignore parse errors

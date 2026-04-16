@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useERP, type RawMaterialKind } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
+import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -112,7 +113,11 @@ export function RawMaterial() {
       setSuccess(t.rmCreatedSuccess);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.rmCreateError);
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.rmCreateError,
+      );
     }
   };
 
@@ -275,7 +280,11 @@ export function RawMaterial() {
       setTimeout(() => setSuccess(''), 2000);
       closeEditBagName();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.whRequestError);
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
     }
   };
 
