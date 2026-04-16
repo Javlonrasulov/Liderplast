@@ -710,7 +710,9 @@ export function Warehouse() {
     setError('');
     setSuccess('');
 
-    const defaultBagWeightKg = Number(rawMaterialForm.defaultBagWeightKg);
+    const defaultBagWeightKg = Number(
+      rawMaterialForm.defaultBagWeightKg.replace(',', '.'),
+    );
     if (!rawMaterialForm.name.trim()) {
       setError(t.whNameRequired);
       return;

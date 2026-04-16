@@ -73,7 +73,7 @@ export function RawMaterial() {
     e.preventDefault();
     setError('');
     const name = createForm.name.trim();
-    const defaultBagWeightKg = parseFloat(createForm.defaultBagWeightKg);
+    const defaultBagWeightKg = parseFloat(createForm.defaultBagWeightKg.replace(',', '.'));
     if (!name) {
       setError(t.rmCreateNameRequired);
       return;
@@ -223,7 +223,7 @@ export function RawMaterial() {
   };
 
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
-  const createBagWeightKg = parseFloat(createForm.defaultBagWeightKg || '0');
+  const createBagWeightKg = parseFloat((createForm.defaultBagWeightKg || '0').replace(',', '.'));
   const bagAmountKg = parseFloat(bagForm.initialQuantityKg || '0');
   const quickConsumeKg = quickForm.quantityKg
     ? parseFloat(quickForm.quantityKg || '0')

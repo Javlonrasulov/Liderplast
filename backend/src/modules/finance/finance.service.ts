@@ -52,6 +52,13 @@ type ClientMatchResult = {
   unresolved: boolean;
 };
 
+type LightweightClient = {
+  id: string;
+  name: string;
+  bankAccount: string | null;
+  bankName: string | null;
+};
+
 function normalizeText(value?: string | null) {
   return (value ?? '')
     .toLowerCase()
@@ -172,6 +179,39 @@ function monthFromDate(date: Date) {
 @Injectable()
 export class FinanceService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async syncClientBankInfo(
+    client: LightweightClient | null,
+    row: Pick<ParsedBankRow, 'receiverAccount' | 'receiverBankName'>,
+  ) {
+    if (!client) {
+      return;
+    }
+
+    const nextBankAccount =
+      !normalizeDigits(client.bankAccount) && normalizeDigits(row.receiverAccount)
+        ? row.receiverAccount?.trim() || null
+        : null;
+    const nextBankName =
+      !client.bankName?.trim() && row.receiverBankName?.trim()
+        ? row.receiverBankName.trim()
+        : null;
+
+    if (!nextBankAccount && !nextBankName) {
+      return;
+    }
+
+    await this.prisma.client.update({
+      where: { id: client.id },
+      data: {
+        ...(nextBankAccount ? { bankAccount: nextBankAccount } : {}),
+        ...(nextBankName ? { bankName: nextBankName } : {}),
+      },
+    });
+
+    client.bankAccount = client.bankAccount ?? nextBankAccount;
+    client.bankName = client.bankName ?? nextBankName;
+  }
 
   createExpense(dto: CreateExpenseDto, createdById?: string) {
     return this.prisma.expense.create({
@@ -441,6 +481,8 @@ export class FinanceService {
           errorMessage: notes.length > 0 ? notes.join('. ') : null,
         },
       });
+
+      await this.reconcileBankVedomost(vedomost.id);
     } catch (error) {
       await this.prisma.bankVedomost.update({
         where: { id: vedomost.id },
@@ -677,6 +719,8 @@ export class FinanceService {
         transaction.type === BankTransactionType.INCOME
           ? this.matchClient(row, clients)
           : { client: null, unresolved: false };
+
+      await this.syncClientBankInfo(clientMatch.client, row);
 
       await this.prisma.bankTransaction.update({
         where: { id: transaction.id },

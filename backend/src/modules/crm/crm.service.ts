@@ -90,14 +90,36 @@ export class CrmService {
     });
   }
 
-  getClients() {
-    return this.prisma.client.findMany({
+  async getClients() {
+    const clients = await this.prisma.client.findMany({
       include: {
         orders: true,
         payments: true,
+        bankTransactions: {
+          where: {
+            OR: [
+              { receiverAccount: { not: null } },
+              { receiverBankName: { not: null } },
+            ],
+          },
+          orderBy: [{ operationDate: 'desc' }, { createdAt: 'desc' }],
+          take: 1,
+          select: {
+            receiverAccount: true,
+            receiverBankName: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return clients.map(({ bankTransactions, ...client }) => ({
+      ...client,
+      bankAccount:
+        client.bankAccount ?? bankTransactions[0]?.receiverAccount?.trim() ?? null,
+      bankName:
+        client.bankName ?? bankTransactions[0]?.receiverBankName?.trim() ?? null,
+    }));
   }
 
   async createOrder(dto: CreateOrderDto, createdById?: string) {
