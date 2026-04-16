@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../auth/auth-context';
 import {
   type FinishedProductCatalogItem,
+  type RawMaterialKind,
   type SemiProductCatalogItem,
   useERP,
   type WarehouseProduct,
@@ -80,6 +81,7 @@ type RawMaterialEditState = {
   name: string;
   description: string;
   defaultBagWeightKg: string;
+  rawMaterialKind: RawMaterialKind;
 };
 
 const DEFAULT_FORM: ProductFormState = {
@@ -102,7 +104,6 @@ function StockItem({
   bgColor,
   icon,
   warning,
-  maxLabel,
 }: {
   label: string;
   value: number;
@@ -112,7 +113,6 @@ function StockItem({
   bgColor: string;
   icon: React.ReactNode;
   warning?: boolean;
-  maxLabel: string;
 }) {
   const pct = calcPercent(value, max);
   return (
@@ -151,12 +151,6 @@ function StockItem({
           className={`h-full rounded-full transition-all duration-700 ${color}`}
           style={{ width: `${pct}%` }}
         />
-      </div>
-      <div className="mt-1.5 flex justify-between">
-        <span className="text-xs text-slate-400">0</span>
-        <span className="text-xs text-slate-400">
-          {maxLabel}: {formatNumber(max)} {unit}
-        </span>
       </div>
     </div>
   );
@@ -227,6 +221,7 @@ export function Warehouse() {
     name: '',
     description: '',
     defaultBagWeightKg: '',
+    rawMaterialKind: 'SIRO',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -276,6 +271,42 @@ export function Warehouse() {
       ),
     [productCatalog],
   );
+
+  const semiRecipePaintBreakdown = useMemo(() => {
+    if (semiProducts.length === 0) return [];
+    return semiProducts.map((semi) => {
+      const stockQty =
+        state.warehouseStock.find(
+          (s) => s.itemType === 'SEMI_PRODUCT' && s.itemName === semi.name,
+        )?.quantity ?? 0;
+      const recipeLines = semi.rawMaterials.map((rm) => {
+        const kgPerUnit = rm.amountGram / 1000;
+        return {
+          name: rm.name,
+          unit: rm.unit,
+          estKg: stockQty * kgPerUnit,
+        };
+      });
+      const paintTotals = new Map<string, number>();
+      for (const r of state.shiftRecords) {
+        if (
+          r.productType === semi.name &&
+          r.paintUsed &&
+          (r.paintQuantityKg ?? 0) > 0 &&
+          r.paintRawMaterialName
+        ) {
+          const key = r.paintRawMaterialName;
+          paintTotals.set(key, (paintTotals.get(key) ?? 0) + (r.paintQuantityKg ?? 0));
+        }
+      }
+      return {
+        semiName: semi.name,
+        stockQty,
+        recipeLines,
+        paintTotals: [...paintTotals.entries()],
+      };
+    });
+  }, [semiProducts, state.warehouseStock, state.shiftRecords]);
 
   const hasCatalogRaw = rawMaterials.length > 0;
   const hasCatalogSemi18 = semiProducts.some(
@@ -394,10 +425,15 @@ export function Warehouse() {
     t,
   ]);
 
-  const availableFinalMachines = useMemo(
-    () => state.machines.filter((machine) => machine.type === 'final'),
-    [state.machines],
-  );
+  /** Tayyor mahsulot katalogi: backend har qanday `machine.id`ni qabul qiladi; faqat `final` filtrlash ko‘pincha bo‘sh qoldiradi */
+  const machinesForFinishedProduct = useMemo(() => {
+    const list = [...state.machines];
+    list.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'final' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    return list;
+  }, [state.machines]);
 
   const totalSemiProduced = state.semiProductBatches.reduce(
     (sum, batch) => sum + batch.quantity,
@@ -691,6 +727,7 @@ export function Warehouse() {
         rawMaterial.defaultBagWeightKg != null
           ? String(rawMaterial.defaultBagWeightKg)
           : '',
+      rawMaterialKind: rawMaterial.rawMaterialKind,
     });
     setError('');
     setSuccess('');
@@ -702,6 +739,7 @@ export function Warehouse() {
       name: '',
       description: '',
       defaultBagWeightKg: '',
+      rawMaterialKind: 'SIRO',
     });
   };
 
@@ -735,6 +773,7 @@ export function Warehouse() {
           name: rawMaterialForm.name.trim(),
           description: rawMaterialForm.description.trim() || undefined,
           unit: editingRawMaterial.unit,
+          rawMaterialKind: rawMaterialForm.rawMaterialKind,
           defaultBagWeightKg,
         },
       });
@@ -987,7 +1026,7 @@ export function Warehouse() {
               {t.whMachineSelectionTitle}
             </p>
             <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
-              {availableFinalMachines.map((machine) => (
+              {machinesForFinishedProduct.map((machine) => (
                 <label
                   key={machine.id}
                   className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
@@ -997,15 +1036,18 @@ export function Warehouse() {
                     checked={form.machineIds.includes(machine.id)}
                     onChange={() => toggleSelection('machineIds', machine.id)}
                   />
-                  <span className="flex-1 text-slate-700 dark:text-slate-200">
-                    {machine.name}
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-slate-700 dark:text-slate-200 sm:flex-row sm:items-center sm:gap-2">
+                    <span className="truncate">{machine.name}</span>
+                    <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                      {machine.type === 'final' ? t.whFinal : t.whSemi}
+                    </span>
                   </span>
                   <span className="text-xs text-slate-400">
                     {machine.isActive ? t.statusActive : t.statusCritical}
                   </span>
                 </label>
               ))}
-              {availableFinalMachines.length === 0 && (
+              {machinesForFinishedProduct.length === 0 && (
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {t.whNoMachines}
                 </p>
@@ -1079,7 +1121,6 @@ export function Warehouse() {
                 bgColor="bg-blue-100 dark:bg-blue-900/30"
                 icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
                 warning={rawMaterialStock < 1000}
-                maxLabel={t.whMaxLabel}
               />
             )}
             {hasCatalogSemi18 && (
@@ -1091,7 +1132,6 @@ export function Warehouse() {
                 color="bg-purple-500"
                 bgColor="bg-purple-100 dark:bg-purple-900/30"
                 icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />}
-                maxLabel={t.whMaxLabel}
               />
             )}
             {hasCatalogSemi20 && (
@@ -1103,7 +1143,6 @@ export function Warehouse() {
                 color="bg-violet-500"
                 bgColor="bg-violet-100 dark:bg-violet-900/30"
                 icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />}
-                maxLabel={t.whMaxLabel}
               />
             )}
             {hasCatalogFinal05 && (
@@ -1115,7 +1154,6 @@ export function Warehouse() {
                 color="bg-cyan-500"
                 bgColor="bg-cyan-100 dark:bg-cyan-900/30"
                 icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />}
-                maxLabel={t.whMaxLabel}
               />
             )}
             {hasCatalogFinal1 && (
@@ -1127,7 +1165,6 @@ export function Warehouse() {
                 color="bg-teal-500"
                 bgColor="bg-teal-100 dark:bg-teal-900/30"
                 icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />}
-                maxLabel={t.whMaxLabel}
               />
             )}
             {hasCatalogFinal5 && (
@@ -1139,7 +1176,6 @@ export function Warehouse() {
                 color="bg-blue-500"
                 bgColor="bg-blue-100 dark:bg-blue-900/30"
                 icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
-                maxLabel={t.whMaxLabel}
               />
             )}
           </div>
@@ -1147,6 +1183,58 @@ export function Warehouse() {
           <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
         )}
       </div>
+
+      {semiRecipePaintBreakdown.length > 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+            {t.whSemiBreakdownTitle}
+          </h3>
+          <div className="space-y-4">
+            {semiRecipePaintBreakdown.map((row) => (
+              <div
+                key={row.semiName}
+                className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/30"
+              >
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{row.semiName}</p>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  {t.whSemiStockPieces}:{' '}
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {formatNumber(row.stockQty)} {t.unitPiece}
+                  </span>
+                </p>
+                <p className="mt-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {t.whRecipeRaw}
+                </p>
+                <ul className="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                  {row.recipeLines.length === 0 ? (
+                    <li>—</li>
+                  ) : (
+                    row.recipeLines.map((line) => (
+                      <li key={line.name}>
+                        {line.name}: ~{formatNumber(line.estKg)} {t.unitKg}
+                      </li>
+                    ))
+                  )}
+                </ul>
+                {row.paintTotals.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      {t.whShiftPaintTotal}
+                    </p>
+                    <ul className="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                      {row.paintTotals.map(([name, kg]) => (
+                        <li key={name}>
+                          {name}: {formatNumber(kg)} {t.unitKg}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {(hasCatalogSemi || hasCatalogFinal) && (
         <div
@@ -1313,6 +1401,11 @@ export function Warehouse() {
                     <span className="inline-flex items-center rounded-lg bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                       {t.whMaterial}
                     </span>
+                    {rawMaterial.rawMaterialKind === 'PAINT' && (
+                      <span className="inline-flex items-center rounded-lg bg-fuchsia-100 px-2 py-1 text-[11px] font-medium text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-200">
+                        {t.rmKindPaint}
+                      </span>
+                    )}
                   </div>
                   <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     {t.whUnit}: {rawMaterial.unit}
@@ -1507,6 +1600,39 @@ export function Warehouse() {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.rmKindLabel}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'SIRO' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'SIRO'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindSiro}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'PAINT' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'PAINT'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPaint}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                   {t.rmDefaultBagWeight}
                 </label>
                 <input
@@ -1579,6 +1705,39 @@ export function Warehouse() {
                   }
                   className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
                 />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.rmKindLabel}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'SIRO' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'SIRO'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindSiro}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'PAINT' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'PAINT'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPaint}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">

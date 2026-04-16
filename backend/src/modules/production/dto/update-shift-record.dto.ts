@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsInt,
   IsNumber,
@@ -6,6 +7,7 @@ import {
   IsString,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateShiftRecordDto {
@@ -58,4 +60,17 @@ export class UpdateShiftRecordDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  paintUsed?: boolean;
+
+  @ValidateIf((o) => o.paintUsed === true)
+  @IsString()
+  paintRawMaterialId?: string;
+
+  @ValidateIf((o) => o.paintUsed === true)
+  @IsNumber()
+  @Min(0.000001)
+  paintQuantityKg?: number;
 }

@@ -10,6 +10,7 @@ import {
   Prisma,
   ProductAuditActionType,
   ProductAuditEntityType,
+  RawMaterialKind,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { RealtimeGateway } from '../../socket/realtime.gateway.js';
@@ -42,6 +43,7 @@ type ProductSnapshot = {
   name: string;
   description?: string;
   unit?: string;
+  rawMaterialKind?: RawMaterialKind;
   defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
@@ -76,6 +78,7 @@ type ResolvedProductInput = {
   name: string;
   description?: string;
   unit?: string;
+  rawMaterialKind?: RawMaterialKind;
   defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
@@ -424,6 +427,10 @@ export class WarehouseService {
       name: dto.name.trim(),
       description: dto.description?.trim() || undefined,
       unit: dto.unit?.trim() || undefined,
+      rawMaterialKind:
+        dto.itemType === InventoryItemType.RAW_MATERIAL
+          ? (dto.rawMaterialKind ?? RawMaterialKind.SIRO)
+          : undefined,
       defaultBagWeightKg: dto.defaultBagWeightKg,
       weightGram: dto.weightGram,
       volumeLiter: dto.volumeLiter,
@@ -450,6 +457,12 @@ export class WarehouseService {
           : current.description,
       unit:
         dto.unit !== undefined ? dto.unit.trim() || undefined : current.unit,
+      rawMaterialKind:
+        nextType === InventoryItemType.RAW_MATERIAL
+          ? dto.rawMaterialKind !== undefined
+            ? dto.rawMaterialKind
+            : current.rawMaterialKind ?? RawMaterialKind.SIRO
+          : undefined,
       defaultBagWeightKg:
         dto.defaultBagWeightKg !== undefined
           ? dto.defaultBagWeightKg
@@ -637,6 +650,7 @@ export class WarehouseService {
         const data: Prisma.RawMaterialUncheckedCreateInput = {
           name: input.name,
           unit: input.unit ?? 'kg',
+          kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
           defaultBagWeightKg: input.defaultBagWeightKg ?? null,
           description: input.description ?? null,
         };
@@ -689,6 +703,7 @@ export class WarehouseService {
           const data: Prisma.RawMaterialUncheckedUpdateInput = {
             name: input.name,
             unit: input.unit ?? 'kg',
+            kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
             defaultBagWeightKg: input.defaultBagWeightKg ?? null,
             description: input.description ?? null,
           };
@@ -738,6 +753,7 @@ export class WarehouseService {
             id,
             name: input.name,
             unit: input.unit ?? 'kg',
+            kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
             defaultBagWeightKg: input.defaultBagWeightKg ?? null,
             description: input.description ?? null,
           };
@@ -1149,6 +1165,7 @@ export class WarehouseService {
     id: string;
     name: string;
     unit: string;
+    kind?: RawMaterialKind;
     defaultBagWeightKg?: number | null;
     description: string | null;
     isDeleted: boolean;
@@ -1165,6 +1182,7 @@ export class WarehouseService {
       itemType: InventoryItemType.RAW_MATERIAL,
       name: item.name,
       unit: item.unit,
+      rawMaterialKind: item.kind ?? RawMaterialKind.SIRO,
       defaultBagWeightKg: item.defaultBagWeightKg ?? undefined,
       description: item.description ?? undefined,
       isDeleted: item.isDeleted,

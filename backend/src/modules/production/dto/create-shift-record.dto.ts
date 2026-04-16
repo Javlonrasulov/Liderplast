@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsInt,
   IsNumber,
@@ -6,6 +7,7 @@ import {
   IsString,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateShiftRecordDto {
@@ -53,4 +55,19 @@ export class CreateShiftRecordDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  /** Yarim tayyor smena: kraska/bo‘yoq ishlatilganmi */
+  @IsOptional()
+  @IsBoolean()
+  paintUsed?: boolean;
+
+  @ValidateIf((o) => o.paintUsed === true)
+  @IsString()
+  paintRawMaterialId?: string;
+
+  /** kg (frontend gr ni kg ga aylantiradi) */
+  @ValidateIf((o) => o.paintUsed === true)
+  @IsNumber()
+  @Min(0.000001)
+  paintQuantityKg?: number;
 }

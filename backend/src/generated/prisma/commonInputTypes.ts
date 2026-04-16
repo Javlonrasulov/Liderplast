@@ -253,6 +253,13 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type EnumRawMaterialKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialKind | Prisma.EnumRawMaterialKindFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel> | $Enums.RawMaterialKind
+}
+
 export type FloatNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
@@ -269,6 +276,16 @@ export type EnumEntityStatusFilter<$PrismaModel = never> = {
   in?: $Enums.EntityStatus[] | Prisma.ListEnumEntityStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EntityStatus[] | Prisma.ListEnumEntityStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEntityStatusFilter<$PrismaModel> | $Enums.EntityStatus
+}
+
+export type EnumRawMaterialKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialKind | Prisma.EnumRawMaterialKindFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialKindWithAggregatesFilter<$PrismaModel> | $Enums.RawMaterialKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel>
 }
 
 export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -865,11 +882,28 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumRawMaterialKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialKind | Prisma.EnumRawMaterialKindFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel> | $Enums.RawMaterialKind
+}
+
 export type NestedEnumEntityStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.EntityStatus | Prisma.EnumEntityStatusFieldRefInput<$PrismaModel>
   in?: $Enums.EntityStatus[] | Prisma.ListEnumEntityStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EntityStatus[] | Prisma.ListEnumEntityStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEntityStatusFilter<$PrismaModel> | $Enums.EntityStatus
+}
+
+export type NestedEnumRawMaterialKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialKind | Prisma.EnumRawMaterialKindFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialKind[] | Prisma.ListEnumRawMaterialKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialKindWithAggregatesFilter<$PrismaModel> | $Enums.RawMaterialKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRawMaterialKindFilter<$PrismaModel>
 }
 
 export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {

@@ -173,3 +173,11 @@ export const ProductAuditEntityType = {
 } as const
 
 export type ProductAuditEntityType = (typeof ProductAuditEntityType)[keyof typeof ProductAuditEntityType]
+
+
+export const RawMaterialKind = {
+  SIRO: 'SIRO',
+  PAINT: 'PAINT'
+} as const
+
+export type RawMaterialKind = (typeof RawMaterialKind)[keyof typeof RawMaterialKind]

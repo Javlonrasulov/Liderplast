@@ -2883,6 +2883,7 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
+  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -3126,6 +3127,9 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
+  paintUsed: 'paintUsed',
+  paintRawMaterialId: 'paintRawMaterialId',
+  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -3490,6 +3494,20 @@ export type EnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'TokenType[]'
  */
 export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'RawMaterialKind'
+ */
+export type EnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind'>
+    
+
+
+/**
+ * Reference to a field of type 'RawMaterialKind[]'
+ */
+export type ListEnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind[]'>
     
 
 

@@ -480,12 +480,12 @@ type ERPAction =
       };
     }
   | {
-      type: 'CONNECT_RAW_MATERIAL_BAG';
-      payload: { bagId: string; machineId?: string };
+      type: 'CREATE_RAW_MATERIAL_BAG';
+      payload: { rawMaterialId: string; name?: string; initialQuantityKg: number };
     }
   | {
-      type: 'UPDATE_RAW_MATERIAL_BAG_NAME';
-      payload: { bagId: string; name: string };
+      type: 'CONNECT_RAW_MATERIAL_BAG';
+      payload: { bagId: string; machineId?: string };
     }
   | {
       type: 'SWITCH_RAW_MATERIAL_BAG';
@@ -499,6 +499,16 @@ type ERPAction =
   | {
       type: 'WRITE_OFF_RAW_MATERIAL_BAG';
       payload: { bagId: string; reason?: string };
+    }
+  | {
+      type: 'QUICK_CONSUME_RAW_MATERIAL_BAG';
+      payload: {
+        rawMaterialId?: string;
+        quantityKg?: number;
+        pieceCount?: number;
+        gramPerUnit?: number;
+        note?: string;
+      };
     }
   | { type: 'PRODUCE_SEMI'; payload: { productType: '18g' | '20g'; quantity: number; machineId: string; date: string } }
   | { type: 'PRODUCE_FINAL'; payload: { productType: '0.5L' | '1L' | '5L'; quantity: number; semiProductType: '18g' | '20g'; date: string } }
@@ -1554,7 +1564,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             method: 'POST',
             body: JSON.stringify({
               itemType: 'RAW_MATERIAL',
-              movementType: 'INCOMING',
               rawMaterialId,
               quantity: action.payload.amount,
               note: action.payload.description,
@@ -1582,16 +1591,16 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             { method: 'DELETE' },
           );
           break;
-        case 'CONNECT_RAW_MATERIAL_BAG':
-          await apiRequest('/raw-material-bags/connect', {
+        case 'CREATE_RAW_MATERIAL_BAG':
+          await apiRequest('/raw-material-bags/create', {
             method: 'POST',
             body: JSON.stringify(action.payload),
           });
           break;
-        case 'UPDATE_RAW_MATERIAL_BAG_NAME':
-          await apiRequest(`/raw-material-bags/${action.payload.bagId}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ name: action.payload.name }),
+        case 'CONNECT_RAW_MATERIAL_BAG':
+          await apiRequest('/raw-material-bags/connect', {
+            method: 'POST',
+            body: JSON.stringify(action.payload),
           });
           break;
         case 'SWITCH_RAW_MATERIAL_BAG':
@@ -1602,6 +1611,12 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         case 'WRITE_OFF_RAW_MATERIAL_BAG':
           await apiRequest('/raw-material-bags/writeoff', {
+            method: 'POST',
+            body: JSON.stringify(action.payload),
+          });
+          break;
+        case 'QUICK_CONSUME_RAW_MATERIAL_BAG':
+          await apiRequest('/raw-material-bags/quick-consume', {
             method: 'POST',
             body: JSON.stringify(action.payload),
           });

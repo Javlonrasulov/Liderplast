@@ -71,13 +71,13 @@ function requiredPermissionGroups(
       anyOf: ['view_raw_material_bags', 'view_raw_material'],
     },
     {
-      test: /^\/raw-material-bags\/(connect|switch|writeoff)$/,
+      test: /^\/raw-material-bags\/create$/,
       method: 'POST',
       anyOf: ['manage_raw_material_bags', 'view_raw_material'],
     },
     {
-      test: /^\/raw-material-bags\/[^/]+$/,
-      method: 'PATCH',
+      test: /^\/raw-material-bags\/(connect|switch|writeoff|quick-consume)$/,
+      method: 'POST',
       anyOf: ['manage_raw_material_bags', 'view_raw_material'],
     },
 

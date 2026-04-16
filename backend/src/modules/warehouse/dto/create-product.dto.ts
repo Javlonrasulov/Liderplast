@@ -8,7 +8,10 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { InventoryItemType } from '../../../generated/prisma/enums.js';
+import {
+  InventoryItemType,
+  RawMaterialKind,
+} from '../../../generated/prisma/enums.js';
 import { ProductRelationsDto } from './product-relations.dto.js';
 
 export class CreateProductDto {
@@ -44,6 +47,10 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0.0001)
   defaultBagWeightKg?: number;
+
+  @IsOptional()
+  @IsEnum(RawMaterialKind)
+  rawMaterialKind?: RawMaterialKind;
 
   @IsOptional()
   @ValidateNested()

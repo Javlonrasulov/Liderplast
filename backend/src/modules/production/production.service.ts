@@ -9,7 +9,11 @@ import {
   InventoryItemType,
   MovementType,
   ProductionStage,
+  RawMaterialKind,
 } from '../../generated/prisma/enums.js';
+import { Prisma } from '../../generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
 import { RealtimeGateway } from '../../socket/realtime.gateway.js';
 import { RawMaterialBagsService } from '../raw-material-bags/raw-material-bags.service.js';
 import { CreateMachineDto } from './dto/create-machine.dto.js';
@@ -252,55 +256,273 @@ export class ProductionService {
     return record;
   }
 
-  createShiftRecord(dto: CreateShiftRecordDto) {
-    return this.prisma.shiftRecord.create({
+  private async reverseShiftInventoryMovements(tx: Tx, shiftId: string) {
+    const movements = await tx.inventoryMovement.findMany({
+      where: { referenceType: 'shift', referenceId: shiftId },
+    });
+
+    for (const movement of movements) {
+      if (
+        movement.itemType !== InventoryItemType.RAW_MATERIAL ||
+        !movement.rawMaterialId
+      ) {
+        await tx.inventoryMovement.delete({ where: { id: movement.id } });
+        continue;
+      }
+
+      const balance = await tx.inventoryBalance.findFirst({
+        where: { rawMaterialId: movement.rawMaterialId },
+      });
+
+      if (balance) {
+        await tx.inventoryBalance.update({
+          where: { id: balance.id },
+          data: { quantity: balance.quantity + movement.quantity },
+        });
+      }
+
+      await tx.inventoryMovement.delete({ where: { id: movement.id } });
+    }
+  }
+
+  private async applyShiftPaintConsumption(
+    tx: Tx,
+    params: {
+      shiftId: string;
+      workerId: string;
+      rawMaterialId: string;
+      quantityKg: number;
+    },
+  ) {
+    const balance = await tx.inventoryBalance.findFirst({
+      where: { rawMaterialId: params.rawMaterialId },
+    });
+
+    if (!balance || balance.quantity < params.quantityKg) {
+      throw new BadRequestException('Kraska/xomashyo omborda yetarli emas');
+    }
+
+    const newQty = balance.quantity - params.quantityKg;
+
+    await tx.inventoryBalance.update({
+      where: { id: balance.id },
+      data: { quantity: newQty },
+    });
+
+    await tx.inventoryMovement.create({
       data: {
-        workerId: dto.workerId,
-        machineId: dto.machineId,
-        shiftNumber: dto.shiftNumber,
-        date: new Date(dto.date),
-        hoursWorked: dto.hoursWorked,
-        productLabel: dto.productLabel,
-        machineReading: dto.machineReading,
-        producedQty: dto.producedQty,
-        defectCount: dto.defectCount ?? 0,
-        electricityKwh: dto.electricityKwh ?? 0,
-        notes: dto.notes,
+        itemType: InventoryItemType.RAW_MATERIAL,
+        movementType: MovementType.CONSUMPTION,
+        quantity: params.quantityKg,
+        previousQuantity: balance.quantity,
+        newQuantity: newQty,
+        rawMaterialId: params.rawMaterialId,
+        referenceType: 'shift',
+        referenceId: params.shiftId,
+        createdById: params.workerId,
+        status: EntityStatus.COMPLETED,
+        note: 'Smena: kraska/bo‘yoq sarfi',
       },
     });
   }
 
-  async updateShiftRecord(id: string, dto: UpdateShiftRecordDto) {
-    const record = await this.prisma.shiftRecord.findUnique({
-      where: { id },
+  async createShiftRecord(dto: CreateShiftRecordDto) {
+    const wantsPaint =
+      dto.paintUsed === true &&
+      Boolean(dto.paintRawMaterialId) &&
+      dto.paintQuantityKg != null &&
+      dto.paintQuantityKg > 0;
+
+    if (dto.paintUsed === true && !wantsPaint) {
+      throw new BadRequestException(
+        'Kraska ishlatilgani belgilansa — xomashyo va miqdor (kg) kiritilishi kerak',
+      );
+    }
+
+    if (wantsPaint) {
+      if (!dto.machineId) {
+        throw new BadRequestException('Kraska uchun apparat tanlanishi kerak');
+      }
+      const machine = await this.prisma.machine.findUnique({
+        where: { id: dto.machineId },
+      });
+      if (!machine || machine.stage !== ProductionStage.SEMI) {
+        throw new BadRequestException(
+          'Kraska faqat yarim tayyor (qolip) apparati uchun yoziladi',
+        );
+      }
+      const paintRm = await this.prisma.rawMaterial.findFirst({
+        where: { id: dto.paintRawMaterialId!, isDeleted: false },
+      });
+      if (!paintRm || paintRm.kind !== RawMaterialKind.PAINT) {
+        throw new BadRequestException(
+          'Kraska uchun «kraska» turidagi xomashyo (siro sahifasida yaratilgan) tanlanishi kerak',
+        );
+      }
+    }
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const shift = await tx.shiftRecord.create({
+        data: {
+          workerId: dto.workerId,
+          machineId: dto.machineId,
+          shiftNumber: dto.shiftNumber,
+          date: new Date(dto.date),
+          hoursWorked: dto.hoursWorked,
+          productLabel: dto.productLabel,
+          machineReading: dto.machineReading,
+          producedQty: dto.producedQty,
+          defectCount: dto.defectCount ?? 0,
+          electricityKwh: dto.electricityKwh ?? 0,
+          notes: dto.notes,
+          paintUsed: wantsPaint,
+          paintRawMaterialId: wantsPaint ? dto.paintRawMaterialId! : null,
+          paintQuantityKg: wantsPaint ? dto.paintQuantityKg! : null,
+        },
+      });
+
+      if (wantsPaint) {
+        await this.applyShiftPaintConsumption(tx, {
+          shiftId: shift.id,
+          workerId: dto.workerId,
+          rawMaterialId: dto.paintRawMaterialId!,
+          quantityKg: dto.paintQuantityKg!,
+        });
+      }
+
+      return tx.shiftRecord.findUniqueOrThrow({
+        where: { id: shift.id },
+        include: {
+          worker: {
+            omit: { passwordHash: true },
+          },
+          machine: true,
+          paintRawMaterial: { select: { id: true, name: true, unit: true } },
+        },
+      });
     });
 
-    if (!record) {
+    this.realtimeGateway.emitWarehouseUpdated({
+      source: 'shift',
+      shiftId: created.id,
+    });
+
+    return created;
+  }
+
+  async updateShiftRecord(id: string, dto: UpdateShiftRecordDto) {
+    const existing = await this.prisma.shiftRecord.findUnique({
+      where: { id },
+      include: { machine: true },
+    });
+
+    if (!existing) {
       throw new NotFoundException('Shift record not found');
     }
 
-    return this.prisma.shiftRecord.update({
-      where: { id },
-      data: {
-        ...(dto.workerId !== undefined ? { workerId: dto.workerId } : {}),
-        ...(dto.machineId !== undefined ? { machineId: dto.machineId || null } : {}),
-        ...(dto.shiftNumber !== undefined ? { shiftNumber: dto.shiftNumber } : {}),
-        ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
-        ...(dto.hoursWorked !== undefined ? { hoursWorked: dto.hoursWorked } : {}),
-        ...(dto.productLabel !== undefined ? { productLabel: dto.productLabel } : {}),
-        ...(dto.machineReading !== undefined ? { machineReading: dto.machineReading } : {}),
-        ...(dto.producedQty !== undefined ? { producedQty: dto.producedQty } : {}),
-        ...(dto.defectCount !== undefined ? { defectCount: dto.defectCount } : {}),
-        ...(dto.electricityKwh !== undefined ? { electricityKwh: dto.electricityKwh } : {}),
-        ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
-      },
-      include: {
-        worker: {
-          omit: { passwordHash: true },
+    const nextWorkerId =
+      dto.workerId !== undefined ? dto.workerId : existing.workerId;
+    const nextMachineId =
+      dto.machineId !== undefined ? dto.machineId || null : existing.machineId;
+    const nextPaintUsed =
+      dto.paintUsed !== undefined ? dto.paintUsed : existing.paintUsed;
+    const nextPaintRawMaterialId =
+      dto.paintRawMaterialId !== undefined
+        ? dto.paintRawMaterialId
+        : existing.paintRawMaterialId;
+    const nextPaintQuantityKg =
+      dto.paintQuantityKg !== undefined
+        ? dto.paintQuantityKg
+        : existing.paintQuantityKg;
+
+    const wantsPaint =
+      nextPaintUsed === true &&
+      Boolean(nextPaintRawMaterialId) &&
+      nextPaintQuantityKg != null &&
+      nextPaintQuantityKg > 0;
+
+    if (nextPaintUsed === true && !wantsPaint) {
+      throw new BadRequestException(
+        'Kraska ishlatilgani belgilansa — xomashyo va miqdor (kg) kiritilishi kerak',
+      );
+    }
+
+    if (wantsPaint) {
+      if (!nextMachineId) {
+        throw new BadRequestException('Kraska uchun apparat tanlanishi kerak');
+      }
+      const machine = await this.prisma.machine.findUnique({
+        where: { id: nextMachineId },
+      });
+      if (!machine || machine.stage !== ProductionStage.SEMI) {
+        throw new BadRequestException(
+          'Kraska faqat yarim tayyor (qolip) apparati uchun yoziladi',
+        );
+      }
+      const paintRm = await this.prisma.rawMaterial.findFirst({
+        where: { id: nextPaintRawMaterialId!, isDeleted: false },
+      });
+      if (!paintRm || paintRm.kind !== RawMaterialKind.PAINT) {
+        throw new BadRequestException(
+          'Kraska uchun «kraska» turidagi xomashyo (siro sahifasida yaratilgan) tanlanishi kerak',
+        );
+      }
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await this.reverseShiftInventoryMovements(tx, id);
+
+      const shift = await tx.shiftRecord.update({
+        where: { id },
+        data: {
+          ...(dto.workerId !== undefined ? { workerId: dto.workerId } : {}),
+          ...(dto.machineId !== undefined ? { machineId: dto.machineId || null } : {}),
+          ...(dto.shiftNumber !== undefined ? { shiftNumber: dto.shiftNumber } : {}),
+          ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
+          ...(dto.hoursWorked !== undefined ? { hoursWorked: dto.hoursWorked } : {}),
+          ...(dto.productLabel !== undefined ? { productLabel: dto.productLabel } : {}),
+          ...(dto.machineReading !== undefined
+            ? { machineReading: dto.machineReading }
+            : {}),
+          ...(dto.producedQty !== undefined ? { producedQty: dto.producedQty } : {}),
+          ...(dto.defectCount !== undefined ? { defectCount: dto.defectCount } : {}),
+          ...(dto.electricityKwh !== undefined
+            ? { electricityKwh: dto.electricityKwh }
+            : {}),
+          ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+          paintUsed: wantsPaint,
+          paintRawMaterialId: wantsPaint ? nextPaintRawMaterialId! : null,
+          paintQuantityKg: wantsPaint ? nextPaintQuantityKg! : null,
         },
-        machine: true,
-      },
+      });
+
+      if (wantsPaint) {
+        await this.applyShiftPaintConsumption(tx, {
+          shiftId: shift.id,
+          workerId: nextWorkerId,
+          rawMaterialId: nextPaintRawMaterialId!,
+          quantityKg: nextPaintQuantityKg!,
+        });
+      }
+
+      return tx.shiftRecord.findUniqueOrThrow({
+        where: { id: shift.id },
+        include: {
+          worker: {
+            omit: { passwordHash: true },
+          },
+          machine: true,
+          paintRawMaterial: { select: { id: true, name: true, unit: true } },
+        },
+      });
     });
+
+    this.realtimeGateway.emitWarehouseUpdated({
+      source: 'shift',
+      shiftId: updated.id,
+    });
+
+    return updated;
   }
 
   async deleteShiftRecord(id: string) {
@@ -312,8 +534,16 @@ export class ProductionService {
       throw new NotFoundException('Shift record not found');
     }
 
-    await this.prisma.shiftRecord.delete({
-      where: { id },
+    await this.prisma.$transaction(async (tx) => {
+      await this.reverseShiftInventoryMovements(tx, id);
+      await tx.shiftRecord.delete({
+        where: { id },
+      });
+    });
+
+    this.realtimeGateway.emitWarehouseUpdated({
+      source: 'shift-deleted',
+      shiftId: id,
     });
 
     return { success: true };
@@ -341,6 +571,7 @@ export class ProductionService {
           omit: { passwordHash: true },
         },
         machine: true,
+        paintRawMaterial: { select: { id: true, name: true, unit: true } },
       },
       orderBy: { createdAt: 'desc' },
     });

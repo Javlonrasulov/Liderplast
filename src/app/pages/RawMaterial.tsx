@@ -13,7 +13,7 @@ import {
   History,
   ChevronDown,
 } from 'lucide-react';
-import { useERP } from '../store/erp-store';
+import { useERP, type RawMaterialKind } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
@@ -52,7 +52,12 @@ export function RawMaterial() {
   const { state, dispatch, rawMaterialStock } = useERP();
   const { t, filterData } = useApp();
   const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
-  const [createForm, setCreateForm] = useState({ name: '', description: '', defaultBagWeightKg: '' });
+  const [createForm, setCreateForm] = useState<{
+    name: string;
+    description: string;
+    defaultBagWeightKg: string;
+    rawMaterialKind: RawMaterialKind;
+  }>({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
   const [selectedBagId, setSelectedBagId] = useState('');
   const [switchBagId, setSwitchBagId] = useState('');
   const [switchAction, setSwitchAction] = useState<'RETURN_TO_STORAGE' | 'WRITE_OFF'>('RETURN_TO_STORAGE');
@@ -76,14 +81,19 @@ export function RawMaterial() {
     e.preventDefault();
     setError('');
     const name = createForm.name.trim();
-    const defaultBagWeightKg = parseFloat(createForm.defaultBagWeightKg.replace(',', '.'));
     if (!name) {
       setError(t.rmCreateNameRequired);
       return;
     }
-    if (!createForm.defaultBagWeightKg || !Number.isFinite(defaultBagWeightKg) || defaultBagWeightKg <= 0) {
-      setError(t.rmDefaultBagWeightRequired);
-      return;
+    const isPaint = createForm.rawMaterialKind === 'PAINT';
+    let defaultBagWeightKg: number | undefined;
+    if (!isPaint) {
+      const parsed = parseFloat(createForm.defaultBagWeightKg.replace(',', '.'));
+      if (!createForm.defaultBagWeightKg || !Number.isFinite(parsed) || parsed <= 0) {
+        setError(t.rmDefaultBagWeightRequired);
+        return;
+      }
+      defaultBagWeightKg = parsed;
     }
 
     try {
@@ -94,10 +104,11 @@ export function RawMaterial() {
           name,
           description: createForm.description.trim() || undefined,
           unit: 'kg',
-          defaultBagWeightKg,
+          rawMaterialKind: createForm.rawMaterialKind,
+          ...(defaultBagWeightKg !== undefined ? { defaultBagWeightKg } : {}),
         },
       });
-      setCreateForm({ name: '', description: '', defaultBagWeightKg: '' });
+      setCreateForm({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
       setSuccess(t.rmCreatedSuccess);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -423,6 +434,34 @@ export function RawMaterial() {
                 />
               </div>
               <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmKindLabel}</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, rawMaterialKind: 'SIRO' })}
+                    className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                      createForm.rawMaterialKind === 'SIRO'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindSiro}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, rawMaterialKind: 'PAINT' })}
+                    className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                      createForm.rawMaterialKind === 'PAINT'
+                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPaint}
+                  </button>
+                </div>
+                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{t.rmPaintHint}</p>
+              </div>
+              <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
                 <textarea
                   rows={3}
@@ -432,20 +471,22 @@ export function RawMaterial() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmDefaultBagWeight}</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  value={createForm.defaultBagWeightKg}
-                  onChange={e => setCreateForm({ ...createForm, defaultBagWeightKg: e.target.value })}
-                  placeholder={t.rmDefaultBagWeightPlaceholder}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-                <p className="text-xs text-slate-400 mt-1">{t.rmDefaultBagWeightHint}</p>
-              </div>
-              {createBagWeightKg > 0 && (
+              {createForm.rawMaterialKind === 'SIRO' && (
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmDefaultBagWeight}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.0001"
+                    value={createForm.defaultBagWeightKg}
+                    onChange={e => setCreateForm({ ...createForm, defaultBagWeightKg: e.target.value })}
+                    placeholder={t.rmDefaultBagWeightPlaceholder}
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">{t.rmDefaultBagWeightHint}</p>
+                </div>
+              )}
+              {createForm.rawMaterialKind === 'SIRO' && createBagWeightKg > 0 && (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-700 dark:bg-emerald-900/20">
                   <p className="text-xs text-emerald-700 dark:text-emerald-400">
                     {t.rmDefaultBagWeightPreview.replace('{weight}', formatNumber(createBagWeightKg))}
@@ -453,7 +494,8 @@ export function RawMaterial() {
                 </div>
               )}
               <button type="submit" className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
-                <Plus size={16} /> {t.rmCreateTypeButton}
+                <Plus size={16} />
+                {createForm.rawMaterialKind === 'PAINT' ? t.rmCreatePaintButton : t.rmCreateTypeButton}
               </button>
             </form>
         </div>

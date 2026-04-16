@@ -4,12 +4,18 @@ import {
   AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu, Power, PowerOff,
   Pencil, Layers, X,
 } from 'lucide-react';
-import { useERP, type Employee, type ShiftRecord } from '../store/erp-store';
+import {
+  useERP,
+  type Employee,
+  type RawMaterialProduct,
+  type ShiftRecord,
+} from '../store/erp-store';
+import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 
-const PRODUCT_TYPES = ['18g', '20g', '0.5L', '1L', '5L'];
+const FALLBACK_PRODUCT_TYPES = ['18g', '20g', '0.5L', '1L', '5L'];
 
 const SHIFT_DEFS_KEY = 'liderplast_shift_definitions_v1';
 
@@ -165,6 +171,15 @@ const TR = {
     workerOrphansTitle: 'Фақат смена ёзувларида (базада алоҳида ёзув йўқ)',
     workerDuplicate: 'Бу исмда ишчи аллақачон мавжуд',
     workerOptional: 'ихтиёрий',
+    shiftPaintQuestion: 'Краска/бўёқ ишлатилдими? (қолип)',
+    shiftPaintMaterial: 'Краска / хомашё',
+    shiftPaintQty: 'Миқдор',
+    shiftPaintUnitKg: 'кг',
+    shiftPaintUnitG: 'г',
+    shiftPaintUnitLabel: 'Ўлчов',
+    shiftPaintError: 'Краска белгиланса — тур ва миқдор тўғри киритилсин',
+    shiftPaintNoMaterials:
+      'Краска тури мавжуд эмас. «Хомашё (сиро)» саҳифасида янги хомашёни «краска» тури билан қўшинг.',
   },
   uz_latin: {
     title: 'Smena Hisobi',
@@ -269,6 +284,15 @@ const TR = {
     workerOrphansTitle: 'Faqat smena yozuvlarida (bazada alohida yozuv yo\'q)',
     workerDuplicate: 'Bu ismda ishchi allaqachon mavjud',
     workerOptional: 'ixtiyoriy',
+    shiftPaintQuestion: 'Kraska/bo\'yoq ishlatildimi? (qolip)',
+    shiftPaintMaterial: 'Kraska / xomashyo',
+    shiftPaintQty: 'Miqdor',
+    shiftPaintUnitKg: 'kg',
+    shiftPaintUnitG: 'g',
+    shiftPaintUnitLabel: 'O\'lchov',
+    shiftPaintError: 'Kraska belgilansa — tur va miqdor to\'g\'ri kirilsin',
+    shiftPaintNoMaterials:
+      'Kraska turi yo\'q. «Xomashyo (siro)» sahifasida yangi xomashyoni «kraska» turi bilan qo\'shing.',
   },
   ru: {
     title: 'Учёт смен',
@@ -373,6 +397,15 @@ const TR = {
     workerOrphansTitle: 'Только в записях смены (нет записи в базе)',
     workerDuplicate: 'Сотрудник с таким именем уже есть',
     workerOptional: 'необязательно',
+    shiftPaintQuestion: 'Использовалась краска/краситель? (преформа)',
+    shiftPaintMaterial: 'Краска / сырьё',
+    shiftPaintQty: 'Количество',
+    shiftPaintUnitKg: 'кг',
+    shiftPaintUnitG: 'г',
+    shiftPaintUnitLabel: 'Единица',
+    shiftPaintError: 'Если краска — укажите тип и количество',
+    shiftPaintNoMaterials:
+      'Нет позиций типа «краска». Добавьте сырьё на странице сырья с типом «краска».',
   },
 };
 
@@ -477,6 +510,84 @@ export function ShiftWork() {
   const { lang, filterData } = useApp();
   const t = TR[lang];
 
+  const [catalogProductTypes, setCatalogProductTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (state.warehouseProducts.length > 0) return;
+    let isMounted = true;
+    apiRequest<{
+      semiProducts: Array<{ name: string }>;
+      finishedProducts: Array<{ name: string }>;
+    }>('/warehouse/catalog')
+      .then((catalog) => {
+        if (!isMounted) return;
+        const names = [
+          ...catalog.semiProducts.map((p) => p.name?.trim?.() ?? '').filter(Boolean),
+          ...catalog.finishedProducts.map((p) => p.name?.trim?.() ?? '').filter(Boolean),
+        ];
+        setCatalogProductTypes(Array.from(new Set(names)));
+      })
+      .catch(() => {
+        // ignore (permissions/offline) — fallback will be used
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [state.warehouseProducts.length]);
+
+  const productTypes = useMemo(() => {
+    const fromStore = state.warehouseProducts
+      .filter((p) => p.itemType !== 'RAW_MATERIAL')
+      .map((p) => p.name?.trim?.() ?? '')
+      .filter(Boolean);
+    const fromApi = fromStore.length > 0 ? fromStore : catalogProductTypes;
+
+    const uniq = Array.from(new Set(fromApi));
+    if (uniq.length === 0) return [...FALLBACK_PRODUCT_TYPES];
+    return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [state.warehouseProducts, catalogProductTypes]);
+
+  const semiProductTypes = useMemo(() => {
+    const fromStore = state.warehouseProducts
+      .filter((p) => p.itemType === 'SEMI_PRODUCT')
+      .map((p) => p.name?.trim?.() ?? '')
+      .filter(Boolean);
+    const base = fromStore.length > 0 ? fromStore : productTypes.filter((p) => /g\b/i.test(p));
+    const uniq = Array.from(new Set(base));
+    return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [state.warehouseProducts, productTypes]);
+
+  const finishedProductTypes = useMemo(() => {
+    const fromStore = state.warehouseProducts
+      .filter((p) => p.itemType === 'FINISHED_PRODUCT')
+      .map((p) => p.name?.trim?.() ?? '')
+      .filter(Boolean);
+    const base = fromStore.length > 0 ? fromStore : productTypes.filter((p) => /l\b/i.test(p));
+    const uniq = Array.from(new Set(base));
+    return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [state.warehouseProducts, productTypes]);
+
+  const fallbackSemiTypes = useMemo(
+    () => FALLBACK_PRODUCT_TYPES.filter((p) => /g\b/i.test(p)),
+    [],
+  );
+  const fallbackFinishedTypes = useMemo(
+    () => FALLBACK_PRODUCT_TYPES.filter((p) => /l\b/i.test(p)),
+    [],
+  );
+
+  const allowedSemiTypes = useMemo(() => {
+    if (semiProductTypes.length > 0) return semiProductTypes;
+    if (fallbackSemiTypes.length > 0) return fallbackSemiTypes;
+    return productTypes;
+  }, [semiProductTypes, fallbackSemiTypes, productTypes]);
+
+  const allowedFinishedTypes = useMemo(() => {
+    if (finishedProductTypes.length > 0) return finishedProductTypes;
+    if (fallbackFinishedTypes.length > 0) return fallbackFinishedTypes;
+    return productTypes;
+  }, [finishedProductTypes, fallbackFinishedTypes, productTypes]);
+
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'workers' | 'machines' | 'shiftDefs'>('form');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -566,20 +677,92 @@ export function ShiftWork() {
     date: TODAY,
     shift: 1,
     workerName: '',
-    machineId: state.machines[0]?.id || '',
-    hoursWorked: '',
-    productType: '18g',
-    machineReading: '',
-    producedQty: '',
-    defectCount: '0',
-    notes: '',
   });
 
+  type ShiftLine = {
+    id: string;
+    machineId: string;
+    hoursWorked: string;
+    productType: string;
+    machineReading: string;
+    producedQty: string;
+    defectCount: string;
+    notes: string;
+    paintUsed: boolean;
+    paintRawMaterialId: string;
+    paintQuantity: string;
+    paintUnit: 'kg' | 'g';
+  };
+
+  const createEmptyLine = useCallback((): ShiftLine => {
+    const defaultMachineId = state.machines[0]?.id || '';
+    const defaultMachine = state.machines.find((m) => m.id === defaultMachineId);
+    const defaultProductType =
+      defaultMachine?.type === 'final'
+        ? (allowedFinishedTypes[0] || productTypes[0] || '0.5L')
+        : (allowedSemiTypes[0] || productTypes[0] || '18g');
+    return {
+      id: `line-${Math.random().toString(16).slice(2)}`,
+      machineId: defaultMachineId,
+      hoursWorked: '',
+      productType: defaultProductType,
+      machineReading: '',
+      producedQty: '',
+      defectCount: '0',
+      notes: '',
+      paintUsed: false,
+      paintRawMaterialId: '',
+      paintQuantity: '',
+      paintUnit: 'kg',
+    };
+  }, [state.machines, productTypes, allowedSemiTypes, allowedFinishedTypes]);
+
+  const [lines, setLines] = useState<ShiftLine[]>(() => []);
+
   useEffect(() => {
-    if (!form.machineId && state.machines[0]?.id) {
-      setForm((prev) => ({ ...prev, machineId: state.machines[0].id }));
-    }
-  }, [state.machines, form.machineId]);
+    if (lines.length > 0) return;
+    setLines([createEmptyLine()]);
+  }, [lines.length, createEmptyLine]);
+
+  const workerSuggestions = useMemo(() => {
+    const query = form.workerName.trim().toLowerCase();
+    return state.workers.filter((w) =>
+      !query ? true : w.toLowerCase().includes(query),
+    );
+  }, [state.workers, form.workerName]);
+
+  const rawMaterialOptions = useMemo(() => {
+    const paints = state.warehouseProducts.filter(
+      (p): p is RawMaterialProduct =>
+        p.itemType === 'RAW_MATERIAL' && p.rawMaterialKind === 'PAINT',
+    );
+    return paints.map((p) => ({ value: p.id, label: `${p.name} (${p.unit})` }));
+  }, [state.warehouseProducts]);
+
+  useEffect(() => {
+    if (!productTypes.length) return;
+    setLines((prev) => {
+      return prev.map((ln) => {
+        const machine = state.machines.find((m) => m.id === ln.machineId);
+        const allowed =
+          machine?.type === 'semi'
+            ? allowedSemiTypes
+            : machine?.type === 'final'
+              ? allowedFinishedTypes
+              : productTypes;
+        const fallback = allowed[0] || productTypes[0];
+        if (!fallback) return ln;
+        return allowed.includes(ln.productType) ? ln : { ...ln, productType: fallback };
+      });
+    });
+  }, [productTypes, state.machines, allowedSemiTypes, allowedFinishedTypes]);
+
+  useEffect(() => {
+    if (!state.machines[0]?.id) return;
+    setLines((prev) =>
+      prev.map((ln) => (ln.machineId ? ln : { ...ln, machineId: state.machines[0]!.id })),
+    );
+  }, [state.machines]);
 
   useEffect(() => {
     if (sortedShiftDefs.length === 0) return;
@@ -648,16 +831,86 @@ export function ShiftWork() {
     closeRecordEditor();
   };
 
-  const selectedMachine = state.machines.find(m => m.id === form.machineId);
-  const hours = parseFloat(form.hoursWorked) || 0;
-  const kwh = hours * (selectedMachine?.powerKw || 0);
+  const updateLine = useCallback((id: string, patch: Partial<ShiftLine>) => {
+    setLines((prev) =>
+      prev.map((ln) => {
+        if (ln.id !== id) return ln;
+        const next = { ...ln, ...patch };
+        if (patch.machineId !== undefined) {
+          const machine = state.machines.find((m) => m.id === next.machineId);
+          const allowed =
+            machine?.type === 'semi'
+              ? allowedSemiTypes
+              : machine?.type === 'final'
+                ? allowedFinishedTypes
+                : productTypes;
+          const fallback = allowed[0];
+          if (fallback && !allowed.includes(next.productType)) {
+            next.productType = fallback;
+          }
+          if (machine?.type !== 'semi') {
+            next.paintUsed = false;
+            next.paintRawMaterialId = '';
+            next.paintQuantity = '';
+            next.paintUnit = 'kg';
+          }
+        }
+        return next;
+      }),
+    );
+  }, [state.machines, allowedSemiTypes, allowedFinishedTypes, productTypes]);
+
+  const addLine = useCallback(() => {
+    setLines((prev) => [...prev, createEmptyLine()]);
+  }, [createEmptyLine]);
+
+  const removeLine = useCallback((id: string) => {
+    setLines((prev) => {
+      const next = prev.filter((ln) => ln.id !== id);
+      return next.length > 0 ? next : [createEmptyLine()];
+    });
+  }, [createEmptyLine]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!form.workerName.trim()) { setError(t.labelWorker + '!'); return; }
-    if (!hours || hours <= 0) { setError(t.labelHours + '!'); return; }
-    if (!form.producedQty || parseInt(form.producedQty) < 0) { setError(t.labelProduced + '!'); return; }
+
+    const meaningfulLines = lines.filter((ln) => {
+      const any =
+        Boolean(ln.machineId) ||
+        Boolean(ln.hoursWorked.trim()) ||
+        Boolean(ln.producedQty.trim()) ||
+        Boolean(ln.machineReading.trim()) ||
+        Boolean(ln.notes.trim());
+      return any;
+    });
+
+    if (meaningfulLines.length === 0) {
+      setError(t.labelMachine + ' / ' + t.labelHours + '!');
+      return;
+    }
+
+    for (const ln of meaningfulLines) {
+      const hours = parseFloat(ln.hoursWorked) || 0;
+      if (!hours || hours <= 0) { setError(t.labelHours + '!'); return; }
+      const produced = parseInt(ln.producedQty, 10);
+      if (Number.isNaN(produced) || produced < 0) { setError(t.labelProduced + '!'); return; }
+      if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
+      if (!ln.productType) { setError(t.labelProduct + '!'); return; }
+      const machine = state.machines.find((m) => m.id === ln.machineId);
+      if (machine?.type === 'semi' && ln.paintUsed) {
+        if (!ln.paintRawMaterialId) {
+          setError(t.shiftPaintError);
+          return;
+        }
+        const pq = parseFloat(ln.paintQuantity);
+        if (!pq || pq <= 0 || Number.isNaN(pq)) {
+          setError(t.shiftPaintError);
+          return;
+        }
+      }
+    }
 
     try {
       if (!state.workers.some((w) => w === form.workerName.trim())) {
@@ -668,22 +921,40 @@ export function ShiftWork() {
         await refresh();
       }
 
-      await dispatch({
-        type: 'ADD_SHIFT_RECORD',
-        payload: {
-          date: form.date,
-          shift: form.shift,
-          workerName: form.workerName.trim(),
-          machineId: form.machineId,
-          hoursWorked: hours,
-          productType: form.productType,
-          machineReading: form.machineReading,
-          producedQty: parseInt(form.producedQty) || 0,
-          defectCount: parseInt(form.defectCount) || 0,
-          electricityKwh: parseFloat(kwh.toFixed(1)),
-          notes: form.notes,
+      for (const ln of meaningfulLines) {
+        const hours = parseFloat(ln.hoursWorked) || 0;
+        const sel = state.machines.find((m) => m.id === ln.machineId);
+        const kwh = hours * (sel?.powerKw || 0);
+        const paintPayload: Partial<
+          Pick<ShiftRecord, 'paintUsed' | 'paintRawMaterialId' | 'paintQuantityKg'>
+        > = {};
+        if (sel?.type === 'semi' && ln.paintUsed) {
+          const pq = parseFloat(ln.paintQuantity);
+          const paintQuantityKg = ln.paintUnit === 'g' ? pq / 1000 : pq;
+          paintPayload.paintUsed = true;
+          paintPayload.paintRawMaterialId = ln.paintRawMaterialId;
+          paintPayload.paintQuantityKg = paintQuantityKg;
+        } else {
+          paintPayload.paintUsed = false;
         }
-      });
+        await dispatch({
+          type: 'ADD_SHIFT_RECORD',
+          payload: {
+            date: form.date,
+            shift: form.shift,
+            workerName: form.workerName.trim(),
+            machineId: ln.machineId,
+            hoursWorked: hours,
+            productType: ln.productType,
+            machineReading: ln.machineReading,
+            producedQty: parseInt(ln.producedQty, 10) || 0,
+            defectCount: parseInt(ln.defectCount, 10) || 0,
+            electricityKwh: parseFloat(kwh.toFixed(1)),
+            notes: ln.notes,
+            ...paintPayload,
+          }
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error');
       return;
@@ -694,12 +965,8 @@ export function ShiftWork() {
     setForm(prev => ({
       ...prev,
       workerName: '',
-      machineReading: '',
-      producedQty: '',
-      defectCount: '0',
-      hoursWorked: '',
-      notes: '',
     }));
+    setLines([createEmptyLine()]);
   };
 
   const handleAddWorker = async (e: React.FormEvent) => {
@@ -1033,6 +1300,20 @@ export function ShiftWork() {
                     value={form.workerName}
                     onChange={e => { setForm({ ...form, workerName: e.target.value }); setWorkerInputOpen(true); }}
                     onFocus={() => setWorkerInputOpen(true)}
+                    onBlur={() => {
+                      // allow click on suggestion before closing
+                      window.setTimeout(() => setWorkerInputOpen(false), 120);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && workerSuggestions.length > 0) {
+                        e.preventDefault();
+                        setForm({ ...form, workerName: workerSuggestions[0] });
+                        setWorkerInputOpen(false);
+                      }
+                      if (e.key === 'Escape') {
+                        setWorkerInputOpen(false);
+                      }
+                    }}
                     placeholder={t.placeholderWorker}
                     autoComplete="off"
                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 pr-8"
@@ -1041,10 +1322,9 @@ export function ShiftWork() {
                 </div>
                 {workerInputOpen && state.workers.length > 0 && (
                   <div className="absolute z-10 top-full mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl overflow-hidden">
-                    {state.workers.filter(w =>
-                      !form.workerName || w.toLowerCase().includes(form.workerName.toLowerCase())
-                    ).map(w => (
+                    {workerSuggestions.map(w => (
                       <button key={w} type="button"
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => { setForm({ ...form, workerName: w }); setWorkerInputOpen(false); }}
                         className="w-full text-left px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
@@ -1057,74 +1337,237 @@ export function ShiftWork() {
                 )}
               </div>
 
-              {/* Machine + Hours */}
-              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelMachine}</label>
-                  <UiDropdown
-                    value={form.machineId}
-                    onChange={(machineId) => setForm({ ...form, machineId })}
-                    options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
-                    placeholder={t.labelMachine}
-                  />
+              {/* Multi lines: Machine + Hours + Product + ... */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {t.labelMachine} · {t.labelHours} · {t.labelProduct}
                 </div>
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelHours}</label>
-                  <input type="number" value={form.hoursWorked} onChange={e => setForm({ ...form, hoursWorked: e.target.value })} placeholder="0" min="0" max="24" step="0.5"
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                </div>
+                <button
+                  type="button"
+                  onClick={addLine}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                >
+                  <Plus size={14} /> + qator
+                </button>
               </div>
 
-              {/* Electricity calc */}
-              {hours > 0 && selectedMachine && (
-                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
-                  <p className="text-yellow-800 dark:text-yellow-400 text-xs font-semibold mb-1.5">{t.autoKwh}</p>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500">{selectedMachine.powerKw} kW × {hours}h =</span>
-                    <span className="font-bold text-yellow-700 dark:text-yellow-400">{kwh.toFixed(1)} kWh</span>
-                  </div>
-                </div>
-              )}
+              <div className="space-y-3">
+                {lines.map((ln, idx) => {
+                  const selectedMachine = state.machines.find((m) => m.id === ln.machineId);
+                  const hours = parseFloat(ln.hoursWorked) || 0;
+                  const kwh = hours * (selectedMachine?.powerKw || 0);
+                  return (
+                    <div
+                      key={ln.id}
+                      className="p-3 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/20 space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                          #{idx + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeLine(ln.id)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                          title={t.shiftDefDelete}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
 
-              {/* Product type */}
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduct}</label>
-                <div className="flex flex-wrap gap-2">
-                  {PRODUCT_TYPES.map(pt => (
-                    <button key={pt} type="button" onClick={() => setForm({ ...form, productType: pt })}
-                      className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${form.productType === pt ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`}>
-                      {pt}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      {/* Machine + Hours */}
+                      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelMachine}</label>
+                          <UiDropdown
+                            value={ln.machineId}
+                            onChange={(machineId) => updateLine(ln.id, { machineId })}
+                            options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
+                            placeholder={t.labelMachine}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelHours}</label>
+                          <input
+                            type="number"
+                            value={ln.hoursWorked}
+                            onChange={(e) => updateLine(ln.id, { hoursWorked: e.target.value })}
+                            placeholder="0"
+                            min="0"
+                            max="24"
+                            step="0.5"
+                            className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          />
+                        </div>
+                      </div>
 
-              {/* Machine reading */}
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelReading}</label>
-                <input type="text" value={form.machineReading} onChange={e => setForm({ ...form, machineReading: e.target.value })} placeholder={t.placeholderReading}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono" />
-              </div>
+                      {/* Electricity calc */}
+                      {hours > 0 && selectedMachine && (
+                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
+                          <p className="text-yellow-800 dark:text-yellow-400 text-xs font-semibold mb-1.5">{t.autoKwh}</p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-500">{selectedMachine.powerKw} kW × {hours}h =</span>
+                            <span className="font-bold text-yellow-700 dark:text-yellow-400">{kwh.toFixed(1)} kWh</span>
+                          </div>
+                        </div>
+                      )}
 
-              {/* Produced + Defect */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduced}</label>
-                  <input type="number" value={form.producedQty} onChange={e => setForm({ ...form, producedQty: e.target.value })} placeholder="0" min="0"
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                </div>
-                <div>
-                  <label className="block text-red-500 text-xs font-medium mb-1.5">{t.labelDefect}</label>
-                  <input type="number" value={form.defectCount} onChange={e => setForm({ ...form, defectCount: e.target.value })} placeholder="0" min="0"
-                    className="w-full px-3 py-2.5 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400" />
-                </div>
-              </div>
+                      {/* Product type */}
+                      <div>
+                        <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduct}</label>
+                        <div className="flex flex-wrap gap-2">
+                          {(selectedMachine?.type === 'semi'
+                            ? allowedSemiTypes
+                            : selectedMachine?.type === 'final'
+                              ? allowedFinishedTypes
+                              : productTypes
+                          ).map((pt) => (
+                            <button
+                              key={pt}
+                              type="button"
+                              onClick={() => updateLine(ln.id, { productType: pt })}
+                              className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${ln.productType === pt ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`}
+                            >
+                              {pt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-              {/* Notes */}
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelNotes}</label>
-                <input type="text" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder={t.placeholderNotes}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                      {selectedMachine?.type === 'semi' && (
+                        <div className="rounded-xl border border-indigo-200/70 bg-indigo-50/40 p-3 dark:border-indigo-800 dark:bg-indigo-950/20 space-y-3">
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={ln.paintUsed}
+                              onChange={(e) =>
+                                updateLine(ln.id, {
+                                  paintUsed: e.target.checked,
+                                  ...(e.target.checked
+                                    ? {}
+                                    : {
+                                        paintRawMaterialId: '',
+                                        paintQuantity: '',
+                                        paintUnit: 'kg' as const,
+                                      }),
+                                })
+                              }
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-400"
+                            />
+                            {t.shiftPaintQuestion}
+                          </label>
+                          {ln.paintUsed && (
+                            <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-3">
+                              <div className="min-[380px]:col-span-1">
+                                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
+                                  {t.shiftPaintMaterial}
+                                </label>
+                                <UiDropdown
+                                  value={ln.paintRawMaterialId}
+                                  onChange={(paintRawMaterialId) =>
+                                    updateLine(ln.id, { paintRawMaterialId })
+                                  }
+                                  options={rawMaterialOptions}
+                                  placeholder={t.shiftPaintMaterial}
+                                />
+                                {rawMaterialOptions.length === 0 ? (
+                                  <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-300">
+                                    {t.shiftPaintNoMaterials}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div>
+                                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
+                                  {t.shiftPaintQty}
+                                </label>
+                                <input
+                                  type="number"
+                                  value={ln.paintQuantity}
+                                  onChange={(e) => updateLine(ln.id, { paintQuantity: e.target.value })}
+                                  placeholder="0"
+                                  min="0"
+                                  step="0.001"
+                                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
+                                  {t.shiftPaintUnitLabel}
+                                </label>
+                                <div className="flex rounded-xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateLine(ln.id, { paintUnit: 'kg' })}
+                                    className={`flex-1 py-2.5 text-xs font-semibold ${ln.paintUnit === 'kg' ? 'bg-indigo-600 text-white' : 'bg-white/80 dark:bg-slate-700 text-slate-600'}`}
+                                  >
+                                    {t.shiftPaintUnitKg}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateLine(ln.id, { paintUnit: 'g' })}
+                                    className={`flex-1 py-2.5 text-xs font-semibold ${ln.paintUnit === 'g' ? 'bg-indigo-600 text-white' : 'bg-white/80 dark:bg-slate-700 text-slate-600'}`}
+                                  >
+                                    {t.shiftPaintUnitG}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Machine reading */}
+                      <div>
+                        <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelReading}</label>
+                        <input
+                          type="text"
+                          value={ln.machineReading}
+                          onChange={(e) => updateLine(ln.id, { machineReading: e.target.value })}
+                          placeholder={t.placeholderReading}
+                          className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"
+                        />
+                      </div>
+
+                      {/* Produced + Defect */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduced}</label>
+                          <input
+                            type="number"
+                            value={ln.producedQty}
+                            onChange={(e) => updateLine(ln.id, { producedQty: e.target.value })}
+                            placeholder="0"
+                            min="0"
+                            className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-red-500 text-xs font-medium mb-1.5">{t.labelDefect}</label>
+                          <input
+                            type="number"
+                            value={ln.defectCount}
+                            onChange={(e) => updateLine(ln.id, { defectCount: e.target.value })}
+                            placeholder="0"
+                            min="0"
+                            className="w-full px-3 py-2.5 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      <div>
+                        <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelNotes}</label>
+                        <input
+                          type="text"
+                          value={ln.notes}
+                          onChange={(e) => updateLine(ln.id, { notes: e.target.value })}
+                          placeholder={t.placeholderNotes}
+                          className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {error && (
@@ -1887,7 +2330,7 @@ export function ShiftWork() {
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelProduct}</label>
                 <div className="flex flex-wrap gap-2">
-                  {PRODUCT_TYPES.map((pt) => (
+                  {Array.from(new Set([recordEditForm.productType, ...productTypes])).map((pt) => (
                     <button
                       key={pt}
                       type="button"
