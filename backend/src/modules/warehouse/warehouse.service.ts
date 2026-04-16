@@ -1274,6 +1274,11 @@ export class WarehouseService {
     };
   }
 
+  /**
+   * Soft-delete (isDeleted) ruxsat: tarixdagi sotuv/ishlab chiqarish yozuvlari
+   * mahsulot satrini saqlab qoladi — bloklash shart emas.
+   * Bloklash: faqat omborda musbat qoldiq yoki xomashyo qoplari.
+   */
   private async ensureProductCanBeDeletedTx(
     tx: Tx,
     itemType: InventoryItemType,
@@ -1281,101 +1286,51 @@ export class WarehouseService {
   ) {
     switch (itemType) {
       case InventoryItemType.RAW_MATERIAL: {
-        const [
-          item,
-          balance,
-          movementCount,
-          consumptionCount,
-          bagCount,
-          recipeCount,
-        ] = await Promise.all([
+        const [item, balance, bagCount] = await Promise.all([
           tx.rawMaterial.findUnique({ where: { id } }),
           tx.inventoryBalance.findFirst({ where: { rawMaterialId: id } }),
-          tx.inventoryMovement.count({ where: { rawMaterialId: id } }),
-          tx.productionConsumption.count({ where: { rawMaterialId: id } }),
           tx.rawMaterialBag.count({ where: { rawMaterialId: id } }),
-          tx.semiProductRawMaterial.count({ where: { rawMaterialId: id } }),
         ]);
 
         if (!item || item.isDeleted) {
           throw new NotFoundException('Product not found');
         }
 
-        if (
-          (balance?.quantity ?? 0) > 0 ||
-          movementCount > 0 ||
-          consumptionCount > 0 ||
-          bagCount > 0 ||
-          recipeCount > 0
-        ) {
-          throw new BadRequestException(
-            'This product is already used and cannot be deleted',
-          );
+        if ((balance?.quantity ?? 0) > 0) {
+          throw new BadRequestException('WAREHOUSE_DELETE_STOCK_REMAINS');
+        }
+        if (bagCount > 0) {
+          throw new BadRequestException('WAREHOUSE_DELETE_RAW_BAGS_EXIST');
         }
         return;
       }
       case InventoryItemType.SEMI_PRODUCT: {
-        const [
-          item,
-          balance,
-          movementCount,
-          consumptionCount,
-          outputCount,
-          orderCount,
-          recipeCount,
-        ] = await Promise.all([
+        const [item, balance] = await Promise.all([
           tx.semiProduct.findUnique({ where: { id } }),
           tx.inventoryBalance.findFirst({ where: { semiProductId: id } }),
-          tx.inventoryMovement.count({ where: { semiProductId: id } }),
-          tx.productionConsumption.count({ where: { semiProductId: id } }),
-          tx.productionRecord.count({ where: { outputSemiProductId: id } }),
-          tx.orderItem.count({ where: { semiProductId: id } }),
-          tx.finishedProductSemiProduct.count({ where: { semiProductId: id } }),
         ]);
 
         if (!item || item.isDeleted) {
           throw new NotFoundException('Product not found');
         }
 
-        if (
-          (balance?.quantity ?? 0) > 0 ||
-          movementCount > 0 ||
-          consumptionCount > 0 ||
-          outputCount > 0 ||
-          orderCount > 0 ||
-          recipeCount > 0
-        ) {
-          throw new BadRequestException(
-            'This product is already used and cannot be deleted',
-          );
+        if ((balance?.quantity ?? 0) > 0) {
+          throw new BadRequestException('WAREHOUSE_DELETE_STOCK_REMAINS');
         }
         return;
       }
       case InventoryItemType.FINISHED_PRODUCT: {
-        const [item, balance, movementCount, outputCount, orderCount] =
-          await Promise.all([
-            tx.finishedProduct.findUnique({ where: { id } }),
-            tx.inventoryBalance.findFirst({ where: { finishedProductId: id } }),
-            tx.inventoryMovement.count({ where: { finishedProductId: id } }),
-            tx.productionRecord.count({
-              where: { outputFinishedProductId: id },
-            }),
-            tx.orderItem.count({ where: { finishedProductId: id } }),
-          ]);
+        const [item, balance] = await Promise.all([
+          tx.finishedProduct.findUnique({ where: { id } }),
+          tx.inventoryBalance.findFirst({ where: { finishedProductId: id } }),
+        ]);
 
         if (!item || item.isDeleted) {
           throw new NotFoundException('Product not found');
         }
 
-        if (
-          (balance?.quantity ?? 0) > 0 ||
-          movementCount > 0 ||
-          outputCount > 0 ||
-          orderCount > 0
-        ) {
-          throw new BadRequestException(
-            'This product is already used and cannot be deleted',
-          );
+        if ((balance?.quantity ?? 0) > 0) {
+          throw new BadRequestException('WAREHOUSE_DELETE_STOCK_REMAINS');
         }
         return;
       }

@@ -43,6 +43,7 @@ export type BankVedomostMinAggregateOutputType = {
   totalExpense: number | null
   status: $Enums.BankVedomostStatus | null
   errorMessage: string | null
+  uploadedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +55,7 @@ export type BankVedomostMaxAggregateOutputType = {
   totalExpense: number | null
   status: $Enums.BankVedomostStatus | null
   errorMessage: string | null
+  uploadedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,6 +67,7 @@ export type BankVedomostCountAggregateOutputType = {
   totalExpense: number
   status: number
   errorMessage: number
+  uploadedById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,6 +91,7 @@ export type BankVedomostMinAggregateInputType = {
   totalExpense?: true
   status?: true
   errorMessage?: true
+  uploadedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -99,6 +103,7 @@ export type BankVedomostMaxAggregateInputType = {
   totalExpense?: true
   status?: true
   errorMessage?: true
+  uploadedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,6 +115,7 @@ export type BankVedomostCountAggregateInputType = {
   totalExpense?: true
   status?: true
   errorMessage?: true
+  uploadedById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -208,6 +214,7 @@ export type BankVedomostGroupByOutputType = {
   totalExpense: number
   status: $Enums.BankVedomostStatus
   errorMessage: string | null
+  uploadedById: string | null
   createdAt: Date
   updatedAt: Date
   _count: BankVedomostCountAggregateOutputType | null
@@ -242,8 +249,10 @@ export type BankVedomostWhereInput = {
   totalExpense?: Prisma.FloatFilter<"BankVedomost"> | number
   status?: Prisma.EnumBankVedomostStatusFilter<"BankVedomost"> | $Enums.BankVedomostStatus
   errorMessage?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
+  uploadedById?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
+  uploadedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   transactions?: Prisma.BankTransactionListRelationFilter
 }
 
@@ -254,8 +263,10 @@ export type BankVedomostOrderByWithRelationInput = {
   totalExpense?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  uploadedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  uploadedBy?: Prisma.UserOrderByWithRelationInput
   transactions?: Prisma.BankTransactionOrderByRelationAggregateInput
 }
 
@@ -269,8 +280,10 @@ export type BankVedomostWhereUniqueInput = Prisma.AtLeast<{
   totalExpense?: Prisma.FloatFilter<"BankVedomost"> | number
   status?: Prisma.EnumBankVedomostStatusFilter<"BankVedomost"> | $Enums.BankVedomostStatus
   errorMessage?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
+  uploadedById?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
+  uploadedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   transactions?: Prisma.BankTransactionListRelationFilter
 }, "id">
 
@@ -281,6 +294,7 @@ export type BankVedomostOrderByWithAggregationInput = {
   totalExpense?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  uploadedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BankVedomostCountOrderByAggregateInput
@@ -300,6 +314,7 @@ export type BankVedomostScalarWhereWithAggregatesInput = {
   totalExpense?: Prisma.FloatWithAggregatesFilter<"BankVedomost"> | number
   status?: Prisma.EnumBankVedomostStatusWithAggregatesFilter<"BankVedomost"> | $Enums.BankVedomostStatus
   errorMessage?: Prisma.StringNullableWithAggregatesFilter<"BankVedomost"> | string | null
+  uploadedById?: Prisma.StringNullableWithAggregatesFilter<"BankVedomost"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BankVedomost"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BankVedomost"> | Date | string
 }
@@ -313,6 +328,7 @@ export type BankVedomostCreateInput = {
   errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedBankVedomostsInput
   transactions?: Prisma.BankTransactionCreateNestedManyWithoutBankVedomostInput
 }
 
@@ -323,6 +339,7 @@ export type BankVedomostUncheckedCreateInput = {
   totalExpense?: number
   status?: $Enums.BankVedomostStatus
   errorMessage?: string | null
+  uploadedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutBankVedomostInput
@@ -337,6 +354,7 @@ export type BankVedomostUpdateInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedBy?: Prisma.UserUpdateOneWithoutUploadedBankVedomostsNestedInput
   transactions?: Prisma.BankTransactionUpdateManyWithoutBankVedomostNestedInput
 }
 
@@ -347,6 +365,7 @@ export type BankVedomostUncheckedUpdateInput = {
   totalExpense?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumBankVedomostStatusFieldUpdateOperationsInput | $Enums.BankVedomostStatus
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutBankVedomostNestedInput
@@ -359,6 +378,7 @@ export type BankVedomostCreateManyInput = {
   totalExpense?: number
   status?: $Enums.BankVedomostStatus
   errorMessage?: string | null
+  uploadedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -381,8 +401,19 @@ export type BankVedomostUncheckedUpdateManyInput = {
   totalExpense?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumBankVedomostStatusFieldUpdateOperationsInput | $Enums.BankVedomostStatus
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankVedomostListRelationFilter = {
+  every?: Prisma.BankVedomostWhereInput
+  some?: Prisma.BankVedomostWhereInput
+  none?: Prisma.BankVedomostWhereInput
+}
+
+export type BankVedomostOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type BankVedomostCountOrderByAggregateInput = {
@@ -392,6 +423,7 @@ export type BankVedomostCountOrderByAggregateInput = {
   totalExpense?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
+  uploadedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +440,7 @@ export type BankVedomostMaxOrderByAggregateInput = {
   totalExpense?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
+  uploadedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -419,6 +452,7 @@ export type BankVedomostMinOrderByAggregateInput = {
   totalExpense?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
+  uploadedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -431,6 +465,48 @@ export type BankVedomostSumOrderByAggregateInput = {
 export type BankVedomostScalarRelationFilter = {
   is?: Prisma.BankVedomostWhereInput
   isNot?: Prisma.BankVedomostWhereInput
+}
+
+export type BankVedomostCreateNestedManyWithoutUploadedByInput = {
+  create?: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput> | Prisma.BankVedomostCreateWithoutUploadedByInput[] | Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput[]
+  connectOrCreate?: Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput | Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput[]
+  createMany?: Prisma.BankVedomostCreateManyUploadedByInputEnvelope
+  connect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+}
+
+export type BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput = {
+  create?: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput> | Prisma.BankVedomostCreateWithoutUploadedByInput[] | Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput[]
+  connectOrCreate?: Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput | Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput[]
+  createMany?: Prisma.BankVedomostCreateManyUploadedByInputEnvelope
+  connect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+}
+
+export type BankVedomostUpdateManyWithoutUploadedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput> | Prisma.BankVedomostCreateWithoutUploadedByInput[] | Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput[]
+  connectOrCreate?: Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput | Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput[]
+  upsert?: Prisma.BankVedomostUpsertWithWhereUniqueWithoutUploadedByInput | Prisma.BankVedomostUpsertWithWhereUniqueWithoutUploadedByInput[]
+  createMany?: Prisma.BankVedomostCreateManyUploadedByInputEnvelope
+  set?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  disconnect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  delete?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  connect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  update?: Prisma.BankVedomostUpdateWithWhereUniqueWithoutUploadedByInput | Prisma.BankVedomostUpdateWithWhereUniqueWithoutUploadedByInput[]
+  updateMany?: Prisma.BankVedomostUpdateManyWithWhereWithoutUploadedByInput | Prisma.BankVedomostUpdateManyWithWhereWithoutUploadedByInput[]
+  deleteMany?: Prisma.BankVedomostScalarWhereInput | Prisma.BankVedomostScalarWhereInput[]
+}
+
+export type BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput> | Prisma.BankVedomostCreateWithoutUploadedByInput[] | Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput[]
+  connectOrCreate?: Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput | Prisma.BankVedomostCreateOrConnectWithoutUploadedByInput[]
+  upsert?: Prisma.BankVedomostUpsertWithWhereUniqueWithoutUploadedByInput | Prisma.BankVedomostUpsertWithWhereUniqueWithoutUploadedByInput[]
+  createMany?: Prisma.BankVedomostCreateManyUploadedByInputEnvelope
+  set?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  disconnect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  delete?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  connect?: Prisma.BankVedomostWhereUniqueInput | Prisma.BankVedomostWhereUniqueInput[]
+  update?: Prisma.BankVedomostUpdateWithWhereUniqueWithoutUploadedByInput | Prisma.BankVedomostUpdateWithWhereUniqueWithoutUploadedByInput[]
+  updateMany?: Prisma.BankVedomostUpdateManyWithWhereWithoutUploadedByInput | Prisma.BankVedomostUpdateManyWithWhereWithoutUploadedByInput[]
+  deleteMany?: Prisma.BankVedomostScalarWhereInput | Prisma.BankVedomostScalarWhereInput[]
 }
 
 export type EnumBankVedomostStatusFieldUpdateOperationsInput = {
@@ -451,6 +527,71 @@ export type BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.BankVedomostUpdateToOneWithWhereWithoutTransactionsInput, Prisma.BankVedomostUpdateWithoutTransactionsInput>, Prisma.BankVedomostUncheckedUpdateWithoutTransactionsInput>
 }
 
+export type BankVedomostCreateWithoutUploadedByInput = {
+  id?: string
+  fileName: string
+  totalIncome?: number
+  totalExpense?: number
+  status?: $Enums.BankVedomostStatus
+  errorMessage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.BankTransactionCreateNestedManyWithoutBankVedomostInput
+}
+
+export type BankVedomostUncheckedCreateWithoutUploadedByInput = {
+  id?: string
+  fileName: string
+  totalIncome?: number
+  totalExpense?: number
+  status?: $Enums.BankVedomostStatus
+  errorMessage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutBankVedomostInput
+}
+
+export type BankVedomostCreateOrConnectWithoutUploadedByInput = {
+  where: Prisma.BankVedomostWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput>
+}
+
+export type BankVedomostCreateManyUploadedByInputEnvelope = {
+  data: Prisma.BankVedomostCreateManyUploadedByInput | Prisma.BankVedomostCreateManyUploadedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type BankVedomostUpsertWithWhereUniqueWithoutUploadedByInput = {
+  where: Prisma.BankVedomostWhereUniqueInput
+  update: Prisma.XOR<Prisma.BankVedomostUpdateWithoutUploadedByInput, Prisma.BankVedomostUncheckedUpdateWithoutUploadedByInput>
+  create: Prisma.XOR<Prisma.BankVedomostCreateWithoutUploadedByInput, Prisma.BankVedomostUncheckedCreateWithoutUploadedByInput>
+}
+
+export type BankVedomostUpdateWithWhereUniqueWithoutUploadedByInput = {
+  where: Prisma.BankVedomostWhereUniqueInput
+  data: Prisma.XOR<Prisma.BankVedomostUpdateWithoutUploadedByInput, Prisma.BankVedomostUncheckedUpdateWithoutUploadedByInput>
+}
+
+export type BankVedomostUpdateManyWithWhereWithoutUploadedByInput = {
+  where: Prisma.BankVedomostScalarWhereInput
+  data: Prisma.XOR<Prisma.BankVedomostUpdateManyMutationInput, Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByInput>
+}
+
+export type BankVedomostScalarWhereInput = {
+  AND?: Prisma.BankVedomostScalarWhereInput | Prisma.BankVedomostScalarWhereInput[]
+  OR?: Prisma.BankVedomostScalarWhereInput[]
+  NOT?: Prisma.BankVedomostScalarWhereInput | Prisma.BankVedomostScalarWhereInput[]
+  id?: Prisma.StringFilter<"BankVedomost"> | string
+  fileName?: Prisma.StringFilter<"BankVedomost"> | string
+  totalIncome?: Prisma.FloatFilter<"BankVedomost"> | number
+  totalExpense?: Prisma.FloatFilter<"BankVedomost"> | number
+  status?: Prisma.EnumBankVedomostStatusFilter<"BankVedomost"> | $Enums.BankVedomostStatus
+  errorMessage?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
+  uploadedById?: Prisma.StringNullableFilter<"BankVedomost"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"BankVedomost"> | Date | string
+}
+
 export type BankVedomostCreateWithoutTransactionsInput = {
   id?: string
   fileName: string
@@ -460,6 +601,7 @@ export type BankVedomostCreateWithoutTransactionsInput = {
   errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedBankVedomostsInput
 }
 
 export type BankVedomostUncheckedCreateWithoutTransactionsInput = {
@@ -469,6 +611,7 @@ export type BankVedomostUncheckedCreateWithoutTransactionsInput = {
   totalExpense?: number
   status?: $Enums.BankVedomostStatus
   errorMessage?: string | null
+  uploadedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -498,9 +641,57 @@ export type BankVedomostUpdateWithoutTransactionsInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedBy?: Prisma.UserUpdateOneWithoutUploadedBankVedomostsNestedInput
 }
 
 export type BankVedomostUncheckedUpdateWithoutTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  totalIncome?: Prisma.FloatFieldUpdateOperationsInput | number
+  totalExpense?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBankVedomostStatusFieldUpdateOperationsInput | $Enums.BankVedomostStatus
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankVedomostCreateManyUploadedByInput = {
+  id?: string
+  fileName: string
+  totalIncome?: number
+  totalExpense?: number
+  status?: $Enums.BankVedomostStatus
+  errorMessage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankVedomostUpdateWithoutUploadedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  totalIncome?: Prisma.FloatFieldUpdateOperationsInput | number
+  totalExpense?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBankVedomostStatusFieldUpdateOperationsInput | $Enums.BankVedomostStatus
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.BankTransactionUpdateManyWithoutBankVedomostNestedInput
+}
+
+export type BankVedomostUncheckedUpdateWithoutUploadedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  totalIncome?: Prisma.FloatFieldUpdateOperationsInput | number
+  totalExpense?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumBankVedomostStatusFieldUpdateOperationsInput | $Enums.BankVedomostStatus
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutBankVedomostNestedInput
+}
+
+export type BankVedomostUncheckedUpdateManyWithoutUploadedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   totalIncome?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -549,8 +740,10 @@ export type BankVedomostSelect<ExtArgs extends runtime.Types.Extensions.Internal
   totalExpense?: boolean
   status?: boolean
   errorMessage?: boolean
+  uploadedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
   transactions?: boolean | Prisma.BankVedomost$transactionsArgs<ExtArgs>
   _count?: boolean | Prisma.BankVedomostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bankVedomost"]>
@@ -562,8 +755,10 @@ export type BankVedomostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   totalExpense?: boolean
   status?: boolean
   errorMessage?: boolean
+  uploadedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
 }, ExtArgs["result"]["bankVedomost"]>
 
 export type BankVedomostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -573,8 +768,10 @@ export type BankVedomostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   totalExpense?: boolean
   status?: boolean
   errorMessage?: boolean
+  uploadedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
 }, ExtArgs["result"]["bankVedomost"]>
 
 export type BankVedomostSelectScalar = {
@@ -584,21 +781,28 @@ export type BankVedomostSelectScalar = {
   totalExpense?: boolean
   status?: boolean
   errorMessage?: boolean
+  uploadedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BankVedomostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fileName" | "totalIncome" | "totalExpense" | "status" | "errorMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["bankVedomost"]>
+export type BankVedomostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fileName" | "totalIncome" | "totalExpense" | "status" | "errorMessage" | "uploadedById" | "createdAt" | "updatedAt", ExtArgs["result"]["bankVedomost"]>
 export type BankVedomostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
   transactions?: boolean | Prisma.BankVedomost$transactionsArgs<ExtArgs>
   _count?: boolean | Prisma.BankVedomostCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type BankVedomostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type BankVedomostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type BankVedomostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
+}
+export type BankVedomostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  uploadedBy?: boolean | Prisma.BankVedomost$uploadedByArgs<ExtArgs>
+}
 
 export type $BankVedomostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BankVedomost"
   objects: {
+    uploadedBy: Prisma.$UserPayload<ExtArgs> | null
     transactions: Prisma.$BankTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -608,6 +812,7 @@ export type $BankVedomostPayload<ExtArgs extends runtime.Types.Extensions.Intern
     totalExpense: number
     status: $Enums.BankVedomostStatus
     errorMessage: string | null
+    uploadedById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["bankVedomost"]>
@@ -1004,6 +1209,7 @@ readonly fields: BankVedomostFieldRefs;
  */
 export interface Prisma__BankVedomostClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  uploadedBy<T extends Prisma.BankVedomost$uploadedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankVedomost$uploadedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   transactions<T extends Prisma.BankVedomost$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankVedomost$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1040,6 +1246,7 @@ export interface BankVedomostFieldRefs {
   readonly totalExpense: Prisma.FieldRef<"BankVedomost", 'Float'>
   readonly status: Prisma.FieldRef<"BankVedomost", 'BankVedomostStatus'>
   readonly errorMessage: Prisma.FieldRef<"BankVedomost", 'String'>
+  readonly uploadedById: Prisma.FieldRef<"BankVedomost", 'String'>
   readonly createdAt: Prisma.FieldRef<"BankVedomost", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BankVedomost", 'DateTime'>
 }
@@ -1296,6 +1503,10 @@ export type BankVedomostCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    */
   data: Prisma.BankVedomostCreateManyInput | Prisma.BankVedomostCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankVedomostIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1366,6 +1577,10 @@ export type BankVedomostUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many BankVedomosts to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankVedomostIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1432,6 +1647,25 @@ export type BankVedomostDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many BankVedomosts to delete.
    */
   limit?: number
+}
+
+/**
+ * BankVedomost.uploadedBy
+ */
+export type BankVedomost$uploadedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

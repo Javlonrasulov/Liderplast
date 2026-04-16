@@ -289,6 +289,8 @@ export interface T {
   whTotalProd: string;
   whInWarehouse: string;
   whDetailed: string;
+  /** Katalogda slot yo‘q — batafsil qoldiq kartalari bo‘sh */
+  whStockBreakdownEmpty: string;
   whSemiStats: string;
   whFinalStats: string;
   whProduced: string;
@@ -317,6 +319,10 @@ export interface T {
   whNameRequired: string;
   whMetricRequired: string;
   whRequestError: string;
+  /** Omborda qoldiq bor — o‘chirish mumkin emas */
+  whErrDeleteStockRemains: string;
+  /** Xomashyoga bog‘langan qoplar bor */
+  whErrDeleteRawBags: string;
   whSemi18Label: string;
   whSemi20Label: string;
   whFinal05Label: string;
@@ -364,6 +370,8 @@ export interface T {
   slSemiCat: string;
   slFinalCat: string;
   slProductType: string;
+  /** Sotuv: katalogda sotiladigan mahsulot yo‘q */
+  slNoCatalogProducts: string;
   slAvailableStock: string;
   slAvailableProducts: string;
   slNewClient: string;
@@ -558,6 +566,12 @@ export interface T {
   prBankUploadHint: string;
   prBankUploadAction: string;
   prBankUploadSuccess: string;
+  prBankUploadDate: string;
+  prBankUploadedBy: string;
+  prBankStatusDraft: string;
+  prBankStatusParsed: string;
+  prBankStatusConfirmed: string;
+  prBankStatusRejected: string;
   prBankVedomostList: string;
   prBankNoVedomost: string;
   prBankTransactions: string;
@@ -591,6 +605,10 @@ export interface T {
   prBankCreateEmployeeTitle: string;
   prBankCreateEmployeeDesc: string;
   prBankCreateWarning: string;
+  prBankRejectedTitle: string;
+  prBankRejectedExplain: string;
+  prBankRejectedEmptyTx: string;
+  prBankTechnicalDetails: string;
 }
 
 // ======================== UZBEK CYRILLIC ========================
@@ -872,6 +890,8 @@ const uz_cyrillic: T = {
   whTotalProd: 'Жами маҳсулот',
   whInWarehouse: 'Омборда',
   whDetailed: 'Батафсил Омбор Ҳолати',
+  whStockBreakdownEmpty:
+    'Бу ерда фақат каталогга қўшилган махсулот турлари бўйича карта кўринади. Аввал махсулот қўшинг.',
   whSemiStats: 'Қолип статистикаси',
   whFinalStats: 'Бакалашка статистикаси',
   whProduced: 'Жами ишлаб чиқарилган',
@@ -900,6 +920,10 @@ const uz_cyrillic: T = {
   whNameRequired: 'Маҳсулот номи мажбурий',
   whMetricRequired: 'Ўлчам майдонини тўғри киритинг',
   whRequestError: 'Маҳсулот амалиётида хатолик юз берди',
+  whErrDeleteStockRemains:
+    'Омборда қолдиқ бор. Аввал қолдиқни нолга туширинг, кейин ўчиринг.',
+  whErrDeleteRawBags:
+    'Бу хомашё турига боғланган қоплар мавжуд. Аввал қопларни ёпинг ёки бошқа турига уланг.',
   whSemi18Label: '18g қолип',
   whSemi20Label: '20g қолип',
   whFinal05Label: '0.5L',
@@ -946,6 +970,8 @@ const uz_cyrillic: T = {
   slSemiCat: 'Яримтайёр (Қолип)',
   slFinalCat: 'Тайёр (Бакалашка)',
   slProductType: 'Маҳсулот тури',
+  slNoCatalogProducts:
+    'Каталогда сотиш учун махсулот йўқ. Аввал «Омбор»дан махсулот қўшинг.',
   slAvailableStock: 'мавжуд',
   slAvailableProducts: 'Мавжуд Маҳсулотлар',
   slNewClient: 'Янги Клиент',
@@ -1136,6 +1162,12 @@ const uz_cyrillic: T = {
   prBankUploadHint: 'Биринчи sheet автоматик ўқилади',
   prBankUploadAction: '.xlsx файл танлаш',
   prBankUploadSuccess: 'Обортка файли муваффақиятли юкланди',
+  prBankUploadDate: 'Юкланган сана',
+  prBankUploadedBy: 'Юкловчи',
+  prBankStatusDraft: 'Қораловма',
+  prBankStatusParsed: 'Қайта ишланган',
+  prBankStatusConfirmed: 'Тасдиқланган',
+  prBankStatusRejected: 'Рад этилган',
   prBankVedomostList: 'Банк ведомостлари',
   prBankNoVedomost: 'Ҳозирча банк ведомости йўқ',
   prBankTransactions: 'Транзакциялар',
@@ -1169,6 +1201,11 @@ const uz_cyrillic: T = {
   prBankCreateEmployeeTitle: 'Ходимни тизимга қўшиш',
   prBankCreateEmployeeDesc: 'Ушбу олувчини ходим сифатида қўшасизми?',
   prBankCreateWarning: 'Рад этсангиз, ушбу ўтказма тизимда клиент/ходимга боғланмайди ва кейинги ҳисоботлар ҳамда солиштиришларда номувофиқлик қолиши мумкин.',
+  prBankRejectedTitle: 'Файл импорти якунланмади',
+  prBankRejectedExplain:
+    'Банк обороткаси талаб қилинган форматда ўқилмади ёки сақлашда хатолик бўлди. Транзакциялар базага ёзилмади — шу сабабли рўйхат бўш. Агар хабарда «database» ёки «schema» бўлса, ишлаб чиқувчи `prisma db push` ни ишга тушириши керак.',
+  prBankRejectedEmptyTx: 'Рад этилган ведомостда транзакциялар йўқ.',
+  prBankTechnicalDetails: 'Техник тафсилотлар (ихтиёрий)',
 };
 
 // ======================== UZBEK LATIN ========================
@@ -1450,6 +1487,8 @@ const uz_latin: T = {
   whTotalProd: 'Jami mahsulot',
   whInWarehouse: 'Omborda',
   whDetailed: 'Batafsil Ombor Holati',
+  whStockBreakdownEmpty:
+    'Bu yerda faqat katalogga qo‘shilgan mahsulot turlari bo‘yicha karta ko‘rinadi. Avval mahsulot qo‘shing.',
   whSemiStats: 'Qolip statistikasi',
   whFinalStats: 'Bakalashka statistikasi',
   whProduced: 'Jami ishlab chiqarilgan',
@@ -1478,6 +1517,10 @@ const uz_latin: T = {
   whNameRequired: 'Mahsulot nomi majburiy',
   whMetricRequired: 'O\'lcham maydonini to\'g\'ri kiriting',
   whRequestError: 'Mahsulot amaliyotida xatolik yuz berdi',
+  whErrDeleteStockRemains:
+    'Omborda qoldiq bor. Avval qoldiqni nolga tushiring, keyin o‘chiring.',
+  whErrDeleteRawBags:
+    'Bu xomashyo turiga bog‘langan qoplar mavjud. Avval qoplarni yoping yoki boshqa turga ulang.',
   whSemi18Label: '18g qolip',
   whSemi20Label: '20g qolip',
   whFinal05Label: '0.5L',
@@ -1524,6 +1567,8 @@ const uz_latin: T = {
   slSemiCat: 'Yarim tayyor (Qolip)',
   slFinalCat: 'Tayyor (Bakalashka)',
   slProductType: 'Mahsulot turi',
+  slNoCatalogProducts:
+    'Katalogda sotish uchun mahsulot yo‘q. Avval «Ombor»dan mahsulot qo‘shing.',
   slAvailableStock: 'mavjud',
   slAvailableProducts: 'Mavjud Mahsulotlar',
   slNewClient: 'Yangi Klient',
@@ -1714,6 +1759,12 @@ const uz_latin: T = {
   prBankUploadHint: 'Birinchi sheet avtomatik o‘qiladi',
   prBankUploadAction: '.xlsx fayl tanlash',
   prBankUploadSuccess: 'Oborotka fayli muvaffaqiyatli yuklandi',
+  prBankUploadDate: 'Yuklangan sana',
+  prBankUploadedBy: 'Yuklovchi',
+  prBankStatusDraft: 'Qoralovma',
+  prBankStatusParsed: 'Qayta ishlangan',
+  prBankStatusConfirmed: 'Tasdiqlangan',
+  prBankStatusRejected: 'Rad etilgan',
   prBankVedomostList: 'Bank vedemostlar',
   prBankNoVedomost: 'Hozircha bank vedemosti yo‘q',
   prBankTransactions: 'Tranzaksiyalar',
@@ -1747,6 +1798,11 @@ const uz_latin: T = {
   prBankCreateEmployeeTitle: 'Xodimni tizimga qo‘shish',
   prBankCreateEmployeeDesc: 'Ushbu oluvchini xodim sifatida qo‘shasizmi?',
   prBankCreateWarning: 'Yo‘q desangiz, ushbu o‘tkazma tizimda klient/xodimga bog‘lanmaydi va keyingi hisobotlar hamda solishtirishlarda xatolik xavfi saqlanib qoladi.',
+  prBankRejectedTitle: 'Fayl importi yakunlanmadi',
+  prBankRejectedExplain:
+    'Bank oborotkasi talab qilingan formatda o‘qilmadi yoki saqlashda xatolik bo‘ldi. Tranzaksiyalar bazaga yozilmadi — shu sababli ro‘yxat bo‘sh. Agar xabarda «database» yoki «schema» bo‘lsa, ishlab chiquvchi `prisma db push` ni ishga tushirishi kerak.',
+  prBankRejectedEmptyTx: 'Rad etilgan vedemostda tranzaksiyalar yo‘q.',
+  prBankTechnicalDetails: 'Texnik tafsilotlar (ixtiyoriy)',
 };
 
 // ======================== RUSSIAN ========================
@@ -2028,6 +2084,8 @@ const ru: T = {
   whTotalProd: 'Всего продукции',
   whInWarehouse: 'На складе',
   whDetailed: 'Подробное состояние склада',
+  whStockBreakdownEmpty:
+    'Здесь отображаются только позиции по типам из каталога. Сначала добавьте продукт.',
   whSemiStats: 'Статистика заготовок',
   whFinalStats: 'Статистика бутылок',
   whProduced: 'Всего произведено',
@@ -2056,6 +2114,10 @@ const ru: T = {
   whNameRequired: 'Название продукта обязательно',
   whMetricRequired: 'Корректно заполните поле объёма или веса',
   whRequestError: 'Произошла ошибка при операции с продуктом',
+  whErrDeleteStockRemains:
+    'На складе есть остаток. Сначала обнулите остаток, затем удалите.',
+  whErrDeleteRawBags:
+    'Есть мешки, привязанные к этому сырью. Сначала закройте мешки или переключите на другой тип.',
   whSemi18Label: 'Заготовка 18g',
   whSemi20Label: 'Заготовка 20g',
   whFinal05Label: '0.5L',
@@ -2102,6 +2164,8 @@ const ru: T = {
   slSemiCat: 'Полуфабрикат (заготовки)',
   slFinalCat: 'Готовый продукт (бутылки)',
   slProductType: 'Тип продукта',
+  slNoCatalogProducts:
+    'В каталоге нет товаров для продажи. Сначала добавьте продукт на «Складе».',
   slAvailableStock: 'доступно',
   slAvailableProducts: 'Доступные продукты',
   slNewClient: 'Новый клиент',
@@ -2292,6 +2356,12 @@ const ru: T = {
   prBankUploadHint: 'Автоматически читается первый лист',
   prBankUploadAction: 'Выбрать .xlsx файл',
   prBankUploadSuccess: 'Файл оборотки успешно загружен',
+  prBankUploadDate: 'Дата загрузки',
+  prBankUploadedBy: 'Загрузил',
+  prBankStatusDraft: 'Черновик',
+  prBankStatusParsed: 'Обработано',
+  prBankStatusConfirmed: 'Подтверждено',
+  prBankStatusRejected: 'Отклонено',
   prBankVedomostList: 'Банковские ведомости',
   prBankNoVedomost: 'Банковские ведомости пока отсутствуют',
   prBankTransactions: 'Транзакции',
@@ -2325,6 +2395,11 @@ const ru: T = {
   prBankCreateEmployeeTitle: 'Добавить сотрудника в систему',
   prBankCreateEmployeeDesc: 'Добавить этого получателя как сотрудника?',
   prBankCreateWarning: 'Если отказаться, перевод останется не связанным с клиентом/сотрудником и это может вызвать ошибки или расхождения в отчётах и сверке.',
+  prBankRejectedTitle: 'Импорт файла не выполнен',
+  prBankRejectedExplain:
+    'Выписка не была разобрана в ожидаемом формате или при сохранении произошла ошибка. Транзакции в базу не записаны — поэтому список пуст. Если в сообщении есть «database» или «schema», разработчику нужно выполнить `prisma db push`.',
+  prBankRejectedEmptyTx: 'У отклонённой ведомости нет транзакций.',
+  prBankTechnicalDetails: 'Технические подробности (по желанию)',
 };
 
 export const translations: Record<Language, T> = {

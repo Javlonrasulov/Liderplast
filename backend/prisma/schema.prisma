@@ -153,6 +153,7 @@ model User {
   bagWriteoffs        BagWriteoff[]       @relation("BagWriteoffCreator")
   productAuditLogs    ProductAuditLog[]   @relation("ProductAuditActor")
   bankTransactions    BankTransaction[]
+  uploadedBankVedomosts BankVedomost[]
 
   @@index([stir])
 }
@@ -600,9 +601,13 @@ model BankVedomost {
   totalExpense Float               @default(0)
   status       BankVedomostStatus  @default(DRAFT)
   errorMessage String?
+  uploadedById String?
+  uploadedBy   User?               @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   transactions BankTransaction[]
+
+  @@index([uploadedById])
 }
 
 model BankTransaction {

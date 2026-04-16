@@ -358,6 +358,8 @@ export interface BankVedomost {
   totalExpense: number;
   status: 'draft' | 'parsed' | 'confirmed' | 'rejected';
   errorMessage?: string | null;
+  uploadedById?: string | null;
+  uploadedByName?: string | null;
   transactionsCount: number;
   createdAt: string;
   updatedAt: string;
@@ -914,6 +916,8 @@ type BackendBankVedomost = {
   totalExpense: number;
   status: 'DRAFT' | 'PARSED' | 'CONFIRMED' | 'REJECTED';
   errorMessage?: string | null;
+  uploadedById?: string | null;
+  uploadedBy?: { id: string; fullName: string } | null;
   createdAt: string;
   updatedAt: string;
   _count?: { transactions: number };
@@ -992,6 +996,8 @@ function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
     totalExpense: item.totalExpense,
     status: normalizeBankVedomostStatus(item.status),
     errorMessage: item.errorMessage ?? null,
+    uploadedById: item.uploadedById ?? null,
+    uploadedByName: item.uploadedBy?.fullName ?? null,
     transactionsCount:
       item._count?.transactions ?? item.transactions?.length ?? 0,
     createdAt: item.createdAt,

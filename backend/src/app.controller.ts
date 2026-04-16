@@ -8,7 +8,7 @@ export class AppController {
 
   @Get()
   @Public()
-  getHealth() {
+  async getHealth() {
     return this.appService.getHealth();
   }
 }

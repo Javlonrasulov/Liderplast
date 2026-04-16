@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatCurrency, formatNumber, TODAY } from '../utils/format';
+import { formatCurrency, formatDateTime, formatNumber, TODAY } from '../utils/format';
 import type { Employee, EmployeeProductRate } from '../store/erp-store';
 import {
   AlertDialog,
@@ -749,6 +749,16 @@ function BankTab() {
                         : item.status === 'rejected'
                           ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
                           : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+                  const statusLabel =
+                    item.status === 'draft'
+                      ? t.prBankStatusDraft
+                      : item.status === 'parsed'
+                        ? t.prBankStatusParsed
+                        : item.status === 'confirmed'
+                          ? t.prBankStatusConfirmed
+                          : item.status === 'rejected'
+                            ? t.prBankStatusRejected
+                            : item.status;
 
                   return (
                     <button
@@ -769,9 +779,20 @@ function BankTab() {
                           <p className="mt-1 text-xs text-slate-400">
                             {item.transactionsCount} {t.prBankTransactions}
                           </p>
+                          <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                            <span className="font-medium text-slate-500 dark:text-slate-400">
+                              {t.prBankUploadDate}:
+                            </span>{' '}
+                            {formatDateTime(item.createdAt)}
+                            <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+                            <span className="font-medium text-slate-500 dark:text-slate-400">
+                              {t.prBankUploadedBy}:
+                            </span>{' '}
+                            {item.uploadedByName ?? '—'}
+                          </p>
                         </div>
-                        <span className={`rounded-lg px-2 py-1 text-[10px] font-semibold uppercase ${statusColor}`}>
-                          {item.status}
+                        <span className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${statusColor}`}>
+                          {statusLabel}
                         </span>
                       </div>
                       <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
@@ -850,13 +871,45 @@ function BankTab() {
                 <p className="text-xs text-slate-400">
                   {selectedVedomost?.fileName ?? t.prBankNoSelection}
                 </p>
+                {selectedVedomost && (
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">
+                      {t.prBankUploadDate}:
+                    </span>{' '}
+                    {formatDateTime(selectedVedomost.createdAt)}
+                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+                    <span className="font-medium text-slate-500 dark:text-slate-400">
+                      {t.prBankUploadedBy}:
+                    </span>{' '}
+                    {selectedVedomost.uploadedByName ?? '—'}
+                  </p>
+                )}
               </div>
-              {selectedVedomost?.errorMessage && (
+              {selectedVedomost?.errorMessage && selectedVedomost.status !== 'rejected' && (
                 <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
                   {selectedVedomost.errorMessage}
                 </span>
               )}
             </div>
+
+            {selectedVedomost?.status === 'rejected' && (
+              <div className="mx-5 mb-4 rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-sm text-rose-900 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100">
+                <p className="font-semibold text-rose-950 dark:text-rose-50">{t.prBankRejectedTitle}</p>
+                <p className="mt-2 text-xs leading-relaxed text-rose-800/95 dark:text-rose-200/90">
+                  {t.prBankRejectedExplain}
+                </p>
+                {selectedVedomost.errorMessage ? (
+                  <details className="mt-3 text-xs">
+                    <summary className="cursor-pointer font-medium text-rose-800 underline decoration-rose-300 decoration-dotted underline-offset-2 hover:text-rose-950 dark:text-rose-200 dark:hover:text-white">
+                      {t.prBankTechnicalDetails}
+                    </summary>
+                    <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-rose-200/80 bg-white/90 p-3 font-mono text-[11px] text-slate-700 dark:border-rose-800 dark:bg-slate-900/80 dark:text-slate-200">
+                      {selectedVedomost.errorMessage}
+                    </pre>
+                  </details>
+                ) : null}
+              </div>
+            )}
 
             {!selectedVedomost ? (
               <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
@@ -941,7 +994,9 @@ function BankTab() {
               </div>
             ) : (
               <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-                {t.prBankNoTransactions}
+                {selectedVedomost.status === 'rejected'
+                  ? t.prBankRejectedEmptyTx
+                  : t.prBankNoTransactions}
               </div>
             )}
           </div>

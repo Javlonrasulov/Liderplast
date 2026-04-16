@@ -21,6 +21,11 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { calcPercent, formatDate, formatNumber } from '../utils/format';
+import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
+import {
+  finalBucketFromCatalog,
+  semiBucketFromCatalog,
+} from '../utils/warehouse-catalog-buckets';
 import { Button } from '../components/ui/button';
 import {
   AlertDialog,
@@ -236,14 +241,137 @@ export function Warehouse() {
       ),
     [productCatalog],
   );
+  const finishedProducts = useMemo(
+    () =>
+      productCatalog.filter(
+        (item): item is FinishedProductCatalogItem =>
+          item.itemType === 'FINISHED_PRODUCT',
+      ),
+    [productCatalog],
+  );
+
+  const hasCatalogRaw = rawMaterials.length > 0;
+  const hasCatalogSemi18 = semiProducts.some(
+    (p) => semiBucketFromCatalog(p) === '18g',
+  );
+  const hasCatalogSemi20 = semiProducts.some(
+    (p) => semiBucketFromCatalog(p) === '20g',
+  );
+  const hasCatalogSemi = hasCatalogSemi18 || hasCatalogSemi20;
+
+  const hasCatalogFinal05 = finishedProducts.some(
+    (p) => finalBucketFromCatalog(p) === '0.5L',
+  );
+  const hasCatalogFinal1 = finishedProducts.some(
+    (p) => finalBucketFromCatalog(p) === '1L',
+  );
+  const hasCatalogFinal5 = finishedProducts.some(
+    (p) => finalBucketFromCatalog(p) === '5L',
+  );
+  const hasCatalogFinal =
+    hasCatalogFinal05 || hasCatalogFinal1 || hasCatalogFinal5;
+
+  const totalSemiInCatalogStock =
+    (hasCatalogSemi18 ? semiProductStock['18g'] : 0) +
+    (hasCatalogSemi20 ? semiProductStock['20g'] : 0);
+  const totalFinalInCatalogStock =
+    (hasCatalogFinal05 ? finalProductStock['0.5L'] : 0) +
+    (hasCatalogFinal1 ? finalProductStock['1L'] : 0) +
+    (hasCatalogFinal5 ? finalProductStock['5L'] : 0);
+  const totalPiecesInCatalogStock =
+    totalSemiInCatalogStock + totalFinalInCatalogStock;
+
+  const hasAnyStockDetailCard =
+    hasCatalogRaw ||
+    hasCatalogSemi18 ||
+    hasCatalogSemi20 ||
+    hasCatalogFinal05 ||
+    hasCatalogFinal1 ||
+    hasCatalogFinal5;
+
+  const warehouseSummaryCards = useMemo(() => {
+    const cards: Array<{
+      key: string;
+      label: string;
+      sub: string;
+      val: string;
+      from: string;
+      shadow: string;
+      icon: typeof Droplets;
+    }> = [];
+    if (hasCatalogRaw) {
+      cards.push({
+        key: 'raw',
+        label: t.whMaterial,
+        sub: `${calcPercent(rawMaterialStock, 5000).toFixed(0)}% ${t.whInWarehouse}`,
+        val: `${formatNumber(rawMaterialStock)} ${t.unitKg}`,
+        from: 'from-blue-500 to-blue-600',
+        shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
+        icon: Droplets,
+      });
+    }
+    if (hasCatalogSemi) {
+      const subParts: string[] = [];
+      if (hasCatalogSemi18) subParts.push(t.whSemi18Label);
+      if (hasCatalogSemi20) subParts.push(t.whSemi20Label);
+      cards.push({
+        key: 'semi',
+        label: t.whSemi,
+        sub: subParts.join(' + '),
+        val: `${formatNumber(totalSemiInCatalogStock)} ${t.unitPiece}`,
+        from: 'from-purple-500 to-purple-600',
+        shadow: 'shadow-purple-200 dark:shadow-purple-900/30',
+        icon: Factory,
+      });
+    }
+    if (hasCatalogFinal) {
+      const subParts: string[] = [];
+      if (hasCatalogFinal05) subParts.push(t.whFinal05Label);
+      if (hasCatalogFinal1) subParts.push(t.whFinal1Label);
+      if (hasCatalogFinal5) subParts.push(t.whFinal5Label);
+      cards.push({
+        key: 'final',
+        label: t.whFinal,
+        sub: subParts.join(' + '),
+        val: `${formatNumber(totalFinalInCatalogStock)} ${t.unitPiece}`,
+        from: 'from-cyan-500 to-cyan-600',
+        shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30',
+        icon: Package,
+      });
+    }
+    if (hasCatalogSemi || hasCatalogFinal) {
+      cards.push({
+        key: 'total-pieces',
+        label: t.whTotalProd,
+        sub: t.whInWarehouse,
+        val: `${formatNumber(totalPiecesInCatalogStock)} ${t.unitPiece}`,
+        from: 'from-emerald-500 to-emerald-600',
+        shadow: 'shadow-emerald-200 dark:shadow-emerald-900/30',
+        icon: Boxes,
+      });
+    }
+    return cards;
+  }, [
+    hasCatalogRaw,
+    hasCatalogSemi,
+    hasCatalogFinal,
+    hasCatalogSemi18,
+    hasCatalogSemi20,
+    hasCatalogFinal05,
+    hasCatalogFinal1,
+    hasCatalogFinal5,
+    rawMaterialStock,
+    totalSemiInCatalogStock,
+    totalFinalInCatalogStock,
+    totalPiecesInCatalogStock,
+    t,
+  ]);
+
   const availableFinalMachines = useMemo(
     () => state.machines.filter((machine) => machine.type === 'final'),
     [state.machines],
   );
 
-  const totalSemi = semiProductStock['18g'] + semiProductStock['20g'];
-  const totalFinal =
-    finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
   const totalSemiProduced = state.semiProductBatches.reduce(
     (sum, batch) => sum + batch.quantity,
     0,
@@ -476,7 +604,11 @@ export function Warehouse() {
 
       closeEditor();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.whRequestError);
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -500,7 +632,11 @@ export function Warehouse() {
         closeEditor();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.whRequestError);
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -522,12 +658,19 @@ export function Warehouse() {
             value={form.itemType}
             onValueChange={(value) => setFormType(value as ProductFormType)}
           >
-            <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
+            <SelectTrigger className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              position="popper"
+              className="z-[120] max-h-72 rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+            >
               {typeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm focus:bg-indigo-50 focus:text-indigo-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:focus:bg-indigo-950/40 dark:focus:text-indigo-100 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white"
+                >
                   {option.label} ({option.count})
                 </SelectItem>
               ))}
@@ -619,27 +762,46 @@ export function Warehouse() {
                 key={`${index}-${item.rawMaterialId}`}
                 className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
               >
-                <select
-                  value={item.rawMaterialId}
-                  onChange={(e) =>
+                <Select
+                  value={item.rawMaterialId || '__none__'}
+                  onValueChange={(value) =>
                     setForm((prev) => ({
                       ...prev,
                       rawMaterials: prev.rawMaterials.map((current, currentIndex) =>
                         currentIndex === index
-                          ? { ...current, rawMaterialId: e.target.value }
+                          ? {
+                              ...current,
+                              rawMaterialId: value === '__none__' ? '' : value,
+                            }
                           : current,
                       ),
                     }))
                   }
-                  className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
                 >
-                  <option value="">{t.whSelectRawMaterial}</option>
-                  {rawMaterials.map((rawMaterial) => (
-                    <option key={rawMaterial.id} value={rawMaterial.id}>
-                      {rawMaterial.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
+                    <SelectValue placeholder={t.whSelectRawMaterial} />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    className="z-[120] max-h-60 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                  >
+                    <SelectItem
+                      value="__none__"
+                      className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm text-slate-500 focus:bg-slate-100 focus:text-slate-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:text-slate-400 dark:focus:bg-slate-800 dark:focus:text-white dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white"
+                    >
+                      {t.whSelectRawMaterial}
+                    </SelectItem>
+                    {rawMaterials.map((rawMaterial) => (
+                      <SelectItem
+                        key={rawMaterial.id}
+                        value={rawMaterial.id}
+                        className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm focus:bg-indigo-50 focus:text-indigo-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:focus:bg-indigo-950/40 dark:focus:text-indigo-100 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white"
+                      >
+                        {rawMaterial.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <input
                   type="number"
                   min="0"
@@ -771,202 +933,234 @@ export function Warehouse() {
 
   return (
     <div className="space-y-6 p-4 lg:p-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[
-          {
-            label: t.whMaterial,
-            sub: `${calcPercent(rawMaterialStock, 5000).toFixed(0)}% ${t.whInWarehouse}`,
-            val: `${formatNumber(rawMaterialStock)} ${t.unitKg}`,
-            from: 'from-blue-500 to-blue-600',
-            shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
-            icon: Droplets,
-          },
-          {
-            label: t.whSemi,
-            sub: `${t.whSemi18Label} + ${t.whSemi20Label}`,
-            val: `${formatNumber(totalSemi)} ${t.unitPiece}`,
-            from: 'from-purple-500 to-purple-600',
-            shadow: 'shadow-purple-200 dark:shadow-purple-900/30',
-            icon: Factory,
-          },
-          {
-            label: t.whFinal,
-            sub: `${t.whFinal05Label} + ${t.whFinal1Label} + ${t.whFinal5Label}`,
-            val: `${formatNumber(totalFinal)} ${t.unitPiece}`,
-            from: 'from-cyan-500 to-cyan-600',
-            shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30',
-            icon: Package,
-          },
-          {
-            label: t.whTotalProd,
-            sub: t.whInWarehouse,
-            val: `${formatNumber(totalSemi + totalFinal)} ${t.unitPiece}`,
-            from: 'from-emerald-500 to-emerald-600',
-            shadow: 'shadow-emerald-200 dark:shadow-emerald-900/30',
-            icon: Boxes,
-          },
-        ].map((card) => (
-          <div
-            key={card.label}
-            className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
-          >
-            <card.icon size={20} className="mb-3 opacity-80" />
-            <p className="mb-1 text-xs text-white/80">{card.label}</p>
-            <p className="text-2xl font-bold">{card.val}</p>
-            <p className="mt-1 text-xs text-white/70">{card.sub}</p>
-          </div>
-        ))}
-      </div>
+      {warehouseSummaryCards.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {warehouseSummaryCards.map((card) => (
+            <div
+              key={card.key}
+              className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
+            >
+              <card.icon size={20} className="mb-3 opacity-80" />
+              <p className="mb-1 text-xs text-white/80">{card.label}</p>
+              <p className="text-2xl font-bold">{card.val}</p>
+              <p className="mt-1 text-xs text-white/70">{card.sub}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+          {t.whStockBreakdownEmpty}
+        </p>
+      )}
 
       <div>
         <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
           {t.whDetailed}
         </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StockItem
-            label={t.whMaterial}
-            value={rawMaterialStock}
-            max={5000}
-            unit={t.unitKg}
-            color={rawMaterialStock < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
-            bgColor="bg-blue-100 dark:bg-blue-900/30"
-            icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
-            warning={rawMaterialStock < 1000}
-            maxLabel={t.whMaxLabel}
-          />
-          <StockItem
-            label={t.whSemi18Label}
-            value={semiProductStock['18g']}
-            max={100000}
-            unit={t.unitPiece}
-            color="bg-purple-500"
-            bgColor="bg-purple-100 dark:bg-purple-900/30"
-            icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />}
-            maxLabel={t.whMaxLabel}
-          />
-          <StockItem
-            label={t.whSemi20Label}
-            value={semiProductStock['20g']}
-            max={60000}
-            unit={t.unitPiece}
-            color="bg-violet-500"
-            bgColor="bg-violet-100 dark:bg-violet-900/30"
-            icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />}
-            maxLabel={t.whMaxLabel}
-          />
-          <StockItem
-            label={t.whFinal05Label}
-            value={finalProductStock['0.5L']}
-            max={20000}
-            unit={t.unitPiece}
-            color="bg-cyan-500"
-            bgColor="bg-cyan-100 dark:bg-cyan-900/30"
-            icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />}
-            maxLabel={t.whMaxLabel}
-          />
-          <StockItem
-            label={t.whFinal1Label}
-            value={finalProductStock['1L']}
-            max={15000}
-            unit={t.unitPiece}
-            color="bg-teal-500"
-            bgColor="bg-teal-100 dark:bg-teal-900/30"
-            icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />}
-            maxLabel={t.whMaxLabel}
-          />
-          <StockItem
-            label={t.whFinal5Label}
-            value={finalProductStock['5L']}
-            max={5000}
-            unit={t.unitPiece}
-            color="bg-blue-500"
-            bgColor="bg-blue-100 dark:bg-blue-900/30"
-            icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
-            maxLabel={t.whMaxLabel}
-          />
-        </div>
+        {hasAnyStockDetailCard ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {hasCatalogRaw && (
+              <StockItem
+                label={t.whMaterial}
+                value={rawMaterialStock}
+                max={5000}
+                unit={t.unitKg}
+                color={rawMaterialStock < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
+                bgColor="bg-blue-100 dark:bg-blue-900/30"
+                icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
+                warning={rawMaterialStock < 1000}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+            {hasCatalogSemi18 && (
+              <StockItem
+                label={t.whSemi18Label}
+                value={semiProductStock['18g']}
+                max={100000}
+                unit={t.unitPiece}
+                color="bg-purple-500"
+                bgColor="bg-purple-100 dark:bg-purple-900/30"
+                icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+            {hasCatalogSemi20 && (
+              <StockItem
+                label={t.whSemi20Label}
+                value={semiProductStock['20g']}
+                max={60000}
+                unit={t.unitPiece}
+                color="bg-violet-500"
+                bgColor="bg-violet-100 dark:bg-violet-900/30"
+                icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+            {hasCatalogFinal05 && (
+              <StockItem
+                label={t.whFinal05Label}
+                value={finalProductStock['0.5L']}
+                max={20000}
+                unit={t.unitPiece}
+                color="bg-cyan-500"
+                bgColor="bg-cyan-100 dark:bg-cyan-900/30"
+                icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+            {hasCatalogFinal1 && (
+              <StockItem
+                label={t.whFinal1Label}
+                value={finalProductStock['1L']}
+                max={15000}
+                unit={t.unitPiece}
+                color="bg-teal-500"
+                bgColor="bg-teal-100 dark:bg-teal-900/30"
+                icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+            {hasCatalogFinal5 && (
+              <StockItem
+                label={t.whFinal5Label}
+                value={finalProductStock['5L']}
+                max={5000}
+                unit={t.unitPiece}
+                color="bg-blue-500"
+                bgColor="bg-blue-100 dark:bg-blue-900/30"
+                icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
+                maxLabel={t.whMaxLabel}
+              />
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-4 flex items-center gap-2">
-            <TrendingUp size={16} className="text-emerald-500" />
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
-              {t.whSemiStats}
-            </h3>
-          </div>
-          <div className="space-y-3">
-            {[
-              { label: t.whProduced, value: totalSemiProduced, color: 'text-purple-600 dark:text-purple-400' },
-              {
-                label: t.whUsedInFinal,
-                value: state.finalProductBatches.reduce(
-                  (sum, batch) => sum + batch.semiProductUsed,
-                  0,
-                ),
-                color: 'text-cyan-600 dark:text-cyan-400',
-              },
-              { label: t.whSold, value: totalSemiSold, color: 'text-emerald-600 dark:text-emerald-400' },
-              { label: t.whRemaining, value: totalSemi, color: 'text-slate-800 dark:text-white' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
-              >
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {item.label}
-                </span>
-                <span className={`text-sm font-bold ${item.color}`}>
-                  {formatNumber(item.value)} {t.unitPiece}
-                </span>
+      {(hasCatalogSemi || hasCatalogFinal) && (
+        <div
+          className={`grid grid-cols-1 gap-6 ${hasCatalogSemi && hasCatalogFinal ? 'lg:grid-cols-2' : ''}`}
+        >
+          {hasCatalogSemi && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="mb-4 flex items-center gap-2">
+                <TrendingUp size={16} className="text-emerald-500" />
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.whSemiStats}
+                </h3>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-4 flex items-center gap-2">
-            <TrendingDown size={16} className="text-cyan-500" />
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
-              {t.whFinalStats}
-            </h3>
-          </div>
-          <div className="space-y-3">
-            {[
-              { label: t.whProduced, value: totalFinalProduced, color: 'text-cyan-600 dark:text-cyan-400' },
-              { label: t.whSold, value: totalFinalSold, color: 'text-emerald-600 dark:text-emerald-400' },
-              { label: t.whRemaining, value: totalFinal, color: 'text-slate-800 dark:text-white' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
-              >
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {item.label}
-                </span>
-                <span className={`text-sm font-bold ${item.color}`}>
-                  {formatNumber(item.value)} {t.unitPiece}
-                </span>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: t.whProduced,
+                    value: totalSemiProduced,
+                    color: 'text-purple-600 dark:text-purple-400',
+                  },
+                  {
+                    label: t.whUsedInFinal,
+                    value: state.finalProductBatches.reduce(
+                      (sum, batch) => sum + batch.semiProductUsed,
+                      0,
+                    ),
+                    color: 'text-cyan-600 dark:text-cyan-400',
+                  },
+                  {
+                    label: t.whSold,
+                    value: totalSemiSold,
+                    color: 'text-emerald-600 dark:text-emerald-400',
+                  },
+                  {
+                    label: t.whRemaining,
+                    value: totalSemiInCatalogStock,
+                    color: 'text-slate-800 dark:text-white',
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
+                  >
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      {item.label}
+                    </span>
+                    <span className={`text-sm font-bold ${item.color}`}>
+                      {formatNumber(item.value)} {t.unitPiece}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-            <div className="mt-2 border-t border-slate-100 pt-2 dark:border-slate-700">
-              <p className="mb-2 text-xs text-slate-400">{t.whByType}</p>
-              {[
-                { label: t.whFinal05Label, value: finalProductStock['0.5L'] },
-                { label: t.whFinal1Label, value: finalProductStock['1L'] },
-                { label: t.whFinal5Label, value: finalProductStock['5L'] },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between py-1">
-                  <span className="text-xs text-slate-500">{item.label}</span>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    {formatNumber(item.value)} {t.unitPiece}
-                  </span>
-                </div>
-              ))}
             </div>
-          </div>
+          )}
+
+          {hasCatalogFinal && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="mb-4 flex items-center gap-2">
+                <TrendingDown size={16} className="text-cyan-500" />
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                  {t.whFinalStats}
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: t.whProduced,
+                    value: totalFinalProduced,
+                    color: 'text-cyan-600 dark:text-cyan-400',
+                  },
+                  {
+                    label: t.whSold,
+                    value: totalFinalSold,
+                    color: 'text-emerald-600 dark:text-emerald-400',
+                  },
+                  {
+                    label: t.whRemaining,
+                    value: totalFinalInCatalogStock,
+                    color: 'text-slate-800 dark:text-white',
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
+                  >
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      {item.label}
+                    </span>
+                    <span className={`text-sm font-bold ${item.color}`}>
+                      {formatNumber(item.value)} {t.unitPiece}
+                    </span>
+                  </div>
+                ))}
+                <div className="mt-2 border-t border-slate-100 pt-2 dark:border-slate-700">
+                  <p className="mb-2 text-xs text-slate-400">{t.whByType}</p>
+                  {[
+                    ...(hasCatalogFinal05
+                      ? [
+                          {
+                            label: t.whFinal05Label,
+                            value: finalProductStock['0.5L'],
+                          },
+                        ]
+                      : []),
+                    ...(hasCatalogFinal1
+                      ? [{ label: t.whFinal1Label, value: finalProductStock['1L'] }]
+                      : []),
+                    ...(hasCatalogFinal5
+                      ? [{ label: t.whFinal5Label, value: finalProductStock['5L'] }]
+                      : []),
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between py-1">
+                      <span className="text-xs text-slate-500">{item.label}</span>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        {formatNumber(item.value)} {t.unitPiece}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {(error || success) && (
         <div

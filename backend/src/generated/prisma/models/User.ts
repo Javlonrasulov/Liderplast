@@ -334,6 +334,7 @@ export type UserWhereInput = {
   bagWriteoffs?: Prisma.BagWriteoffListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
   bankTransactions?: Prisma.BankTransactionListRelationFilter
+  uploadedBankVedomosts?: Prisma.BankVedomostListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -369,6 +370,7 @@ export type UserOrderByWithRelationInput = {
   bagWriteoffs?: Prisma.BagWriteoffOrderByRelationAggregateInput
   productAuditLogs?: Prisma.ProductAuditLogOrderByRelationAggregateInput
   bankTransactions?: Prisma.BankTransactionOrderByRelationAggregateInput
+  uploadedBankVedomosts?: Prisma.BankVedomostOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -407,6 +409,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   bagWriteoffs?: Prisma.BagWriteoffListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
   bankTransactions?: Prisma.BankTransactionListRelationFilter
+  uploadedBankVedomosts?: Prisma.BankVedomostListRelationFilter
 }, "id" | "phone" | "login">
 
 export type UserOrderByWithAggregationInput = {
@@ -492,6 +495,7 @@ export type UserCreateInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -527,6 +531,7 @@ export type UserUncheckedCreateInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUpdateInput = {
@@ -562,6 +567,7 @@ export type UserUpdateInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -597,6 +603,7 @@ export type UserUncheckedUpdateInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -980,6 +987,22 @@ export type UserUpdateOneRequiredWithoutSalaryRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSalaryRecordsInput, Prisma.UserUpdateWithoutSalaryRecordsInput>, Prisma.UserUncheckedUpdateWithoutSalaryRecordsInput>
 }
 
+export type UserCreateNestedOneWithoutUploadedBankVedomostsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedCreateWithoutUploadedBankVedomostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUploadedBankVedomostsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutUploadedBankVedomostsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedCreateWithoutUploadedBankVedomostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUploadedBankVedomostsInput
+  upsert?: Prisma.UserUpsertWithoutUploadedBankVedomostsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUploadedBankVedomostsInput, Prisma.UserUpdateWithoutUploadedBankVedomostsInput>, Prisma.UserUncheckedUpdateWithoutUploadedBankVedomostsInput>
+}
+
 export type UserCreateNestedOneWithoutBankTransactionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutBankTransactionsInput, Prisma.UserUncheckedCreateWithoutBankTransactionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankTransactionsInput
@@ -1044,6 +1067,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -1078,6 +1102,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -1128,6 +1153,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -1162,6 +1188,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutInventoryMovementsInput = {
@@ -1196,6 +1223,7 @@ export type UserCreateWithoutInventoryMovementsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutInventoryMovementsInput = {
@@ -1230,6 +1258,7 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutInventoryMovementsInput = {
@@ -1280,6 +1309,7 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
@@ -1314,6 +1344,7 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutProductAuditLogsInput = {
@@ -1348,6 +1379,7 @@ export type UserCreateWithoutProductAuditLogsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutProductAuditLogsInput = {
@@ -1382,6 +1414,7 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutProductAuditLogsInput = {
@@ -1432,6 +1465,7 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
@@ -1466,6 +1500,7 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutBagWriteoffsInput = {
@@ -1500,6 +1535,7 @@ export type UserCreateWithoutBagWriteoffsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutBagWriteoffsInput = {
@@ -1534,6 +1570,7 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutBagWriteoffsInput = {
@@ -1584,6 +1621,7 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
@@ -1618,6 +1656,7 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutBagAuditLogsInput = {
@@ -1652,6 +1691,7 @@ export type UserCreateWithoutBagAuditLogsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutBagAuditLogsInput = {
@@ -1686,6 +1726,7 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutBagAuditLogsInput = {
@@ -1736,6 +1777,7 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
@@ -1770,6 +1812,7 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutProductionsInput = {
@@ -1804,6 +1847,7 @@ export type UserCreateWithoutProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutProductionsInput = {
@@ -1838,6 +1882,7 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutProductionsInput = {
@@ -1888,6 +1933,7 @@ export type UserUpdateWithoutProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductionsInput = {
@@ -1922,6 +1968,7 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutShiftRecordsInput = {
@@ -1956,6 +2003,7 @@ export type UserCreateWithoutShiftRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutShiftRecordsInput = {
@@ -1990,6 +2038,7 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutShiftRecordsInput = {
@@ -2040,6 +2089,7 @@ export type UserUpdateWithoutShiftRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShiftRecordsInput = {
@@ -2074,6 +2124,7 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutCreatedOrdersInput = {
@@ -2108,6 +2159,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
@@ -2142,6 +2194,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -2192,6 +2245,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
@@ -2226,6 +2280,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutCreatedExpensesInput = {
@@ -2260,6 +2315,7 @@ export type UserCreateWithoutCreatedExpensesInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedExpensesInput = {
@@ -2294,6 +2350,7 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedExpensesInput = {
@@ -2344,6 +2401,7 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
@@ -2378,6 +2436,7 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutEmployeeProductionsInput = {
@@ -2412,6 +2471,7 @@ export type UserCreateWithoutEmployeeProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
@@ -2446,6 +2506,7 @@ export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutEmployeeProductionsInput = {
@@ -2496,6 +2557,7 @@ export type UserUpdateWithoutEmployeeProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
@@ -2530,6 +2592,7 @@ export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutEmployeeProductRatesInput = {
@@ -2564,6 +2627,7 @@ export type UserCreateWithoutEmployeeProductRatesInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
@@ -2598,6 +2662,7 @@ export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutEmployeeProductRatesInput = {
@@ -2648,6 +2713,7 @@ export type UserUpdateWithoutEmployeeProductRatesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
@@ -2682,6 +2748,7 @@ export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutSalaryRecordsInput = {
@@ -2716,6 +2783,7 @@ export type UserCreateWithoutSalaryRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutSalaryRecordsInput = {
@@ -2750,6 +2818,7 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutSalaryRecordsInput = {
@@ -2800,6 +2869,7 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
@@ -2826,6 +2896,163 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+}
+
+export type UserCreateWithoutUploadedBankVedomostsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserUncheckedCreateWithoutUploadedBankVedomostsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserCreateOrConnectWithoutUploadedBankVedomostsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedCreateWithoutUploadedBankVedomostsInput>
+}
+
+export type UserUpsertWithoutUploadedBankVedomostsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedUpdateWithoutUploadedBankVedomostsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedCreateWithoutUploadedBankVedomostsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutUploadedBankVedomostsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutUploadedBankVedomostsInput, Prisma.UserUncheckedUpdateWithoutUploadedBankVedomostsInput>
+}
+
+export type UserUpdateWithoutUploadedBankVedomostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserUncheckedUpdateWithoutUploadedBankVedomostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -2868,6 +3095,7 @@ export type UserCreateWithoutBankTransactionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutBankTransactionsInput = {
@@ -2902,6 +3130,7 @@ export type UserUncheckedCreateWithoutBankTransactionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutBankTransactionsInput = {
@@ -2952,6 +3181,7 @@ export type UserUpdateWithoutBankTransactionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBankTransactionsInput = {
@@ -2986,6 +3216,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsInput = {
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutUploadedFilesInput = {
@@ -3020,6 +3251,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedFilesInput = {
@@ -3054,6 +3286,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedFilesInput = {
@@ -3104,6 +3337,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedFilesInput = {
@@ -3138,6 +3372,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 
@@ -3160,6 +3395,7 @@ export type UserCountOutputType = {
   bagWriteoffs: number
   productAuditLogs: number
   bankTransactions: number
+  uploadedBankVedomosts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3177,6 +3413,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   bagWriteoffs?: boolean | UserCountOutputTypeCountBagWriteoffsArgs
   productAuditLogs?: boolean | UserCountOutputTypeCountProductAuditLogsArgs
   bankTransactions?: boolean | UserCountOutputTypeCountBankTransactionsArgs
+  uploadedBankVedomosts?: boolean | UserCountOutputTypeCountUploadedBankVedomostsArgs
 }
 
 /**
@@ -3287,6 +3524,13 @@ export type UserCountOutputTypeCountBankTransactionsArgs<ExtArgs extends runtime
   where?: Prisma.BankTransactionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountUploadedBankVedomostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankVedomostWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3321,6 +3565,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   bagWriteoffs?: boolean | Prisma.User$bagWriteoffsArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.User$productAuditLogsArgs<ExtArgs>
   bankTransactions?: boolean | Prisma.User$bankTransactionsArgs<ExtArgs>
+  uploadedBankVedomosts?: boolean | Prisma.User$uploadedBankVedomostsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3403,6 +3648,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   bagWriteoffs?: boolean | Prisma.User$bagWriteoffsArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.User$productAuditLogsArgs<ExtArgs>
   bankTransactions?: boolean | Prisma.User$bankTransactionsArgs<ExtArgs>
+  uploadedBankVedomosts?: boolean | Prisma.User$uploadedBankVedomostsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3425,6 +3671,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     bagWriteoffs: Prisma.$BagWriteoffPayload<ExtArgs>[]
     productAuditLogs: Prisma.$ProductAuditLogPayload<ExtArgs>[]
     bankTransactions: Prisma.$BankTransactionPayload<ExtArgs>[]
+    uploadedBankVedomosts: Prisma.$BankVedomostPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3856,6 +4103,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   bagWriteoffs<T extends Prisma.User$bagWriteoffsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bagWriteoffsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BagWriteoffPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productAuditLogs<T extends Prisma.User$productAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bankTransactions<T extends Prisma.User$bankTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bankTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  uploadedBankVedomosts<T extends Prisma.User$uploadedBankVedomostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedBankVedomostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankVedomostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4629,6 +4877,30 @@ export type User$bankTransactionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.BankTransactionScalarFieldEnum | Prisma.BankTransactionScalarFieldEnum[]
+}
+
+/**
+ * User.uploadedBankVedomosts
+ */
+export type User$uploadedBankVedomostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankVedomost
+   */
+  select?: Prisma.BankVedomostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankVedomost
+   */
+  omit?: Prisma.BankVedomostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankVedomostInclude<ExtArgs> | null
+  where?: Prisma.BankVedomostWhereInput
+  orderBy?: Prisma.BankVedomostOrderByWithRelationInput | Prisma.BankVedomostOrderByWithRelationInput[]
+  cursor?: Prisma.BankVedomostWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankVedomostScalarFieldEnum | Prisma.BankVedomostScalarFieldEnum[]
 }
 
 /**

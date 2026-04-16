@@ -538,6 +538,7 @@ export const BankVedomostScalarFieldEnum = {
   totalExpense: 'totalExpense',
   status: 'status',
   errorMessage: 'errorMessage',
+  uploadedById: 'uploadedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

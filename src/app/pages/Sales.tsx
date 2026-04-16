@@ -1,10 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink } from 'lucide-react';
-import { useERP } from '../store/erp-store';
-import type { SaleOrderItem } from '../store/erp-store';
+import {
+  useERP,
+  type FinishedProductCatalogItem,
+  type SaleOrderItem,
+  type SemiProductCatalogItem,
+} from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
 import { ClientDetail } from '../components/ClientDetail';
+import {
+  finalBucketFromCatalog,
+  semiBucketFromCatalog,
+} from '../utils/warehouse-catalog-buckets';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 // ---- Cart item row (inline editable) ----
 interface CartItemRow extends SaleOrderItem {
@@ -12,13 +27,11 @@ interface CartItemRow extends SaleOrderItem {
   _stockOk: boolean;
 }
 
-const SEMI_TYPES = ['18g', '20g'] as const;
-const FINAL_TYPES = ['0.5L', '1L', '5L'] as const;
-
 const INPUT_CLS =
   'w-full px-2.5 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400';
-const SELECT_CLS =
-  'w-full px-2.5 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400';
+
+const SELECT_TRIGGER_CLS =
+  'h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white';
 
 export function Sales() {
   const { state, dispatch, semiProductStock, finalProductStock } = useERP();
@@ -34,27 +47,101 @@ export function Sales() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // ---- Add item mini-form ----
+  // ---- Add item mini-form (productType = katalog nomi — API semiByName / finalByName) ----
   const [addCat, setAddCat] = useState<'semi' | 'final'>('final');
-  const [addType, setAddType] = useState<string>('0.5L');
+  const [addType, setAddType] = useState<string>('');
   const [addQty, setAddQty] = useState('');
   const [addPrice, setAddPrice] = useState('');
 
-  // Sync type when category changes
+  const saleSemiCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is SemiProductCatalogItem => p.itemType === 'SEMI_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+
+  const saleFinalCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is FinishedProductCatalogItem =>
+          p.itemType === 'FINISHED_PRODUCT' && finalBucketFromCatalog(p) !== null,
+      ),
+    [state.warehouseProducts],
+  );
+
+  const currentCatalogOptions = addCat === 'semi' ? saleSemiCatalog : saleFinalCatalog;
+
+  const selectedProductName = useMemo(() => {
+    const opts = currentCatalogOptions;
+    if (opts.length === 0) return '';
+    if (addType && opts.some((p) => p.name === addType)) return addType;
+    return opts[0].name;
+  }, [currentCatalogOptions, addType]);
+
   const handleCatChange = (cat: 'semi' | 'final') => {
     setAddCat(cat);
-    setAddType(cat === 'semi' ? '18g' : '0.5L');
+    setAddType('');
   };
 
-  const availableForAdd = useMemo(() => {
-    if (addCat === 'semi') return semiProductStock[addType as '18g' | '20g'] || 0;
-    return finalProductStock[addType as '0.5L' | '1L' | '5L'] || 0;
-  }, [addCat, addType, semiProductStock, finalProductStock]);
-
-  const getStock = (cat: 'semi' | 'final', type: string): number => {
-    if (cat === 'semi') return semiProductStock[type as '18g' | '20g'] || 0;
-    return finalProductStock[type as '0.5L' | '1L' | '5L'] || 0;
+  const getStock = (cat: 'semi' | 'final', productName: string): number => {
+    if (!productName) return 0;
+    if (cat === 'semi') {
+      const p = saleSemiCatalog.find((x) => x.name === productName);
+      if (!p) return 0;
+      const b = semiBucketFromCatalog(p);
+      return semiProductStock[b] || 0;
+    }
+    const p = saleFinalCatalog.find((x) => x.name === productName);
+    if (!p) return 0;
+    const b = finalBucketFromCatalog(p);
+    if (!b) return 0;
+    return finalProductStock[b] || 0;
   };
+
+  const availableForAdd = getStock(addCat, selectedProductName);
+
+  const availabilityRows = useMemo(() => {
+    const rows: Array<{
+      key: string;
+      label: string;
+      value: number;
+      color: string;
+      textColor: string;
+      cat: 'semi' | 'final';
+    }> = [];
+    for (const p of saleSemiCatalog) {
+      const b = semiBucketFromCatalog(p);
+      rows.push({
+        key: `semi-${p.id}`,
+        label: p.name,
+        value: semiProductStock[b],
+        color: b === '20g' ? 'bg-violet-500' : 'bg-purple-500',
+        textColor:
+          b === '20g'
+            ? 'text-violet-600 dark:text-violet-400'
+            : 'text-purple-600 dark:text-purple-400',
+        cat: 'semi',
+      });
+    }
+    for (const p of saleFinalCatalog) {
+      const b = finalBucketFromCatalog(p)!;
+      const colorStyle =
+        b === '5L'
+          ? { color: 'bg-blue-500', textColor: 'text-blue-600 dark:text-blue-400' }
+          : b === '1L'
+            ? { color: 'bg-teal-500', textColor: 'text-teal-600 dark:text-teal-400' }
+            : { color: 'bg-cyan-500', textColor: 'text-cyan-600 dark:text-cyan-400' };
+      rows.push({
+        key: `final-${p.id}`,
+        label: p.name,
+        value: finalProductStock[b],
+        cat: 'final',
+        ...colorStyle,
+      });
+    }
+    return rows;
+  }, [saleSemiCatalog, saleFinalCatalog, semiProductStock, finalProductStock]);
 
   // Check cart stock (sum per type)
   const cartUsed = useMemo(() => {
@@ -69,16 +156,16 @@ export function Sales() {
   const handleAddToCart = () => {
     const qty = parseInt(addQty) || 0;
     const price = parseFloat(addPrice) || 0;
-    if (qty <= 0 || price <= 0) return;
+    if (!selectedProductName.trim() || qty <= 0 || price <= 0) return;
 
-    const key = `${addCat}__${addType}`;
+    const key = `${addCat}__${selectedProductName}`;
     const alreadyInCart = cartUsed[key] || 0;
-    const stockOk = qty + alreadyInCart <= getStock(addCat, addType);
+    const stockOk = qty + alreadyInCart <= getStock(addCat, selectedProductName);
 
     const newItem: CartItemRow = {
       _id: `ci_${Date.now()}_${Math.random()}`,
       productCategory: addCat,
-      productType: addType,
+      productType: selectedProductName,
       quantity: qty,
       pricePerUnit: price,
       total: qty * price,
@@ -108,7 +195,7 @@ export function Sales() {
       const [cat, type] = key.split('__');
       return total <= getStock(cat as 'semi' | 'final', type);
     });
-  }, [cartItems, semiProductStock, finalProductStock]);
+  }, [cartItems, semiProductStock, finalProductStock, saleSemiCatalog, saleFinalCatalog]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,10 +312,34 @@ export function Sales() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.colClient}</label>
-                  <select value={clientId} onChange={e => setClientId(e.target.value)} className={SELECT_CLS}>
-                    <option value="">—</option>
-                    {state.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                  <Select
+                    value={clientId || '__none__'}
+                    onValueChange={(v) => setClientId(v === '__none__' ? '' : v)}
+                  >
+                    <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent
+                      position="popper"
+                      className="z-[120] max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                    >
+                      <SelectItem
+                        value="__none__"
+                        className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800"
+                      >
+                        —
+                      </SelectItem>
+                      {state.clients.map((c) => (
+                        <SelectItem
+                          key={c.id}
+                          value={c.id}
+                          className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm focus:bg-indigo-50 focus:text-indigo-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:focus:bg-indigo-950/40 dark:focus:text-indigo-100 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white"
+                        >
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelDate}</label>
@@ -310,19 +421,60 @@ export function Sales() {
                   {/* Category */}
                   <div>
                     <label className="block text-slate-400 text-xs mb-1">{t.slCategory}</label>
-                    <select value={addCat} onChange={e => handleCatChange(e.target.value as 'semi' | 'final')} className={SELECT_CLS}>
-                      <option value="final">{t.slFinalCat}</option>
-                      <option value="semi">{t.slSemiCat}</option>
-                    </select>
+                    <Select
+                      value={addCat}
+                      onValueChange={(v) => handleCatChange(v as 'semi' | 'final')}
+                    >
+                      <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        className="z-[120] min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                      >
+                        <SelectItem
+                          value="final"
+                          className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800"
+                        >
+                          {t.slFinalCat}
+                        </SelectItem>
+                        <SelectItem
+                          value="semi"
+                          className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800"
+                        >
+                          {t.slSemiCat}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  {/* Type */}
+                  {/* Type — katalog nomi (API bilan mos) */}
                   <div>
                     <label className="block text-slate-400 text-xs mb-1">{t.slProductType}</label>
-                    <select value={addType} onChange={e => setAddType(e.target.value)} className={SELECT_CLS}>
-                      {(addCat === 'semi' ? SEMI_TYPES : FINAL_TYPES).map(v => (
-                        <option key={v} value={v}>{v} ({formatNumber(getStock(addCat, v))} {t.slAvailableStock})</option>
-                      ))}
-                    </select>
+                    {currentCatalogOptions.length === 0 ? (
+                      <div className="flex min-h-[2.75rem] items-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
+                        {t.slNoCatalogProducts}
+                      </div>
+                    ) : (
+                      <Select value={selectedProductName} onValueChange={setAddType}>
+                        <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                          <SelectValue placeholder={t.slProductType} />
+                        </SelectTrigger>
+                        <SelectContent
+                          position="popper"
+                          className="z-[120] max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                        >
+                          {currentCatalogOptions.map((p) => (
+                            <SelectItem
+                              key={p.id}
+                              value={p.name}
+                              className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm focus:bg-indigo-50 focus:text-indigo-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:focus:bg-indigo-950/40 dark:focus:text-indigo-100 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white"
+                            >
+                              {p.name} ({formatNumber(getStock(addCat, p.name))} {t.slAvailableStock})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   {/* Qty */}
                   <div>
@@ -338,8 +490,16 @@ export function Sales() {
                   </div>
                   {/* Add button */}
                   <button onClick={handleAddToCart}
-                    disabled={!addQty || !addPrice || parseInt(addQty) <= 0 || parseFloat(addPrice) <= 0}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors">
+                    disabled={
+                      !selectedProductName.trim() ||
+                      currentCatalogOptions.length === 0 ||
+                      !addQty ||
+                      !addPrice ||
+                      parseInt(addQty, 10) <= 0 ||
+                      parseFloat(addPrice) <= 0
+                    }
+                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
+                  >
                     <Plus size={14} /> {t.slAddToCart}
                   </button>
                 </div>
@@ -394,33 +554,42 @@ export function Sales() {
                 <Package size={15} className="text-slate-400" /> {t.slAvailableProducts}
               </h3>
               <div className="space-y-2.5">
-                {[
-                  { label: '18g', value: semiProductStock['18g'], color: 'bg-purple-500', textColor: 'text-purple-600 dark:text-purple-400', cat: 'semi' },
-                  { label: '20g', value: semiProductStock['20g'], color: 'bg-violet-500', textColor: 'text-violet-600 dark:text-violet-400', cat: 'semi' },
-                  { label: '0.5L', value: finalProductStock['0.5L'], color: 'bg-cyan-500', textColor: 'text-cyan-600 dark:text-cyan-400', cat: 'final' },
-                  { label: '1L', value: finalProductStock['1L'], color: 'bg-teal-500', textColor: 'text-teal-600 dark:text-teal-400', cat: 'final' },
-                  { label: '5L', value: finalProductStock['5L'], color: 'bg-blue-500', textColor: 'text-blue-600 dark:text-blue-400', cat: 'final' },
-                ].map(item => {
-                  const cartKey = `${item.cat}__${item.label}`;
-                  const inCart = cartUsed[cartKey] || 0;
-                  return (
-                    <div key={item.label}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                          <span className="text-xs text-slate-600 dark:text-slate-400">{item.label}</span>
-                          {inCart > 0 && (
-                            <span className="text-xs text-indigo-500 dark:text-indigo-400">(-{formatNumber(inCart)})</span>
-                          )}
+                {availabilityRows.length === 0 ? (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t.slNoCatalogProducts}</p>
+                ) : (
+                  availabilityRows.map((item) => {
+                    const cartKey = `${item.cat}__${item.label}`;
+                    const inCart = cartUsed[cartKey] || 0;
+                    return (
+                      <div key={item.key}>
+                        <div className="mb-1 flex items-center justify-between">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <div className={`h-2 w-2 shrink-0 rounded-full ${item.color}`} />
+                            <span className="truncate text-xs text-slate-600 dark:text-slate-400">
+                              {item.label}
+                            </span>
+                            {inCart > 0 && (
+                              <span className="shrink-0 text-xs text-indigo-500 dark:text-indigo-400">
+                                (-{formatNumber(inCart)})
+                              </span>
+                            )}
+                          </div>
+                          <span className={`shrink-0 text-xs font-semibold ${item.textColor}`}>
+                            {formatNumber(item.value)} {t.unitPiece}
+                          </span>
                         </div>
-                        <span className={`text-xs font-semibold ${item.textColor}`}>{formatNumber(item.value)} {t.unitPiece}</span>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                          <div
+                            className={`h-full rounded-full ${item.color} opacity-70`}
+                            style={{
+                              width: `${Math.min(100, (item.value / 50000) * 100)}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${item.color} opacity-70`} style={{ width: `${Math.min(100, (item.value / 50000) * 100)}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
 
