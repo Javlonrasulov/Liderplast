@@ -179,7 +179,9 @@ function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['
   if (product.itemType === 'FINISHED_PRODUCT') {
     return `${t.whVolumeLiter}: ${formatNumber(product.volumeLiter)} L, ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
   }
-  return `${t.whUnit}: ${product.unit}`;
+  return product.defaultBagWeightKg
+    ? `${t.whUnit}: ${product.unit}, ${t.rmDefaultBagWeight}: ${formatNumber(product.defaultBagWeightKg)} ${t.unitKg}`
+    : `${t.whUnit}: ${product.unit}`;
 }
 
 function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
@@ -209,8 +211,10 @@ export function Warehouse() {
     SemiProductCatalogItem | FinishedProductCatalogItem | null
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<
-    SemiProductCatalogItem | FinishedProductCatalogItem | null
+    WarehouseProduct | null
   >(null);
+  const [blockedDeleteTarget, setBlockedDeleteTarget] =
+    useState<Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -224,6 +228,14 @@ export function Warehouse() {
       ),
     [state.warehouseProducts],
   );
+
+  const rawStockById = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const item of state.warehouseStock ?? []) {
+      if (item.itemType === 'RAW_MATERIAL') map.set(item.id, item.quantity);
+    }
+    return map;
+  }, [state.warehouseStock]);
   const productCatalog = useMemo(
     () =>
       state.warehouseProducts.filter(
@@ -640,6 +652,17 @@ export function Warehouse() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const attemptDeleteRawMaterial = (
+    rawMaterial: Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }>,
+  ) => {
+    const qty = rawStockById.get(rawMaterial.id) ?? 0;
+    if (qty > 0) {
+      setBlockedDeleteTarget(rawMaterial);
+      return;
+    }
+    setDeleteTarget(rawMaterial);
   };
 
   const renderEditorBody = () => (
@@ -1216,8 +1239,20 @@ export function Warehouse() {
                     </p>
                   )}
                 </div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  {t.whIncludedInWarehouse}
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    {t.whIncludedInWarehouse}
+                  </div>
+                  {canManage && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => attemptDeleteRawMaterial(rawMaterial)}
+                    >
+                      <Trash2 size={14} />
+                      {t.suDelete}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -1351,6 +1386,21 @@ export function Warehouse() {
             <AlertDialogAction onClick={confirmDelete}>
               {t.whDeleteAction}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={Boolean(blockedDeleteTarget)}
+        onOpenChange={(open) => !open && setBlockedDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.whDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.whErrDeleteStockRemains}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.btnCancel}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

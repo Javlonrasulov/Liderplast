@@ -20,6 +20,7 @@ import {
   SemiProductRawMaterialInputDto,
 } from './dto/product-relations.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
+import { RawMaterialBagsService } from '../raw-material-bags/raw-material-bags.service.js';
 
 type Tx = Prisma.TransactionClient;
 
@@ -41,6 +42,7 @@ type ProductSnapshot = {
   name: string;
   description?: string;
   unit?: string;
+  defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
   isDeleted: boolean;
@@ -74,6 +76,7 @@ type ResolvedProductInput = {
   name: string;
   description?: string;
   unit?: string;
+  defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
   relations: {
@@ -88,6 +91,7 @@ export class WarehouseService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly rawMaterialBagsService: RawMaterialBagsService,
   ) {}
 
   async createProduct(dto: CreateProductDto, createdById?: string) {
@@ -393,6 +397,20 @@ export class WarehouseService {
         },
       });
 
+      if (
+        dto.itemType === InventoryItemType.RAW_MATERIAL &&
+        dto.movementType === MovementType.INCOMING &&
+        dto.rawMaterialId
+      ) {
+        await this.rawMaterialBagsService.createAutoBagsForIncomingTx(tx, {
+          rawMaterialId: dto.rawMaterialId,
+          totalQuantityKg: dto.quantity,
+          createdById,
+          referenceType: 'warehouse-incoming',
+          referenceId: movement.id,
+        });
+      }
+
       return { movement, updatedBalance };
     });
 
@@ -406,6 +424,7 @@ export class WarehouseService {
       name: dto.name.trim(),
       description: dto.description?.trim() || undefined,
       unit: dto.unit?.trim() || undefined,
+      defaultBagWeightKg: dto.defaultBagWeightKg,
       weightGram: dto.weightGram,
       volumeLiter: dto.volumeLiter,
       relations: this.normalizeRelations(dto.relations),
@@ -431,6 +450,10 @@ export class WarehouseService {
           : current.description,
       unit:
         dto.unit !== undefined ? dto.unit.trim() || undefined : current.unit,
+      defaultBagWeightKg:
+        dto.defaultBagWeightKg !== undefined
+          ? dto.defaultBagWeightKg
+          : current.defaultBagWeightKg,
       weightGram:
         dto.weightGram !== undefined ? dto.weightGram : current.weightGram,
       volumeLiter:
@@ -611,12 +634,14 @@ export class WarehouseService {
   private async createProductRecord(tx: Tx, input: ResolvedProductInput) {
     switch (input.itemType) {
       case InventoryItemType.RAW_MATERIAL: {
+        const data: Prisma.RawMaterialUncheckedCreateInput = {
+          name: input.name,
+          unit: input.unit ?? 'kg',
+          defaultBagWeightKg: input.defaultBagWeightKg ?? null,
+          description: input.description ?? null,
+        };
         return tx.rawMaterial.create({
-          data: {
-            name: input.name,
-            unit: input.unit ?? 'kg',
-            description: input.description,
-          },
+          data,
         });
       }
       case InventoryItemType.SEMI_PRODUCT: {
@@ -660,15 +685,19 @@ export class WarehouseService {
   ) {
     switch (itemType) {
       case InventoryItemType.RAW_MATERIAL:
-        await tx.rawMaterial.update({
-          where: { id },
-          data: {
+        {
+          const data: Prisma.RawMaterialUncheckedUpdateInput = {
             name: input.name,
             unit: input.unit ?? 'kg',
-            description: input.description,
-          },
+            defaultBagWeightKg: input.defaultBagWeightKg ?? null,
+            description: input.description ?? null,
+          };
+        await tx.rawMaterial.update({
+          where: { id },
+          data,
         });
         return;
+        }
       case InventoryItemType.SEMI_PRODUCT:
         await tx.semiProduct.update({
           where: { id },
@@ -704,14 +733,16 @@ export class WarehouseService {
   ) {
     switch (input.itemType) {
       case InventoryItemType.RAW_MATERIAL:
-        await tx.rawMaterial.create({
-          data: {
+        {
+          const data: Prisma.RawMaterialUncheckedCreateInput = {
             id,
             name: input.name,
             unit: input.unit ?? 'kg',
-            description: input.description,
-          },
-        });
+            defaultBagWeightKg: input.defaultBagWeightKg ?? null,
+            description: input.description ?? null,
+          };
+          await tx.rawMaterial.create({ data });
+        }
         break;
       case InventoryItemType.SEMI_PRODUCT:
         await tx.semiProduct.create({
@@ -1118,6 +1149,7 @@ export class WarehouseService {
     id: string;
     name: string;
     unit: string;
+    defaultBagWeightKg?: number | null;
     description: string | null;
     isDeleted: boolean;
     createdAt: Date;
@@ -1133,6 +1165,7 @@ export class WarehouseService {
       itemType: InventoryItemType.RAW_MATERIAL,
       name: item.name,
       unit: item.unit,
+      defaultBagWeightKg: item.defaultBagWeightKg ?? undefined,
       description: item.description ?? undefined,
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),

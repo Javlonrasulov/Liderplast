@@ -1,0 +1,2 @@
+ALTER TABLE "RawMaterial"
+ADD COLUMN "defaultBagWeightKg" DOUBLE PRECISION;

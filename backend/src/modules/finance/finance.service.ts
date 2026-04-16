@@ -133,55 +133,6 @@ function isEmptyRow(row: Record<string, unknown>) {
   return Object.values(row).every((value) => `${value ?? ''}`.trim() === '');
 }
 
-/** User-facing import failure text (stored on BankVedomost.errorMessage). No stack paths. */
-function formatOborotkaImportError(error: unknown): string {
-  const raw =
-    error instanceof Error
-      ? error.message
-      : typeof error === 'string'
-        ? error
-        : 'Import failed';
-
-  const lower = raw.toLowerCase();
-
-  if (
-    lower.includes('does not exist in the current database') ||
-    lower.includes('(not available)') ||
-    (lower.includes('column') && lower.includes('does not exist'))
-  ) {
-    return (
-      'Database table/column is out of sync with the application schema. ' +
-      'Run `npx prisma db push` (or apply migrations) in the backend folder, then restart the server.'
-    );
-  }
-
-  if (lower.includes('no valid transactions found')) {
-    return 'No valid rows after checks (date, amount, debit/credit), or all rows were duplicates.';
-  }
-
-  if (lower.includes('no rows found')) {
-    return 'The first sheet contains no data rows.';
-  }
-
-  if (lower.includes('only .xlsx')) {
-    return 'Only .xlsx files are supported.';
-  }
-
-  let cleaned = raw
-    .replace(/[A-Za-z]:\\(?:[^\\\n]|\\)+?\\finance\.service\.(?:ts|js)(?::\d+:\d+)?/gi, '')
-    .replace(/[A-Za-z]:\\[^\n)]+/g, '')
-    .replace(/\/[^\s:)]+?\/finance\.service\.(?:ts|js)(?::\d+:\d+)?/g, '')
-    .replace(/\binvalid\s+[`'][^`']+[`']\s+invocation\b/gi, 'database error')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-
-  if (cleaned.length > 400) {
-    cleaned = `${cleaned.slice(0, 400)}…`;
-  }
-
-  return cleaned || 'Failed to import oborotka file.';
-}
-
 function getFieldValue(row: Record<string, unknown>, aliases: string[]) {
   const entries = Object.entries(row).map(([key, value]) => [normalizeText(key), value] as const);
 
@@ -495,7 +446,8 @@ export class FinanceService {
         where: { id: vedomost.id },
         data: {
           status: BankVedomostStatus.REJECTED,
-          errorMessage: formatOborotkaImportError(error),
+          errorMessage:
+            error instanceof Error ? error.message : 'Failed to parse oborotka file',
         },
       });
     }

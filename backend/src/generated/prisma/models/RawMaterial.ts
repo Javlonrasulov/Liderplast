@@ -20,14 +20,25 @@ export type RawMaterialModel = runtime.Types.Result.DefaultSelection<Prisma.$Raw
 
 export type AggregateRawMaterial = {
   _count: RawMaterialCountAggregateOutputType | null
+  _avg: RawMaterialAvgAggregateOutputType | null
+  _sum: RawMaterialSumAggregateOutputType | null
   _min: RawMaterialMinAggregateOutputType | null
   _max: RawMaterialMaxAggregateOutputType | null
+}
+
+export type RawMaterialAvgAggregateOutputType = {
+  defaultBagWeightKg: number | null
+}
+
+export type RawMaterialSumAggregateOutputType = {
+  defaultBagWeightKg: number | null
 }
 
 export type RawMaterialMinAggregateOutputType = {
   id: string | null
   name: string | null
   unit: string | null
+  defaultBagWeightKg: number | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -39,6 +50,7 @@ export type RawMaterialMaxAggregateOutputType = {
   id: string | null
   name: string | null
   unit: string | null
+  defaultBagWeightKg: number | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -50,6 +62,7 @@ export type RawMaterialCountAggregateOutputType = {
   id: number
   name: number
   unit: number
+  defaultBagWeightKg: number
   description: number
   isDeleted: number
   status: number
@@ -59,10 +72,19 @@ export type RawMaterialCountAggregateOutputType = {
 }
 
 
+export type RawMaterialAvgAggregateInputType = {
+  defaultBagWeightKg?: true
+}
+
+export type RawMaterialSumAggregateInputType = {
+  defaultBagWeightKg?: true
+}
+
 export type RawMaterialMinAggregateInputType = {
   id?: true
   name?: true
   unit?: true
+  defaultBagWeightKg?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -74,6 +96,7 @@ export type RawMaterialMaxAggregateInputType = {
   id?: true
   name?: true
   unit?: true
+  defaultBagWeightKg?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -85,6 +108,7 @@ export type RawMaterialCountAggregateInputType = {
   id?: true
   name?: true
   unit?: true
+  defaultBagWeightKg?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -131,6 +155,18 @@ export type RawMaterialAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: RawMaterialAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: RawMaterialSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: RawMaterialMinAggregateInputType
@@ -161,6 +197,8 @@ export type RawMaterialGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: RawMaterialCountAggregateInputType | true
+  _avg?: RawMaterialAvgAggregateInputType
+  _sum?: RawMaterialSumAggregateInputType
   _min?: RawMaterialMinAggregateInputType
   _max?: RawMaterialMaxAggregateInputType
 }
@@ -169,12 +207,15 @@ export type RawMaterialGroupByOutputType = {
   id: string
   name: string
   unit: string
+  defaultBagWeightKg: number | null
   description: string | null
   isDeleted: boolean
   status: $Enums.EntityStatus
   createdAt: Date
   updatedAt: Date
   _count: RawMaterialCountAggregateOutputType | null
+  _avg: RawMaterialAvgAggregateOutputType | null
+  _sum: RawMaterialSumAggregateOutputType | null
   _min: RawMaterialMinAggregateOutputType | null
   _max: RawMaterialMaxAggregateOutputType | null
 }
@@ -201,6 +242,7 @@ export type RawMaterialWhereInput = {
   id?: Prisma.StringFilter<"RawMaterial"> | string
   name?: Prisma.StringFilter<"RawMaterial"> | string
   unit?: Prisma.StringFilter<"RawMaterial"> | string
+  defaultBagWeightKg?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableFilter<"RawMaterial"> | string | null
   isDeleted?: Prisma.BoolFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"RawMaterial"> | $Enums.EntityStatus
@@ -219,6 +261,7 @@ export type RawMaterialOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  defaultBagWeightKg?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -240,6 +283,7 @@ export type RawMaterialWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RawMaterialWhereInput[]
   NOT?: Prisma.RawMaterialWhereInput | Prisma.RawMaterialWhereInput[]
   unit?: Prisma.StringFilter<"RawMaterial"> | string
+  defaultBagWeightKg?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableFilter<"RawMaterial"> | string | null
   isDeleted?: Prisma.BoolFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"RawMaterial"> | $Enums.EntityStatus
@@ -258,14 +302,17 @@ export type RawMaterialOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  defaultBagWeightKg?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RawMaterialCountOrderByAggregateInput
+  _avg?: Prisma.RawMaterialAvgOrderByAggregateInput
   _max?: Prisma.RawMaterialMaxOrderByAggregateInput
   _min?: Prisma.RawMaterialMinOrderByAggregateInput
+  _sum?: Prisma.RawMaterialSumOrderByAggregateInput
 }
 
 export type RawMaterialScalarWhereWithAggregatesInput = {
@@ -275,6 +322,7 @@ export type RawMaterialScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"RawMaterial"> | string
   name?: Prisma.StringWithAggregatesFilter<"RawMaterial"> | string
   unit?: Prisma.StringWithAggregatesFilter<"RawMaterial"> | string
+  defaultBagWeightKg?: Prisma.FloatNullableWithAggregatesFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"RawMaterial"> | string | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"RawMaterial"> | $Enums.EntityStatus
@@ -286,6 +334,7 @@ export type RawMaterialCreateInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -304,6 +353,7 @@ export type RawMaterialUncheckedCreateInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -322,6 +372,7 @@ export type RawMaterialUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -340,6 +391,7 @@ export type RawMaterialUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -358,6 +410,7 @@ export type RawMaterialCreateManyInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -369,6 +422,7 @@ export type RawMaterialUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -380,6 +434,7 @@ export type RawMaterialUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -391,6 +446,7 @@ export type RawMaterialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -398,10 +454,15 @@ export type RawMaterialCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type RawMaterialAvgOrderByAggregateInput = {
+  defaultBagWeightKg?: Prisma.SortOrder
+}
+
 export type RawMaterialMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -413,11 +474,16 @@ export type RawMaterialMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type RawMaterialSumOrderByAggregateInput = {
+  defaultBagWeightKg?: Prisma.SortOrder
 }
 
 export type RawMaterialNullableScalarRelationFilter = {
@@ -428,6 +494,14 @@ export type RawMaterialNullableScalarRelationFilter = {
 export type RawMaterialScalarRelationFilter = {
   is?: Prisma.RawMaterialWhereInput
   isNot?: Prisma.RawMaterialWhereInput
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type EnumEntityStatusFieldUpdateOperationsInput = {
@@ -544,6 +618,7 @@ export type RawMaterialCreateWithoutBalanceInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -561,6 +636,7 @@ export type RawMaterialUncheckedCreateWithoutBalanceInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -594,6 +670,7 @@ export type RawMaterialUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -611,6 +688,7 @@ export type RawMaterialUncheckedUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -628,6 +706,7 @@ export type RawMaterialCreateWithoutMovementsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -645,6 +724,7 @@ export type RawMaterialUncheckedCreateWithoutMovementsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -678,6 +758,7 @@ export type RawMaterialUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -695,6 +776,7 @@ export type RawMaterialUncheckedUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -712,6 +794,7 @@ export type RawMaterialCreateWithoutSemiProductLinksInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -729,6 +812,7 @@ export type RawMaterialUncheckedCreateWithoutSemiProductLinksInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -762,6 +846,7 @@ export type RawMaterialUpdateWithoutSemiProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -779,6 +864,7 @@ export type RawMaterialUncheckedUpdateWithoutSemiProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -796,6 +882,7 @@ export type RawMaterialCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -813,6 +900,7 @@ export type RawMaterialUncheckedCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -846,6 +934,7 @@ export type RawMaterialUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -863,6 +952,7 @@ export type RawMaterialUncheckedUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -880,6 +970,7 @@ export type RawMaterialCreateWithoutBagsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -897,6 +988,7 @@ export type RawMaterialUncheckedCreateWithoutBagsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -930,6 +1022,7 @@ export type RawMaterialUpdateWithoutBagsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -947,6 +1040,7 @@ export type RawMaterialUncheckedUpdateWithoutBagsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -964,6 +1058,7 @@ export type RawMaterialCreateWithoutBagAuditLogsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -981,6 +1076,7 @@ export type RawMaterialUncheckedCreateWithoutBagAuditLogsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1014,6 +1110,7 @@ export type RawMaterialUpdateWithoutBagAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1031,6 +1128,7 @@ export type RawMaterialUncheckedUpdateWithoutBagAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1048,6 +1146,7 @@ export type RawMaterialCreateWithoutConsumptionsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1065,6 +1164,7 @@ export type RawMaterialUncheckedCreateWithoutConsumptionsInput = {
   id?: string
   name: string
   unit?: string
+  defaultBagWeightKg?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1098,6 +1198,7 @@ export type RawMaterialUpdateWithoutConsumptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1115,6 +1216,7 @@ export type RawMaterialUncheckedUpdateWithoutConsumptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1208,6 +1310,7 @@ export type RawMaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   name?: boolean
   unit?: boolean
+  defaultBagWeightKg?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1227,6 +1330,7 @@ export type RawMaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   unit?: boolean
+  defaultBagWeightKg?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1238,6 +1342,7 @@ export type RawMaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   unit?: boolean
+  defaultBagWeightKg?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1249,6 +1354,7 @@ export type RawMaterialSelectScalar = {
   id?: boolean
   name?: boolean
   unit?: boolean
+  defaultBagWeightKg?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1256,7 +1362,7 @@ export type RawMaterialSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RawMaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "unit" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["rawMaterial"]>
+export type RawMaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "unit" | "defaultBagWeightKg" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["rawMaterial"]>
 export type RawMaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balance?: boolean | Prisma.RawMaterial$balanceArgs<ExtArgs>
   movements?: boolean | Prisma.RawMaterial$movementsArgs<ExtArgs>
@@ -1285,6 +1391,7 @@ export type $RawMaterialPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     name: string
     unit: string
+    defaultBagWeightKg: number | null
     description: string | null
     isDeleted: boolean
     status: $Enums.EntityStatus
@@ -1723,6 +1830,7 @@ export interface RawMaterialFieldRefs {
   readonly id: Prisma.FieldRef<"RawMaterial", 'String'>
   readonly name: Prisma.FieldRef<"RawMaterial", 'String'>
   readonly unit: Prisma.FieldRef<"RawMaterial", 'String'>
+  readonly defaultBagWeightKg: Prisma.FieldRef<"RawMaterial", 'Float'>
   readonly description: Prisma.FieldRef<"RawMaterial", 'String'>
   readonly isDeleted: Prisma.FieldRef<"RawMaterial", 'Boolean'>
   readonly status: Prisma.FieldRef<"RawMaterial", 'EntityStatus'>

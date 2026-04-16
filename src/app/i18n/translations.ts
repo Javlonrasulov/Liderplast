@@ -243,6 +243,14 @@ export interface T {
   rmSelectRawMaterialRequired: string;
   rmDefaultIncomingNote: string;
   rmIncomingHint: string;
+  rmDefaultBagWeight: string;
+  rmDefaultBagWeightPlaceholder: string;
+  rmDefaultBagWeightHint: string;
+  rmDefaultBagWeightRequired: string;
+  rmDefaultBagWeightPreview: string;
+  rmIncomingBagWeightHint: string;
+  rmAutoBagPreview: string;
+  rmAutoBagMissingHint: string;
 
   // Semi Production
   spTitle: string;
@@ -370,8 +378,6 @@ export interface T {
   slSemiCat: string;
   slFinalCat: string;
   slProductType: string;
-  /** Sotuv: katalogda sotiladigan mahsulot yo‘q */
-  slNoCatalogProducts: string;
   slAvailableStock: string;
   slAvailableProducts: string;
   slNewClient: string;
@@ -605,10 +611,6 @@ export interface T {
   prBankCreateEmployeeTitle: string;
   prBankCreateEmployeeDesc: string;
   prBankCreateWarning: string;
-  prBankRejectedTitle: string;
-  prBankRejectedExplain: string;
-  prBankRejectedEmptyTx: string;
-  prBankTechnicalDetails: string;
 }
 
 // ======================== UZBEK CYRILLIC ========================
@@ -802,7 +804,15 @@ const uz_cyrillic: T = {
   rmCreatedSuccess: 'Сиро тури муваффақиятли яратилди',
   rmSelectRawMaterialRequired: 'Аввал камида битта сиро турини яратинг',
   rmDefaultIncomingNote: 'Сиро кирими',
-  rmIncomingHint: 'Кирим яратилган биринчи сиро турига ёзилади',
+  rmIncomingHint: 'Кирим танланган сиро турига ёзилади',
+  rmDefaultBagWeight: 'Бир қопдаги миқдор',
+  rmDefaultBagWeightPlaceholder: 'Масалан: 25',
+  rmDefaultBagWeightHint: 'Киримда автоматик қоплар шу миқдор бўйича яратилади',
+  rmDefaultBagWeightRequired: 'Бир қопдаги миқдорни киритинг',
+  rmDefaultBagWeightPreview: 'Ҳар бир янги қоп: {weight} кг',
+  rmIncomingBagWeightHint: 'Авто қоп яратиш: ҳар бир қоп {weight} {unit}',
+  rmAutoBagPreview: 'Киримдан кейин автоматик {count} қоп яратилади. Одатий қоп: {weight} кг, охиргиси: {lastWeight} кг',
+  rmAutoBagMissingHint: 'Бу сиро турида авто қоп яратиш учун бир қопдаги миқдор белгиланмаган',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -970,8 +980,6 @@ const uz_cyrillic: T = {
   slSemiCat: 'Яримтайёр (Қолип)',
   slFinalCat: 'Тайёр (Бакалашка)',
   slProductType: 'Маҳсулот тури',
-  slNoCatalogProducts:
-    'Каталогда сотиш учун махсулот йўқ. Аввал «Омбор»дан махсулот қўшинг.',
   slAvailableStock: 'мавжуд',
   slAvailableProducts: 'Мавжуд Маҳсулотлар',
   slNewClient: 'Янги Клиент',
@@ -1201,11 +1209,6 @@ const uz_cyrillic: T = {
   prBankCreateEmployeeTitle: 'Ходимни тизимга қўшиш',
   prBankCreateEmployeeDesc: 'Ушбу олувчини ходим сифатида қўшасизми?',
   prBankCreateWarning: 'Рад этсангиз, ушбу ўтказма тизимда клиент/ходимга боғланмайди ва кейинги ҳисоботлар ҳамда солиштиришларда номувофиқлик қолиши мумкин.',
-  prBankRejectedTitle: 'Файл импорти якунланмади',
-  prBankRejectedExplain:
-    'Банк обороткаси талаб қилинган форматда ўқилмади ёки сақлашда хатолик бўлди. Транзакциялар базага ёзилмади — шу сабабли рўйхат бўш. Агар хабарда «database» ёки «schema» бўлса, ишлаб чиқувчи `prisma db push` ни ишга тушириши керак.',
-  prBankRejectedEmptyTx: 'Рад этилган ведомостда транзакциялар йўқ.',
-  prBankTechnicalDetails: 'Техник тафсилотлар (ихтиёрий)',
 };
 
 // ======================== UZBEK LATIN ========================
@@ -1399,7 +1402,15 @@ const uz_latin: T = {
   rmCreatedSuccess: 'Siro turi muvaffaqiyatli yaratildi',
   rmSelectRawMaterialRequired: 'Avval kamida bitta siro turini yarating',
   rmDefaultIncomingNote: 'Siro kirimi',
-  rmIncomingHint: 'Kirim yaratilgan birinchi siro turiga yoziladi',
+  rmIncomingHint: 'Kirim tanlangan siro turiga yoziladi',
+  rmDefaultBagWeight: 'Bir qopdagi miqdor',
+  rmDefaultBagWeightPlaceholder: 'Masalan: 25',
+  rmDefaultBagWeightHint: 'Kirimda avtomatik qoplar shu miqdor bo‘yicha yaratiladi',
+  rmDefaultBagWeightRequired: 'Bir qopdagi miqdorni kiriting',
+  rmDefaultBagWeightPreview: 'Har bir yangi qop: {weight} kg',
+  rmIncomingBagWeightHint: 'Avto qop yaratish: har bir qop {weight} {unit}',
+  rmAutoBagPreview: 'Kirimdan keyin avtomatik {count} qop yaratiladi. Odatdagi qop: {weight} kg, oxirgisi: {lastWeight} kg',
+  rmAutoBagMissingHint: 'Bu siro turida avto qop yaratish uchun bir qopdagi miqdor belgilanmagan',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -1567,8 +1578,6 @@ const uz_latin: T = {
   slSemiCat: 'Yarim tayyor (Qolip)',
   slFinalCat: 'Tayyor (Bakalashka)',
   slProductType: 'Mahsulot turi',
-  slNoCatalogProducts:
-    'Katalogda sotish uchun mahsulot yo‘q. Avval «Ombor»dan mahsulot qo‘shing.',
   slAvailableStock: 'mavjud',
   slAvailableProducts: 'Mavjud Mahsulotlar',
   slNewClient: 'Yangi Klient',
@@ -1798,11 +1807,6 @@ const uz_latin: T = {
   prBankCreateEmployeeTitle: 'Xodimni tizimga qo‘shish',
   prBankCreateEmployeeDesc: 'Ushbu oluvchini xodim sifatida qo‘shasizmi?',
   prBankCreateWarning: 'Yo‘q desangiz, ushbu o‘tkazma tizimda klient/xodimga bog‘lanmaydi va keyingi hisobotlar hamda solishtirishlarda xatolik xavfi saqlanib qoladi.',
-  prBankRejectedTitle: 'Fayl importi yakunlanmadi',
-  prBankRejectedExplain:
-    'Bank oborotkasi talab qilingan formatda o‘qilmadi yoki saqlashda xatolik bo‘ldi. Tranzaksiyalar bazaga yozilmadi — shu sababli ro‘yxat bo‘sh. Agar xabarda «database» yoki «schema» bo‘lsa, ishlab chiquvchi `prisma db push` ni ishga tushirishi kerak.',
-  prBankRejectedEmptyTx: 'Rad etilgan vedemostda tranzaksiyalar yo‘q.',
-  prBankTechnicalDetails: 'Texnik tafsilotlar (ixtiyoriy)',
 };
 
 // ======================== RUSSIAN ========================
@@ -1996,7 +2000,15 @@ const ru: T = {
   rmCreatedSuccess: 'Тип сырья успешно создан',
   rmSelectRawMaterialRequired: 'Сначала создайте хотя бы один тип сырья',
   rmDefaultIncomingNote: 'Поступление сырья',
-  rmIncomingHint: 'Поступление будет записано на первый созданный тип сырья',
+  rmIncomingHint: 'Поступление будет записано на выбранный тип сырья',
+  rmDefaultBagWeight: 'Вес одного мешка',
+  rmDefaultBagWeightPlaceholder: 'Например: 25',
+  rmDefaultBagWeightHint: 'При поступлении мешки будут создаваться автоматически по этому весу',
+  rmDefaultBagWeightRequired: 'Укажите вес одного мешка',
+  rmDefaultBagWeightPreview: 'Каждый новый мешок: {weight} кг',
+  rmIncomingBagWeightHint: 'Автосоздание мешков: каждый мешок по {weight} {unit}',
+  rmAutoBagPreview: 'После поступления автоматически создастся {count} мешков. Обычный мешок: {weight} кг, последний: {lastWeight} кг',
+  rmAutoBagMissingHint: 'Для этого типа сырья не задан вес одного мешка для автосоздания',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',
@@ -2164,8 +2176,6 @@ const ru: T = {
   slSemiCat: 'Полуфабрикат (заготовки)',
   slFinalCat: 'Готовый продукт (бутылки)',
   slProductType: 'Тип продукта',
-  slNoCatalogProducts:
-    'В каталоге нет товаров для продажи. Сначала добавьте продукт на «Складе».',
   slAvailableStock: 'доступно',
   slAvailableProducts: 'Доступные продукты',
   slNewClient: 'Новый клиент',
@@ -2395,11 +2405,6 @@ const ru: T = {
   prBankCreateEmployeeTitle: 'Добавить сотрудника в систему',
   prBankCreateEmployeeDesc: 'Добавить этого получателя как сотрудника?',
   prBankCreateWarning: 'Если отказаться, перевод останется не связанным с клиентом/сотрудником и это может вызвать ошибки или расхождения в отчётах и сверке.',
-  prBankRejectedTitle: 'Импорт файла не выполнен',
-  prBankRejectedExplain:
-    'Выписка не была разобрана в ожидаемом формате или при сохранении произошла ошибка. Транзакции в базу не записаны — поэтому список пуст. Если в сообщении есть «database» или «schema», разработчику нужно выполнить `prisma db push`.',
-  prBankRejectedEmptyTx: 'У отклонённой ведомости нет транзакций.',
-  prBankTechnicalDetails: 'Технические подробности (по желанию)',
 };
 
 export const translations: Record<Language, T> = {

@@ -621,14 +621,6 @@ export type EnumBagAuditActionTypeFieldUpdateOperationsInput = {
   set?: $Enums.BagAuditActionType
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type BagAuditLogCreateWithoutCreatedByInput = {
   id?: string
   actionType: $Enums.BagAuditActionType

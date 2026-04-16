@@ -402,6 +402,84 @@ export class RawMaterialBagsService {
     });
   }
 
+  async createAutoBagsForIncomingTx(
+    tx: Tx,
+    params: {
+      rawMaterialId: string;
+      totalQuantityKg: number;
+      createdById?: string;
+      referenceType?: string;
+      referenceId?: string;
+    },
+  ) {
+    if (params.totalQuantityKg <= 0) {
+      return { bagCount: 0 };
+    }
+
+    const rawMaterial = await tx.rawMaterial.findUnique({
+      where: { id: params.rawMaterialId },
+      select: {
+        id: true,
+        defaultBagWeightKg: true,
+      },
+    });
+    if (!rawMaterial) {
+      throw new NotFoundException('Raw material not found');
+    }
+
+    const bagWeightKg = rawMaterial.defaultBagWeightKg ?? 0;
+    if (bagWeightKg <= 0) {
+      return { bagCount: 0 };
+    }
+
+    const balance = await this.getRawMaterialBalance(tx, params.rawMaterialId);
+    const allocated = await tx.rawMaterialBag.aggregate({
+      _sum: { currentQuantityKg: true },
+      where: { rawMaterialId: params.rawMaterialId },
+    });
+    const allocatedQuantity = allocated._sum.currentQuantityKg ?? 0;
+    const availableToAllocate = balance.quantity - allocatedQuantity;
+
+    if (params.totalQuantityKg > availableToAllocate + 0.0001) {
+      throw new BadRequestException(
+        'Auto bag quantity exceeds unallocated raw material stock',
+      );
+    }
+
+    let remainingQuantityKg = params.totalQuantityKg;
+    let createdCount = 0;
+
+    while (remainingQuantityKg > 0.0001) {
+      const nextBagQuantityKg = Math.min(bagWeightKg, remainingQuantityKg);
+      const createdBag = await tx.rawMaterialBag.create({
+        data: {
+          rawMaterialId: params.rawMaterialId,
+          initialQuantityKg: nextBagQuantityKg,
+          currentQuantityKg: nextBagQuantityKg,
+          status: BagStatus.IN_STORAGE,
+        },
+      });
+
+      await this.createAuditLog(tx, {
+        bagId: createdBag.id,
+        rawMaterialId: params.rawMaterialId,
+        actionType: BagAuditActionType.CREATED,
+        quantityKg: nextBagQuantityKg,
+        referenceType: params.referenceType,
+        referenceId: params.referenceId,
+        createdById: params.createdById,
+      });
+
+      remainingQuantityKg -= nextBagQuantityKg;
+      createdCount += 1;
+    }
+
+    return {
+      bagCount: createdCount,
+      bagWeightKg,
+    };
+  }
+
   private async consumeFromActiveBagTx(tx: Tx, params: ConsumeBagParams) {
     if (params.quantityKg <= 0) {
       throw new BadRequestException('Consumption quantity must be greater than zero');

@@ -42,6 +42,12 @@ export class UpdateProductDto {
   volumeLiter?: number;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.0001)
+  defaultBagWeightKg?: number;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => ProductRelationsDto)
   relations?: ProductRelationsDto;

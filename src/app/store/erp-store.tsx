@@ -123,6 +123,7 @@ interface WarehouseProductBase {
 export interface RawMaterialProduct extends WarehouseProductBase {
   itemType: 'RAW_MATERIAL';
   unit: string;
+  defaultBagWeightKg?: number;
 }
 
 export interface SemiProductRawMaterialRelation {
@@ -395,6 +396,8 @@ export interface ERPState {
   rawMaterialBags: RawMaterialBag[];
   activeRawMaterialBag: RawMaterialBag | null;
   bagLogs: BagLog[];
+  /** `/warehouse/stock` dan keladigan real qoldiq (ID bo‘yicha) */
+  warehouseStock: WarehouseStockItem[];
   warehouseProducts: WarehouseProduct[];
   semiProductBatches: SemiProductBatch[];
   finalProductBatches: FinalProductBatch[];
@@ -434,6 +437,7 @@ type ERPAction =
         name: string;
         description?: string;
         unit?: string;
+        defaultBagWeightKg?: number;
         weightGram?: number;
         volumeLiter?: number;
         relations?: {
@@ -455,6 +459,7 @@ type ERPAction =
         name?: string;
         description?: string;
         unit?: string;
+        defaultBagWeightKg?: number;
         weightGram?: number;
         volumeLiter?: number;
         relations?: {
@@ -592,6 +597,7 @@ const emptyState: ERPState = {
   rawMaterialBags: [],
   activeRawMaterialBag: null,
   bagLogs: [],
+  warehouseStock: [],
   warehouseProducts: [],
   semiProductBatches: [],
   finalProductBatches: [],
@@ -625,6 +631,7 @@ type CatalogResponse = {
     id: string;
     name: string;
     unit: string;
+    defaultBagWeightKg?: number;
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -1268,6 +1275,7 @@ async function loadStateFromApi() {
       itemType: 'RAW_MATERIAL' as const,
       name: item.name,
       unit: item.unit,
+      defaultBagWeightKg: item.defaultBagWeightKg,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
@@ -1477,6 +1485,7 @@ async function loadStateFromApi() {
     rawMaterialBags,
     activeRawMaterialBag: mappedActiveBag,
     bagLogs: mappedBagLogs,
+    warehouseStock: stock,
     warehouseProducts,
     semiProductBatches,
     finalProductBatches,

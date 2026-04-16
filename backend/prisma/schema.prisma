@@ -173,6 +173,7 @@ model RawMaterial {
   id           String                  @id @default(cuid())
   name         String                  @unique
   unit         String                  @default("kg")
+  defaultBagWeightKg Float?
   description  String?
   isDeleted    Boolean                 @default(false)
   status       EntityStatus            @default(COMPLETED)

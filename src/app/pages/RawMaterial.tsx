@@ -10,6 +10,7 @@ import {
   Ban,
   Package,
   History,
+  ChevronDown,
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -22,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../components/ui/collapsible';
 
 const NONE = '__none__';
 
@@ -38,7 +44,7 @@ export function RawMaterial() {
   const { state, dispatch, rawMaterialStock } = useERP();
   const { t, filterData } = useApp();
   const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
-  const [createForm, setCreateForm] = useState({ name: '', description: '' });
+  const [createForm, setCreateForm] = useState({ name: '', description: '', defaultBagWeightKg: '' });
   const [bagForm, setBagForm] = useState({ rawMaterialId: '', name: '', initialQuantityKg: '' });
   const [quickForm, setQuickForm] = useState({
     pieceCount: '',
@@ -54,6 +60,7 @@ export function RawMaterial() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const MAX_STOCK = 5000;
   const stockPercent = calcPercent(rawMaterialStock, MAX_STOCK);
@@ -68,8 +75,13 @@ export function RawMaterial() {
     e.preventDefault();
     setError('');
     const name = createForm.name.trim();
+    const defaultBagWeightKg = parseFloat(createForm.defaultBagWeightKg);
     if (!name) {
       setError(t.rmCreateNameRequired);
+      return;
+    }
+    if (!createForm.defaultBagWeightKg || !Number.isFinite(defaultBagWeightKg) || defaultBagWeightKg <= 0) {
+      setError(t.rmDefaultBagWeightRequired);
       return;
     }
 
@@ -81,9 +93,10 @@ export function RawMaterial() {
           name,
           description: createForm.description.trim() || undefined,
           unit: 'kg',
+          defaultBagWeightKg,
         },
       });
-      setCreateForm({ name: '', description: '' });
+      setCreateForm({ name: '', description: '', defaultBagWeightKg: '' });
       setSuccess(t.rmCreatedSuccess);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -127,6 +140,16 @@ export function RawMaterial() {
     }
     return availableRawMaterials[0]?.id ?? '';
   }, [availableRawMaterials, incomingRawMaterialId]);
+
+  const incomingRawMaterial = useMemo(
+    () =>
+      state.warehouseProducts.find(
+        (item) =>
+          item.itemType === 'RAW_MATERIAL' &&
+          item.id === resolvedIncomingRawMaterialId,
+      ),
+    [resolvedIncomingRawMaterialId, state.warehouseProducts],
+  );
 
   useEffect(() => {
     // Keep selected value valid when list changes (e.g. after loading or creating a new raw material).
@@ -174,10 +197,22 @@ export function RawMaterial() {
   };
 
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
+  const createBagWeightKg = parseFloat(createForm.defaultBagWeightKg || '0');
   const bagAmountKg = parseFloat(bagForm.initialQuantityKg || '0');
   const quickConsumeKg = quickForm.quantityKg
     ? parseFloat(quickForm.quantityKg || '0')
     : ((parseFloat(quickForm.pieceCount || '0') || 0) * (parseFloat(quickForm.gramPerUnit || '0') || 0)) / 1000;
+  const incomingAutoBagCount =
+    incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
+    incomingRawMaterial.defaultBagWeightKg &&
+    incomingRawMaterial.defaultBagWeightKg > 0 &&
+    amountKg > 0
+      ? Math.ceil(amountKg / incomingRawMaterial.defaultBagWeightKg)
+      : 0;
+  const incomingLastBagKg =
+    incomingAutoBagCount > 0 && incomingRawMaterial?.itemType === 'RAW_MATERIAL'
+      ? amountKg - (incomingAutoBagCount - 1) * (incomingRawMaterial.defaultBagWeightKg ?? 0)
+      : 0;
 
   const handleCreateBag = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,7 +313,7 @@ export function RawMaterial() {
   };
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
@@ -330,10 +365,8 @@ export function RawMaterial() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
                 <Droplets size={16} className="text-white" />
@@ -362,13 +395,33 @@ export function RawMaterial() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
                 />
               </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmDefaultBagWeight}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.0001"
+                  value={createForm.defaultBagWeightKg}
+                  onChange={e => setCreateForm({ ...createForm, defaultBagWeightKg: e.target.value })}
+                  placeholder={t.rmDefaultBagWeightPlaceholder}
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+                <p className="text-xs text-slate-400 mt-1">{t.rmDefaultBagWeightHint}</p>
+              </div>
+              {createBagWeightKg > 0 && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-700 dark:bg-emerald-900/20">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                    {t.rmDefaultBagWeightPreview.replace('{weight}', formatNumber(createBagWeightKg))}
+                  </p>
+                </div>
+              )}
               <button type="submit" className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
                 <Plus size={16} /> {t.rmCreateTypeButton}
               </button>
             </form>
-          </div>
+        </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
                 <Plus size={16} className="text-white" />
@@ -404,6 +457,15 @@ export function RawMaterial() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-slate-400 mt-1">{t.rmIncomingHint}</p>
+                {incomingRawMaterial?.itemType === 'RAW_MATERIAL' && incomingRawMaterial.defaultBagWeightKg ? (
+                  <p className="text-xs text-indigo-500 mt-1">
+                    {t.rmIncomingBagWeightHint
+                      .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg))
+                      .replace('{unit}', t.unitKg)}
+                  </p>
+                ) : (
+                  <p className="text-xs text-amber-500 mt-1">{t.rmAutoBagMissingHint}</p>
+                )}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
@@ -448,6 +510,14 @@ export function RawMaterial() {
                   <p className="text-blue-700 dark:text-blue-400 text-xs font-medium">{t.rmPreviewAdd}</p>
                   <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatNumber(amountKg)} {t.unitKg}</p>
                   <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">{t.rmPreviewBalance} {formatNumber(rawMaterialStock + amountKg)} {t.unitKg}</p>
+                  {incomingAutoBagCount > 0 && incomingRawMaterial?.itemType === 'RAW_MATERIAL' ? (
+                    <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
+                      {t.rmAutoBagPreview
+                        .replace('{count}', String(incomingAutoBagCount))
+                        .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg ?? 0))
+                        .replace('{lastWeight}', formatNumber(incomingLastBagKg || 0))}
+                    </p>
+                  ) : null}
                 </div>
               )}
               {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl"><p className="text-red-600 dark:text-red-400 text-sm">{error}</p></div>}
@@ -456,15 +526,30 @@ export function RawMaterial() {
                 <Plus size={16} /> {t.rmAddBtn}
               </button>
             </form>
-          </div>
         </div>
+      </div>
 
-        {/* Table */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      <Collapsible
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+      >
+        <CollapsibleTrigger className="w-full">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
-            <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
+            <div className="flex items-center gap-2">
+              <History size={16} className="text-indigo-500" />
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
+              <ChevronDown
+                size={16}
+                className={`text-slate-400 transition-transform ${historyOpen ? 'rotate-180' : ''}`}
+              />
+            </div>
           </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
           {filteredEntries.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
           ) : (
@@ -506,12 +591,12 @@ export function RawMaterial() {
               </table>
             </div>
           )}
-        </div>
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+      <div className="grid flex-1 grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 flex flex-col gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex-1">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmActiveBagTitle}</h3>
@@ -779,13 +864,13 @@ export function RawMaterial() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+        <div className="flex flex-col gap-6 xl:min-h-0">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex flex-1 flex-col min-h-[240px]">
             <div className="flex items-center gap-2 mb-4">
               <RefreshCw size={16} className="text-indigo-500" />
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagsTitle}</h3>
             </div>
-            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-1">
               {state.rawMaterialBags.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
               ) : (
@@ -816,12 +901,12 @@ export function RawMaterial() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex flex-1 flex-col min-h-[240px]">
             <div className="flex items-center gap-2 mb-4">
               <History size={16} className="text-indigo-500" />
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagLogsTitle}</h3>
             </div>
-            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-1">
               {filteredBagLogs.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
               ) : (

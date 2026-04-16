@@ -142,6 +142,7 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
+  defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
