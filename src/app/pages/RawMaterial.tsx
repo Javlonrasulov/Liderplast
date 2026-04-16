@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Plus,
   Droplets,
@@ -10,29 +10,29 @@ import {
   Ban,
   Package,
   History,
-  ChevronDown,
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, TODAY, calcPercent } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
-function SelectField(
-  props: React.SelectHTMLAttributes<HTMLSelectElement>,
-) {
-  return (
-    <div className="relative">
-      <select
-        {...props}
-        className={`w-full h-11 appearance-none rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 px-3 pr-10 text-sm text-slate-800 dark:text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-300 dark:focus:border-indigo-500 ${props.className ?? ''}`}
-      />
-      <ChevronDown
-        size={16}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-      />
-    </div>
-  );
-}
+const NONE = '__none__';
+
+const SELECT_TRIGGER_CLS =
+  'h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white';
+
+const SELECT_CONTENT_CLS =
+  'z-[120] max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900';
+
+const SELECT_ITEM_CLS =
+  'cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white';
 
 export function RawMaterial() {
   const { state, dispatch, rawMaterialStock } = useERP();
@@ -53,6 +53,7 @@ export function RawMaterial() {
   const [writeoffReason, setWriteoffReason] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
 
   const MAX_STOCK = 5000;
   const stockPercent = calcPercent(rawMaterialStock, MAX_STOCK);
@@ -90,19 +91,6 @@ export function RawMaterial() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    const rawMaterialId = availableRawMaterials[0]?.id;
-    const amountKg = form.unit === 'ton' ? parseFloat(form.amount) * 1000 : parseFloat(form.amount);
-    if (!rawMaterialId) { setError(t.rmSelectRawMaterialRequired); return; }
-    if (!form.amount || isNaN(amountKg) || amountKg <= 0) { setError(t.labelAmount + '!'); return; }
-    dispatch({ type: 'ADD_RAW_MATERIAL', payload: { rawMaterialId, amount: amountKg, description: form.description || t.rmDefaultIncomingNote, date: form.date } });
-    setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
-    setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
-    setTimeout(() => setSuccess(''), 3000);
-  };
-
   const filteredEntries = filterData([...state.rawMaterialEntries]).sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -130,7 +118,36 @@ export function RawMaterial() {
       }
     }
     return Array.from(names.entries()).map(([id, name]) => ({ id, name }));
-  }, [state.rawMaterialBags, state.rawMaterialEntries]);
+  }, [state.warehouseProducts, state.rawMaterialBags, state.rawMaterialEntries]);
+
+  const resolvedIncomingRawMaterialId = useMemo(() => {
+    if (availableRawMaterials.length === 0) return '';
+    if (incomingRawMaterialId && availableRawMaterials.some((x) => x.id === incomingRawMaterialId)) {
+      return incomingRawMaterialId;
+    }
+    return availableRawMaterials[0]?.id ?? '';
+  }, [availableRawMaterials, incomingRawMaterialId]);
+
+  useEffect(() => {
+    // Keep selected value valid when list changes (e.g. after loading or creating a new raw material).
+    if (!resolvedIncomingRawMaterialId) return;
+    if (incomingRawMaterialId !== resolvedIncomingRawMaterialId) {
+      setIncomingRawMaterialId(resolvedIncomingRawMaterialId);
+    }
+  }, [incomingRawMaterialId, resolvedIncomingRawMaterialId]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const rawMaterialId = resolvedIncomingRawMaterialId;
+    const amountKg = form.unit === 'ton' ? parseFloat(form.amount) * 1000 : parseFloat(form.amount);
+    if (!rawMaterialId) { setError(t.rmSelectRawMaterialRequired); return; }
+    if (!form.amount || isNaN(amountKg) || amountKg <= 0) { setError(t.labelAmount + '!'); return; }
+    dispatch({ type: 'ADD_RAW_MATERIAL', payload: { rawMaterialId, amount: amountKg, description: form.description || t.rmDefaultIncomingNote, date: form.date } });
+    setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
+    setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
+    setTimeout(() => setSuccess(''), 3000);
+  };
 
   const bagStatusTone: Record<string, string> = {
     IN_STORAGE: 'bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-200',
@@ -161,7 +178,6 @@ export function RawMaterial() {
   const quickConsumeKg = quickForm.quantityKg
     ? parseFloat(quickForm.quantityKg || '0')
     : ((parseFloat(quickForm.pieceCount || '0') || 0) * (parseFloat(quickForm.gramPerUnit || '0') || 0)) / 1000;
-  const selectedIncomingRawMaterialId = availableRawMaterials[0]?.id ?? '';
 
   const handleCreateBag = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -369,19 +385,24 @@ export function RawMaterial() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagRawMaterial}</label>
-                <SelectField
-                  value={selectedIncomingRawMaterialId}
-                  onChange={() => undefined}
-                  disabled
+                <Select
+                  value={resolvedIncomingRawMaterialId || NONE}
+                  onValueChange={(v) => setIncomingRawMaterialId(v === NONE ? '' : v)}
                 >
-                  {availableRawMaterials.length === 0 ? (
-                    <option value="">{t.rmBagSelectRawMaterial}</option>
-                  ) : (
-                    availableRawMaterials.map((item) => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))
-                  )}
-                </SelectField>
+                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                    <SelectValue placeholder={t.rmBagSelectRawMaterial} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
+                      —
+                    </SelectItem>
+                    {availableRawMaterials.map((item) => (
+                      <SelectItem key={item.id} value={item.id} className={SELECT_ITEM_CLS}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-xs text-slate-400 mt-1">{t.rmIncomingHint}</p>
               </div>
               <div>
@@ -396,10 +417,21 @@ export function RawMaterial() {
                 <div className="flex gap-2">
                   <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="0" min="0"
                     className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                  <SelectField value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} className="w-[110px]">
-                    <option value="kg">{t.unitKg}</option>
-                    <option value="ton">{t.unitTon}</option>
-                  </SelectField>
+                  <div className="w-[140px]">
+                    <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
+                      <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                        <SelectItem value="kg" className={SELECT_ITEM_CLS}>
+                          {t.unitKg}
+                        </SelectItem>
+                        <SelectItem value="ton" className={SELECT_ITEM_CLS}>
+                          {t.unitTon}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 {form.amount && form.unit === 'ton' && (
                   <p className="text-xs text-indigo-500 mt-1">= {formatNumber(amountKg)} {t.unitKg}</p>
@@ -545,15 +577,24 @@ export function RawMaterial() {
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagRawMaterial}</label>
-                <SelectField
-                  value={bagForm.rawMaterialId}
-                  onChange={(e) => setBagForm({ ...bagForm, rawMaterialId: e.target.value })}
+                <Select
+                  value={bagForm.rawMaterialId || NONE}
+                  onValueChange={(v) => setBagForm({ ...bagForm, rawMaterialId: v === NONE ? '' : v })}
                 >
-                  <option value="">{t.rmBagSelectRawMaterial}</option>
-                  {availableRawMaterials.map((item) => (
-                    <option key={item.id} value={item.id}>{item.name}</option>
-                  ))}
-                </SelectField>
+                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                    <SelectValue placeholder={t.rmBagSelectRawMaterial} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
+                      —
+                    </SelectItem>
+                    {availableRawMaterials.map((item) => (
+                      <SelectItem key={item.id} value={item.id} className={SELECT_ITEM_CLS}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagName}</label>
@@ -646,15 +687,26 @@ export function RawMaterial() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="space-y-3">
                 <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagConnectTitle}</label>
-                <SelectField
-                  value={selectedBagId}
-                  onChange={(e) => setSelectedBagId(e.target.value)}
+                <Select
+                  value={selectedBagId || NONE}
+                  onValueChange={(v) => setSelectedBagId(v === NONE ? '' : v)}
                 >
-                  <option value="">{t.rmBagSelect}</option>
-                  {state.rawMaterialBags.filter((item) => item.status === 'IN_STORAGE').map((bag) => (
-                    <option key={bag.id} value={bag.id}>{bag.name}</option>
-                  ))}
-                </SelectField>
+                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                    <SelectValue placeholder={t.rmBagSelect} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
+                      —
+                    </SelectItem>
+                    {state.rawMaterialBags
+                      .filter((item) => item.status === 'IN_STORAGE')
+                      .map((bag) => (
+                        <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
+                          {bag.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
                 <button type="button" onClick={() => void handleConnectBag()} className="w-full py-2.5 rounded-xl border border-indigo-200 text-indigo-700 dark:text-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm font-medium">
                   {t.rmBagConnectButton}
                 </button>
@@ -662,24 +714,42 @@ export function RawMaterial() {
 
               <div className="space-y-3">
                 <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagSwitchTitle}</label>
-                <SelectField
-                  value={switchBagId}
-                  onChange={(e) => setSwitchBagId(e.target.value)}
+                <Select
+                  value={switchBagId || NONE}
+                  onValueChange={(v) => setSwitchBagId(v === NONE ? '' : v)}
                 >
-                  <option value="">{t.rmBagSelectReplacement}</option>
-                  {state.rawMaterialBags
-                    .filter((item) => item.status === 'IN_STORAGE' && item.id !== activeBag?.id)
-                    .map((bag) => (
-                      <option key={bag.id} value={bag.id}>{bag.name}</option>
-                    ))}
-                </SelectField>
-                <SelectField
+                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                    <SelectValue placeholder={t.rmBagSelectReplacement} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
+                      —
+                    </SelectItem>
+                    {state.rawMaterialBags
+                      .filter((item) => item.status === 'IN_STORAGE' && item.id !== activeBag?.id)
+                      .map((bag) => (
+                        <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
+                          {bag.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Select
                   value={switchAction}
-                  onChange={(e) => setSwitchAction(e.target.value as 'RETURN_TO_STORAGE' | 'WRITE_OFF')}
+                  onValueChange={(v) => setSwitchAction(v as 'RETURN_TO_STORAGE' | 'WRITE_OFF')}
                 >
-                  <option value="RETURN_TO_STORAGE">{t.rmBagSwitchReturn}</option>
-                  <option value="WRITE_OFF">{t.rmBagSwitchWriteoff}</option>
-                </SelectField>
+                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                    <SelectItem value="RETURN_TO_STORAGE" className={SELECT_ITEM_CLS}>
+                      {t.rmBagSwitchReturn}
+                    </SelectItem>
+                    <SelectItem value="WRITE_OFF" className={SELECT_ITEM_CLS}>
+                      {t.rmBagSwitchWriteoff}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <input
                   type="text"
                   value={switchReason}
