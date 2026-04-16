@@ -5,6 +5,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   AlertTriangle,
+  Pencil,
   Link2,
   RefreshCw,
   Ban,
@@ -28,6 +29,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../components/ui/collapsible';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 
 const NONE = '__none__';
 
@@ -45,18 +53,13 @@ export function RawMaterial() {
   const { t, filterData } = useApp();
   const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
   const [createForm, setCreateForm] = useState({ name: '', description: '', defaultBagWeightKg: '' });
-  const [bagForm, setBagForm] = useState({ rawMaterialId: '', name: '', initialQuantityKg: '' });
-  const [quickForm, setQuickForm] = useState({
-    pieceCount: '',
-    gramPerUnit: '18',
-    quantityKg: '',
-    note: '',
-  });
   const [selectedBagId, setSelectedBagId] = useState('');
   const [switchBagId, setSwitchBagId] = useState('');
   const [switchAction, setSwitchAction] = useState<'RETURN_TO_STORAGE' | 'WRITE_OFF'>('RETURN_TO_STORAGE');
   const [switchReason, setSwitchReason] = useState('');
   const [writeoffReason, setWriteoffReason] = useState('');
+  const [editingBagId, setEditingBagId] = useState('');
+  const [editingBagName, setEditingBagName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
@@ -132,10 +135,10 @@ export function RawMaterial() {
   }, [state.warehouseProducts, state.rawMaterialBags, state.rawMaterialEntries]);
 
   const rawMaterialAlerts = useMemo(() => {
-    const stockById = new Map<string, number>();
+    const stockByName = new Map<string, number>();
     for (const item of state.warehouseStock) {
       if (item.itemType === 'RAW_MATERIAL') {
-        stockById.set(item.id, item.quantity);
+        if (item.itemName) stockByName.set(item.itemName, item.quantity);
       }
     }
 
@@ -145,7 +148,7 @@ export function RawMaterial() {
           item.itemType === 'RAW_MATERIAL',
       )
       .map((item) => {
-        const quantityKg = stockById.get(item.id) ?? 0;
+        const quantityKg = stockByName.get(item.name) ?? 0;
         const level =
           quantityKg < 500 ? 'critical' : quantityKg < 1000 ? 'warning' : 'ok';
         return {
@@ -224,10 +227,6 @@ export function RawMaterial() {
 
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
   const createBagWeightKg = parseFloat((createForm.defaultBagWeightKg || '0').replace(',', '.'));
-  const bagAmountKg = parseFloat(bagForm.initialQuantityKg || '0');
-  const quickConsumeKg = quickForm.quantityKg
-    ? parseFloat(quickForm.quantityKg || '0')
-    : ((parseFloat(quickForm.pieceCount || '0') || 0) * (parseFloat(quickForm.gramPerUnit || '0') || 0)) / 1000;
   const incomingAutoBagCount =
     incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
     incomingRawMaterial.defaultBagWeightKg &&
@@ -240,25 +239,33 @@ export function RawMaterial() {
       ? amountKg - (incomingAutoBagCount - 1) * (incomingRawMaterial.defaultBagWeightKg ?? 0)
       : 0;
 
-  const handleCreateBag = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const openEditBagName = (bagId: string, currentName: string) => {
+    setEditingBagId(bagId);
+    setEditingBagName(currentName);
     setError('');
-    const rawMaterialId = bagForm.rawMaterialId || availableRawMaterials[0]?.id;
-    if (!rawMaterialId || !bagAmountKg || bagAmountKg <= 0) {
-      setError(t.rmBagCreateError);
-      return;
+  };
+
+  const closeEditBagName = () => {
+    setEditingBagId('');
+    setEditingBagName('');
+  };
+
+  const submitEditBagName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const nextName = editingBagName.trim();
+    if (!editingBagId || !nextName) return;
+    setError('');
+    try {
+      await dispatch({
+        type: 'UPDATE_RAW_MATERIAL_BAG_NAME',
+        payload: { bagId: editingBagId, name: nextName },
+      });
+      setSuccess(t.btnSave);
+      setTimeout(() => setSuccess(''), 2000);
+      closeEditBagName();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.whRequestError);
     }
-    await dispatch({
-      type: 'CREATE_RAW_MATERIAL_BAG',
-      payload: {
-        rawMaterialId,
-        name: bagForm.name || undefined,
-        initialQuantityKg: bagAmountKg,
-      },
-    });
-    setBagForm({ rawMaterialId: rawMaterialId, name: '', initialQuantityKg: '' });
-    setSuccess(t.rmBagCreatedSuccess);
-    setTimeout(() => setSuccess(''), 3000);
   };
 
   const handleConnectBag = async () => {
@@ -311,32 +318,7 @@ export function RawMaterial() {
     setTimeout(() => setSuccess(''), 3000);
   };
 
-  const handleQuickConsume = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickConsumeKg || quickConsumeKg <= 0) {
-      setError(t.rmQuickConsumeError);
-      return;
-    }
-    setError('');
-    await dispatch({
-      type: 'QUICK_CONSUME_RAW_MATERIAL_BAG',
-      payload: {
-        rawMaterialId: activeBag?.rawMaterialId,
-        quantityKg: quickForm.quantityKg ? quickConsumeKg : undefined,
-        pieceCount: quickForm.quantityKg ? undefined : parseFloat(quickForm.pieceCount || '0'),
-        gramPerUnit: quickForm.quantityKg ? undefined : parseFloat(quickForm.gramPerUnit || '0'),
-        note: quickForm.note || undefined,
-      },
-    });
-    setQuickForm({
-      pieceCount: '',
-      gramPerUnit: quickForm.gramPerUnit,
-      quantityKg: '',
-      note: '',
-    });
-    setSuccess(t.rmQuickConsumeSuccess);
-    setTimeout(() => setSuccess(''), 3000);
-  };
+  // NOTE: quick consume + manual bag creation removed (handled elsewhere)
 
   return (
     <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
@@ -709,113 +691,7 @@ export function RawMaterial() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <form onSubmit={handleCreateBag} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4">
-              <div className="flex items-center gap-2">
-                <Plus size={16} className="text-indigo-500" />
-                <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmCreateBagTitle}</h3>
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagRawMaterial}</label>
-                <Select
-                  value={bagForm.rawMaterialId || NONE}
-                  onValueChange={(v) => setBagForm({ ...bagForm, rawMaterialId: v === NONE ? '' : v })}
-                >
-                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                    <SelectValue placeholder={t.rmBagSelectRawMaterial} />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
-                      —
-                    </SelectItem>
-                    {availableRawMaterials.map((item) => (
-                      <SelectItem key={item.id} value={item.id} className={SELECT_ITEM_CLS}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagName}</label>
-                <input
-                  type="text"
-                  value={bagForm.name}
-                  onChange={(e) => setBagForm({ ...bagForm, name: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  placeholder={t.rmBagNamePlaceholder}
-                />
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmBagInitial}</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={bagForm.initialQuantityKg}
-                  onChange={(e) => setBagForm({ ...bagForm, initialQuantityKg: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-              <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors">
-                {t.rmCreateBagButton}
-              </button>
-            </form>
-
-            <form onSubmit={handleQuickConsume} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4">
-              <div className="flex items-center gap-2">
-                <Droplets size={16} className="text-indigo-500" />
-                <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmQuickConsumeTitle}</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmQuickConsumePieces}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={quickForm.pieceCount}
-                    onChange={(e) => setQuickForm({ ...quickForm, pieceCount: e.target.value, quantityKg: '' })}
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmQuickConsumeGram}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={quickForm.gramPerUnit}
-                    onChange={(e) => setQuickForm({ ...quickForm, gramPerUnit: e.target.value, quantityKg: '' })}
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmQuickConsumeDirectKg}</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={quickForm.quantityKg}
-                  onChange={(e) => setQuickForm({ ...quickForm, quantityKg: e.target.value, pieceCount: '', gramPerUnit: quickForm.gramPerUnit })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
-                <input
-                  type="text"
-                  value={quickForm.note}
-                  onChange={(e) => setQuickForm({ ...quickForm, note: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  placeholder={t.rmQuickConsumeNote}
-                />
-              </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3 text-sm text-slate-600 dark:text-slate-300">
-                {t.rmQuickConsumeResult}: <span className="font-semibold text-slate-900 dark:text-white">{formatNumber(quickConsumeKg)} {t.unitKg}</span>
-              </div>
-              <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors">
-                {t.rmQuickConsumeButton}
-              </button>
-            </form>
-          </div>
+          {/* NOTE: manual bag creation + quick consume removed */}
 
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3 mb-4">
@@ -842,7 +718,7 @@ export function RawMaterial() {
                       .filter((item) => item.status === 'IN_STORAGE')
                       .map((bag) => (
                         <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
-                          {bag.name}
+                          {bag.name} — {formatNumber(bag.currentQuantityKg)} {t.unitKg}
                         </SelectItem>
                       ))}
                   </SelectContent>
@@ -869,7 +745,7 @@ export function RawMaterial() {
                       .filter((item) => item.status === 'IN_STORAGE' && item.id !== activeBag?.id)
                       .map((bag) => (
                         <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
-                          {bag.name}
+                          {bag.name} — {formatNumber(bag.currentQuantityKg)} {t.unitKg}
                         </SelectItem>
                       ))}
                   </SelectContent>
@@ -936,6 +812,14 @@ export function RawMaterial() {
                         <p className="font-medium text-slate-900 dark:text-white truncate">{bag.name}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">{bag.rawMaterialName}</p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => openEditBagName(bag.id, bag.name)}
+                        className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        title={t.whEdit}
+                      >
+                        <Pencil size={14} />
+                      </button>
                       <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-medium ${bagStatusTone[bag.status]}`}>
                         {bagStatusLabel[bag.status]}
                       </span>
@@ -999,6 +883,38 @@ export function RawMaterial() {
           )}
         </div>
       )}
+
+      <Dialog open={Boolean(editingBagId)} onOpenChange={(open) => !open && closeEditBagName()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.whEdit}</DialogTitle>
+            <DialogDescription>{t.rmBagName}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitEditBagName} className="space-y-4">
+            <input
+              value={editingBagName}
+              onChange={(e) => setEditingBagName(e.target.value)}
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+              placeholder={t.rmBagNamePlaceholder}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeEditBagName}
+                className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 text-sm font-medium"
+              >
+                {t.btnCancel}
+              </button>
+              <button
+                type="submit"
+                className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium"
+              >
+                {t.btnSave}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

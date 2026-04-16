@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { ConnectBagDto } from './dto/connect-bag.dto.js';
-import { CreateBagDto } from './dto/create-bag.dto.js';
 import { ListBagsDto } from './dto/list-bags.dto.js';
-import { QuickConsumeDto } from './dto/quick-consume.dto.js';
 import { SwitchBagDto } from './dto/switch-bag.dto.js';
+import { UpdateBagDto } from './dto/update-bag.dto.js';
 import { WriteoffBagDto } from './dto/writeoff-bag.dto.js';
 import { RawMaterialBagsService } from './raw-material-bags.service.js';
 
@@ -15,15 +14,6 @@ export class RawMaterialBagsController {
   constructor(
     private readonly rawMaterialBagsService: RawMaterialBagsService,
   ) {}
-
-  @Post('create')
-  @Roles(Role.DIRECTOR, Role.MANAGER, Role.WORKER)
-  create(
-    @Body() dto: CreateBagDto,
-    @CurrentUser('sub') userId?: string,
-  ) {
-    return this.rawMaterialBagsService.createBag(dto, userId);
-  }
 
   @Get()
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER, Role.WORKER)
@@ -70,12 +60,13 @@ export class RawMaterialBagsController {
     return this.rawMaterialBagsService.writeoffBag(dto, userId);
   }
 
-  @Post('quick-consume')
+  @Patch(':id')
   @Roles(Role.DIRECTOR, Role.MANAGER, Role.WORKER)
-  quickConsume(
-    @Body() dto: QuickConsumeDto,
+  updateName(
+    @Param('id') id: string,
+    @Body() dto: UpdateBagDto,
     @CurrentUser('sub') userId?: string,
   ) {
-    return this.rawMaterialBagsService.quickConsume(dto, userId);
+    return this.rawMaterialBagsService.updateBagName(id, dto, userId);
   }
 }

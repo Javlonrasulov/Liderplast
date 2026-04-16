@@ -242,10 +242,12 @@ export function Warehouse() {
     [state.warehouseProducts],
   );
 
-  const rawStockById = useMemo(() => {
+  const rawStockByName = useMemo(() => {
     const map = new Map<string, number>();
     for (const item of state.warehouseStock ?? []) {
-      if (item.itemType === 'RAW_MATERIAL') map.set(item.id, item.quantity);
+      if (item.itemType === 'RAW_MATERIAL' && item.itemName) {
+        map.set(item.itemName, item.quantity);
+      }
     }
     return map;
   }, [state.warehouseStock]);
@@ -670,7 +672,7 @@ export function Warehouse() {
   const attemptDeleteRawMaterial = (
     rawMaterial: Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }>,
   ) => {
-    const qty = rawStockById.get(rawMaterial.id) ?? 0;
+    const qty = rawStockByName.get(rawMaterial.name) ?? 0;
     if (qty > 0) {
       setBlockedDeleteTarget(rawMaterial);
       return;

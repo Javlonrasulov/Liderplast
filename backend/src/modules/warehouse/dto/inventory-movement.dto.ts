@@ -8,8 +8,9 @@ export class InventoryMovementDto {
   @IsEnum(InventoryItemType)
   itemType!: InventoryItemType;
 
+  @IsOptional()
   @IsEnum(MovementType)
-  movementType!: MovementType;
+  movementType?: MovementType;
 
   @IsOptional()
   @IsString()

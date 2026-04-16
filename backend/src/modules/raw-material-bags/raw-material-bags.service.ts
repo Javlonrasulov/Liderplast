@@ -19,8 +19,8 @@ import {
 } from './dto/connect-bag.dto.js';
 import { CreateBagDto } from './dto/create-bag.dto.js';
 import { ListBagsDto } from './dto/list-bags.dto.js';
-import { QuickConsumeDto } from './dto/quick-consume.dto.js';
 import { SwitchBagDto } from './dto/switch-bag.dto.js';
+import { UpdateBagDto } from './dto/update-bag.dto.js';
 import { WriteoffBagDto } from './dto/writeoff-bag.dto.js';
 
 type Tx = Prisma.TransactionClient;
@@ -129,7 +129,7 @@ export class RawMaterialBagsService {
       const createdBag = await tx.rawMaterialBag.create({
         data: {
           rawMaterialId: dto.rawMaterialId,
-          name: dto.name?.trim() || null,
+          name: dto.name?.trim() || (await this.nextAutoBagNameTx(tx, dto.rawMaterialId)),
           initialQuantityKg: dto.initialQuantityKg,
           currentQuantityKg: dto.initialQuantityKg,
           status: BagStatus.IN_STORAGE,
@@ -157,6 +157,33 @@ export class RawMaterialBagsService {
     });
 
     return this.getBagById(bag.id);
+  }
+
+  async updateBagName(id: string, dto: UpdateBagDto, updatedById?: string) {
+    const nextName = dto.name.trim();
+    if (!nextName) {
+      throw new BadRequestException('Bag name is required');
+    }
+
+    const bag = await this.prisma.rawMaterialBag.findUnique({ where: { id } });
+    if (!bag) {
+      throw new NotFoundException('Bag not found');
+    }
+
+    await this.prisma.rawMaterialBag.update({
+      where: { id },
+      data: { name: nextName },
+    });
+
+    await this.emitUpdates({
+      source: 'raw-material-bags',
+      action: 'updated',
+      bagId: id,
+    });
+
+    // Note: we intentionally skip audit log here to avoid adding new enum values/migrations.
+    void updatedById;
+    return this.getBagById(id);
   }
 
   async connectBag(dto: ConnectBagDto, createdById?: string) {
@@ -359,36 +386,7 @@ export class RawMaterialBagsService {
 
     return this.getBagById(bagId);
   }
-
-  async quickConsume(dto: QuickConsumeDto, createdById?: string) {
-    const quantityKg = this.resolveConsumptionQuantity(dto);
-    const result = await this.prisma.$transaction(async (tx) =>
-      this.consumeFromActiveBagTx(tx, {
-        rawMaterialId: dto.rawMaterialId ?? '',
-        quantityKg,
-        createdById,
-        consumedAt: this.resolveDate(dto.consumedAt),
-        note: dto.note,
-        referenceType: dto.referenceType ?? 'quick-consume',
-        referenceId: dto.referenceId,
-        updateInventoryBalance: true,
-        createInventoryMovement: true,
-      }),
-    );
-
-    await this.emitUpdates({
-      source: 'raw-material-bags',
-      action: 'consumed',
-      bagId: result.bagId,
-      quantityKg,
-    });
-
-    return {
-      bag: await this.getBagById(result.bagId),
-      consumedQuantityKg: quantityKg,
-      remainingQuantityKg: result.remainingQuantityKg,
-    };
-  }
+  // NOTE: quick-consume flow removed (consumption handled on another page)
 
   async consumeFromActiveBagForProduction(
     tx: Tx,
@@ -448,12 +446,17 @@ export class RawMaterialBagsService {
 
     let remainingQuantityKg = params.totalQuantityKg;
     let createdCount = 0;
+    const existingCount = await tx.rawMaterialBag.count({
+      where: { rawMaterialId: params.rawMaterialId },
+    });
 
     while (remainingQuantityKg > 0.0001) {
       const nextBagQuantityKg = Math.min(bagWeightKg, remainingQuantityKg);
+      const autoName = this.formatAutoBagName(existingCount + createdCount + 1);
       const createdBag = await tx.rawMaterialBag.create({
         data: {
           rawMaterialId: params.rawMaterialId,
+          name: autoName,
           initialQuantityKg: nextBagQuantityKg,
           currentQuantityKg: nextBagQuantityKg,
           status: BagStatus.IN_STORAGE,
@@ -478,6 +481,16 @@ export class RawMaterialBagsService {
       bagCount: createdCount,
       bagWeightKg,
     };
+  }
+
+  private formatAutoBagName(seq: number) {
+    // Default label is Uzbek Cyrillic as requested
+    return `Қоп-${String(seq).padStart(3, '0')}`;
+  }
+
+  private async nextAutoBagNameTx(tx: Tx, rawMaterialId: string) {
+    const existingCount = await tx.rawMaterialBag.count({ where: { rawMaterialId } });
+    return this.formatAutoBagName(existingCount + 1);
   }
 
   private async consumeFromActiveBagTx(tx: Tx, params: ConsumeBagParams) {
@@ -901,20 +914,6 @@ export class RawMaterialBagsService {
 
   private resolveDate(value?: string) {
     return value ? new Date(value) : new Date();
-  }
-
-  private resolveConsumptionQuantity(dto: QuickConsumeDto) {
-    if (dto.quantityKg !== undefined) {
-      return dto.quantityKg;
-    }
-
-    if (dto.pieceCount === undefined || dto.gramPerUnit === undefined) {
-      throw new BadRequestException(
-        'Provide either quantityKg or both pieceCount and gramPerUnit',
-      );
-    }
-
-    return (dto.pieceCount * dto.gramPerUnit) / 1000;
   }
 
   private async emitUpdates(payload: Record<string, unknown>) {
