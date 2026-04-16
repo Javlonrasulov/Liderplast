@@ -235,8 +235,13 @@ export interface T {
   rmNoLogNote: string;
   rmCreateTypeTitle: string;
   rmCreateTypeButton: string;
+  rmCreatePaintButton: string;
   rmCreateTypePlaceholder: string;
   rmCreateTypeDescPlaceholder: string;
+  rmKindLabel: string;
+  rmKindSiro: string;
+  rmKindPaint: string;
+  rmPaintHint: string;
   rmCreateNameRequired: string;
   rmCreateError: string;
   rmCreatedSuccess: string;
@@ -797,10 +802,16 @@ const uz_cyrillic: T = {
   rmLogDepleted: 'Тугаган',
   rmLogWrittenOff: 'Чиқимга чиқарилди',
   rmNoLogNote: 'Изоҳ йўқ',
-  rmCreateTypeTitle: 'Сиро турини яратиш',
+  rmCreateTypeTitle: 'Сиро турини яратиш (маҳсулот)',
   rmCreateTypeButton: 'Сиро турини сақлаш',
+  rmCreatePaintButton: 'Краскани сақлаш',
   rmCreateTypePlaceholder: 'Масалан: PET 9921',
-  rmCreateTypeDescPlaceholder: 'Сиро ҳақида қисқача изоҳ',
+  rmCreateTypeDescPlaceholder: 'маҳсулот ҳақида қисқача изоҳ',
+  rmKindLabel: 'Хомашё тури',
+  rmKindSiro: 'PET сиро / оддий хомашё',
+  rmKindPaint: 'Краска / бўёқ',
+  rmPaintHint:
+    'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
   rmCreateNameRequired: 'Сиро номи мажбурий',
   rmCreateError: 'Сиро турини яратишда хатолик юз берди',
   rmCreatedSuccess: 'Сиро тури муваффақиятли яратилди',
@@ -1397,10 +1408,16 @@ const uz_latin: T = {
   rmLogDepleted: 'Tugagan',
   rmLogWrittenOff: 'Chiqimga chiqarildi',
   rmNoLogNote: 'Izoh yo‘q',
-  rmCreateTypeTitle: 'Siro turini yaratish',
+  rmCreateTypeTitle: 'Siro turini yaratish (mahsulot)',
   rmCreateTypeButton: 'Siro turini saqlash',
+  rmCreatePaintButton: 'Kraskani saqlash',
   rmCreateTypePlaceholder: 'Masalan: PET 9921',
-  rmCreateTypeDescPlaceholder: 'Siro haqida qisqacha izoh',
+  rmCreateTypeDescPlaceholder: 'mahsulot haqida qisqacha izoh',
+  rmKindLabel: 'Xomashyo turi',
+  rmKindSiro: 'PET siro / oddiy xomashyo',
+  rmKindPaint: "Kraska / bo'yoq",
+  rmPaintHint:
+    'Turni «kraska» deb belgilang — smenada faqat shu turdagi pozitsiyalar tanlanadi.',
   rmCreateNameRequired: 'Siro nomi majburiy',
   rmCreateError: 'Siro turini yaratishda xatolik yuz berdi',
   rmCreatedSuccess: 'Siro turi muvaffaqiyatli yaratildi',
@@ -1997,10 +2014,16 @@ const ru: T = {
   rmLogDepleted: 'Закончился',
   rmLogWrittenOff: 'Списан',
   rmNoLogNote: 'Без примечания',
-  rmCreateTypeTitle: 'Создать тип сырья',
+  rmCreateTypeTitle: 'Создать тип сырья (продукт)',
   rmCreateTypeButton: 'Сохранить тип сырья',
+  rmCreatePaintButton: 'Сохранить краску',
   rmCreateTypePlaceholder: 'Например: PET 9921',
-  rmCreateTypeDescPlaceholder: 'Краткое описание сырья',
+  rmCreateTypeDescPlaceholder: 'краткое описание продукта',
+  rmKindLabel: 'Тип сырья',
+  rmKindSiro: 'PET / обычное сырьё',
+  rmKindPaint: 'Краска / краситель',
+  rmPaintHint:
+    'Отметьте тип «краска» — в смене будут доступны только такие позиции.',
   rmCreateNameRequired: 'Название сырья обязательно',
   rmCreateError: 'Произошла ошибка при создании типа сырья',
   rmCreatedSuccess: 'Тип сырья успешно создан',

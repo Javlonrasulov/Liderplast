@@ -66,6 +66,30 @@ const FONT_SIZE_MAP: Record<FontSize, string> = {
   xl: '19px',
 };
 
+/** Eski bundle yoki qisman deployda kalitlar bo‘lmasa, tugmalar bo‘sh qolmasin */
+const RAW_MATERIAL_FALLBACK: Pick<
+  T,
+  'rmKindLabel' | 'rmKindSiro' | 'rmKindPaint' | 'rmPaintHint' | 'rmCreatePaintButton'
+> = {
+  rmKindLabel: 'Хомашё тури',
+  rmKindSiro: 'PET сиро / оддий хомашё',
+  rmKindPaint: 'Краска / бўёқ',
+  rmPaintHint:
+    'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
+  rmCreatePaintButton: 'Краскани сақлаш',
+};
+
+function withRawMaterialFallbacks(base: T): T {
+  return {
+    ...base,
+    rmKindLabel: base.rmKindLabel || RAW_MATERIAL_FALLBACK.rmKindLabel,
+    rmKindSiro: base.rmKindSiro || RAW_MATERIAL_FALLBACK.rmKindSiro,
+    rmKindPaint: base.rmKindPaint || RAW_MATERIAL_FALLBACK.rmKindPaint,
+    rmPaintHint: base.rmPaintHint || RAW_MATERIAL_FALLBACK.rmPaintHint,
+    rmCreatePaintButton: base.rmCreatePaintButton || RAW_MATERIAL_FALLBACK.rmCreatePaintButton,
+  };
+}
+
 // ======================== CONTEXT ========================
 
 interface AppContextValue {
@@ -98,7 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const t = translations[lang];
+  const t = useMemo(() => withRawMaterialFallbacks(translations[lang]), [lang]);
 
   // Apply font size to <html> on mount and change
   useEffect(() => {
