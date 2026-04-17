@@ -250,6 +250,10 @@ export interface ProductionHistoryRow {
   outputProductName: string;
   quantityProduced: number;
   consumptions: ProductionHistoryConsumption[];
+  /** Partiya (`/production`) yoki smena yozuvi */
+  source: 'production' | 'shift';
+  workerName?: string;
+  shiftNumber?: number;
 }
 
 export interface OperationLog {
@@ -867,12 +871,123 @@ function mapProductionHistoryRows(
         outputProductName,
         quantityProduced: p.quantityProduced,
         consumptions,
+        source: 'production',
       };
     })
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
+}
+
+function namesMatchCatalog(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+/**
+ * Smena yozuvlari — omborda ko‘rinadigan tarix uchun (asosiy ish odatda shu yerda).
+ * Retsept va backend `applyShiftRecipeAndOutput` bilan mos: siro kg, qolip dona, kraska kg.
+ */
+export function buildShiftRecordsToProductionHistory(
+  shiftRecords: ShiftRecord[],
+  machines: Machine[],
+  warehouseProducts: WarehouseProduct[],
+): ProductionHistoryRow[] {
+  const machineById = new Map(machines.map((m) => [m.id, m]));
+  const rawById = new Map(
+    warehouseProducts
+      .filter((p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL')
+      .map((p) => [p.id, p]),
+  );
+  const semis = warehouseProducts.filter(
+    (p): p is SemiProductCatalogItem => p.itemType === 'SEMI_PRODUCT',
+  );
+  const finals = warehouseProducts.filter(
+    (p): p is FinishedProductCatalogItem => p.itemType === 'FINISHED_PRODUCT',
+  );
+
+  return shiftRecords
+    .map((shift) => {
+      const machine = machineById.get(shift.machineId);
+      const label = shift.productType?.trim() ?? '';
+      const materialUnits = shift.producedQty + (shift.defectCount ?? 0);
+      const consumptions: ProductionHistoryConsumption[] = [];
+
+      if (machine?.type === 'semi' && label && materialUnits > 0) {
+        const semi = semis.find((s) => namesMatchCatalog(s.name, label));
+        if (semi) {
+          for (const rm of semi.rawMaterials) {
+            const raw = rawById.get(rm.rawMaterialId);
+            if (raw?.rawMaterialKind === 'PAINT') continue;
+            const qtyKg = (rm.amountGram * materialUnits) / 1000;
+            if (qtyKg <= 0) continue;
+            consumptions.push({
+              resourceName: rm.name,
+              quantity: qtyKg,
+              unitLabel: 'kg',
+              kind: 'raw',
+            });
+          }
+        }
+      }
+
+      if (machine?.type === 'final' && label && materialUnits > 0) {
+        const fin = finals.find((f) => namesMatchCatalog(f.name, label));
+        if (fin) {
+          for (const sp of fin.semiProducts) {
+            consumptions.push({
+              resourceName: sp.name,
+              quantity: materialUnits,
+              unitLabel: 'dona',
+              kind: 'semi',
+            });
+          }
+        }
+      }
+
+      if (
+        shift.paintUsed &&
+        shift.paintRawMaterialName &&
+        (shift.paintQuantityKg ?? 0) > 0
+      ) {
+        consumptions.push({
+          resourceName: shift.paintRawMaterialName,
+          quantity: shift.paintQuantityKg!,
+          unitLabel: 'kg',
+          kind: 'raw',
+        });
+      }
+
+      const stage: 'SEMI' | 'FINISHED' =
+        machine?.type === 'final' ? 'FINISHED' : 'SEMI';
+
+      return {
+        id: `shift-${shift.id}`,
+        createdAt: shift.createdAt,
+        date: shift.date,
+        stage,
+        outputProductName: label || '—',
+        quantityProduced: shift.producedQty,
+        consumptions,
+        source: 'shift',
+        workerName: shift.workerName,
+        shiftNumber: shift.shift,
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+}
+
+export function mergeWarehouseProductionHistory(
+  fromProduction: ProductionHistoryRow[],
+  fromShifts: ProductionHistoryRow[],
+): ProductionHistoryRow[] {
+  return [...fromProduction, ...fromShifts].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 type BackendClient = {

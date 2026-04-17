@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
 import {
+  buildShiftRecordsToProductionHistory,
   computeRawMaterialStockByKind,
   type FinishedProductCatalogItem,
+  mergeWarehouseProductionHistory,
   type RawMaterialKind,
   type SemiProductCatalogItem,
   useERP,
@@ -340,6 +342,24 @@ export function Warehouse() {
           item.itemType === 'FINISHED_PRODUCT',
       ),
     [productCatalog],
+  );
+
+  const warehouseHistoryRows = useMemo(
+    () =>
+      mergeWarehouseProductionHistory(
+        state.productionHistory,
+        buildShiftRecordsToProductionHistory(
+          state.shiftRecords,
+          state.machines,
+          state.warehouseProducts,
+        ),
+      ),
+    [
+      state.productionHistory,
+      state.shiftRecords,
+      state.machines,
+      state.warehouseProducts,
+    ],
   );
 
   const semiRecipePaintBreakdown = useMemo(() => {
@@ -1606,14 +1626,15 @@ export function Warehouse() {
               </div>
             </div>
             <div className="max-h-[min(70vh,720px)] overflow-auto p-4 sm:p-5">
-              {state.productionHistory.length === 0 ? (
+              {warehouseHistoryRows.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.whHistoryEmpty}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                  <table className="w-full min-w-[880px] border-collapse text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:text-slate-400">
                         <th className="py-2 pr-3">{t.whHistoryColWhen}</th>
+                        <th className="py-2 pr-3">{t.whHistoryColSource}</th>
                         <th className="py-2 pr-3">{t.whHistoryColType}</th>
                         <th className="py-2 pr-3">{t.whHistoryColOutput}</th>
                         <th className="py-2 pr-3 text-right">{t.whHistoryColQty}</th>
@@ -1621,7 +1642,7 @@ export function Warehouse() {
                       </tr>
                     </thead>
                     <tbody>
-                      {state.productionHistory.map((row) => (
+                      {warehouseHistoryRows.map((row) => (
                         <tr
                           key={row.id}
                           className="border-b border-slate-100 align-top dark:border-slate-700/80"
@@ -1629,6 +1650,27 @@ export function Warehouse() {
                           <td className="py-3 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
                             {formatDateTime(row.createdAt)}
                             <div className="text-[11px] text-slate-400">{row.date}</div>
+                          </td>
+                          <td className="py-3 pr-3 align-top">
+                            <span
+                              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                row.source === 'shift'
+                                  ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-100'
+                                  : 'bg-slate-200 text-slate-800 dark:bg-slate-600 dark:text-slate-100'
+                              }`}
+                            >
+                              {row.source === 'shift'
+                                ? t.whHistorySourceShift
+                                : t.whHistorySourceProduction}
+                            </span>
+                            {row.source === 'shift' && row.workerName ? (
+                              <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                {row.workerName}
+                                {row.shiftNumber != null
+                                  ? ` · ${t.whHistoryShiftShort} ${row.shiftNumber}`
+                                  : ''}
+                              </div>
+                            ) : null}
                           </td>
                           <td className="py-3 pr-3">
                             <span

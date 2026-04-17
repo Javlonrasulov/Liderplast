@@ -358,6 +358,10 @@ export interface T {
   whHistoryColOutput: string;
   whHistoryColQty: string;
   whHistoryColConsumed: string;
+  whHistoryColSource: string;
+  whHistorySourceProduction: string;
+  whHistorySourceShift: string;
+  whHistoryShiftShort: string;
   whHistoryTypeSemi: string;
   whHistoryTypeFinal: string;
   whHistoryKindRaw: string;
@@ -1023,9 +1027,13 @@ const uz_cyrillic: T = {
   whTabHistory: 'Тарих',
   whHistoryTitle: 'Ишлаб чиқариш тарихи',
   whHistorySubtitle:
-    'Сиро / краска сарфи ва қолип сарфи — қайси маҳсулот қанча ишлаб чиқарилгани (/production).',
+    'Партия (/production) ва смена ёзувлари: сиро, краска, қолип сарфи — каталог номи билан мос келса, ретсепт бўйича ҳисобланади.',
   whHistoryEmpty: 'Ҳозирча ишлаб чиқариш ёзувлари мавжуд эмас.',
   whHistoryColWhen: 'Вақт',
+  whHistoryColSource: 'Манба',
+  whHistorySourceProduction: 'Партия',
+  whHistorySourceShift: 'Смена',
+  whHistoryShiftShort: 'Смена',
   whHistoryColType: 'Тур',
   whHistoryColOutput: 'Чиқарилган',
   whHistoryColQty: 'Миқдор',
@@ -1690,9 +1698,13 @@ const uz_latin: T = {
   whTabHistory: 'Tarix',
   whHistoryTitle: 'Ishlab chiqarish tarixi',
   whHistorySubtitle:
-    'Siro / kraska va qolip sarfi — qaysi mahsulot qancha chiqarilgani (/production).',
+    'Partiya (/production) va smena yozuvlari: siro, kraska, qolip sarfi — katalog nomi mos kelsa, retsept bo‘yicha hisoblanadi.',
   whHistoryEmpty: 'Hozircha ishlab chiqarish yozuvlari yo‘q.',
   whHistoryColWhen: 'Vaqt',
+  whHistoryColSource: 'Manba',
+  whHistorySourceProduction: 'Partiya',
+  whHistorySourceShift: 'Smena',
+  whHistoryShiftShort: 'Smena',
   whHistoryColType: 'Tur',
   whHistoryColOutput: 'Chiqarilgan',
   whHistoryColQty: 'Miqdor',
@@ -2357,9 +2369,13 @@ const ru: T = {
   whTabHistory: 'История',
   whHistoryTitle: 'История производства',
   whHistorySubtitle:
-    'Расход сырья / краски и заготовок — что и сколько произведено (/production).',
+    'Партии (/production) и смены: расход сырья, краски, заготовок — при совпадении с каталогом считается по рецепту.',
   whHistoryEmpty: 'Записей производства пока нет.',
   whHistoryColWhen: 'Время',
+  whHistoryColSource: 'Источник',
+  whHistorySourceProduction: 'Партия',
+  whHistorySourceShift: 'Смена',
+  whHistoryShiftShort: 'Смена',
   whHistoryColType: 'Тип',
   whHistoryColOutput: 'Выпуск',
   whHistoryColQty: 'Кол-во',
