@@ -28,11 +28,7 @@ import {
 import { useApp } from '../i18n/app-context';
 import { calcPercent, formatDate, formatNumber } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import {
-  finalBucketFromCatalog,
-  inferVolumeLiterFromFinishedProductName,
-  semiBucketFromCatalog,
-} from '../utils/warehouse-catalog-buckets';
+import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
 import { Button } from '../components/ui/button';
 import {
   AlertDialog,
@@ -252,14 +248,7 @@ const FINAL_DETAIL_CARD_STYLES = [
 ] as const;
 
 export function Warehouse() {
-  const {
-    state,
-    semiProductStock,
-    finalProductStock,
-    semiStockByProductName,
-    finalStockByProductName,
-    dispatch,
-  } = useERP();
+  const { state, semiStockByProductName, finalStockByProductName, dispatch } = useERP();
   const { user } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
@@ -1331,61 +1320,36 @@ export function Warehouse() {
                 warning={rawStockByKind.paint < 200}
               />
             )}
-            {hasCatalogSemi18 && (
-              <StockItem
-                label={t.whSemi18Label}
-                value={semiProductStock['18g']}
-                max={100000}
-                unit={t.unitPiece}
-                color="bg-purple-500"
-                bgColor="bg-purple-100 dark:bg-purple-900/30"
-                icon={<Factory size={18} className="text-purple-600 dark:text-purple-400" />}
-              />
-            )}
-            {hasCatalogSemi20 && (
-              <StockItem
-                label={t.whSemi20Label}
-                value={semiProductStock['20g']}
-                max={60000}
-                unit={t.unitPiece}
-                color="bg-violet-500"
-                bgColor="bg-violet-100 dark:bg-violet-900/30"
-                icon={<Factory size={18} className="text-violet-600 dark:text-violet-400" />}
-              />
-            )}
-            {hasCatalogFinal05 && (
-              <StockItem
-                label={t.whFinal05Label}
-                value={finalProductStock['0.5L']}
-                max={20000}
-                unit={t.unitPiece}
-                color="bg-cyan-500"
-                bgColor="bg-cyan-100 dark:bg-cyan-900/30"
-                icon={<Package size={18} className="text-cyan-600 dark:text-cyan-400" />}
-              />
-            )}
-            {hasCatalogFinal1 && (
-              <StockItem
-                label={t.whFinal1Label}
-                value={finalProductStock['1L']}
-                max={15000}
-                unit={t.unitPiece}
-                color="bg-teal-500"
-                bgColor="bg-teal-100 dark:bg-teal-900/30"
-                icon={<Package size={18} className="text-teal-600 dark:text-teal-400" />}
-              />
-            )}
-            {hasCatalogFinal5 && (
-              <StockItem
-                label={t.whFinal5Label}
-                value={finalProductStock['5L']}
-                max={5000}
-                unit={t.unitPiece}
-                color="bg-blue-500"
-                bgColor="bg-blue-100 dark:bg-blue-900/30"
-                icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
-              />
-            )}
+            {semiProducts.map((p, idx) => {
+              const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
+              return (
+                <StockItem
+                  key={p.id}
+                  label={p.name}
+                  value={semiStockByProductName[p.name] ?? 0}
+                  max={100000}
+                  unit={t.unitPiece}
+                  color={st.color}
+                  bgColor={st.bgColor}
+                  icon={<Factory size={18} className={st.iconColor} />}
+                />
+              );
+            })}
+            {finishedProducts.map((p, idx) => {
+              const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
+              return (
+                <StockItem
+                  key={p.id}
+                  label={p.name}
+                  value={finalStockByProductName[p.name] ?? 0}
+                  max={20000}
+                  unit={t.unitPiece}
+                  color={st.color}
+                  bgColor={st.bgColor}
+                  icon={<Package size={18} className={st.iconColor} />}
+                />
+              );
+            })}
                 </div>
               ) : (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
@@ -1581,26 +1545,11 @@ export function Warehouse() {
                 ))}
                 <div className="mt-2 border-t border-slate-100 pt-2 dark:border-slate-700">
                   <p className="mb-2 text-xs text-slate-400">{t.whByType}</p>
-                  {[
-                    ...(hasCatalogFinal05
-                      ? [
-                          {
-                            label: t.whFinal05Label,
-                            value: finalProductStock['0.5L'],
-                          },
-                        ]
-                      : []),
-                    ...(hasCatalogFinal1
-                      ? [{ label: t.whFinal1Label, value: finalProductStock['1L'] }]
-                      : []),
-                    ...(hasCatalogFinal5
-                      ? [{ label: t.whFinal5Label, value: finalProductStock['5L'] }]
-                      : []),
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between py-1">
-                      <span className="text-xs text-slate-500">{item.label}</span>
+                  {finishedProducts.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between py-1">
+                      <span className="text-xs text-slate-500">{p.name}</span>
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        {formatNumber(item.value)} {t.unitPiece}
+                        {formatNumber(finalStockByProductName[p.name] ?? 0)} {t.unitPiece}
                       </span>
                     </div>
                   ))}
@@ -2177,4 +2126,3 @@ export function Warehouse() {
     </div>
   );
 }
-                                                                          

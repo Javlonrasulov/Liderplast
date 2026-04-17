@@ -34,7 +34,12 @@ const SELECT_TRIGGER_CLS =
   'h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white';
 
 export function Sales() {
-  const { state, dispatch, semiProductStock, finalProductStock } = useERP();
+  const {
+    state,
+    dispatch,
+    semiStockByProductName,
+    finalStockByProductName,
+  } = useERP();
   const { t, filterData } = useApp();
 
   const [activeTab, setActiveTab] = useState<'sale' | 'clients' | 'history'>('sale');
@@ -89,14 +94,11 @@ export function Sales() {
     if (cat === 'semi') {
       const p = saleSemiCatalog.find((x) => x.name === productName);
       if (!p) return 0;
-      const b = semiBucketFromCatalog(p);
-      return semiProductStock[b] || 0;
+      return semiStockByProductName[productName] ?? 0;
     }
     const p = saleFinalCatalog.find((x) => x.name === productName);
     if (!p) return 0;
-    const b = finalBucketFromCatalog(p);
-    if (!b) return 0;
-    return finalProductStock[b] || 0;
+    return finalStockByProductName[productName] ?? 0;
   };
 
   const availableForAdd = getStock(addCat, selectedProductName);
@@ -112,36 +114,38 @@ export function Sales() {
     }> = [];
     for (const p of saleSemiCatalog) {
       const b = semiBucketFromCatalog(p);
+      const is18 = b === '18g';
       rows.push({
         key: `semi-${p.id}`,
         label: p.name,
-        value: semiProductStock[b],
-        color: b === '20g' ? 'bg-violet-500' : 'bg-purple-500',
-        textColor:
-          b === '20g'
-            ? 'text-violet-600 dark:text-violet-400'
-            : 'text-purple-600 dark:text-purple-400',
+        value: semiStockByProductName[p.name] ?? 0,
+        color: is18 ? 'bg-purple-500' : 'bg-violet-500',
+        textColor: is18
+          ? 'text-purple-600 dark:text-purple-400'
+          : 'text-violet-600 dark:text-violet-400',
         cat: 'semi',
       });
     }
     for (const p of saleFinalCatalog) {
-      const b = finalBucketFromCatalog(p)!;
+      const b = finalBucketFromCatalog(p);
       const colorStyle =
         b === '5L'
           ? { color: 'bg-blue-500', textColor: 'text-blue-600 dark:text-blue-400' }
           : b === '1L'
             ? { color: 'bg-teal-500', textColor: 'text-teal-600 dark:text-teal-400' }
-            : { color: 'bg-cyan-500', textColor: 'text-cyan-600 dark:text-cyan-400' };
+            : b === '0.5L'
+              ? { color: 'bg-cyan-500', textColor: 'text-cyan-600 dark:text-cyan-400' }
+              : { color: 'bg-sky-500', textColor: 'text-sky-600 dark:text-sky-400' };
       rows.push({
         key: `final-${p.id}`,
         label: p.name,
-        value: finalProductStock[b],
+        value: finalStockByProductName[p.name] ?? 0,
         cat: 'final',
         ...colorStyle,
       });
     }
     return rows;
-  }, [saleSemiCatalog, saleFinalCatalog, semiProductStock, finalProductStock]);
+  }, [saleSemiCatalog, saleFinalCatalog, semiStockByProductName, finalStockByProductName]);
 
   // Check cart stock (sum per type)
   const cartUsed = useMemo(() => {
@@ -195,7 +199,7 @@ export function Sales() {
       const [cat, type] = key.split('__');
       return total <= getStock(cat as 'semi' | 'final', type);
     });
-  }, [cartItems, semiProductStock, finalProductStock, saleSemiCatalog, saleFinalCatalog]);
+  }, [cartItems, semiStockByProductName, finalStockByProductName, saleSemiCatalog, saleFinalCatalog]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -86,6 +86,18 @@ export interface T {
   dfShowing: string;
   dfAllTime: string;
 
+  /** Смена сақлаш — backend `ERR::` кодлари (омбор / ретсепт) */
+  apiShiftProductTypeRequired: string;
+  apiShiftMachineRequired: string;
+  apiShiftSemiNotFound: string;
+  apiShiftRawInsufficient: string;
+  apiShiftSemiBalanceMissing: string;
+  apiShiftFinishedNotFound: string;
+  apiShiftMachineNotLinked: string;
+  apiShiftFinishedNoSemiRecipe: string;
+  apiShiftInsufficientSemiStock: string;
+  apiShiftFinishedBalanceMissing: string;
+
   // Common
   btnAdd: string;
   btnSave: string;
@@ -744,6 +756,18 @@ const uz_cyrillic: T = {
   dfShowing: 'Кўрсатилмоқда:',
   dfAllTime: 'Барча вақт',
 
+  apiShiftProductTypeRequired: 'Маҳсулот тури киритилиши керак',
+  apiShiftMachineRequired: 'Аппарат танланиши керак',
+  apiShiftSemiNotFound: 'Ярим тайёр маҳсулот топилмади (ном мос келиши керак): {label}',
+  apiShiftRawInsufficient: 'Хомашё омборда етарли эмас: {name}',
+  apiShiftSemiBalanceMissing: 'Ярим тайёр маҳсулот учун омбор қолдиғи топилмади',
+  apiShiftFinishedNotFound: 'Тайёр маҳсулот топилмади (ном мос келиши керак): {label}',
+  apiShiftMachineNotLinked:
+    'Бу маҳсулот ушбу аппарат билан боғланмаган (тайёр маҳсулот → аппаратлар)',
+  apiShiftFinishedNoSemiRecipe: 'Тайёр маҳсулот учун ярим тайёр ретсепти йўқ',
+  apiShiftInsufficientSemiStock: 'Ярим тайёр омборда етарли эмас: {name}',
+  apiShiftFinishedBalanceMissing: 'Тайёр маҳсулот учун омбор қолдиғи топилмади',
+
   btnAdd: 'Қўшиш',
   btnSave: 'Сақлаш',
   btnCancel: 'Бекор қилиш',
@@ -1383,6 +1407,18 @@ const uz_latin: T = {
   dfShowing: "Ko'rsatilmoqda:",
   dfAllTime: 'Barcha vaqt',
 
+  apiShiftProductTypeRequired: 'Mahsulot turi kiritilishi kerak',
+  apiShiftMachineRequired: 'Apparat tanlanishi kerak',
+  apiShiftSemiNotFound: 'Yarim tayyor mahsulot topilmadi (nom mos kelishi kerak): {label}',
+  apiShiftRawInsufficient: 'Xomashyo omborda yetarli emas: {name}',
+  apiShiftSemiBalanceMissing: 'Yarim tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+  apiShiftFinishedNotFound: 'Tayyor mahsulot topilmadi (nom mos kelishi kerak): {label}',
+  apiShiftMachineNotLinked:
+    'Bu mahsulot ushbu apparat bilan bog‘lanmagan (tayyor mahsulot → apparatlar)',
+  apiShiftFinishedNoSemiRecipe: 'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
+  apiShiftInsufficientSemiStock: 'Yarim tayyor omborda yetarli emas: {name}',
+  apiShiftFinishedBalanceMissing: 'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+
   btnAdd: "Qo'shish",
   btnSave: 'Saqlash',
   btnCancel: 'Bekor qilish',
@@ -2021,6 +2057,18 @@ const ru: T = {
   dfApply: 'Применить',
   dfShowing: 'Отображается:',
   dfAllTime: 'Всё время',
+
+  apiShiftProductTypeRequired: 'Нужно указать тип продукции',
+  apiShiftMachineRequired: 'Нужно выбрать аппарат',
+  apiShiftSemiNotFound: 'Полуфабрикат не найден (имя должно совпадать): {label}',
+  apiShiftRawInsufficient: 'Недостаточно сырья на складе: {name}',
+  apiShiftSemiBalanceMissing: 'Не найден складской остаток для полуфабриката',
+  apiShiftFinishedNotFound: 'Готовая продукция не найдена (имя должно совпадать): {label}',
+  apiShiftMachineNotLinked:
+    'Эта продукция не привязана к данному аппарату (готовая продукция → аппараты)',
+  apiShiftFinishedNoSemiRecipe: 'Для готовой продукции нет рецепта полуфабрикатов',
+  apiShiftInsufficientSemiStock: 'Недостаточно полуфабриката на складе: {name}',
+  apiShiftFinishedBalanceMissing: 'Не найден складской остаток для готовой продукции',
 
   btnAdd: 'Добавить',
   btnSave: 'Сохранить',

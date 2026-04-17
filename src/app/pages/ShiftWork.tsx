@@ -13,6 +13,7 @@ import {
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
+import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 
 const FALLBACK_PRODUCT_TYPES = ['18g', '20g', '0.5L', '1L', '5L'];
@@ -94,6 +95,7 @@ const TR = {
     labelNotes: 'Изоҳ',
     autoKwh: '⚡ Автоматик ток ҳисоби:',
     btn: 'Смена ёзувини сақлаш',
+    formAddRow: '+ қатор',
     colNum: '№',
     colDate: 'Сана',
     colShift: 'Смена',
@@ -211,6 +213,7 @@ const TR = {
     labelNotes: 'Izoh',
     autoKwh: "⚡ Avtomatik tok hisobi:",
     btn: 'Smena yozuvini saqlash',
+    formAddRow: '+ qator',
     colNum: '№',
     colDate: 'Sana',
     colShift: 'Smena',
@@ -328,6 +331,7 @@ const TR = {
     labelNotes: 'Примечание',
     autoKwh: '⚡ Автоматический расчёт тока:',
     btn: 'Сохранить запись смены',
+    formAddRow: '+ строка',
     colNum: '№',
     colDate: 'Дата',
     colShift: 'Смена',
@@ -549,7 +553,7 @@ function isValidPartialNonNegativeInt(raw: string): boolean {
 // ── Component ─────────────────────────────────────────────────────────────────
 export function ShiftWork() {
   const { state, dispatch, refresh } = useERP();
-  const { lang, filterData } = useApp();
+  const { lang, filterData, t: appT } = useApp();
   const t = TR[lang];
 
   const todayPreviewPanelRef = useRef<HTMLDivElement>(null);
@@ -913,23 +917,28 @@ export function ShiftWork() {
     }
     const sel = state.machines.find((m) => m.id === recordEditForm.machineId);
     const kwhEdit = hours * (sel?.powerKw || 0);
-    await dispatch({
-      type: 'UPDATE_SHIFT_RECORD',
-      payload: {
-        id: recordEditId,
-        date: recordEditForm.date,
-        shift: recordEditForm.shift,
-        machineId: recordEditForm.machineId,
-        hoursWorked: hours,
-        productType: recordEditForm.productType,
-        machineReading: recordEditForm.machineReading,
-        producedQty: produced,
-        defectCount: Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0),
-        electricityKwh: parseFloat(kwhEdit.toFixed(1)),
-        notes: recordEditForm.notes,
-      },
-    });
-    closeRecordEditor();
+    try {
+      await dispatch({
+        type: 'UPDATE_SHIFT_RECORD',
+        payload: {
+          id: recordEditId,
+          date: recordEditForm.date,
+          shift: recordEditForm.shift,
+          machineId: recordEditForm.machineId,
+          hoursWorked: hours,
+          productType: recordEditForm.productType,
+          machineReading: recordEditForm.machineReading,
+          producedQty: produced,
+          defectCount: Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0),
+          electricityKwh: parseFloat(kwhEdit.toFixed(1)),
+          notes: recordEditForm.notes,
+        },
+      });
+      closeRecordEditor();
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : 'Error';
+      setRecordEditError(translateShiftInventoryApiError(raw, appT));
+    }
   };
 
   const updateLine = useCallback((id: string, patch: Partial<ShiftLine>) => {
@@ -1056,7 +1065,8 @@ export function ShiftWork() {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      const raw = err instanceof Error ? err.message : 'Error';
+      setError(translateShiftInventoryApiError(raw, appT));
       return;
     }
 
@@ -1469,7 +1479,7 @@ export function ShiftWork() {
                   onClick={addLine}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                 >
-                  <Plus size={14} /> + qator
+                  <Plus size={14} /> {t.formAddRow}
                 </button>
               </div>
 

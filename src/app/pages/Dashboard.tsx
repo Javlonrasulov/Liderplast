@@ -1,7 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Droplets, Factory, Package, ShoppingCart, TrendingUp, TrendingDown, AlertTriangle, ArrowUpRight, Clock, Boxes, RefreshCw } from 'lucide-react';
 import { SimpleBarChart, SimpleAreaChart } from '../components/charts';
-import { useERP } from '../store/erp-store';
+import {
+  useERP,
+  type FinishedProductCatalogItem,
+  type SemiProductCatalogItem,
+} from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, getLast7Days, getInclusiveDateRange, shortDate, TODAY, formatDateTime } from '../utils/format';
 
@@ -231,7 +235,12 @@ const MaterialChart = React.memo(function MaterialChart({
 
 // ======================== DASHBOARD ========================
 export function Dashboard() {
-  const { state, rawMaterialStock, semiProductStock, finalProductStock } = useERP();
+  const {
+    state,
+    rawMaterialStock,
+    semiStockByProductName,
+    finalStockByProductName,
+  } = useERP();
   const { t, filterLabel, dateFilter } = useApp();
 
   const machineTypeById = useMemo(
@@ -295,9 +304,99 @@ export function Dashboard() {
     outgoing: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'outgoing').reduce((s, e) => s + e.amount, 0),
   })), [state, chartDayKeys]);
 
-  const totalSemiStock = semiProductStock['18g'] + semiProductStock['20g'];
-  const totalFinalStock = finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
   const lowStock = rawMaterialStock < 1000;
+
+  const semiCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is SemiProductCatalogItem => p.itemType === 'SEMI_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+  const finalCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is FinishedProductCatalogItem => p.itemType === 'FINISHED_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+
+  const totalSemiStock = useMemo(
+    () => semiCatalog.reduce((s, p) => s + (semiStockByProductName[p.name] ?? 0), 0),
+    [semiCatalog, semiStockByProductName],
+  );
+  const totalFinalStock = useMemo(
+    () => finalCatalog.reduce((s, p) => s + (finalStockByProductName[p.name] ?? 0), 0),
+    [finalCatalog, finalStockByProductName],
+  );
+
+  const dashStockOverviewRows = useMemo(() => {
+    type Row = {
+      key: string;
+      label: string;
+      val: number;
+      max: number;
+      unit: string;
+      color: string;
+      textColor: string;
+    };
+    const rows: Row[] = [
+      {
+        key: 'siro',
+        label: 'PET Siro',
+        val: rawMaterialStock,
+        max: 3500,
+        unit: 'kg',
+        color: lowStock ? 'bg-amber-500' : 'bg-blue-500',
+        textColor: lowStock ? 'text-amber-500' : 'text-blue-600',
+      },
+    ];
+    const semiStyles = [
+      { color: 'bg-purple-500', textColor: 'text-purple-600 dark:text-purple-400' },
+      { color: 'bg-violet-500', textColor: 'text-violet-600 dark:text-violet-400' },
+      { color: 'bg-fuchsia-500', textColor: 'text-fuchsia-600 dark:text-fuchsia-400' },
+      { color: 'bg-indigo-500', textColor: 'text-indigo-600 dark:text-indigo-400' },
+    ];
+    semiCatalog.forEach((p, i) => {
+      const st = semiStyles[i % semiStyles.length];
+      rows.push({
+        key: `semi-${p.id}`,
+        label: p.name,
+        val: semiStockByProductName[p.name] ?? 0,
+        max: 100000,
+        unit: t.unitPiece,
+        color: st.color,
+        textColor: st.textColor,
+      });
+    });
+    const finStyles = [
+      { color: 'bg-cyan-500', textColor: 'text-cyan-600 dark:text-cyan-400' },
+      { color: 'bg-teal-500', textColor: 'text-teal-600 dark:text-teal-400' },
+      { color: 'bg-sky-500', textColor: 'text-sky-600 dark:text-sky-400' },
+      { color: 'bg-blue-500', textColor: 'text-blue-600 dark:text-blue-400' },
+    ];
+    finalCatalog.forEach((p, i) => {
+      const st = finStyles[i % finStyles.length];
+      rows.push({
+        key: `fin-${p.id}`,
+        label: p.name,
+        val: finalStockByProductName[p.name] ?? 0,
+        max: 30000,
+        unit: t.unitPiece,
+        color: st.color,
+        textColor: st.textColor,
+      });
+    });
+    return rows;
+  }, [
+    rawMaterialStock,
+    lowStock,
+    semiCatalog,
+    finalCatalog,
+    semiStockByProductName,
+    finalStockByProductName,
+    t.unitPiece,
+  ]);
 
   const filteredLogs = useMemo(() => {
     const logs = [...state.logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -412,19 +511,19 @@ export function Dashboard() {
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashStockTitle}</h3>
           </div>
           <div className="space-y-4">
-            {[
-              { label: 'PET Siro', val: rawMaterialStock, max: 3500, unit: 'kg', color: lowStock ? 'bg-amber-500' : 'bg-blue-500', textColor: lowStock ? 'text-amber-500' : 'text-blue-600' },
-              { label: '18g Qolip', val: semiProductStock['18g'], max: 100000, unit: t.unitPiece, color: 'bg-purple-500', textColor: 'text-purple-600' },
-              { label: '20g Qolip', val: semiProductStock['20g'], max: 60000, unit: t.unitPiece, color: 'bg-violet-500', textColor: 'text-violet-600' },
-              { label: '0.5L+1L+5L', val: totalFinalStock, max: 30000, unit: t.unitPiece, color: 'bg-cyan-500', textColor: 'text-cyan-600' },
-            ].map(item => (
-              <div key={item.label}>
+            {dashStockOverviewRows.map((item) => (
+              <div key={item.key}>
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-slate-600 dark:text-slate-400 text-xs">{item.label}</span>
-                  <span className={`text-xs font-semibold ${item.textColor} dark:opacity-90`}>{formatNumber(item.val)} {item.unit}</span>
+                  <span className={`text-xs font-semibold ${item.textColor}`}>
+                    {formatNumber(item.val)} {item.unit}
+                  </span>
                 </div>
                 <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${item.color}`} style={{ width: `${Math.min(100, (item.val / item.max) * 100)}%` }} />
+                  <div
+                    className={`h-full rounded-full ${item.color}`}
+                    style={{ width: `${Math.min(100, (item.val / item.max) * 100)}%` }}
+                  />
                 </div>
               </div>
             ))}

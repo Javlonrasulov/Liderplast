@@ -21,6 +21,14 @@ import { CreateProductionDto } from './dto/create-production.dto.js';
 import { CreateShiftRecordDto } from './dto/create-shift-record.dto.js';
 import { UpdateShiftRecordDto } from './dto/update-shift-record.dto.js';
 
+/** Smena retsept xatolari — frontend `ERR::` ni tarjima qiladi */
+function shiftInventoryErr(code: string, param?: string): string {
+  if (param != null && param !== '') {
+    return `ERR::${code}::${encodeURIComponent(param)}`;
+  }
+  return `ERR::${code}`;
+}
+
 @Injectable()
 export class ProductionService {
   constructor(
@@ -353,14 +361,16 @@ export class ProductionService {
     const label = params.productLabel?.trim();
     if (!label) {
       if (materialUnits > 0) {
-        throw new BadRequestException('Mahsulot turi kiritilishi kerak');
+        throw new BadRequestException(
+          shiftInventoryErr('PRODUCT_TYPE_REQUIRED'),
+        );
       }
       return;
     }
 
     if (!params.machine) {
       if (materialUnits > 0) {
-        throw new BadRequestException('Apparat tanlanishi kerak');
+        throw new BadRequestException(shiftInventoryErr('MACHINE_REQUIRED'));
       }
       return;
     }
@@ -380,7 +390,7 @@ export class ProductionService {
 
       if (!semi) {
         throw new BadRequestException(
-          `Yarim tayyor mahsulot topilmadi (nom mos kelishi kerak): ${label}`,
+          shiftInventoryErr('SEMI_NOT_FOUND', label),
         );
       }
 
@@ -403,7 +413,7 @@ export class ProductionService {
         });
         if (!balance || balance.quantity + 0.0001 < qtyKg) {
           throw new BadRequestException(
-            `Xomashyo omborda yetarli emas: ${rm.name}`,
+            shiftInventoryErr('RAW_INSUFFICIENT', rm.name),
           );
         }
 
@@ -447,8 +457,8 @@ export class ProductionService {
           where: { semiProductId: semi.id },
         });
         if (!semiBalance) {
-          throw new NotFoundException(
-            'Yarim tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+          throw new BadRequestException(
+            shiftInventoryErr('SEMI_BALANCE_MISSING'),
           );
         }
 
@@ -491,7 +501,7 @@ export class ProductionService {
 
     if (!finished) {
       throw new BadRequestException(
-        `Tayyor mahsulot topilmadi (nom mos kelishi kerak): ${label}`,
+        shiftInventoryErr('FINISHED_NOT_FOUND', label),
       );
     }
 
@@ -499,14 +509,12 @@ export class ProductionService {
       (l) => l.machineId === machine.id,
     );
     if (!machineOk) {
-      throw new BadRequestException(
-        'Bu mahsulot ushbu apparat bilan bog‘lanmagan (tayyor mahsulot → apparatlar)',
-      );
+      throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
     }
 
     if (finished.semiProductLinks.length === 0) {
       throw new BadRequestException(
-        'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
+        shiftInventoryErr('FINISHED_NO_SEMI_RECIPE'),
       );
     }
 
@@ -522,7 +530,10 @@ export class ProductionService {
 
       if (!semiBal || semiBal.quantity + 0.0001 < qtyPieces) {
         throw new BadRequestException(
-          `Yarim tayyor omborda yetarli emas: ${semiMeta?.name ?? link.semiProductId}`,
+          shiftInventoryErr(
+            'INSUFFICIENT_SEMI_STOCK',
+            semiMeta?.name ?? link.semiProductId,
+          ),
         );
       }
 
@@ -554,8 +565,8 @@ export class ProductionService {
         where: { finishedProductId: finished.id },
       });
       if (!fpBal) {
-        throw new NotFoundException(
-          'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+        throw new BadRequestException(
+          shiftInventoryErr('FINISHED_BALANCE_MISSING'),
         );
       }
 

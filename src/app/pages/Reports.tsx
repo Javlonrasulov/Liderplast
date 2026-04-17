@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { SimpleBarChart, SimpleLineChart, SimpleDonutChart } from '../components/charts';
 import { BarChart3, TrendingUp, FileText, Cpu } from 'lucide-react';
-import { useERP } from '../store/erp-store';
+import {
+  useERP,
+  type FinishedProductCatalogItem,
+  type SemiProductCatalogItem,
+} from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, shortDate, getLast7Days, calcPercent } from '../utils/format';
 
@@ -27,11 +31,48 @@ function EffBar({ label, actual, max }: { label: string; actual: number; max: nu
 }
 
 export function Reports() {
-  const { state, rawMaterialStock, semiProductStock, finalProductStock } = useERP();
+  const {
+    state,
+    rawMaterialStock,
+    semiStockByProductName,
+    finalStockByProductName,
+  } = useERP();
   const { t, filterData } = useApp();
   const [activeTab, setActiveTab] = useState('production');
 
   const last7Days = getLast7Days();
+
+  const semiCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is SemiProductCatalogItem => p.itemType === 'SEMI_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+  const finalCatalog = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (p): p is FinishedProductCatalogItem => p.itemType === 'FINISHED_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+
+  const semiDistData = useMemo(
+    () =>
+      semiCatalog.map((p) => ({
+        name: p.name,
+        value: semiStockByProductName[p.name] ?? 0,
+      })),
+    [semiCatalog, semiStockByProductName],
+  );
+  const finalDistData = useMemo(
+    () =>
+      finalCatalog.map((p) => ({
+        name: p.name,
+        value: finalStockByProductName[p.name] ?? 0,
+      })),
+    [finalCatalog, finalStockByProductName],
+  );
 
   const machineTypeById = useMemo(
     () => new Map(state.machines.map(m => [m.id, m.type] as const)),
@@ -138,18 +179,26 @@ export function Reports() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[
-              { title: t.repSemiDist, data: [{ name: '18g', value: semiProductStock['18g'] }, { name: '20g', value: semiProductStock['20g'] }], offset: 0 },
-              { title: t.repFinalDist, data: [{ name: '0.5L', value: finalProductStock['0.5L'] }, { name: '1L', value: finalProductStock['1L'] }, { name: '5L', value: finalProductStock['5L'] }], offset: 2 },
-            ].map(chart => (
+              { title: t.repSemiDist, data: semiDistData },
+              { title: t.repFinalDist, data: finalDistData },
+            ].map((chart) => (
               <div key={chart.title} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
                 <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{chart.title}</h3>
                 <div className="flex items-center gap-6">
-                  <SimpleDonutChart data={chart.data} colors={PIE_COLORS.slice(chart.offset)} size={140} />
+                  <SimpleDonutChart data={chart.data} colors={PIE_COLORS} size={140} />
                   <div className="space-y-2 flex-1">
                     {chart.data.map((item, i) => (
                       <div key={item.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ background: PIE_COLORS[i + chart.offset] }} /><span className="text-sm text-slate-600 dark:text-slate-400">{item.name}</span></div>
-                        <span className="text-sm font-semibold text-slate-800 dark:text-white">{formatNumber(item.value)}</span>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                          />
+                          <span className="text-sm text-slate-600 dark:text-slate-400">{item.name}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-800 dark:text-white">
+                          {formatNumber(item.value)}
+                        </span>
                       </div>
                     ))}
                   </div>
