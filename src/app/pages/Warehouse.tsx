@@ -1232,46 +1232,84 @@ export function Warehouse() {
       </div>
 
       {semiRecipePaintBreakdown.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
-            {t.whSemiBreakdownTitle}
-          </h3>
-          <div className="space-y-4">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-violet-50/90 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-violet-950/25 dark:via-slate-800 dark:to-slate-800">
+          <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 shadow-inner dark:bg-violet-900/50">
+                <Factory className="h-5 w-5 text-violet-600 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+                  {t.whSemiBreakdownTitle}
+                </h3>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {semiRecipePaintBreakdown.length} {t.totalRecords}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4 p-4 sm:p-5">
             {semiRecipePaintBreakdown.map((row) => (
               <div
                 key={row.semiName}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/30"
+                className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-slate-600 dark:bg-slate-900/50"
               >
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">{row.semiName}</p>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                  {t.whSemiStockPieces}:{' '}
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    {formatNumber(row.stockQty)} {t.unitPiece}
-                  </span>
-                </p>
-                <p className="mt-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  {t.whRecipeRaw}
-                </p>
-                <ul className="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                  {row.recipeLines.length === 0 ? (
-                    <li>—</li>
-                  ) : (
-                    row.recipeLines.map((line) => (
-                      <li key={line.name}>
-                        {line.name}: ~{formatNumber(line.estKg)} {t.unitKg}
-                      </li>
-                    ))
-                  )}
-                </ul>
-                {row.paintTotals.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      {t.whShiftPaintTotal}
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border border-emerald-200/80 bg-emerald-50/80 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/25">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-700/90 dark:text-emerald-400/90">
+                      {t.whSemiStockPieces}
                     </p>
-                    <ul className="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                    <p className="mt-1 text-lg font-bold tabular-nums text-emerald-900 dark:text-emerald-100">
+                      {formatNumber(row.stockQty)}{' '}
+                      <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                        {t.unitPiece}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-600 dark:bg-slate-800/60">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      {t.whRecipeRaw}
+                    </p>
+                    <ul className="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                      {row.recipeLines.length === 0 ? (
+                        <li className="text-slate-400">—</li>
+                      ) : (
+                        row.recipeLines.map((line) => (
+                          <li
+                            key={line.name}
+                            className="flex justify-between gap-2 rounded-md bg-white/80 px-2 py-1 dark:bg-slate-900/40"
+                          >
+                            <span className="min-w-0 truncate font-medium">{line.name}</span>
+                            <span className="shrink-0 tabular-nums text-slate-600 dark:text-slate-400">
+                              ~{formatNumber(line.estKg)} {t.unitKg}
+                            </span>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                </div>
+                {row.paintTotals.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-fuchsia-200/90 bg-fuchsia-50/70 p-3 dark:border-fuchsia-900/40 dark:bg-fuchsia-950/20">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Palette className="h-4 w-4 text-fuchsia-600 dark:text-fuchsia-400" />
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-fuchsia-800 dark:text-fuchsia-300">
+                        {t.whShiftPaintTotal}
+                      </p>
+                    </div>
+                    <ul className="space-y-1.5 text-xs">
                       {row.paintTotals.map(([name, kg]) => (
-                        <li key={name}>
-                          {name}: {formatNumber(kg)} {t.unitKg}
+                        <li
+                          key={name}
+                          className="flex justify-between gap-2 rounded-md bg-white/90 px-2 py-1.5 dark:bg-slate-900/50"
+                        >
+                          <span className="min-w-0 truncate font-medium text-slate-800 dark:text-slate-200">
+                            {name}
+                          </span>
+                          <span className="shrink-0 tabular-nums font-semibold text-fuchsia-800 dark:text-fuchsia-200">
+                            {formatNumber(kg)} {t.unitKg}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -1419,224 +1457,253 @@ export function Warehouse() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-            {t.whRawMaterialListTitle}
-          </h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            {rawMaterials.length} {t.totalRecords}
-            {hasCatalogSiro && hasCatalogPaint
-              ? ` · ${t.rmMetricsCaptionSiro}: ${siroRawMaterials.length} · ${t.rmMetricsCaptionPaint}: ${paintRawMaterials.length}`
-              : ''}
-          </p>
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-sky-50/80 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
+        <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 shadow-inner dark:bg-sky-900/40">
+              <Droplets className="h-5 w-5 text-sky-600 dark:text-sky-300" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+                {t.whRawMaterialListTitle}
+              </h3>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {rawMaterials.length} {t.totalRecords}
+                {hasCatalogSiro && hasCatalogPaint
+                  ? ` · ${t.rmMetricsCaptionSiro}: ${siroRawMaterials.length} · ${t.rmMetricsCaptionPaint}: ${paintRawMaterials.length}`
+                  : ''}
+              </p>
+            </div>
+          </div>
         </div>
 
         {rawMaterials.length === 0 ? (
-          <div className="flex h-28 items-center justify-center px-4 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex min-h-[7rem] items-center justify-center px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
             {t.whNoRawMaterials}
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="space-y-8 p-4 sm:p-5">
             {siroRawMaterials.length > 0 && (
-              <div className="bg-slate-50/80 px-5 py-2 dark:bg-slate-900/50">
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  {t.rmMetricsCaptionSiro}
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {siroRawMaterials.length} {t.totalRecords}
-                </p>
-              </div>
-            )}
-            {siroRawMaterials.map((rawMaterial) => (
-              <div
-                key={rawMaterial.id}
-                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-semibold text-slate-900 dark:text-white">
-                      {rawMaterial.name}
-                    </p>
-                    <span className="inline-flex items-center rounded-lg bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                      {t.rmKindSiro}
+              <div>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2.5 dark:border-blue-900/40 dark:bg-blue-950/30">
+                  <div className="flex items-center gap-2">
+                    <Droplets className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                      {t.rmMetricsCaptionSiro}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                    {t.whUnit}: {rawMaterial.unit}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {rawMaterial.defaultBagWeightKg
-                      ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
-                      : t.rmDefaultBagWeightHint}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {auditLine(rawMaterial, t)}
-                  </p>
-                  {rawMaterial.description && (
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                      {rawMaterial.description}
-                    </p>
-                  )}
+                  <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-semibold text-blue-800 shadow-sm dark:bg-blue-900/50 dark:text-blue-200">
+                    {siroRawMaterials.length} {t.totalRecords}
+                  </span>
                 </div>
-                <div className="flex flex-col items-start gap-2 sm:items-end">
-                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    {t.whIncludedInWarehouse}
-                  </div>
-                  {canManage && (
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => openRawMaterialEdit(rawMaterial)}
-                      >
-                        <Pencil size={14} />
-                        {t.whEdit}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => attemptDeleteRawMaterial(rawMaterial)}
-                      >
-                        <Trash2 size={14} />
-                        {t.suDelete}
-                      </Button>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {siroRawMaterials.map((rawMaterial) => (
+                    <div
+                      key={rawMaterial.id}
+                      className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-600 dark:bg-slate-900/40"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start gap-2">
+                          <p className="min-w-0 flex-1 font-semibold leading-snug text-slate-900 dark:text-white">
+                            {rawMaterial.name}
+                          </p>
+                          <span className="inline-flex shrink-0 items-center rounded-lg bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
+                            {t.rmKindSiro}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                          {t.whUnit}: {rawMaterial.unit}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          {rawMaterial.defaultBagWeightKg
+                            ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
+                            : t.rmDefaultBagWeightHint}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">{auditLine(rawMaterial, t)}</p>
+                        {rawMaterial.description && (
+                          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                            {rawMaterial.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700">
+                        <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                          {t.whIncludedInWarehouse}
+                        </p>
+                        {canManage && (
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 sm:flex-none"
+                              onClick={() => openRawMaterialEdit(rawMaterial)}
+                            >
+                              <Pencil size={14} />
+                              {t.whEdit}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1 sm:flex-none"
+                              onClick={() => attemptDeleteRawMaterial(rawMaterial)}
+                            >
+                              <Trash2 size={14} />
+                              {t.suDelete}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
-            ))}
+            )}
+
             {paintRawMaterials.length > 0 && (
-              <div className="bg-slate-50/80 px-5 py-2 dark:bg-slate-900/50">
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  {t.rmMetricsCaptionPaint}
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {paintRawMaterials.length} {t.totalRecords}
-                </p>
-              </div>
-            )}
-            {paintRawMaterials.map((rawMaterial) => (
-              <div
-                key={rawMaterial.id}
-                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-semibold text-slate-900 dark:text-white">
-                      {rawMaterial.name}
-                    </p>
-                    <span className="inline-flex items-center rounded-lg bg-fuchsia-100 px-2 py-1 text-[11px] font-medium text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-200">
-                      {t.rmKindPaint}
+              <div>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200/80 bg-fuchsia-50/70 px-3 py-2.5 dark:border-fuchsia-900/40 dark:bg-fuchsia-950/25">
+                  <div className="flex items-center gap-2">
+                    <Palette className="h-4 w-4 text-fuchsia-600 dark:text-fuchsia-400" />
+                    <span className="text-sm font-semibold text-fuchsia-900 dark:text-fuchsia-100">
+                      {t.rmMetricsCaptionPaint}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                    {t.whUnit}: {rawMaterial.unit}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {rawMaterial.defaultBagWeightKg
-                      ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
-                      : t.rmDefaultBagWeightHint}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {auditLine(rawMaterial, t)}
-                  </p>
-                  {rawMaterial.description && (
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                      {rawMaterial.description}
-                    </p>
-                  )}
+                  <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-semibold text-fuchsia-900 shadow-sm dark:bg-fuchsia-900/50 dark:text-fuchsia-100">
+                    {paintRawMaterials.length} {t.totalRecords}
+                  </span>
                 </div>
-                <div className="flex flex-col items-start gap-2 sm:items-end">
-                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    {t.whIncludedInWarehouse}
-                  </div>
-                  {canManage && (
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => openRawMaterialEdit(rawMaterial)}
-                      >
-                        <Pencil size={14} />
-                        {t.whEdit}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => attemptDeleteRawMaterial(rawMaterial)}
-                      >
-                        <Trash2 size={14} />
-                        {t.suDelete}
-                      </Button>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {paintRawMaterials.map((rawMaterial) => (
+                    <div
+                      key={rawMaterial.id}
+                      className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-600 dark:bg-slate-900/40"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start gap-2">
+                          <p className="min-w-0 flex-1 font-semibold leading-snug text-slate-900 dark:text-white">
+                            {rawMaterial.name}
+                          </p>
+                          <span className="inline-flex shrink-0 items-center rounded-lg bg-fuchsia-100 px-2 py-0.5 text-[11px] font-medium text-fuchsia-900 dark:bg-fuchsia-900/40 dark:text-fuchsia-200">
+                            {t.rmKindPaint}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                          {t.whUnit}: {rawMaterial.unit}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          {rawMaterial.defaultBagWeightKg
+                            ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
+                            : t.rmDefaultBagWeightHint}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">{auditLine(rawMaterial, t)}</p>
+                        {rawMaterial.description && (
+                          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                            {rawMaterial.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700">
+                        <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                          {t.whIncludedInWarehouse}
+                        </p>
+                        {canManage && (
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 sm:flex-none"
+                              onClick={() => openRawMaterialEdit(rawMaterial)}
+                            >
+                              <Pencil size={14} />
+                              {t.whEdit}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1 sm:flex-none"
+                              onClick={() => attemptDeleteRawMaterial(rawMaterial)}
+                            >
+                              <Trash2 size={14} />
+                              {t.suDelete}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              {t.whProductsList}
-            </h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {filteredProducts.length} {t.totalRecords}
-            </p>
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-indigo-50/70 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-indigo-950/20 dark:via-slate-800 dark:to-slate-800">
+        <div className="flex flex-col gap-4 border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 shadow-inner dark:bg-indigo-900/40">
+              <Boxes className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+                {t.whProductsList}
+              </h3>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {filteredProducts.length} {t.totalRecords}
+              </p>
+            </div>
           </div>
           {canManage ? (
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className="w-full shrink-0 sm:w-auto">
               <Plus size={16} />
               {t.whAddProduct}
             </Button>
           ) : (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {t.whManageReadOnly}
-            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{t.whManageReadOnly}</p>
           )}
         </div>
 
         {filteredProducts.length === 0 ? (
-          <div className="flex h-40 items-center justify-center px-4 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex min-h-[10rem] items-center justify-center px-4 py-10 text-sm text-slate-500 dark:text-slate-400">
             {t.whNoProducts}
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="flex flex-col gap-4 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 sm:p-5 lg:flex-row lg:items-center"
+                className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-all hover:border-indigo-200/80 hover:shadow-md dark:border-slate-600 dark:bg-slate-900/40 dark:hover:border-indigo-900/50"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-semibold text-slate-900 dark:text-white">
+                  <div className="flex flex-wrap items-start gap-2">
+                    <p className="min-w-0 flex-1 font-semibold leading-snug text-slate-900 dark:text-white">
                       {product.name}
                     </p>
-                    <span className="inline-flex items-center rounded-lg bg-indigo-100 px-2 py-1 text-[11px] font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                    <span className="inline-flex shrink-0 items-center rounded-lg bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200">
                       {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-3 text-xs font-medium text-slate-600 dark:text-slate-300">
                     {productMetric(product, t)}
                   </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {auditLine(product, t)}
-                  </p>
+                  <p className="mt-1 text-[11px] text-slate-400">{auditLine(product, t)}</p>
                   {product.description && (
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                       {product.description}
                     </p>
                   )}
                 </div>
                 {canManage && (
-                  <div className="flex flex-col gap-2 sm:flex-row">
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
+                      className="flex-1"
                       onClick={() => startEdit(product)}
                     >
                       <Pencil size={14} />
@@ -1645,6 +1712,8 @@ export function Warehouse() {
                     <Button
                       type="button"
                       variant="destructive"
+                      size="sm"
+                      className="flex-1"
                       onClick={() => setDeleteTarget(product)}
                     >
                       <Trash2 size={14} />

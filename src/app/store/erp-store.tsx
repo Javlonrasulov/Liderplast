@@ -261,6 +261,7 @@ export interface ShiftRecord {
   createdAt: string;
   /** Smenada kraska ishlatilgani (backend/frontend mos kelishi uchun ixtiyoriy) */
   paintUsed?: boolean;
+  paintRawMaterialId?: string;
   paintQuantityKg?: number;
   paintRawMaterialName?: string;
 }
@@ -544,6 +545,9 @@ type ERPAction =
         defectCount?: number;
         electricityKwh?: number;
         notes?: string;
+        paintUsed?: boolean;
+        paintRawMaterialId?: string;
+        paintQuantityKg?: number;
       };
     }
   | { type: 'DELETE_SHIFT_RECORD'; payload: string }
@@ -764,6 +768,10 @@ type BackendShiftRecord = {
   machineReading?: string | null;
   notes?: string | null;
   createdAt: string;
+  paintUsed?: boolean;
+  paintRawMaterialId?: string | null;
+  paintQuantityKg?: number | null;
+  paintRawMaterial?: { id: string; name: string; unit?: string } | null;
   worker: { fullName: string };
   machine?: { id: string } | null;
 };
@@ -1479,6 +1487,10 @@ async function loadStateFromApi() {
     electricityKwh: shift.electricityKwh,
     notes: shift.notes ?? '',
     createdAt: shift.createdAt,
+    paintUsed: shift.paintUsed ?? false,
+    paintRawMaterialId: shift.paintRawMaterialId ?? undefined,
+    paintQuantityKg: shift.paintQuantityKg ?? undefined,
+    paintRawMaterialName: shift.paintRawMaterial?.name,
   }));
 
   const payrollUsers = users.filter((user) => user.role === 'WORKER');
@@ -1989,6 +2001,18 @@ export function ERPProvider({ children }: { children: ReactNode }) {
         case 'ADD_SHIFT_RECORD': {
           const workerId = lookups.usersByName.get(action.payload.workerName);
           if (!workerId) break;
+          const p = action.payload;
+          const paintBody =
+            p.paintUsed === true &&
+            p.paintRawMaterialId &&
+            p.paintQuantityKg != null &&
+            p.paintQuantityKg > 0
+              ? {
+                  paintUsed: true as const,
+                  paintRawMaterialId: p.paintRawMaterialId,
+                  paintQuantityKg: p.paintQuantityKg,
+                }
+              : { paintUsed: false as const };
           await apiRequest('/production/shifts', {
             method: 'POST',
             body: JSON.stringify({
@@ -2003,6 +2027,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               defectCount: action.payload.defectCount,
               electricityKwh: action.payload.electricityKwh,
               notes: action.payload.notes,
+              ...paintBody,
             }),
           });
           break;
@@ -2024,6 +2049,16 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           if (p.defectCount !== undefined) body.defectCount = p.defectCount;
           if (p.electricityKwh !== undefined) body.electricityKwh = p.electricityKwh;
           if (p.notes !== undefined) body.notes = p.notes;
+          if (p.paintUsed === true &&
+            p.paintRawMaterialId &&
+            p.paintQuantityKg != null &&
+            p.paintQuantityKg > 0) {
+            body.paintUsed = true;
+            body.paintRawMaterialId = p.paintRawMaterialId;
+            body.paintQuantityKg = p.paintQuantityKg;
+          } else if (p.paintUsed === false) {
+            body.paintUsed = false;
+          }
           if (Object.keys(body).length === 0) break;
           await apiRequest(`/production/shifts/${p.id}`, {
             method: 'PATCH',

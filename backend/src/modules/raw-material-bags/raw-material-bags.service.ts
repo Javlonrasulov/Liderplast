@@ -400,6 +400,74 @@ export class RawMaterialBagsService {
     });
   }
 
+  /**
+   * Smena / boshqa oqimlar: ombor qoldig‘i allaqachon yangilangan bo‘lganidan keyin.
+   * Faqat hozirgi aktiv qop shu xomashyoga tegishli bo‘lsa qopdan yechiladi; aks holda hech narsa qilinmaydi.
+   */
+  async consumeFromActiveBagAfterInventoryAlreadyDeducted(
+    tx: Tx,
+    params: ConsumeBagParams,
+  ): Promise<void> {
+    const activeSession = await this.getActiveSession(tx);
+    if (!activeSession) {
+      return;
+    }
+    const activeBag = activeSession.bag;
+    if (activeBag.rawMaterialId !== params.rawMaterialId) {
+      return;
+    }
+    await this.consumeFromActiveBagForProduction(tx, {
+      ...params,
+      referenceType: params.referenceType ?? 'shift',
+    });
+  }
+
+  /**
+   * Smena yozuvi bekor qilinishi / tahrirlanishidan oldin: shift bo‘yicha qop audit va qoldiqni qaytarish.
+   */
+  async reverseBagConsumptionForShiftReference(tx: Tx, shiftId: string): Promise<void> {
+    const consumed = await tx.bagAuditLog.findMany({
+      where: {
+        referenceType: 'shift',
+        referenceId: shiftId,
+        actionType: BagAuditActionType.CONSUMED,
+      },
+    });
+
+    for (const log of consumed) {
+      const qty = log.quantityKg ?? 0;
+      if (qty <= 0) {
+        continue;
+      }
+      const bag = await tx.rawMaterialBag.findUnique({ where: { id: log.bagId } });
+      if (!bag) {
+        continue;
+      }
+      const newQty = bag.currentQuantityKg + qty;
+      let newStatus = bag.status;
+      if (bag.status === BagStatus.DEPLETED && newQty > 0.0001) {
+        newStatus = BagStatus.IN_STORAGE;
+      }
+      await tx.rawMaterialBag.update({
+        where: { id: bag.id },
+        data: {
+          currentQuantityKg: newQty,
+          status: newStatus,
+        },
+      });
+    }
+
+    await tx.bagAuditLog.deleteMany({
+      where: {
+        referenceType: 'shift',
+        referenceId: shiftId,
+        actionType: {
+          in: [BagAuditActionType.CONSUMED, BagAuditActionType.DEPLETED],
+        },
+      },
+    });
+  }
+
   async createAutoBagsForIncomingTx(
     tx: Tx,
     params: {

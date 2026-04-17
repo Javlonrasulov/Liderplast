@@ -77,6 +77,8 @@ export function RawMaterial() {
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
   const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [bagLogsOpen, setBagLogsOpen] = useState(false);
+  const [otherBagsOpen, setOtherBagsOpen] = useState(false);
 
   const stockByKind = useMemo(
     () => computeRawMaterialStockByKind(state.rawMaterialEntries, state.warehouseProducts),
@@ -104,6 +106,18 @@ export function RawMaterial() {
         return p?.rawMaterialKind !== 'PAINT';
       }),
     [state.rawMaterialBags, state.warehouseProducts],
+  );
+
+  /** Рўйхатда фақат аппаратга уланган қоп */
+  const connectedSiroBagsForList = useMemo(
+    () => siroBags.filter((b) => b.status === 'CONNECTED'),
+    [siroBags],
+  );
+
+  /** Омбор / бошқа ҳолат — босилса очiladi */
+  const otherSiroBagsForList = useMemo(
+    () => siroBags.filter((b) => b.status !== 'CONNECTED'),
+    [siroBags],
   );
 
   const handleCreateRawMaterial = async (e: React.FormEvent) => {
@@ -1056,10 +1070,10 @@ export function RawMaterial() {
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagsTitle}</h3>
             </div>
             <div className="space-y-3">
-              {siroBags.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
+              {connectedSiroBagsForList.length === 0 ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t.rmBagsListNoConnected}</p>
               ) : (
-                siroBags.map((bag) => (
+                connectedSiroBagsForList.map((bag) => (
                   <div key={bag.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -1092,33 +1106,119 @@ export function RawMaterial() {
                 ))
               )}
             </div>
+
+            {otherSiroBagsForList.length > 0 && (
+              <Collapsible
+                open={otherBagsOpen}
+                onOpenChange={setOtherBagsOpen}
+                className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
+              >
+                <CollapsibleTrigger className="w-full text-left">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Package size={16} className="text-slate-500 shrink-0" />
+                      <span className="text-slate-900 dark:text-white font-medium text-sm truncate">
+                        {t.rmBagsListOtherTitle}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-slate-400">
+                        {otherSiroBagsForList.length}
+                      </span>
+                      <ChevronDown
+                        size={16}
+                        className={`text-slate-400 transition-transform ${otherBagsOpen ? 'rotate-180' : ''}`}
+                      />
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-3 mt-3">
+                    {otherSiroBagsForList.map((bag) => (
+                      <div key={bag.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-900 dark:text-white truncate">{bag.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{bag.rawMaterialName}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openEditBagName(bag.id, bag.name)}
+                            className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            title={t.whEdit}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-medium ${bagStatusTone[bag.status]}`}>
+                            {bagStatusLabel[bag.status]}
+                          </span>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <p className="text-slate-400">{t.rmBagInitial}</p>
+                            <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.initialQuantityKg)} {t.unitKg}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400">{t.rmBagRemaining}</p>
+                            <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.currentQuantityKg)} {t.unitKg}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <History size={16} className="text-indigo-500" />
-              <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagLogsTitle}</h3>
-            </div>
-            <div className="space-y-3">
-              {filteredBagLogs.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
-              ) : (
-                filteredBagLogs.map((log) => (
-                  <div key={log.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{actionLabel[log.actionType] ?? log.actionType}</p>
-                      <span className="text-[11px] text-slate-400">{formatDate(log.date)}</span>
+          <Collapsible
+            open={bagLogsOpen}
+            onOpenChange={setBagLogsOpen}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+          >
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <History size={16} className="text-indigo-500" />
+                  <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmBagLogsTitle}</h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400">
+                    {filteredBagLogs.length} {t.totalRecords}
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={`text-slate-400 transition-transform ${bagLogsOpen ? 'rotate-180' : ''}`}
+                  />
+                </div>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-3 p-5 pt-4">
+                {filteredBagLogs.length === 0 ? (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
+                ) : (
+                  filteredBagLogs.map((log) => (
+                    <div key={log.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          {actionLabel[log.actionType] ?? log.actionType}
+                        </p>
+                        <span className="text-[11px] text-slate-400">{formatDate(log.date)}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{log.bagName}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">{log.note || t.rmNoLogNote}</p>
+                      {log.quantityKg !== undefined && (
+                        <p className="text-xs text-indigo-600 dark:text-indigo-300 mt-2">
+                          {formatNumber(log.quantityKg)} {t.unitKg}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{log.bagName}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">{log.note || t.rmNoLogNote}</p>
-                    {log.quantityKg !== undefined && (
-                      <p className="text-xs text-indigo-600 dark:text-indigo-300 mt-2">{formatNumber(log.quantityKg)} {t.unitKg}</p>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+                  ))
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
 

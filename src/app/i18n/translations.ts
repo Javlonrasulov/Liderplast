@@ -213,6 +213,10 @@ export interface T {
   rmBagWriteoffError: string;
   rmBagWrittenOffSuccess: string;
   rmBagsTitle: string;
+  /** Рўйхатда фақат аппаратга уланган қоп — бўшда */
+  rmBagsListNoConnected: string;
+  /** Омбордаги / бошқа ҳолатдаги қоплар — босилса очiladi */
+  rmBagsListOtherTitle: string;
   rmBagLogsTitle: string;
   rmBagInitial: string;
   rmBagRemaining: string;
@@ -786,6 +790,8 @@ const uz_cyrillic: T = {
   rmBagWriteoffError: 'Чиқимга чиқариш учун фаол қоп йўқ',
   rmBagWrittenOffSuccess: 'Қоп чиқимга чиқарилди',
   rmBagsTitle: 'Қоплар рўйхати',
+  rmBagsListNoConnected: 'Ҳозир аппаратга уланган қоп йўқ.',
+  rmBagsListOtherTitle: 'Қолган қоплар',
   rmBagLogsTitle: 'Қоплар тарихи',
   rmBagInitial: 'Бошланғич миқдор',
   rmBagRemaining: 'Жорий қолдиқ',
@@ -1408,6 +1414,8 @@ const uz_latin: T = {
   rmBagWriteoffError: 'Chiqimga chiqarish uchun faol qop yo‘q',
   rmBagWrittenOffSuccess: 'Qop chiqimga chiqarildi',
   rmBagsTitle: 'Qoplar ro‘yxati',
+  rmBagsListNoConnected: 'Hozir apparatga ulangan qop yo‘q.',
+  rmBagsListOtherTitle: 'Qolgan qoplar',
   rmBagLogsTitle: 'Qoplar tarixi',
   rmBagInitial: 'Boshlang‘ich miqdor',
   rmBagRemaining: 'Joriy qoldiq',
@@ -2030,6 +2038,8 @@ const ru: T = {
   rmBagWriteoffError: 'Нет активного мешка для списания',
   rmBagWrittenOffSuccess: 'Мешок списан',
   rmBagsTitle: 'Список мешков',
+  rmBagsListNoConnected: 'Сейчас к аппарату не подключён ни один мешок.',
+  rmBagsListOtherTitle: 'Остальные мешки',
   rmBagLogsTitle: 'История мешков',
   rmBagInitial: 'Начальное количество',
   rmBagRemaining: 'Текущий остаток',

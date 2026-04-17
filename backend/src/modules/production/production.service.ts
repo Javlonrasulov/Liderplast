@@ -257,31 +257,329 @@ export class ProductionService {
   }
 
   private async reverseShiftInventoryMovements(tx: Tx, shiftId: string) {
+    await this.rawMaterialBagsService.reverseBagConsumptionForShiftReference(
+      tx,
+      shiftId,
+    );
+
     const movements = await tx.inventoryMovement.findMany({
       where: { referenceType: 'shift', referenceId: shiftId },
     });
 
     for (const movement of movements) {
-      if (
-        movement.itemType !== InventoryItemType.RAW_MATERIAL ||
-        !movement.rawMaterialId
-      ) {
-        await tx.inventoryMovement.delete({ where: { id: movement.id } });
-        continue;
-      }
-
-      const balance = await tx.inventoryBalance.findFirst({
-        where: { rawMaterialId: movement.rawMaterialId },
-      });
-
-      if (balance) {
-        await tx.inventoryBalance.update({
-          where: { id: balance.id },
-          data: { quantity: balance.quantity + movement.quantity },
-        });
+      if (movement.movementType === MovementType.CONSUMPTION) {
+        if (
+          movement.itemType === InventoryItemType.RAW_MATERIAL &&
+          movement.rawMaterialId
+        ) {
+          const balance = await tx.inventoryBalance.findFirst({
+            where: { rawMaterialId: movement.rawMaterialId },
+          });
+          if (balance) {
+            await tx.inventoryBalance.update({
+              where: { id: balance.id },
+              data: { quantity: balance.quantity + movement.quantity },
+            });
+          }
+        } else if (
+          movement.itemType === InventoryItemType.SEMI_PRODUCT &&
+          movement.semiProductId
+        ) {
+          const balance = await tx.inventoryBalance.findFirst({
+            where: { semiProductId: movement.semiProductId },
+          });
+          if (balance) {
+            await tx.inventoryBalance.update({
+              where: { id: balance.id },
+              data: { quantity: balance.quantity + movement.quantity },
+            });
+          }
+        }
+      } else if (movement.movementType === MovementType.PRODUCTION_OUTPUT) {
+        if (
+          movement.itemType === InventoryItemType.SEMI_PRODUCT &&
+          movement.semiProductId
+        ) {
+          const balance = await tx.inventoryBalance.findFirst({
+            where: { semiProductId: movement.semiProductId },
+          });
+          if (balance) {
+            await tx.inventoryBalance.update({
+              where: { id: balance.id },
+              data: { quantity: balance.quantity - movement.quantity },
+            });
+          }
+        } else if (
+          movement.itemType === InventoryItemType.FINISHED_PRODUCT &&
+          movement.finishedProductId
+        ) {
+          const balance = await tx.inventoryBalance.findFirst({
+            where: { finishedProductId: movement.finishedProductId },
+          });
+          if (balance) {
+            await tx.inventoryBalance.update({
+              where: { id: balance.id },
+              data: { quantity: balance.quantity - movement.quantity },
+            });
+          }
+        }
       }
 
       await tx.inventoryMovement.delete({ where: { id: movement.id } });
+    }
+  }
+
+  /**
+   * Smena yozuvi bo‘yicha retseptdan siro/yarim tayyor sarfi va tayyor/yarim mahsulotni omborga qo‘shish.
+   * Kraska retsept qatorlari alohida {@link applyShiftPaintConsumption} orqali.
+   */
+  private async applyShiftRecipeAndOutput(
+    tx: Tx,
+    params: {
+      shiftId: string;
+      workerId: string;
+      machine: { id: string; stage: ProductionStage } | null;
+      productLabel: string | null | undefined;
+      producedQty: number;
+      defectCount: number;
+    },
+  ) {
+    const materialUnits = params.producedQty + params.defectCount;
+    const goodPieces = params.producedQty;
+    if (materialUnits <= 0 && goodPieces <= 0) {
+      return;
+    }
+
+    const label = params.productLabel?.trim();
+    if (!label) {
+      if (materialUnits > 0) {
+        throw new BadRequestException('Mahsulot turi kiritilishi kerak');
+      }
+      return;
+    }
+
+    if (!params.machine) {
+      if (materialUnits > 0) {
+        throw new BadRequestException('Apparat tanlanishi kerak');
+      }
+      return;
+    }
+
+    const machine = params.machine;
+
+    if (machine.stage === ProductionStage.SEMI) {
+      const semi = await tx.semiProduct.findFirst({
+        where: {
+          name: { equals: label, mode: 'insensitive' },
+          isDeleted: false,
+        },
+        include: {
+          rawMaterialLinks: { include: { rawMaterial: true } },
+        },
+      });
+
+      if (!semi) {
+        throw new BadRequestException(
+          `Yarim tayyor mahsulot topilmadi (nom mos kelishi kerak): ${label}`,
+        );
+      }
+
+      for (const link of semi.rawMaterialLinks) {
+        const rm = link.rawMaterial;
+        if (rm.isDeleted) {
+          continue;
+        }
+        if (rm.kind === RawMaterialKind.PAINT) {
+          continue;
+        }
+
+        const qtyKg = (link.amountGram * materialUnits) / 1000;
+        if (qtyKg <= 0) {
+          continue;
+        }
+
+        const balance = await tx.inventoryBalance.findFirst({
+          where: { rawMaterialId: rm.id },
+        });
+        if (!balance || balance.quantity + 0.0001 < qtyKg) {
+          throw new BadRequestException(
+            `Xomashyo omborda yetarli emas: ${rm.name}`,
+          );
+        }
+
+        const newQty = balance.quantity - qtyKg;
+        await tx.inventoryBalance.update({
+          where: { id: balance.id },
+          data: { quantity: newQty },
+        });
+
+        await tx.inventoryMovement.create({
+          data: {
+            itemType: InventoryItemType.RAW_MATERIAL,
+            movementType: MovementType.CONSUMPTION,
+            quantity: qtyKg,
+            previousQuantity: balance.quantity,
+            newQuantity: newQty,
+            rawMaterialId: rm.id,
+            createdById: params.workerId,
+            referenceType: 'shift',
+            referenceId: params.shiftId,
+            status: EntityStatus.COMPLETED,
+            note: 'Smena: retsept bo‘yicha siro sarfi',
+          },
+        });
+
+        await this.rawMaterialBagsService.consumeFromActiveBagAfterInventoryAlreadyDeducted(
+          tx,
+          {
+            rawMaterialId: rm.id,
+            quantityKg: qtyKg,
+            createdById: params.workerId,
+            note: 'Smena: retsept bo‘yicha siro sarfi (ulangan qop)',
+            referenceType: 'shift',
+            referenceId: params.shiftId,
+          },
+        );
+      }
+
+      if (goodPieces > 0) {
+        const semiBalance = await tx.inventoryBalance.findFirst({
+          where: { semiProductId: semi.id },
+        });
+        if (!semiBalance) {
+          throw new NotFoundException(
+            'Yarim tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+          );
+        }
+
+        const newSemiQty = semiBalance.quantity + goodPieces;
+        await tx.inventoryBalance.update({
+          where: { id: semiBalance.id },
+          data: { quantity: newSemiQty },
+        });
+
+        await tx.inventoryMovement.create({
+          data: {
+            itemType: InventoryItemType.SEMI_PRODUCT,
+            movementType: MovementType.PRODUCTION_OUTPUT,
+            quantity: goodPieces,
+            previousQuantity: semiBalance.quantity,
+            newQuantity: newSemiQty,
+            semiProductId: semi.id,
+            createdById: params.workerId,
+            referenceType: 'shift',
+            referenceId: params.shiftId,
+            status: EntityStatus.COMPLETED,
+            note: 'Smena: ishlab chiqarish',
+          },
+        });
+      }
+
+      return;
+    }
+
+    const finished = await tx.finishedProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+      include: {
+        semiProductLinks: true,
+        machineLinks: true,
+      },
+    });
+
+    if (!finished) {
+      throw new BadRequestException(
+        `Tayyor mahsulot topilmadi (nom mos kelishi kerak): ${label}`,
+      );
+    }
+
+    const machineOk = finished.machineLinks.some(
+      (l) => l.machineId === machine.id,
+    );
+    if (!machineOk) {
+      throw new BadRequestException(
+        'Bu mahsulot ushbu apparat bilan bog‘lanmagan (tayyor mahsulot → apparatlar)',
+      );
+    }
+
+    if (finished.semiProductLinks.length === 0) {
+      throw new BadRequestException(
+        'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
+      );
+    }
+
+    for (const link of finished.semiProductLinks) {
+      const qtyPieces = materialUnits;
+      const semiBal = await tx.inventoryBalance.findFirst({
+        where: { semiProductId: link.semiProductId },
+      });
+      const semiMeta = await tx.semiProduct.findUnique({
+        where: { id: link.semiProductId },
+        select: { name: true },
+      });
+
+      if (!semiBal || semiBal.quantity + 0.0001 < qtyPieces) {
+        throw new BadRequestException(
+          `Yarim tayyor omborda yetarli emas: ${semiMeta?.name ?? link.semiProductId}`,
+        );
+      }
+
+      const newSemiQty = semiBal.quantity - qtyPieces;
+      await tx.inventoryBalance.update({
+        where: { id: semiBal.id },
+        data: { quantity: newSemiQty },
+      });
+
+      await tx.inventoryMovement.create({
+        data: {
+          itemType: InventoryItemType.SEMI_PRODUCT,
+          movementType: MovementType.CONSUMPTION,
+          quantity: qtyPieces,
+          previousQuantity: semiBal.quantity,
+          newQuantity: newSemiQty,
+          semiProductId: link.semiProductId,
+          createdById: params.workerId,
+          referenceType: 'shift',
+          referenceId: params.shiftId,
+          status: EntityStatus.COMPLETED,
+          note: 'Smena: tayyor mahsulot uchun yarim tayyor sarfi',
+        },
+      });
+    }
+
+    if (goodPieces > 0) {
+      const fpBal = await tx.inventoryBalance.findFirst({
+        where: { finishedProductId: finished.id },
+      });
+      if (!fpBal) {
+        throw new NotFoundException(
+          'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+        );
+      }
+
+      const newFp = fpBal.quantity + goodPieces;
+      await tx.inventoryBalance.update({
+        where: { id: fpBal.id },
+        data: { quantity: newFp },
+      });
+
+      await tx.inventoryMovement.create({
+        data: {
+          itemType: InventoryItemType.FINISHED_PRODUCT,
+          movementType: MovementType.PRODUCTION_OUTPUT,
+          quantity: goodPieces,
+          previousQuantity: fpBal.quantity,
+          newQuantity: newFp,
+          finishedProductId: finished.id,
+          createdById: params.workerId,
+          referenceType: 'shift',
+          referenceId: params.shiftId,
+          status: EntityStatus.COMPLETED,
+          note: 'Smena: ishlab chiqarish',
+        },
+      });
     }
   }
 
@@ -324,6 +622,18 @@ export class ProductionService {
         note: 'Smena: kraska/bo‘yoq sarfi',
       },
     });
+
+    await this.rawMaterialBagsService.consumeFromActiveBagAfterInventoryAlreadyDeducted(
+      tx,
+      {
+        rawMaterialId: params.rawMaterialId,
+        quantityKg: params.quantityKg,
+        createdById: params.workerId,
+        note: 'Smena: kraska/bo‘yoq sarfi (ulangan qop)',
+        referenceType: 'shift',
+        referenceId: params.shiftId,
+      },
+    );
   }
 
   async createShiftRecord(dto: CreateShiftRecordDto) {
@@ -389,6 +699,19 @@ export class ProductionService {
           quantityKg: dto.paintQuantityKg!,
         });
       }
+
+      const machine = dto.machineId
+        ? await tx.machine.findUnique({ where: { id: dto.machineId } })
+        : null;
+
+      await this.applyShiftRecipeAndOutput(tx, {
+        shiftId: shift.id,
+        workerId: dto.workerId,
+        machine,
+        productLabel: dto.productLabel,
+        producedQty: dto.producedQty,
+        defectCount: dto.defectCount ?? 0,
+      });
 
       return tx.shiftRecord.findUniqueOrThrow({
         where: { id: shift.id },
@@ -504,6 +827,28 @@ export class ProductionService {
           quantityKg: nextPaintQuantityKg!,
         });
       }
+
+      const machine = nextMachineId
+        ? await tx.machine.findUnique({ where: { id: nextMachineId } })
+        : null;
+
+      const nextProductLabel =
+        dto.productLabel !== undefined ? dto.productLabel : existing.productLabel;
+      const nextProducedQty =
+        dto.producedQty !== undefined ? dto.producedQty : existing.producedQty;
+      const nextDefectCount =
+        dto.defectCount !== undefined
+          ? dto.defectCount
+          : existing.defectCount;
+
+      await this.applyShiftRecipeAndOutput(tx, {
+        shiftId: shift.id,
+        workerId: nextWorkerId,
+        machine,
+        productLabel: nextProductLabel,
+        producedQty: nextProducedQty,
+        defectCount: nextDefectCount,
+      });
 
       return tx.shiftRecord.findUniqueOrThrow({
         where: { id: shift.id },
