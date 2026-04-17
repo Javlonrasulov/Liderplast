@@ -165,8 +165,21 @@ export interface T {
   rmTotalIn: string;
   rmTotalOut: string;
   rmRemaining: string;
+  /** Kraska bo‘limidagi қолдиқ картаси учун */
+  rmRemainingPaint: string;
   rmStockLevel: string;
   rmNewEntry: string;
+  rmIncomingTitleSiro: string;
+  rmIncomingTitlePaint: string;
+  rmIncomingTabSiro: string;
+  rmIncomingTabPaint: string;
+  rmIncomingHintPaint: string;
+  rmPlaceholderDescPaint: string;
+  rmMetricsCaptionSiro: string;
+  rmMetricsCaptionPaint: string;
+  rmAlertsTitlePaint: string;
+  rmAlertsSubtitlePaint: string;
+  rmSelectPaintRequired: string;
   rmAddBtn: string;
   rmHistory: string;
   rmIncoming: string;
@@ -621,7 +634,7 @@ const uz_cyrillic: T = {
   langShort: 'КИ',
 
   navDashboard: 'Бошқарув панели',
-  navRawMaterial: 'Хомашё (Сиро)',
+  navRawMaterial: 'Хомашё (сиро / краска)',
   navSemiProduction: 'Қолип ишлаб чиқариш',
   navFinalProduction: 'Бакалашка ишлаб чиқариш',
   navWarehouse: 'Омбор',
@@ -844,12 +857,24 @@ const uz_cyrillic: T = {
   dashCbuRefresh: 'Янгилаш',
   dashCbuChangeToday: 'бугун',
 
-  rmTitle: 'Хомашё (Сиро) Бошқаруви',
+  rmTitle: 'Хомашё (сиро / краска) бошқаруви',
   rmTotalIn: 'Жами кирди',
   rmTotalOut: 'Жами ишлатилди',
   rmRemaining: 'Қолган сиро',
+  rmRemainingPaint: 'Қолган краска / бўёқ',
   rmStockLevel: 'Омбор тўлиши',
   rmNewEntry: 'Янги Сиро Кирими',
+  rmIncomingTitleSiro: 'Янги сиро кирими',
+  rmIncomingTitlePaint: 'Янги краска кирими',
+  rmIncomingTabSiro: 'PET сиро',
+  rmIncomingTabPaint: 'Краска',
+  rmIncomingHintPaint: 'Кирим танланган краска/бўёқ позициясига ёзилади.',
+  rmPlaceholderDescPaint: 'Краска кирими...',
+  rmMetricsCaptionSiro: 'PET сиро (қоплар)',
+  rmMetricsCaptionPaint: 'Краска / бўёқ',
+  rmAlertsTitlePaint: 'Краска турлари бўйича огоҳлантириш',
+  rmAlertsSubtitlePaint: 'Ҳар бир краска қолдиғи алоҳида назорат қилинади',
+  rmSelectPaintRequired: 'Аввал «Краска / бўёқ» турида хомашё яратинг',
   rmAddBtn: 'Омборга қўшиш',
   rmHistory: 'Сиро Ҳаракати Тарихи',
   rmIncoming: '↓ Кирди',
@@ -1221,7 +1246,7 @@ const uz_latin: T = {
   langShort: 'LT',
 
   navDashboard: 'Boshqaruv paneli',
-  navRawMaterial: 'Xomashyo (Siro)',
+  navRawMaterial: 'Xomashyo (siro / kraska)',
   navSemiProduction: 'Qolip ishlab chiqarish',
   navFinalProduction: 'Bakalashka ishlab chiqarish',
   navWarehouse: 'Ombor',
@@ -1444,12 +1469,24 @@ const uz_latin: T = {
   dashCbuRefresh: 'Yangilash',
   dashCbuChangeToday: 'bugun',
 
-  rmTitle: 'Xomashyo (Siro) Boshqaruvi',
+  rmTitle: 'Xomashyo (siro / kraska) boshqaruvi',
   rmTotalIn: 'Jami kirdi',
   rmTotalOut: 'Jami ishlatildi',
   rmRemaining: "Qolgan siro",
+  rmRemainingPaint: "Qolgan kraska / bo'yoq",
   rmStockLevel: "Ombor to'lishi",
   rmNewEntry: 'Yangi Siro Kirimi',
+  rmIncomingTitleSiro: 'Yangi siro kirimi',
+  rmIncomingTitlePaint: 'Yangi kraska kirimi',
+  rmIncomingTabSiro: 'PET siro',
+  rmIncomingTabPaint: 'Kraska',
+  rmIncomingHintPaint: "Kirim tanlangan kraska/bo'yoq pozitsiyasiga yoziladi.",
+  rmPlaceholderDescPaint: 'Kraska kirimi...',
+  rmMetricsCaptionSiro: 'PET siro (qoplar)',
+  rmMetricsCaptionPaint: "Kraska / bo'yoq",
+  rmAlertsTitlePaint: 'Kraska turlari bo\'yicha ogohlantirish',
+  rmAlertsSubtitlePaint: "Har bir kraska qoldig'i alohida nazorat qilinadi",
+  rmSelectPaintRequired: "Avval «Kraska / bo'yoq» turida xomashyo yarating",
   rmAddBtn: "Omborga qo'shish",
   rmHistory: 'Siro Harakati Tarixi',
   rmIncoming: '↓ Kirdi',
@@ -1821,7 +1858,7 @@ const ru: T = {
   langShort: 'RU',
 
   navDashboard: 'Панель управления',
-  navRawMaterial: 'Сырьё (Сиро)',
+  navRawMaterial: 'Сырьё (сырьё / краска)',
   navSemiProduction: 'Производство заготовок',
   navFinalProduction: 'Производство бутылок',
   navWarehouse: 'Склад',
@@ -2044,12 +2081,24 @@ const ru: T = {
   dashCbuRefresh: 'Обновить',
   dashCbuChangeToday: 'сегодня',
 
-  rmTitle: 'Управление сырьём (Сиро)',
+  rmTitle: 'Управление сырьём и краской',
   rmTotalIn: 'Всего поступило',
   rmTotalOut: 'Всего использовано',
   rmRemaining: 'Остаток сырья',
+  rmRemainingPaint: 'Остаток краски / красителя',
   rmStockLevel: 'Заполненность склада',
   rmNewEntry: 'Новое поступление сырья',
+  rmIncomingTitleSiro: 'Новое поступление сырья (PET)',
+  rmIncomingTitlePaint: 'Новое поступление краски',
+  rmIncomingTabSiro: 'PET / сырьё',
+  rmIncomingTabPaint: 'Краска',
+  rmIncomingHintPaint: 'Поступление будет записано на выбранную позицию краски.',
+  rmPlaceholderDescPaint: 'Поступление краски...',
+  rmMetricsCaptionSiro: 'PET / сырьё (мешки)',
+  rmMetricsCaptionPaint: 'Краска / краситель',
+  rmAlertsTitlePaint: 'Предупреждения по краске',
+  rmAlertsSubtitlePaint: 'Остаток каждой позиции краски отслеживается отдельно',
+  rmSelectPaintRequired: 'Сначала создайте сырьё с типом «краска»',
   rmAddBtn: 'Добавить на склад',
   rmHistory: 'История движения сырья',
   rmIncoming: '↓ Поступило',

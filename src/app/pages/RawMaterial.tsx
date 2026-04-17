@@ -13,7 +13,13 @@ import {
   History,
   ChevronDown,
 } from 'lucide-react';
-import { useERP, type RawMaterialKind } from '../store/erp-store';
+import {
+  useERP,
+  type RawMaterialKind,
+  type RawMaterialProduct,
+  computeRawMaterialFlowByKind,
+  computeRawMaterialStockByKind,
+} from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
@@ -50,7 +56,7 @@ const SELECT_ITEM_CLS =
   'cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white';
 
 export function RawMaterial() {
-  const { state, dispatch, rawMaterialStock } = useERP();
+  const { state, dispatch } = useERP();
   const { t, filterData } = useApp();
   const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
   const [createForm, setCreateForm] = useState<{
@@ -69,14 +75,36 @@ export function RawMaterial() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
+  const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const lowStock = rawMaterialStock < 1000;
-  const criticalStock = rawMaterialStock < 500;
+  const stockByKind = useMemo(
+    () => computeRawMaterialStockByKind(state.rawMaterialEntries, state.warehouseProducts),
+    [state.rawMaterialEntries, state.warehouseProducts],
+  );
+  const flowByKind = useMemo(
+    () => computeRawMaterialFlowByKind(state.rawMaterialEntries, state.warehouseProducts),
+    [state.rawMaterialEntries, state.warehouseProducts],
+  );
+
+  const siroStockKg = stockByKind.siro;
+  const paintStockKg = stockByKind.paint;
+
+  const lowStock = siroStockKg < 1000;
+  const criticalStock = siroStockKg < 500;
   const activeBag = state.activeRawMaterialBag;
 
-  const totalIncoming = state.rawMaterialEntries.filter(e => e.type === 'incoming').reduce((s, e) => s + e.amount, 0);
-  const totalOutgoing = state.rawMaterialEntries.filter(e => e.type === 'outgoing').reduce((s, e) => s + e.amount, 0);
+  const siroBags = useMemo(
+    () =>
+      state.rawMaterialBags.filter((b) => {
+        const p = state.warehouseProducts.find(
+          (x): x is RawMaterialProduct =>
+            x.itemType === 'RAW_MATERIAL' && x.id === b.rawMaterialId,
+        );
+        return p?.rawMaterialKind !== 'PAINT';
+      }),
+    [state.rawMaterialBags, state.warehouseProducts],
+  );
 
   const handleCreateRawMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,59 +160,57 @@ export function RawMaterial() {
     })),
   ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const availableRawMaterials = useMemo(() => {
-    const names = new Map<string, string>();
-    for (const item of state.warehouseProducts) {
-      if (item.itemType === 'RAW_MATERIAL') {
-        names.set(item.id, item.name);
-      }
-    }
-    for (const bag of state.rawMaterialBags) {
-      names.set(bag.rawMaterialId, bag.rawMaterialName);
-    }
-    for (const entry of state.rawMaterialEntries) {
-      if (!names.size && entry.description) {
-        names.set('fallback', entry.description);
-      }
-    }
-    return Array.from(names.entries()).map(([id, name]) => ({ id, name }));
-  }, [state.warehouseProducts, state.rawMaterialBags, state.rawMaterialEntries]);
+  const incomingCatalogItems = useMemo(() => {
+    return state.warehouseProducts
+      .filter((p): p is RawMaterialProduct => {
+        if (p.itemType !== 'RAW_MATERIAL') return false;
+        return incomingKind === 'PAINT'
+          ? p.rawMaterialKind === 'PAINT'
+          : p.rawMaterialKind !== 'PAINT';
+      })
+      .map((p) => ({ id: p.id, name: p.name }));
+  }, [state.warehouseProducts, incomingKind]);
 
-  const rawMaterialAlerts = useMemo(() => {
+  const buildKindAlerts = (paintOnly: boolean) => {
     const stockByName = new Map<string, number>();
     for (const item of state.warehouseStock) {
-      if (item.itemType === 'RAW_MATERIAL') {
-        if (item.itemName) stockByName.set(item.itemName, item.quantity);
+      if (item.itemType === 'RAW_MATERIAL' && item.itemName) {
+        stockByName.set(item.itemName, item.quantity);
       }
     }
-
     return state.warehouseProducts
-      .filter(
-        (item): item is Extract<typeof item, { itemType: 'RAW_MATERIAL' }> =>
-          item.itemType === 'RAW_MATERIAL',
-      )
+      .filter((item): item is RawMaterialProduct => {
+        if (item.itemType !== 'RAW_MATERIAL') return false;
+        const isPaint = item.rawMaterialKind === 'PAINT';
+        return paintOnly ? isPaint : !isPaint;
+      })
       .map((item) => {
         const quantityKg = stockByName.get(item.name) ?? 0;
         const level =
           quantityKg < 500 ? 'critical' : quantityKg < 1000 ? 'warning' : 'ok';
-        return {
-          id: item.id,
-          name: item.name,
-          quantityKg,
-          level,
-        };
+        return { id: item.id, name: item.name, quantityKg, level };
       })
       .filter((item) => item.level !== 'ok')
       .sort((a, b) => a.quantityKg - b.quantityKg);
-  }, [state.warehouseProducts, state.warehouseStock]);
+  };
+
+  const siroMaterialAlerts = useMemo(
+    () => buildKindAlerts(false),
+    [state.warehouseProducts, state.warehouseStock],
+  );
+
+  const paintMaterialAlerts = useMemo(
+    () => buildKindAlerts(true),
+    [state.warehouseProducts, state.warehouseStock],
+  );
 
   const resolvedIncomingRawMaterialId = useMemo(() => {
-    if (availableRawMaterials.length === 0) return '';
-    if (incomingRawMaterialId && availableRawMaterials.some((x) => x.id === incomingRawMaterialId)) {
+    if (incomingCatalogItems.length === 0) return '';
+    if (incomingRawMaterialId && incomingCatalogItems.some((x) => x.id === incomingRawMaterialId)) {
       return incomingRawMaterialId;
     }
-    return availableRawMaterials[0]?.id ?? '';
-  }, [availableRawMaterials, incomingRawMaterialId]);
+    return incomingCatalogItems[0]?.id ?? '';
+  }, [incomingCatalogItems, incomingRawMaterialId]);
 
   const incomingRawMaterial = useMemo(
     () =>
@@ -204,9 +230,17 @@ export function RawMaterial() {
     }
   }, [incomingRawMaterialId, resolvedIncomingRawMaterialId]);
 
+  useEffect(() => {
+    setIncomingRawMaterialId('');
+  }, [incomingKind]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (incomingKind === 'PAINT' && incomingCatalogItems.length === 0) {
+      setError(t.rmSelectPaintRequired);
+      return;
+    }
     const rawMaterialId = resolvedIncomingRawMaterialId;
     const amountKg = form.unit === 'ton' ? parseFloat(form.amount) * 1000 : parseFloat(form.amount);
     if (!rawMaterialId) { setError(t.rmSelectRawMaterialRequired); return; }
@@ -242,6 +276,7 @@ export function RawMaterial() {
   };
 
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
+  const previewStockKg = incomingKind === 'PAINT' ? paintStockKg : siroStockKg;
   const createBagWeightKg = parseFloat((createForm.defaultBagWeightKg || '0').replace(',', '.'));
   const incomingAutoBagCount =
     incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
@@ -289,7 +324,7 @@ export function RawMaterial() {
   };
 
   const handleConnectBag = async () => {
-    const bagId = selectedBagId || state.rawMaterialBags.find((item) => item.status === 'IN_STORAGE')?.id;
+    const bagId = selectedBagId || siroBags.find((item) => item.status === 'IN_STORAGE')?.id;
     if (!bagId) {
       setError(t.rmBagConnectError);
       return;
@@ -342,41 +377,120 @@ export function RawMaterial() {
 
   return (
     <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
-              <ArrowDownCircle size={18} className="text-white" />
-            </div>
-            <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
-          </div>
-          <p className="text-slate-900 dark:text-white text-2xl font-bold">{formatNumber(totalIncoming)} <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span></p>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
-              <ArrowUpCircle size={18} className="text-white" />
-            </div>
-            <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
-          </div>
-          <p className="text-slate-900 dark:text-white text-2xl font-bold">{formatNumber(totalOutgoing)} <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span></p>
-        </div>
-        <div className={`rounded-2xl border p-5 shadow-sm ${criticalStock ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : lowStock ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${criticalStock ? 'bg-red-500' : lowStock ? 'bg-amber-500' : 'bg-emerald-500'}`}>
-              {lowStock ? <AlertTriangle size={18} className="text-white" /> : <Droplets size={18} className="text-white" />}
-            </div>
-            <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmRemaining}</span>
-          </div>
-          <p className={`text-2xl font-bold ${criticalStock ? 'text-red-600' : lowStock ? 'text-amber-600' : 'text-slate-900 dark:text-white'}`}>
-            {formatNumber(rawMaterialStock)} <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
+      {/* Summary: сиро ва краска алоҳида */}
+      <div className="flex flex-col gap-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+            {t.rmMetricsCaptionSiro}
           </p>
-          {lowStock && <p className="text-xs mt-1 text-amber-600 dark:text-amber-400 font-medium">⚠ {t.dashOrderMaterial}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
+                  <ArrowDownCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatNumber(flowByKind.siroIn)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
+                  <ArrowUpCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatNumber(flowByKind.siroOut)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div
+              className={`rounded-2xl border p-5 shadow-sm ${
+                criticalStock
+                  ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                  : lowStock
+                    ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    criticalStock ? 'bg-red-500' : lowStock ? 'bg-amber-500' : 'bg-emerald-500'
+                  }`}
+                >
+                  {lowStock ? (
+                    <AlertTriangle size={18} className="text-white" />
+                  ) : (
+                    <Droplets size={18} className="text-white" />
+                  )}
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmRemaining}</span>
+              </div>
+              <p
+                className={`text-2xl font-bold ${
+                  criticalStock ? 'text-red-600' : lowStock ? 'text-amber-600' : 'text-slate-900 dark:text-white'
+                }`}
+              >
+                {formatNumber(siroStockKg)}{' '}
+                <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
+              </p>
+              {lowStock && (
+                <p className="text-xs mt-1 text-amber-600 dark:text-amber-400 font-medium">⚠ {t.dashOrderMaterial}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+            {t.rmMetricsCaptionPaint}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                  <ArrowDownCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatNumber(flowByKind.paintIn)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center">
+                  <ArrowUpCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatNumber(flowByKind.paintOut)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+                  <Droplets size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmRemainingPaint}</span>
+              </div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {formatNumber(paintStockKg)}{' '}
+                <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {rawMaterialAlerts.length > 0 && (
+      {siroMaterialAlerts.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
@@ -388,7 +502,7 @@ export function RawMaterial() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {rawMaterialAlerts.map((item) => (
+            {siroMaterialAlerts.map((item) => (
               <div
                 key={item.id}
                 className={`rounded-xl border px-4 py-3 ${
@@ -399,9 +513,51 @@ export function RawMaterial() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                      {item.name}
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {formatNumber(item.quantityKg)} {t.unitKg}
                     </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                      item.level === 'critical'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                    }`}
+                  >
+                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {paintMaterialAlerts.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+              <AlertTriangle size={18} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {paintMaterialAlerts.map((item) => (
+              <div
+                key={item.id}
+                className={`rounded-xl border px-4 py-3 ${
+                  item.level === 'critical'
+                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {formatNumber(item.quantityKg)} {t.unitKg}
                     </p>
@@ -510,11 +666,37 @@ export function RawMaterial() {
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-5">
+            <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
                 <Plus size={16} className="text-white" />
               </div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmNewEntry}</h3>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
+                {incomingKind === 'PAINT' ? t.rmIncomingTitlePaint : t.rmIncomingTitleSiro}
+              </h3>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-5">
+              <button
+                type="button"
+                onClick={() => setIncomingKind('SIRO')}
+                className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                  incomingKind === 'SIRO'
+                    ? 'border-indigo-600 bg-indigo-600 text-white'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                }`}
+              >
+                {t.rmIncomingTabSiro}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIncomingKind('PAINT')}
+                className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                  incomingKind === 'PAINT'
+                    ? 'border-violet-600 bg-violet-600 text-white'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                }`}
+              >
+                {t.rmIncomingTabPaint}
+              </button>
             </div>
 
             {success && (
@@ -537,23 +719,26 @@ export function RawMaterial() {
                     <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
                       —
                     </SelectItem>
-                    {availableRawMaterials.map((item) => (
+                    {incomingCatalogItems.map((item) => (
                       <SelectItem key={item.id} value={item.id} className={SELECT_ITEM_CLS}>
                         {item.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-slate-400 mt-1">{t.rmIncomingHint}</p>
-                {incomingRawMaterial?.itemType === 'RAW_MATERIAL' && incomingRawMaterial.defaultBagWeightKg ? (
-                  <p className="text-xs text-indigo-500 mt-1">
-                    {t.rmIncomingBagWeightHint
-                      .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg))
-                      .replace('{unit}', t.unitKg)}
-                  </p>
-                ) : (
-                  <p className="text-xs text-amber-500 mt-1">{t.rmAutoBagMissingHint}</p>
-                )}
+                <p className="text-xs text-slate-400 mt-1">
+                  {incomingKind === 'PAINT' ? t.rmIncomingHintPaint : t.rmIncomingHint}
+                </p>
+                {incomingKind === 'SIRO' &&
+                  (incomingRawMaterial?.itemType === 'RAW_MATERIAL' && incomingRawMaterial.defaultBagWeightKg ? (
+                    <p className="text-xs text-indigo-500 mt-1">
+                      {t.rmIncomingBagWeightHint
+                        .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg))
+                        .replace('{unit}', t.unitKg)}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-amber-500 mt-1">{t.rmAutoBagMissingHint}</p>
+                  ))}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
@@ -589,7 +774,11 @@ export function RawMaterial() {
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
-                <input type="text" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t.rmPlaceholderDesc}
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder={incomingKind === 'PAINT' ? t.rmPlaceholderDescPaint : t.rmPlaceholderDesc}
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
               </div>
 
@@ -597,8 +786,12 @@ export function RawMaterial() {
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
                   <p className="text-blue-700 dark:text-blue-400 text-xs font-medium">{t.rmPreviewAdd}</p>
                   <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatNumber(amountKg)} {t.unitKg}</p>
-                  <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">{t.rmPreviewBalance} {formatNumber(rawMaterialStock + amountKg)} {t.unitKg}</p>
-                  {incomingAutoBagCount > 0 && incomingRawMaterial?.itemType === 'RAW_MATERIAL' ? (
+                  <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
+                    {t.rmPreviewBalance} {formatNumber(previewStockKg + amountKg)} {t.unitKg}
+                  </p>
+                  {incomingKind === 'SIRO' &&
+                  incomingAutoBagCount > 0 &&
+                  incomingRawMaterial?.itemType === 'RAW_MATERIAL' ? (
                     <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
                       {t.rmAutoBagPreview
                         .replace('{count}', String(incomingAutoBagCount))
@@ -672,7 +865,17 @@ export function RawMaterial() {
                 <tfoot>
                   <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
                     <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.rmBalance}</td>
-                    <td className="px-4 py-3 text-right"><span className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}>{formatNumber(rawMaterialStock)} {t.unitKg}</span></td>
+                    <td className="px-4 py-3 text-right">
+                      <span
+                        className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
+                      >
+                        {formatNumber(siroStockKg + paintStockKg)} {t.unitKg}
+                      </span>
+                      <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                        {t.rmMetricsCaptionSiro}: {formatNumber(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
+                        {formatNumber(paintStockKg)}
+                      </span>
+                    </td>
                     <td className="hidden md:table-cell" />
                   </tr>
                 </tfoot>
@@ -765,7 +968,7 @@ export function RawMaterial() {
                     <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
                       —
                     </SelectItem>
-                    {state.rawMaterialBags
+                    {siroBags
                       .filter((item) => item.status === 'IN_STORAGE')
                       .map((bag) => (
                         <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
@@ -792,7 +995,7 @@ export function RawMaterial() {
                     <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
                       —
                     </SelectItem>
-                    {state.rawMaterialBags
+                    {siroBags
                       .filter((item) => item.status === 'IN_STORAGE' && item.id !== activeBag?.id)
                       .map((bag) => (
                         <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
@@ -853,10 +1056,10 @@ export function RawMaterial() {
               <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagsTitle}</h3>
             </div>
             <div className="space-y-3">
-              {state.rawMaterialBags.length === 0 ? (
+              {siroBags.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
               ) : (
-                state.rawMaterialBags.map((bag) => (
+                siroBags.map((bag) => (
                   <div key={bag.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">

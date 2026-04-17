@@ -17,6 +17,8 @@ export interface RawMaterialEntry {
   amount: number;
   description: string;
   createdAt: string;
+  /** Кирим/чиқим қайси хомашё учун — SIRO/PAINT ажратиши учун */
+  rawMaterialId?: string;
 }
 
 export interface RawMaterialBagSession {
@@ -98,6 +100,9 @@ export type WarehouseItemType =
   | 'SEMI_PRODUCT'
   | 'FINISHED_PRODUCT';
 
+/** SIRO = PET / оддий хомашё; PAINT = краска (қоплар одатда фақат SIRO) */
+export type RawMaterialKind = 'SIRO' | 'PAINT';
+
 export interface ProductAuditInfo {
   createdAt?: string;
   createdById?: string;
@@ -124,6 +129,7 @@ export interface RawMaterialProduct extends WarehouseProductBase {
   itemType: 'RAW_MATERIAL';
   unit: string;
   defaultBagWeightKg?: number;
+  rawMaterialKind?: RawMaterialKind;
 }
 
 export interface SemiProductRawMaterialRelation {
@@ -631,6 +637,7 @@ type CatalogResponse = {
     id: string;
     name: string;
     unit: string;
+    rawMaterialKind?: RawMaterialKind;
     defaultBagWeightKg?: number;
     description?: string | null;
     createdAt?: string;
@@ -1058,6 +1065,58 @@ export function computeRawMaterialStock(entries: RawMaterialEntry[]): number {
   );
 }
 
+function resolveRawEntryKind(
+  entry: RawMaterialEntry,
+  products: WarehouseProduct[],
+): RawMaterialKind {
+  if (entry.rawMaterialId) {
+    const p = products.find(
+      (x): x is RawMaterialProduct =>
+        x.itemType === 'RAW_MATERIAL' && x.id === entry.rawMaterialId,
+    );
+    return p?.rawMaterialKind === 'PAINT' ? 'PAINT' : 'SIRO';
+  }
+  const byName = products.find(
+    (x): x is RawMaterialProduct =>
+      x.itemType === 'RAW_MATERIAL' && x.name === entry.description,
+  );
+  return byName?.rawMaterialKind === 'PAINT' ? 'PAINT' : 'SIRO';
+}
+
+/** Қолдиқ: сиро ва краска алоҳида */
+export function computeRawMaterialStockByKind(
+  entries: RawMaterialEntry[],
+  products: WarehouseProduct[],
+): { siro: number; paint: number } {
+  let siro = 0;
+  let paint = 0;
+  for (const entry of entries) {
+    const delta = entry.type === 'incoming' ? entry.amount : -entry.amount;
+    if (resolveRawEntryKind(entry, products) === 'PAINT') paint += delta;
+    else siro += delta;
+  }
+  return { siro, paint };
+}
+
+/** Кирим/чиқим жами: тур бўйича */
+export function computeRawMaterialFlowByKind(
+  entries: RawMaterialEntry[],
+  products: WarehouseProduct[],
+): { siroIn: number; siroOut: number; paintIn: number; paintOut: number } {
+  const out = { siroIn: 0, siroOut: 0, paintIn: 0, paintOut: 0 };
+  for (const entry of entries) {
+    const paint = resolveRawEntryKind(entry, products) === 'PAINT';
+    if (entry.type === 'incoming') {
+      if (paint) out.paintIn += entry.amount;
+      else out.siroIn += entry.amount;
+    } else {
+      if (paint) out.paintOut += entry.amount;
+      else out.siroOut += entry.amount;
+    }
+  }
+  return out;
+}
+
 export function computeSemiProductStock(
   batches: SemiProductBatch[],
   finalBatches: FinalProductBatch[],
@@ -1228,6 +1287,8 @@ async function loadStateFromApi() {
     apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
   ]);
 
+  const nameToRawMaterialId = new Map(catalog.rawMaterials.map((r) => [r.name, r.id]));
+
   const rawHistoryEntries: RawMaterialEntry[] = history
     .filter((item) => item.itemType === 'RAW_MATERIAL')
     .map((item) => ({
@@ -1237,6 +1298,7 @@ async function loadStateFromApi() {
       amount: item.quantity,
       description: item.note || item.rawMaterial?.name || 'Warehouse movement',
       createdAt: item.createdAt,
+      rawMaterialId: item.rawMaterial?.id,
     }));
 
   const rawMaterialEntries: RawMaterialEntry[] =
@@ -1251,6 +1313,8 @@ async function loadStateFromApi() {
             amount: item.quantity,
             description: item.itemName ?? 'Warehouse stock',
             createdAt: new Date().toISOString(),
+            rawMaterialId:
+              item.itemName != null ? nameToRawMaterialId.get(item.itemName) : undefined,
           }));
 
   const rawMaterialBags = bags.map(mapBag);
@@ -1275,6 +1339,7 @@ async function loadStateFromApi() {
       itemType: 'RAW_MATERIAL' as const,
       name: item.name,
       unit: item.unit,
+      rawMaterialKind: item.rawMaterialKind ?? 'SIRO',
       defaultBagWeightKg: item.defaultBagWeightKg,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
