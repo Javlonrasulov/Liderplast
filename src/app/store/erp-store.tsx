@@ -527,7 +527,12 @@ type ERPAction =
     }
   | {
       type: 'CONNECT_RAW_MATERIAL_BAG';
-      payload: { bagId: string; machineId?: string };
+      payload: {
+        bagId: string;
+        machineId?: string;
+        previousBagAction?: 'RETURN_TO_STORAGE' | 'WRITE_OFF';
+        reason?: string;
+      };
     }
   | {
       type: 'SWITCH_RAW_MATERIAL_BAG';

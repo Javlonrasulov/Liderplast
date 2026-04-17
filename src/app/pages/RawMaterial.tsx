@@ -67,10 +67,10 @@ export function RawMaterial() {
     rawMaterialKind: RawMaterialKind;
   }>({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
   const [selectedBagId, setSelectedBagId] = useState('');
-  const [switchBagId, setSwitchBagId] = useState('');
-  const [switchAction, setSwitchAction] = useState<'RETURN_TO_STORAGE' | 'WRITE_OFF'>('RETURN_TO_STORAGE');
-  const [switchReason, setSwitchReason] = useState('');
-  const [writeoffReason, setWriteoffReason] = useState('');
+  const [connectPrevAction, setConnectPrevAction] = useState<'RETURN_TO_STORAGE' | 'WRITE_OFF'>(
+    'RETURN_TO_STORAGE',
+  );
+  const [connectPrevReason, setConnectPrevReason] = useState('');
   const [editingBagId, setEditingBagId] = useState('');
   const [editingBagName, setEditingBagName] = useState('');
   const [error, setError] = useState('');
@@ -346,47 +346,29 @@ export function RawMaterial() {
       return;
     }
     setError('');
-    await dispatch({ type: 'CONNECT_RAW_MATERIAL_BAG', payload: { bagId } });
-    setSuccess(t.rmBagConnectedSuccess);
-    setTimeout(() => setSuccess(''), 3000);
-  };
-
-  const handleSwitchBag = async () => {
-    if (!switchBagId) {
-      setError(t.rmBagSwitchError);
-      return;
+    try {
+      const payload: {
+        bagId: string;
+        previousBagAction?: 'RETURN_TO_STORAGE' | 'WRITE_OFF';
+        reason?: string;
+      } = { bagId };
+      if (activeBag && activeBag.currentQuantityKg > 0.0001) {
+        payload.previousBagAction = connectPrevAction;
+        if (connectPrevReason.trim()) {
+          payload.reason = connectPrevReason.trim();
+        }
+      }
+      await dispatch({ type: 'CONNECT_RAW_MATERIAL_BAG', payload });
+      setConnectPrevReason('');
+      setSuccess(t.rmBagConnectedSuccess);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
     }
-    setError('');
-    await dispatch({
-      type: 'SWITCH_RAW_MATERIAL_BAG',
-      payload: {
-        nextBagId: switchBagId,
-        previousBagAction: switchAction,
-        reason: switchReason || undefined,
-      },
-    });
-    setSwitchBagId('');
-    setSwitchReason('');
-    setSuccess(t.rmBagSwitchedSuccess);
-    setTimeout(() => setSuccess(''), 3000);
-  };
-
-  const handleWriteoffBag = async () => {
-    if (!activeBag?.id) {
-      setError(t.rmBagWriteoffError);
-      return;
-    }
-    setError('');
-    await dispatch({
-      type: 'WRITE_OFF_RAW_MATERIAL_BAG',
-      payload: {
-        bagId: activeBag.id,
-        reason: writeoffReason || undefined,
-      },
-    });
-    setWriteoffReason('');
-    setSuccess(t.rmBagWrittenOffSuccess);
-    setTimeout(() => setSuccess(''), 3000);
   };
 
   // NOTE: quick consume + manual bag creation removed (handled elsewhere)
@@ -940,7 +922,7 @@ export function RawMaterial() {
                 <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagActionsTitle}</h3>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="max-w-xl">
               <div className="space-y-3">
                 <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagConnectTitle}</label>
                 <Select
@@ -963,72 +945,43 @@ export function RawMaterial() {
                       ))}
                   </SelectContent>
                 </Select>
+                {activeBag && activeBag.currentQuantityKg > 0.0001 && (
+                  <div className="space-y-2 rounded-xl border border-amber-200/90 bg-amber-50/80 p-3 dark:border-amber-900/40 dark:bg-amber-950/25">
+                    <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+                      {t.rmBagConnectPrevHint}{' '}
+                      <span className="font-semibold tabular-nums">
+                        {formatNumber(activeBag.currentQuantityKg)} {t.unitKg}
+                      </span>
+                    </p>
+                    <Select
+                      value={connectPrevAction}
+                      onValueChange={(v) =>
+                        setConnectPrevAction(v as 'RETURN_TO_STORAGE' | 'WRITE_OFF')
+                      }
+                    >
+                      <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                        <SelectItem value="RETURN_TO_STORAGE" className={SELECT_ITEM_CLS}>
+                          {t.rmBagSwitchReturn}
+                        </SelectItem>
+                        <SelectItem value="WRITE_OFF" className={SELECT_ITEM_CLS}>
+                          {t.rmBagSwitchWriteoff}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <input
+                      type="text"
+                      value={connectPrevReason}
+                      onChange={(e) => setConnectPrevReason(e.target.value)}
+                      placeholder={t.rmBagReasonPlaceholder}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                  </div>
+                )}
                 <button type="button" onClick={() => void handleConnectBag()} className="w-full py-2.5 rounded-xl border border-indigo-200 text-indigo-700 dark:text-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm font-medium">
                   {t.rmBagConnectButton}
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagSwitchTitle}</label>
-                <Select
-                  value={switchBagId || NONE}
-                  onValueChange={(v) => setSwitchBagId(v === NONE ? '' : v)}
-                >
-                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                    <SelectValue placeholder={t.rmBagSelectReplacement} />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
-                      —
-                    </SelectItem>
-                    {siroBags
-                      .filter((item) => item.status === 'IN_STORAGE' && item.id !== activeBag?.id)
-                      .map((bag) => (
-                        <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
-                          {bag.name} — {formatNumber(bag.currentQuantityKg)} {t.unitKg}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={switchAction}
-                  onValueChange={(v) => setSwitchAction(v as 'RETURN_TO_STORAGE' | 'WRITE_OFF')}
-                >
-                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                    <SelectItem value="RETURN_TO_STORAGE" className={SELECT_ITEM_CLS}>
-                      {t.rmBagSwitchReturn}
-                    </SelectItem>
-                    <SelectItem value="WRITE_OFF" className={SELECT_ITEM_CLS}>
-                      {t.rmBagSwitchWriteoff}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="text"
-                  value={switchReason}
-                  onChange={(e) => setSwitchReason(e.target.value)}
-                  placeholder={t.rmBagReasonPlaceholder}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-                <button type="button" onClick={() => void handleSwitchBag()} className="w-full py-2.5 rounded-xl border border-indigo-200 text-indigo-700 dark:text-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm font-medium">
-                  {t.rmBagSwitchButton}
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagWriteoffTitle}</label>
-                <input
-                  type="text"
-                  value={writeoffReason}
-                  onChange={(e) => setWriteoffReason(e.target.value)}
-                  placeholder={t.rmBagReasonPlaceholder}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-                <button type="button" onClick={() => void handleWriteoffBag()} className="w-full py-2.5 rounded-xl border border-red-200 text-red-700 dark:text-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium">
-                  {t.rmBagWriteoffButton}
                 </button>
               </div>
             </div>

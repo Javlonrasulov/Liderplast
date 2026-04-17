@@ -29,7 +29,13 @@ import {
   type WarehouseProduct,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { calcPercent, formatDate, formatDateTime, formatNumber } from '../utils/format';
+import {
+  calcPercent,
+  formatDate,
+  formatDateTime,
+  formatKgAmount,
+  formatNumber,
+} from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
 import { Button } from '../components/ui/button';
@@ -65,6 +71,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+
+function catalogNamesMatch(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
 
 type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
 
@@ -107,6 +117,7 @@ function StockItem({
   bgColor,
   icon,
   warning,
+  valueMode = 'integer',
 }: {
   label: string;
   value: number;
@@ -116,8 +127,11 @@ function StockItem({
   bgColor: string;
   icon: React.ReactNode;
   warning?: boolean;
+  /** `massKg` — хомашё kg, кичик қийматлар учун */
+  valueMode?: 'integer' | 'massKg';
 }) {
   const pct = calcPercent(value, max);
+  const valueStr = valueMode === 'massKg' ? formatKgAmount(value) : formatNumber(value);
   return (
     <div
       className={`rounded-2xl border bg-white p-5 shadow-sm dark:bg-slate-800 ${
@@ -146,7 +160,7 @@ function StockItem({
       </div>
       <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{label}</p>
       <p className="text-2xl font-bold text-slate-900 dark:text-white">
-        {formatNumber(value)}{' '}
+        {valueStr}{' '}
         <span className="text-sm font-normal text-slate-400">{unit}</span>
       </p>
       <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
@@ -437,7 +451,7 @@ export function Warehouse() {
         key: 'raw-siro',
         label: t.rmMetricsCaptionSiro,
         sub: `${calcPercent(rawStockByKind.siro, 5000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatNumber(rawStockByKind.siro)} ${t.unitKg}`,
+        val: `${formatKgAmount(rawStockByKind.siro)} ${t.unitKg}`,
         from: 'from-blue-500 to-blue-600',
         shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
         icon: Droplets,
@@ -448,7 +462,7 @@ export function Warehouse() {
         key: 'raw-paint',
         label: t.rmMetricsCaptionPaint,
         sub: `${calcPercent(rawStockByKind.paint, 2000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatNumber(rawStockByKind.paint)} ${t.unitKg}`,
+        val: `${formatKgAmount(rawStockByKind.paint)} ${t.unitKg}`,
         from: 'from-fuchsia-500 to-pink-600',
         shadow: 'shadow-fuchsia-200 dark:shadow-fuchsia-900/30',
         icon: Palette,
@@ -517,14 +531,48 @@ export function Warehouse() {
     [state.machines],
   );
 
-  const totalSemiProduced = state.semiProductBatches.reduce(
-    (sum, batch) => sum + batch.quantity,
-    0,
+  const machineTypeById = useMemo(
+    () => new Map(state.machines.map((m) => [m.id, m.type])),
+    [state.machines],
   );
-  const totalFinalProduced = state.finalProductBatches.reduce(
-    (sum, batch) => sum + batch.quantity,
-    0,
-  );
+
+  /** Partiya (`/production`) + smena yozuvlari — aks holda «жами ишлаб чиқарилган» 0 қолади */
+  const totalSemiProduced = useMemo(() => {
+    const fromBatches = state.semiProductBatches.reduce((sum, batch) => sum + batch.quantity, 0);
+    let fromShifts = 0;
+    for (const r of state.shiftRecords) {
+      if (machineTypeById.get(r.machineId) === 'semi') fromShifts += r.producedQty;
+    }
+    return fromBatches + fromShifts;
+  }, [state.semiProductBatches, state.shiftRecords, machineTypeById]);
+
+  const totalFinalProduced = useMemo(() => {
+    const fromBatches = state.finalProductBatches.reduce((sum, batch) => sum + batch.quantity, 0);
+    let fromShifts = 0;
+    for (const r of state.shiftRecords) {
+      if (machineTypeById.get(r.machineId) === 'final') fromShifts += r.producedQty;
+    }
+    return fromBatches + fromShifts;
+  }, [state.finalProductBatches, state.shiftRecords, machineTypeById]);
+
+  /** Бакалашка учун сарфланган қолип: партия + smena (retseпт билан `buildShiftRecordsToProductionHistory` мос) */
+  const totalSemiUsedTowardFinal = useMemo(() => {
+    const fromBatches = state.finalProductBatches.reduce(
+      (sum, batch) => sum + batch.semiProductUsed,
+      0,
+    );
+    let fromShifts = 0;
+    for (const r of state.shiftRecords) {
+      if (machineTypeById.get(r.machineId) !== 'final') continue;
+      const label = r.productType?.trim() ?? '';
+      if (!label) continue;
+      const fin = finishedProducts.find((f) => catalogNamesMatch(f.name, label));
+      if (!fin?.semiProducts?.length) continue;
+      const materialUnits = r.producedQty + (r.defectCount ?? 0);
+      fromShifts += materialUnits * fin.semiProducts.length;
+    }
+    return fromBatches + fromShifts;
+  }, [state.finalProductBatches, state.shiftRecords, machineTypeById, finishedProducts]);
   /** Бир нечта позицияли буюртмаларда категория бўйича тўғри йиғинди */
   const totalSemiSold = useMemo(() => {
     let sum = 0;
@@ -1336,6 +1384,7 @@ export function Warehouse() {
                 value={rawStockByKind.siro}
                 max={5000}
                 unit={t.unitKg}
+                valueMode="massKg"
                 color={rawStockByKind.siro < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
                 bgColor="bg-blue-100 dark:bg-blue-900/30"
                 icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
@@ -1348,6 +1397,7 @@ export function Warehouse() {
                 value={rawStockByKind.paint}
                 max={2000}
                 unit={t.unitKg}
+                valueMode="massKg"
                 color={rawStockByKind.paint < 200 ? 'bg-amber-500' : 'bg-fuchsia-500'}
                 bgColor="bg-fuchsia-100 dark:bg-fuchsia-900/30"
                 icon={<Palette size={18} className="text-fuchsia-600 dark:text-fuchsia-400" />}
@@ -1456,7 +1506,7 @@ export function Warehouse() {
                             <div className="mt-0.5 text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
                               {t.whRecipePerThousand}{' '}
                               <span className="font-semibold text-slate-700 dark:text-slate-200">
-                                {formatNumber(line.kgPerThousandPieces)} {t.unitKg}
+                                {formatKgAmount(line.kgPerThousandPieces)} {t.unitKg}
                               </span>
                             </div>
                           </li>
@@ -1483,7 +1533,7 @@ export function Warehouse() {
                             {name}
                           </span>
                           <span className="shrink-0 tabular-nums font-semibold text-fuchsia-800 dark:text-fuchsia-200">
-                            {formatNumber(kg)} {t.unitKg}
+                            {formatKgAmount(kg)} {t.unitKg}
                           </span>
                         </li>
                       ))}
@@ -1517,10 +1567,7 @@ export function Warehouse() {
                   },
                   {
                     label: t.whUsedInFinal,
-                    value: state.finalProductBatches.reduce(
-                      (sum, batch) => sum + batch.semiProductUsed,
-                      0,
-                    ),
+                    value: totalSemiUsedTowardFinal,
                     color: 'text-cyan-600 dark:text-cyan-400',
                   },
                   {
@@ -1707,8 +1754,10 @@ export function Warehouse() {
                                     </span>
                                     <span className="min-w-0 font-medium">{c.resourceName}</span>
                                     <span className="tabular-nums text-slate-600 dark:text-slate-400">
-                                      — {formatNumber(c.quantity)}{' '}
-                                      {c.unitLabel === 'dona' ? t.unitPiece : c.unitLabel}
+                                      —{' '}
+                                      {c.unitLabel === 'dona'
+                                        ? `${formatNumber(c.quantity)} ${t.unitPiece}`
+                                        : `${formatKgAmount(c.quantity)} ${c.unitLabel}`}
                                     </span>
                                   </li>
                                 ))}

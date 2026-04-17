@@ -14,6 +14,17 @@ export function formatNumber(num: number): string {
   return new Intl.NumberFormat('ru-RU').format(Math.round(num));
 }
 
+/**
+ * kg (PET, kraska): кичик миқдорлар 0 га яхлитланмайди (масалан 300 г → 0,3 kg).
+ */
+export function formatKgAmount(kg: number): string {
+  if (!Number.isFinite(kg)) return '0';
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  }).format(kg);
+}
+
 export function formatCurrency(num: number): string {
   return formatNumber(num) + " so'm";
 }

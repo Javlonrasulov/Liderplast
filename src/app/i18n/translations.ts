@@ -217,6 +217,8 @@ export interface T {
   rmBagConnectTitle: string;
   rmBagConnectButton: string;
   rmBagConnectError: string;
+  /** Фаол қопда қолдиқ бор — улашдан олдин танлов */
+  rmBagConnectPrevHint: string;
   rmBagConnectedSuccess: string;
   rmBagSwitchTitle: string;
   rmBagSwitchButton: string;
@@ -843,6 +845,8 @@ const uz_cyrillic: T = {
   rmBagConnectTitle: 'Қопни улаш',
   rmBagConnectButton: 'Қопни улаш',
   rmBagConnectError: 'Улаш учун қоп танланмади',
+  rmBagConnectPrevHint:
+    'Фаол қопда қолдиқ бор. Янги қопни улашдан олдин қолдиқни қайта ишлашни танланг:',
   rmBagConnectedSuccess: 'Қоп аппаратга уланди',
   rmBagSwitchTitle: 'Қопни алмаштириш',
   rmBagSwitchButton: 'Алмаштириш',
@@ -934,7 +938,7 @@ const uz_cyrillic: T = {
   dashLowDesc: 'Янги сиро буюртма беринг',
   dashKpiMaterial: 'Сиро қолдиғи',
   dashKpiSemi: 'Қолип омбори',
-  dashKpiFinal: 'Бакалашка омбори',
+  dashKpiFinal: 'Тайёр маҳсулотлар омбори',
   dashKpiTodayProd: 'Бугунги ишлаб чиқариш',
   dashKpiTodaySales: 'Бугунги сотув',
   dashChartProd: 'Ишлаб Чиқариш Трэнди',
@@ -1052,8 +1056,8 @@ const uz_cyrillic: T = {
   whDetailed: 'Батафсил Омбор Ҳолати',
   whStockBreakdownEmpty:
     'Бу ерда фақат каталогга қўшилган махсулот турлари бўйича карта кўринади. Аввал махсулот қўшинг.',
-  whSemiStats: 'Қолип статистикаси',
-  whFinalStats: 'Бакалашка статистикаси',
+  whSemiStats: 'Ярим тайёр маҳсулотлар',
+  whFinalStats: 'Тайёр маҳсулотлар',
   whProduced: 'Жами ишлаб чиқарилган',
   whUsedInFinal: 'Бакалашкага сарфланган',
   whSold: 'Сотилган',
@@ -1514,6 +1518,8 @@ const uz_latin: T = {
   rmBagConnectTitle: 'Qopni ulash',
   rmBagConnectButton: 'Qopni ulash',
   rmBagConnectError: 'Ulash uchun qop tanlanmadi',
+  rmBagConnectPrevHint:
+    'Faol qopda qoldiq bor. Yangi qopni ulashdan oldin qoldiqni qayta ishlashni tanlang:',
   rmBagConnectedSuccess: 'Qop apparatga ulandi',
   rmBagSwitchTitle: 'Qopni almashtirish',
   rmBagSwitchButton: 'Almashtirish',
@@ -1605,7 +1611,7 @@ const uz_latin: T = {
   dashLowDesc: 'Yangi siro buyurtma bering',
   dashKpiMaterial: "Siro qoldig'i",
   dashKpiSemi: 'Qolip ombori',
-  dashKpiFinal: 'Bakalashka ombori',
+  dashKpiFinal: 'Tayyor mahsulotlar ombori',
   dashKpiTodayProd: 'Bugungi ishlab chiqarish',
   dashKpiTodaySales: 'Bugungi sotuv',
   dashChartProd: 'Ishlab Chiqarish Trendi',
@@ -1723,8 +1729,8 @@ const uz_latin: T = {
   whDetailed: 'Batafsil Ombor Holati',
   whStockBreakdownEmpty:
     'Bu yerda faqat katalogga qo‘shilgan mahsulot turlari bo‘yicha karta ko‘rinadi. Avval mahsulot qo‘shing.',
-  whSemiStats: 'Qolip statistikasi',
-  whFinalStats: 'Bakalashka statistikasi',
+  whSemiStats: 'Yarim tayyor mahsulotlar',
+  whFinalStats: 'Tayyor mahsulotlar',
   whProduced: 'Jami ishlab chiqarilgan',
   whUsedInFinal: 'Bakalashkaga sarflangan',
   whSold: 'Sotilgan',
@@ -2185,6 +2191,8 @@ const ru: T = {
   rmBagConnectTitle: 'Подключить мешок',
   rmBagConnectButton: 'Подключить мешок',
   rmBagConnectError: 'Мешок для подключения не выбран',
+  rmBagConnectPrevHint:
+    'В активном мешке есть остаток. Перед подключением нового укажите, что сделать с остатком:',
   rmBagConnectedSuccess: 'Мешок подключен к аппарату',
   rmBagSwitchTitle: 'Заменить мешок',
   rmBagSwitchButton: 'Заменить',
@@ -2276,7 +2284,7 @@ const ru: T = {
   dashLowDesc: 'Закажите новое сырьё',
   dashKpiMaterial: 'Остаток сырья',
   dashKpiSemi: 'Склад заготовок',
-  dashKpiFinal: 'Склад бутылок',
+  dashKpiFinal: 'Склад готовой продукции',
   dashKpiTodayProd: 'Производство сегодня',
   dashKpiTodaySales: 'Продажи сегодня',
   dashChartProd: 'Тренд производства',
@@ -2394,8 +2402,8 @@ const ru: T = {
   whDetailed: 'Подробное состояние склада',
   whStockBreakdownEmpty:
     'Здесь отображаются только позиции по типам из каталога. Сначала добавьте продукт.',
-  whSemiStats: 'Статистика заготовок',
-  whFinalStats: 'Статистика бутылок',
+  whSemiStats: 'Полуфабрикаты',
+  whFinalStats: 'Готовая продукция',
   whProduced: 'Всего произведено',
   whUsedInFinal: 'Использовано для бутылок',
   whSold: 'Продано',
