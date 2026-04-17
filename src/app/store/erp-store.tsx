@@ -259,6 +259,10 @@ export interface ShiftRecord {
   electricityKwh: number;
   notes: string;
   createdAt: string;
+  /** Smenada kraska ishlatilgani (backend/frontend mos kelishi uchun ixtiyoriy) */
+  paintUsed?: boolean;
+  paintQuantityKg?: number;
+  paintRawMaterialName?: string;
 }
 
 export interface Payment {
@@ -466,6 +470,7 @@ type ERPAction =
         description?: string;
         unit?: string;
         defaultBagWeightKg?: number;
+        rawMaterialKind?: RawMaterialKind;
         weightGram?: number;
         volumeLiter?: number;
         relations?: {

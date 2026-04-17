@@ -4,6 +4,7 @@ import {
   Droplets,
   Factory,
   Package,
+  Palette,
   Pencil,
   Plus,
   Save,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
 import {
+  computeRawMaterialStockByKind,
   type FinishedProductCatalogItem,
   type RawMaterialKind,
   type SemiProductCatalogItem,
@@ -199,8 +201,7 @@ function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t'])
 }
 
 export function Warehouse() {
-  const { state, rawMaterialStock, semiProductStock, finalProductStock, dispatch } =
-    useERP();
+  const { state, semiProductStock, finalProductStock, dispatch } = useERP();
   const { user } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
@@ -235,6 +236,24 @@ export function Warehouse() {
           item.itemType === 'RAW_MATERIAL',
       ),
     [state.warehouseProducts],
+  );
+
+  const siroRawMaterials = useMemo(
+    () => rawMaterials.filter((r) => r.rawMaterialKind !== 'PAINT'),
+    [rawMaterials],
+  );
+  const paintRawMaterials = useMemo(
+    () => rawMaterials.filter((r) => r.rawMaterialKind === 'PAINT'),
+    [rawMaterials],
+  );
+
+  const rawStockByKind = useMemo(
+    () =>
+      computeRawMaterialStockByKind(
+        state.rawMaterialEntries,
+        state.warehouseProducts,
+      ),
+    [state.rawMaterialEntries, state.warehouseProducts],
   );
 
   const rawStockByName = useMemo(() => {
@@ -308,7 +327,9 @@ export function Warehouse() {
     });
   }, [semiProducts, state.warehouseStock, state.shiftRecords]);
 
-  const hasCatalogRaw = rawMaterials.length > 0;
+  const hasCatalogSiro = siroRawMaterials.length > 0;
+  const hasCatalogPaint = paintRawMaterials.length > 0;
+  const hasCatalogRaw = hasCatalogSiro || hasCatalogPaint;
   const hasCatalogSemi18 = semiProducts.some(
     (p) => semiBucketFromCatalog(p) === '18g',
   );
@@ -340,7 +361,8 @@ export function Warehouse() {
     totalSemiInCatalogStock + totalFinalInCatalogStock;
 
   const hasAnyStockDetailCard =
-    hasCatalogRaw ||
+    hasCatalogSiro ||
+    hasCatalogPaint ||
     hasCatalogSemi18 ||
     hasCatalogSemi20 ||
     hasCatalogFinal05 ||
@@ -355,17 +377,28 @@ export function Warehouse() {
       val: string;
       from: string;
       shadow: string;
-      icon: typeof Droplets;
+      icon: React.ComponentType<{ size?: number; className?: string }>;
     }> = [];
-    if (hasCatalogRaw) {
+    if (hasCatalogSiro) {
       cards.push({
-        key: 'raw',
-        label: t.whMaterial,
-        sub: `${calcPercent(rawMaterialStock, 5000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatNumber(rawMaterialStock)} ${t.unitKg}`,
+        key: 'raw-siro',
+        label: t.rmMetricsCaptionSiro,
+        sub: `${calcPercent(rawStockByKind.siro, 5000).toFixed(0)}% ${t.whInWarehouse}`,
+        val: `${formatNumber(rawStockByKind.siro)} ${t.unitKg}`,
         from: 'from-blue-500 to-blue-600',
         shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
         icon: Droplets,
+      });
+    }
+    if (hasCatalogPaint) {
+      cards.push({
+        key: 'raw-paint',
+        label: t.rmMetricsCaptionPaint,
+        sub: `${calcPercent(rawStockByKind.paint, 2000).toFixed(0)}% ${t.whInWarehouse}`,
+        val: `${formatNumber(rawStockByKind.paint)} ${t.unitKg}`,
+        from: 'from-fuchsia-500 to-pink-600',
+        shadow: 'shadow-fuchsia-200 dark:shadow-fuchsia-900/30',
+        icon: Palette,
       });
     }
     if (hasCatalogSemi) {
@@ -410,7 +443,8 @@ export function Warehouse() {
     }
     return cards;
   }, [
-    hasCatalogRaw,
+    hasCatalogSiro,
+    hasCatalogPaint,
     hasCatalogSemi,
     hasCatalogFinal,
     hasCatalogSemi18,
@@ -418,7 +452,8 @@ export function Warehouse() {
     hasCatalogFinal05,
     hasCatalogFinal1,
     hasCatalogFinal5,
-    rawMaterialStock,
+    rawStockByKind.siro,
+    rawStockByKind.paint,
     totalSemiInCatalogStock,
     totalFinalInCatalogStock,
     totalPiecesInCatalogStock,
@@ -727,7 +762,7 @@ export function Warehouse() {
         rawMaterial.defaultBagWeightKg != null
           ? String(rawMaterial.defaultBagWeightKg)
           : '',
-      rawMaterialKind: rawMaterial.rawMaterialKind,
+      rawMaterialKind: rawMaterial.rawMaterialKind ?? 'SIRO',
     });
     setError('');
     setSuccess('');
@@ -1111,16 +1146,28 @@ export function Warehouse() {
         </h3>
         {hasAnyStockDetailCard ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {hasCatalogRaw && (
+            {hasCatalogSiro && (
               <StockItem
-                label={t.whMaterial}
-                value={rawMaterialStock}
+                label={t.rmMetricsCaptionSiro}
+                value={rawStockByKind.siro}
                 max={5000}
                 unit={t.unitKg}
-                color={rawMaterialStock < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
+                color={rawStockByKind.siro < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
                 bgColor="bg-blue-100 dark:bg-blue-900/30"
                 icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
-                warning={rawMaterialStock < 1000}
+                warning={rawStockByKind.siro < 1000}
+              />
+            )}
+            {hasCatalogPaint && (
+              <StockItem
+                label={t.rmMetricsCaptionPaint}
+                value={rawStockByKind.paint}
+                max={2000}
+                unit={t.unitKg}
+                color={rawStockByKind.paint < 200 ? 'bg-amber-500' : 'bg-fuchsia-500'}
+                bgColor="bg-fuchsia-100 dark:bg-fuchsia-900/30"
+                icon={<Palette size={18} className="text-fuchsia-600 dark:text-fuchsia-400" />}
+                warning={rawStockByKind.paint < 200}
               />
             )}
             {hasCatalogSemi18 && (
@@ -1379,6 +1426,9 @@ export function Warehouse() {
           </h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {rawMaterials.length} {t.totalRecords}
+            {hasCatalogSiro && hasCatalogPaint
+              ? ` · ${t.rmMetricsCaptionSiro}: ${siroRawMaterials.length} · ${t.rmMetricsCaptionPaint}: ${paintRawMaterials.length}`
+              : ''}
           </p>
         </div>
 
@@ -1388,7 +1438,17 @@ export function Warehouse() {
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
-            {rawMaterials.map((rawMaterial) => (
+            {siroRawMaterials.length > 0 && (
+              <div className="bg-slate-50/80 px-5 py-2 dark:bg-slate-900/50">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {t.rmMetricsCaptionSiro}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {siroRawMaterials.length} {t.totalRecords}
+                </p>
+              </div>
+            )}
+            {siroRawMaterials.map((rawMaterial) => (
               <div
                 key={rawMaterial.id}
                 className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
@@ -1399,13 +1459,76 @@ export function Warehouse() {
                       {rawMaterial.name}
                     </p>
                     <span className="inline-flex items-center rounded-lg bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                      {t.whMaterial}
+                      {t.rmKindSiro}
                     </span>
-                    {rawMaterial.rawMaterialKind === 'PAINT' && (
-                      <span className="inline-flex items-center rounded-lg bg-fuchsia-100 px-2 py-1 text-[11px] font-medium text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-200">
-                        {t.rmKindPaint}
-                      </span>
-                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    {t.whUnit}: {rawMaterial.unit}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {rawMaterial.defaultBagWeightKg
+                      ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
+                      : t.rmDefaultBagWeightHint}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {auditLine(rawMaterial, t)}
+                  </p>
+                  {rawMaterial.description && (
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                      {rawMaterial.description}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    {t.whIncludedInWarehouse}
+                  </div>
+                  {canManage && (
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => openRawMaterialEdit(rawMaterial)}
+                      >
+                        <Pencil size={14} />
+                        {t.whEdit}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => attemptDeleteRawMaterial(rawMaterial)}
+                      >
+                        <Trash2 size={14} />
+                        {t.suDelete}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {paintRawMaterials.length > 0 && (
+              <div className="bg-slate-50/80 px-5 py-2 dark:bg-slate-900/50">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {t.rmMetricsCaptionPaint}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {paintRawMaterials.length} {t.totalRecords}
+                </p>
+              </div>
+            )}
+            {paintRawMaterials.map((rawMaterial) => (
+              <div
+                key={rawMaterial.id}
+                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-semibold text-slate-900 dark:text-white">
+                      {rawMaterial.name}
+                    </p>
+                    <span className="inline-flex items-center rounded-lg bg-fuchsia-100 px-2 py-1 text-[11px] font-medium text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-200">
+                      {t.rmKindPaint}
+                    </span>
                   </div>
                   <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     {t.whUnit}: {rawMaterial.unit}

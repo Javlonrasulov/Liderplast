@@ -266,6 +266,11 @@ export interface T {
   rmAutoBagMissingHint: string;
   rmAlertsTitle: string;
   rmAlertsSubtitle: string;
+  rmKindLabel: string;
+  rmKindSiro: string;
+  rmKindPaint: string;
+  rmPaintHint: string;
+  rmCreatePaintButton: string;
 
   // Semi Production
   spTitle: string;
@@ -376,6 +381,10 @@ export interface T {
   whNoMachines: string;
   whRawMaterialListTitle: string;
   whIncludedInWarehouse: string;
+  whSemiBreakdownTitle: string;
+  whSemiStockPieces: string;
+  whRecipeRaw: string;
+  whShiftPaintTotal: string;
 
   // Sales
   slTitle: string;
@@ -830,6 +839,12 @@ const uz_cyrillic: T = {
   rmAutoBagMissingHint: 'Бу сиро турида авто қоп яратиш учун бир қопдаги миқдор белгиланмаган',
   rmAlertsTitle: 'Сиро турлари бўйича огоҳлантириш',
   rmAlertsSubtitle: 'Ҳар бир сиро тури қолдиғи алоҳида назорат қилинади',
+  rmKindLabel: 'Хомашё тури',
+  rmKindSiro: 'PET сиро / оддий хомашё',
+  rmKindPaint: 'Краска / бўёқ',
+  rmPaintHint:
+    'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
+  rmCreatePaintButton: 'Краскани сақлаш',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -993,6 +1008,10 @@ const uz_cyrillic: T = {
   whNoMachines: 'Аппаратлар топилмади',
   whRawMaterialListTitle: 'Омбордаги сиро турлари',
   whIncludedInWarehouse: 'Омборда кўринади',
+  whSemiBreakdownTitle: 'Ярим тайёр — рецепт ва краска',
+  whSemiStockPieces: 'Омборда қолип',
+  whRecipeRaw: 'Рецепт бўйича хомашё (баҳоланма)',
+  whShiftPaintTotal: 'Сменаларда сарфланган краска',
 
   slTitle: 'Сотув',
   slTotalRevenue: 'Жами Сотув',
@@ -1442,6 +1461,12 @@ const uz_latin: T = {
   rmAutoBagMissingHint: 'Bu siro turida avto qop yaratish uchun bir qopdagi miqdor belgilanmagan',
   rmAlertsTitle: 'Siro turlari bo‘yicha ogohlantirish',
   rmAlertsSubtitle: 'Har bir siro turi qoldig‘i alohida nazorat qilinadi',
+  rmKindLabel: 'Xomashyo turi',
+  rmKindSiro: 'PET siro / oddiy xomashyo',
+  rmKindPaint: 'Kraska / bo‘yoq',
+  rmPaintHint:
+    'Turni «kraska» deb belgilang — smenada faqat shu turdagi pozitsiyalar tanlanadi.',
+  rmCreatePaintButton: 'Kraskani saqlash',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -1605,6 +1630,10 @@ const uz_latin: T = {
   whNoMachines: 'Apparatlar topilmadi',
   whRawMaterialListTitle: 'Ombordagi siro turlari',
   whIncludedInWarehouse: 'Omborda ko‘rinadi',
+  whSemiBreakdownTitle: 'Yarim tayyor — retsept va kraska',
+  whSemiStockPieces: 'Omborda qolip',
+  whRecipeRaw: 'Retsept bo‘yicha xomashyo (baholanma)',
+  whShiftPaintTotal: 'Smenalarda sarflangan kraska',
 
   slTitle: 'Sotuv',
   slTotalRevenue: 'Jami Sotuv',
@@ -2054,6 +2083,12 @@ const ru: T = {
   rmAutoBagMissingHint: 'Для этого типа сырья не задан вес одного мешка для автосоздания',
   rmAlertsTitle: 'Предупреждения по типам сырья',
   rmAlertsSubtitle: 'Остаток каждого типа сырья контролируется отдельно',
+  rmKindLabel: 'Тип сырья',
+  rmKindSiro: 'PET / обычное сырьё',
+  rmKindPaint: 'Краска / лак',
+  rmPaintHint:
+    'Отметьте тип «краска» — в смене будут доступны только позиции этого типа.',
+  rmCreatePaintButton: 'Сохранить краску',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',
@@ -2217,6 +2252,10 @@ const ru: T = {
   whNoMachines: 'Аппараты не найдены',
   whRawMaterialListTitle: 'Типы сырья на складе',
   whIncludedInWarehouse: 'Отображается на складе',
+  whSemiBreakdownTitle: 'Полуфабрикат — рецепт и краска',
+  whSemiStockPieces: 'Остаток заготовок',
+  whRecipeRaw: 'Сырьё по рецепту (оценка)',
+  whShiftPaintTotal: 'Краска по сменам (всего)',
 
   slTitle: 'Продажи',
   slTotalRevenue: 'Общий объём продаж',
