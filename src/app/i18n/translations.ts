@@ -148,6 +148,10 @@ export interface T {
   dashChartLast7: string;
   dashChartMaterial: string;
   dashChartKg: string;
+  /** Ишлаб чиқариш трэнди: ярим тайёр қолип */
+  dashProdYarimTayyor: string;
+  /** Тайёр маҳсулот (бакалашка) */
+  dashProdTayyor: string;
   dashStockTitle: string;
   dashActivityTitle: string;
   dashOrderMaterial: string;
@@ -893,6 +897,8 @@ const uz_cyrillic: T = {
   dashChartLast7: 'Сўнгги 7 кун',
   dashChartMaterial: 'Сиро Ҳаракати',
   dashChartKg: 'кг',
+  dashProdYarimTayyor: 'Ярим тайёр',
+  dashProdTayyor: 'Тайёр',
   dashStockTitle: 'Омбор Ҳолати',
   dashActivityTitle: 'Сўнгги Фаолиятлар',
   dashOrderMaterial: 'Сиро буюртма беринг!',
@@ -1530,6 +1536,8 @@ const uz_latin: T = {
   dashChartLast7: "So'nggi 7 kun",
   dashChartMaterial: 'Siro Harakati',
   dashChartKg: 'kg',
+  dashProdYarimTayyor: 'Yarim tayyor',
+  dashProdTayyor: 'Tayyor',
   dashStockTitle: 'Ombor Holati',
   dashActivityTitle: "So'nggi Faoliyatlar",
   dashOrderMaterial: 'Siro buyurtma bering!',
@@ -2167,6 +2175,8 @@ const ru: T = {
   dashChartLast7: 'Последние 7 дней',
   dashChartMaterial: 'Движение сырья',
   dashChartKg: 'кг',
+  dashProdYarimTayyor: 'Полуфабрикат',
+  dashProdTayyor: 'Готовая продукция',
   dashStockTitle: 'Состояние склада',
   dashActivityTitle: 'Последние операции',
   dashOrderMaterial: 'Закажите сырьё!',

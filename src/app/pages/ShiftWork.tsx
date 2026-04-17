@@ -519,6 +519,33 @@ function UiDropdown({
   );
 }
 
+/** Soat: vergul yoki nuqta; `type="number"` vergulda qiymatni yo‘qotmasligi uchun */
+function parseDecimalInput(raw: string): number {
+  const normalized = String(raw).trim().replace(/\s/g, '').replace(',', '.');
+  if (normalized === '' || normalized === '.') return 0;
+  const n = parseFloat(normalized);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function isValidPartialDecimalHours(raw: string): boolean {
+  const v = String(raw).trim().replace(/\s/g, '').replace(',', '.');
+  if (v === '') return true;
+  return /^[0-9]*\.?[0-9]*$/.test(v);
+}
+
+/** Tayyor mahsulot / brak: bo‘shliq bilan (5 000) va faqat raqam */
+function parseNonNegativeInt(raw: string): number {
+  const digits = String(raw).trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+  if (digits === '') return NaN;
+  const n = parseInt(digits, 10);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function isValidPartialNonNegativeInt(raw: string): boolean {
+  const v = String(raw).trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+  return v === '' || /^\d+$/.test(v);
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export function ShiftWork() {
   const { state, dispatch, refresh } = useERP();
@@ -642,6 +669,15 @@ export function ShiftWork() {
     return productTypes;
   }, [finishedProductTypes, fallbackFinishedTypes, productTypes]);
 
+  /** Aparat tanlanganda: yarim tayyor + tayyor mahsulotlar bitta ro‘yxatda */
+  const shiftLineProductOptions = useMemo(() => {
+    const merged = [...allowedSemiTypes, ...allowedFinishedTypes];
+    const uniq = Array.from(new Set(merged));
+    return uniq.sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
+    );
+  }, [allowedSemiTypes, allowedFinishedTypes]);
+
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'workers' | 'machines' | 'shiftDefs'>('form');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -754,11 +790,8 @@ export function ShiftWork() {
 
   const createEmptyLine = useCallback((): ShiftLine => {
     const defaultMachineId = state.machines[0]?.id || '';
-    const defaultMachine = state.machines.find((m) => m.id === defaultMachineId);
     const defaultProductType =
-      defaultMachine?.type === 'final'
-        ? (allowedFinishedTypes[0] || productTypes[0] || '0.5L')
-        : (allowedSemiTypes[0] || productTypes[0] || '18g');
+      shiftLineProductOptions[0] || productTypes[0] || '18g';
     return {
       id: `line-${Math.random().toString(16).slice(2)}`,
       machineId: defaultMachineId,
@@ -773,7 +806,7 @@ export function ShiftWork() {
       paintQuantity: '',
       paintUnit: 'kg',
     };
-  }, [state.machines, productTypes, allowedSemiTypes, allowedFinishedTypes]);
+  }, [state.machines, productTypes, shiftLineProductOptions]);
 
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
 
@@ -800,26 +833,36 @@ export function ShiftWork() {
   useEffect(() => {
     if (!productTypes.length) return;
     setLines((prev) => {
-      return prev.map((ln) => {
+      let changed = false;
+      const next = prev.map((ln) => {
         const machine = state.machines.find((m) => m.id === ln.machineId);
-        const allowed =
-          machine?.type === 'semi'
-            ? allowedSemiTypes
-            : machine?.type === 'final'
-              ? allowedFinishedTypes
-              : productTypes;
+        const allowed = machine
+          ? shiftLineProductOptions.length > 0
+            ? shiftLineProductOptions
+            : productTypes
+          : productTypes;
         const fallback = allowed[0] || productTypes[0];
         if (!fallback) return ln;
-        return allowed.includes(ln.productType) ? ln : { ...ln, productType: fallback };
+        if (allowed.includes(ln.productType)) return ln;
+        changed = true;
+        return { ...ln, productType: fallback };
       });
+      return changed ? next : prev;
     });
-  }, [productTypes, state.machines, allowedSemiTypes, allowedFinishedTypes]);
+  }, [productTypes, state.machines, shiftLineProductOptions]);
 
   useEffect(() => {
-    if (!state.machines[0]?.id) return;
-    setLines((prev) =>
-      prev.map((ln) => (ln.machineId ? ln : { ...ln, machineId: state.machines[0]!.id })),
-    );
+    const defaultId = state.machines[0]?.id;
+    if (!defaultId) return;
+    setLines((prev) => {
+      let changed = false;
+      const next = prev.map((ln) => {
+        if (ln.machineId) return ln;
+        changed = true;
+        return { ...ln, machineId: defaultId };
+      });
+      return changed ? next : prev;
+    });
   }, [state.machines]);
 
   useEffect(() => {
@@ -858,12 +901,12 @@ export function ShiftWork() {
     e.preventDefault();
     if (!recordEditId) return;
     setRecordEditError('');
-    const hours = parseFloat(recordEditForm.hoursWorked) || 0;
+    const hours = parseDecimalInput(recordEditForm.hoursWorked);
     if (!hours || hours <= 0) {
       setRecordEditError(t.labelHours + '!');
       return;
     }
-    const produced = parseInt(recordEditForm.producedQty, 10);
+    const produced = parseNonNegativeInt(recordEditForm.producedQty);
     if (Number.isNaN(produced) || produced < 0) {
       setRecordEditError(t.labelProduced + '!');
       return;
@@ -881,7 +924,7 @@ export function ShiftWork() {
         productType: recordEditForm.productType,
         machineReading: recordEditForm.machineReading,
         producedQty: produced,
-        defectCount: parseInt(recordEditForm.defectCount, 10) || 0,
+        defectCount: Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0),
         electricityKwh: parseFloat(kwhEdit.toFixed(1)),
         notes: recordEditForm.notes,
       },
@@ -896,12 +939,11 @@ export function ShiftWork() {
         const next = { ...ln, ...patch };
         if (patch.machineId !== undefined) {
           const machine = state.machines.find((m) => m.id === next.machineId);
-          const allowed =
-            machine?.type === 'semi'
-              ? allowedSemiTypes
-              : machine?.type === 'final'
-                ? allowedFinishedTypes
-                : productTypes;
+          const allowed = machine
+            ? shiftLineProductOptions.length > 0
+              ? shiftLineProductOptions
+              : productTypes
+            : productTypes;
           const fallback = allowed[0];
           if (fallback && !allowed.includes(next.productType)) {
             next.productType = fallback;
@@ -916,7 +958,7 @@ export function ShiftWork() {
         return next;
       }),
     );
-  }, [state.machines, allowedSemiTypes, allowedFinishedTypes, productTypes]);
+  }, [state.machines, shiftLineProductOptions, productTypes]);
 
   const addLine = useCallback(() => {
     setLines((prev) => [...prev, createEmptyLine()]);
@@ -950,9 +992,9 @@ export function ShiftWork() {
     }
 
     for (const ln of meaningfulLines) {
-      const hours = parseFloat(ln.hoursWorked) || 0;
+      const hours = parseDecimalInput(ln.hoursWorked);
       if (!hours || hours <= 0) { setError(t.labelHours + '!'); return; }
-      const produced = parseInt(ln.producedQty, 10);
+      const produced = parseNonNegativeInt(ln.producedQty);
       if (Number.isNaN(produced) || produced < 0) { setError(t.labelProduced + '!'); return; }
       if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
       if (!ln.productType) { setError(t.labelProduct + '!'); return; }
@@ -962,8 +1004,8 @@ export function ShiftWork() {
           setError(t.shiftPaintError);
           return;
         }
-        const pq = parseFloat(ln.paintQuantity);
-        if (!pq || pq <= 0 || Number.isNaN(pq)) {
+        const pq = parseDecimalInput(ln.paintQuantity);
+        if (!pq || pq <= 0) {
           setError(t.shiftPaintError);
           return;
         }
@@ -980,14 +1022,14 @@ export function ShiftWork() {
       }
 
       for (const ln of meaningfulLines) {
-        const hours = parseFloat(ln.hoursWorked) || 0;
+        const hours = parseDecimalInput(ln.hoursWorked);
         const sel = state.machines.find((m) => m.id === ln.machineId);
         const kwh = hours * (sel?.powerKw || 0);
         const paintPayload: Partial<
           Pick<ShiftRecord, 'paintUsed' | 'paintRawMaterialId' | 'paintQuantityKg'>
         > = {};
         if (sel?.type === 'semi' && ln.paintUsed) {
-          const pq = parseFloat(ln.paintQuantity);
+          const pq = parseDecimalInput(ln.paintQuantity);
           const paintQuantityKg = ln.paintUnit === 'g' ? pq / 1000 : pq;
           paintPayload.paintUsed = true;
           paintPayload.paintRawMaterialId = ln.paintRawMaterialId;
@@ -1005,8 +1047,8 @@ export function ShiftWork() {
             hoursWorked: hours,
             productType: ln.productType,
             machineReading: ln.machineReading,
-            producedQty: parseInt(ln.producedQty, 10) || 0,
-            defectCount: parseInt(ln.defectCount, 10) || 0,
+            producedQty: Math.max(0, parseNonNegativeInt(ln.producedQty) || 0),
+            defectCount: Math.max(0, parseNonNegativeInt(ln.defectCount) || 0),
             electricityKwh: parseFloat(kwh.toFixed(1)),
             notes: ln.notes,
             ...paintPayload,
@@ -1434,7 +1476,7 @@ export function ShiftWork() {
               <div className="space-y-3">
                 {lines.map((ln, idx) => {
                   const selectedMachine = state.machines.find((m) => m.id === ln.machineId);
-                  const hours = parseFloat(ln.hoursWorked) || 0;
+                  const hours = parseDecimalInput(ln.hoursWorked);
                   const kwh = hours * (selectedMachine?.powerKw || 0);
                   return (
                     <div
@@ -1469,13 +1511,17 @@ export function ShiftWork() {
                         <div>
                           <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelHours}</label>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
+                            autoComplete="off"
                             value={ln.hoursWorked}
-                            onChange={(e) => updateLine(ln.id, { hoursWorked: e.target.value })}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (isValidPartialDecimalHours(v)) {
+                                updateLine(ln.id, { hoursWorked: v });
+                              }
+                            }}
                             placeholder="0"
-                            min="0"
-                            max="24"
-                            step="0.5"
                             className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                           />
                         </div>
@@ -1496,11 +1542,11 @@ export function ShiftWork() {
                       <div>
                         <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduct}</label>
                         <div className="flex flex-wrap gap-2">
-                          {(selectedMachine?.type === 'semi'
-                            ? allowedSemiTypes
-                            : selectedMachine?.type === 'final'
-                              ? allowedFinishedTypes
+                          {(selectedMachine
+                            ? shiftLineProductOptions.length > 0
+                              ? shiftLineProductOptions
                               : productTypes
+                            : productTypes
                           ).map((pt) => (
                             <button
                               key={pt}
@@ -1561,12 +1607,17 @@ export function ShiftWork() {
                                   {t.shiftPaintQty}
                                 </label>
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
+                                  autoComplete="off"
                                   value={ln.paintQuantity}
-                                  onChange={(e) => updateLine(ln.id, { paintQuantity: e.target.value })}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (isValidPartialDecimalHours(v)) {
+                                      updateLine(ln.id, { paintQuantity: v });
+                                    }
+                                  }}
                                   placeholder="0"
-                                  min="0"
-                                  step="0.001"
                                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                                 />
                               </div>
@@ -1613,22 +1664,34 @@ export function ShiftWork() {
                         <div>
                           <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduced}</label>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="off"
                             value={ln.producedQty}
-                            onChange={(e) => updateLine(ln.id, { producedQty: e.target.value })}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (isValidPartialNonNegativeInt(v)) {
+                                updateLine(ln.id, { producedQty: v });
+                              }
+                            }}
                             placeholder="0"
-                            min="0"
                             className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                           />
                         </div>
                         <div>
                           <label className="block text-red-500 text-xs font-medium mb-1.5">{t.labelDefect}</label>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="off"
                             value={ln.defectCount}
-                            onChange={(e) => updateLine(ln.id, { defectCount: e.target.value })}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (isValidPartialNonNegativeInt(v)) {
+                                updateLine(ln.id, { defectCount: v });
+                              }
+                            }}
                             placeholder="0"
-                            min="0"
                             className="w-full px-3 py-2.5 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                           />
                         </div>
@@ -2423,12 +2486,16 @@ export function ShiftWork() {
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelHours}</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
                     value={recordEditForm.hoursWorked}
-                    onChange={(e) => setRecordEditForm({ ...recordEditForm, hoursWorked: e.target.value })}
-                    min="0"
-                    max="24"
-                    step="0.5"
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (isValidPartialDecimalHours(v)) {
+                        setRecordEditForm({ ...recordEditForm, hoursWorked: v });
+                      }
+                    }}
                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
                   />
                 </div>
@@ -2436,7 +2503,16 @@ export function ShiftWork() {
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelProduct}</label>
                 <div className="flex flex-wrap gap-2">
-                  {Array.from(new Set([recordEditForm.productType, ...productTypes])).map((pt) => (
+                  {Array.from(
+                    new Set([
+                      recordEditForm.productType,
+                      ...(state.machines.some((m) => m.id === recordEditForm.machineId)
+                        ? shiftLineProductOptions.length > 0
+                          ? shiftLineProductOptions
+                          : productTypes
+                        : productTypes),
+                    ]),
+                  ).map((pt) => (
                     <button
                       key={pt}
                       type="button"
@@ -2461,20 +2537,32 @@ export function ShiftWork() {
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelProduced}</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
                     value={recordEditForm.producedQty}
-                    onChange={(e) => setRecordEditForm({ ...recordEditForm, producedQty: e.target.value })}
-                    min="0"
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (isValidPartialNonNegativeInt(v)) {
+                        setRecordEditForm({ ...recordEditForm, producedQty: v });
+                      }
+                    }}
                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-red-500 text-xs font-medium mb-1">{t.labelDefect}</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
                     value={recordEditForm.defectCount}
-                    onChange={(e) => setRecordEditForm({ ...recordEditForm, defectCount: e.target.value })}
-                    min="0"
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (isValidPartialNonNegativeInt(v)) {
+                        setRecordEditForm({ ...recordEditForm, defectCount: v });
+                      }
+                    }}
                     className="w-full px-3 py-2.5 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/10 text-slate-800 dark:text-white text-sm"
                   />
                 </div>

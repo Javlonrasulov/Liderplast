@@ -3,16 +3,30 @@ import type {
   SemiProductCatalogItem,
 } from '../store/erp-store';
 
-/** Katalogdagi yarim tayyor mahsulotni ombor statistikasi kalitiga (18g / 20g) bog‘lash */
-export function semiBucketFromCatalog(
-  product: SemiProductCatalogItem,
-): '18g' | '20g' {
+/**
+ * Katalogdagi yarim tayyor учун слот калити: 18г / 20г алоҳида, бошқа вазнлар `25g` каби.
+ * (Аввалги `>=19.5 → 20g` 25гни 20гга улаб юборardi.)
+ */
+export function semiBucketFromCatalog(product: SemiProductCatalogItem): string {
   const w = product.weightGram;
-  if (typeof w === 'number' && Number.isFinite(w)) {
-    if (w >= 19.5) return '20g';
-    if (w > 0) return '18g';
+  if (typeof w === 'number' && Number.isFinite(w) && w > 0) {
+    const r = Math.round(w);
+    if (r === 18) return '18g';
+    if (r === 20) return '20g';
+    return `${r}g`;
   }
-  return product.name?.includes('20') ? '20g' : '18g';
+  const name = product.name?.trim() ?? '';
+  const m = name.match(/(\d+)\s*(?:g|gr|г)\b/i);
+  if (m) {
+    const r = parseInt(m[1], 10);
+    if (Number.isFinite(r) && r > 0) {
+      if (r === 18) return '18g';
+      if (r === 20) return '20g';
+      return `${r}g`;
+    }
+  }
+  if (name.includes('20')) return '20g';
+  return '18g';
 }
 
 /** Katalogdagi tayyor mahsulotni 0.5L / 1L / 5L slotiga bog‘lash; standart bo‘lmagan hajm uchun null */
@@ -40,4 +54,15 @@ export function inferVolumeLiterFromFinishedProductName(name: string): number | 
   const n = Number(m[1].replace(',', '.'));
   if (!Number.isFinite(n) || n <= 0) return null;
   return n;
+}
+
+/** Tayyor mahsulot qoldig‘i sloti: standart 0.5L/1L/5L yoki `2.2L` / katalog nomi */
+export function finalStockSlotFromCatalog(product: FinishedProductCatalogItem): string {
+  const std = finalBucketFromCatalog(product);
+  if (std) return std;
+  const v = product.volumeLiter;
+  if (typeof v === 'number' && Number.isFinite(v) && v > 0) return `${v}L`;
+  const inferred = inferVolumeLiterFromFinishedProductName(product.name ?? '');
+  if (inferred != null && inferred > 0) return `${inferred}L`;
+  return product.name?.trim() || 'other';
 }

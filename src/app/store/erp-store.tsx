@@ -9,6 +9,11 @@ import React, {
   useState,
 } from 'react';
 import { apiRequest } from '../api/http';
+import { toLocalDateString } from '../utils/format';
+import {
+  finalStockSlotFromCatalog,
+  semiBucketFromCatalog,
+} from '../utils/warehouse-catalog-buckets';
 
 export interface RawMaterialEntry {
   id: string;
@@ -604,8 +609,13 @@ interface ERPContextValue {
   isLoading: boolean;
   error: string;
   rawMaterialStock: number;
-  semiProductStock: Record<'18g' | '20g', number>;
-  finalProductStock: Record<'0.5L' | '1L' | '5L', number>;
+  /** Katalog слотлари бўйича (18g, 20g, 25g, …) — омбор қаторларидан */
+  semiProductStock: Record<string, number>;
+  /** Katalog слотлари бўйича (0.5L, …) — омбор қаторларидан */
+  finalProductStock: Record<string, number>;
+  /** Katalog номи бўйича қолдиқ (сотув / KPI учун аниқ) */
+  semiStockByProductName: Record<string, number>;
+  finalStockByProductName: Record<string, number>;
 }
 
 const emptyState: ERPState = {
@@ -1185,6 +1195,38 @@ export function computeFinalProductStock(
   return stock;
 }
 
+export function aggregateSemiStockSlotsFromWarehouse(
+  stockRows: WarehouseStockItem[],
+  semiCatalog: SemiProductCatalogItem[],
+): Record<string, number> {
+  const result: Record<string, number> = {};
+  const byName = new Map(semiCatalog.map((p) => [p.name, p]));
+  for (const row of stockRows) {
+    if (row.itemType !== 'SEMI_PRODUCT' || !row.itemName) continue;
+    const cat = byName.get(row.itemName);
+    if (!cat) continue;
+    const slot = semiBucketFromCatalog(cat);
+    result[slot] = (result[slot] ?? 0) + row.quantity;
+  }
+  return result;
+}
+
+export function aggregateFinalStockSlotsFromWarehouse(
+  stockRows: WarehouseStockItem[],
+  finalCatalog: FinishedProductCatalogItem[],
+): Record<string, number> {
+  const result: Record<string, number> = {};
+  const byName = new Map(finalCatalog.map((p) => [p.name, p]));
+  for (const row of stockRows) {
+    if (row.itemType !== 'FINISHED_PRODUCT' || !row.itemName) continue;
+    const cat = byName.get(row.itemName);
+    if (!cat) continue;
+    const slot = finalStockSlotFromCatalog(cat);
+    result[slot] = (result[slot] ?? 0) + row.quantity;
+  }
+  return result;
+}
+
 function buildLogs(
   rawEntries: RawMaterialEntry[],
   productions: BackendProductionRecord[],
@@ -1398,7 +1440,7 @@ async function loadStateFromApi() {
     .filter((item) => item.stage === 'SEMI')
     .map((item) => ({
       id: item.id,
-      date: item.timestamp.slice(0, 10),
+      date: toLocalDateString(item.timestamp),
       productType: normalizeSemiType(item.outputSemiProduct?.name),
       weight: item.outputSemiProduct?.weightGram ?? (normalizeSemiType(item.outputSemiProduct?.name) === '20g' ? 20 : 18),
       quantity: item.quantityProduced,
@@ -1411,7 +1453,7 @@ async function loadStateFromApi() {
     .filter((item) => item.stage === 'FINISHED')
     .map((item) => ({
       id: item.id,
-      date: item.timestamp.slice(0, 10),
+      date: toLocalDateString(item.timestamp),
       productType: normalizeFinalType(item.outputFinishedProduct?.name),
       quantity: item.quantityProduced,
       semiProductUsed: item.consumptions.reduce((sum, current) => sum + current.quantity, 0),
@@ -1485,7 +1527,7 @@ async function loadStateFromApi() {
 
   const mappedShifts: ShiftRecord[] = shifts.map((shift) => ({
     id: shift.id,
-    date: shift.date.slice(0, 10),
+    date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
     workerName: shift.worker.fullName,
     machineId: shift.machine?.id ?? '',
@@ -2208,20 +2250,37 @@ export function ERPProvider({ children }: { children: ReactNode }) {
     [state.rawMaterialEntries],
   );
 
-  const semiProductStock = useMemo(
-    () =>
-      computeSemiProductStock(
-        state.semiProductBatches,
-        state.finalProductBatches,
-        state.sales,
-      ),
-    [state.semiProductBatches, state.finalProductBatches, state.sales],
-  );
+  const semiStockByProductName = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const row of state.warehouseStock) {
+      if (row.itemType !== 'SEMI_PRODUCT' || !row.itemName) continue;
+      m[row.itemName] = (m[row.itemName] ?? 0) + row.quantity;
+    }
+    return m;
+  }, [state.warehouseStock]);
 
-  const finalProductStock = useMemo(
-    () => computeFinalProductStock(state.finalProductBatches, state.sales),
-    [state.finalProductBatches, state.sales],
-  );
+  const finalStockByProductName = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const row of state.warehouseStock) {
+      if (row.itemType !== 'FINISHED_PRODUCT' || !row.itemName) continue;
+      m[row.itemName] = (m[row.itemName] ?? 0) + row.quantity;
+    }
+    return m;
+  }, [state.warehouseStock]);
+
+  const semiProductStock = useMemo(() => {
+    const semiOnly = state.warehouseProducts.filter(
+      (p): p is SemiProductCatalogItem => p.itemType === 'SEMI_PRODUCT',
+    );
+    return aggregateSemiStockSlotsFromWarehouse(state.warehouseStock, semiOnly);
+  }, [state.warehouseStock, state.warehouseProducts]);
+
+  const finalProductStock = useMemo(() => {
+    const finalOnly = state.warehouseProducts.filter(
+      (p): p is FinishedProductCatalogItem => p.itemType === 'FINISHED_PRODUCT',
+    );
+    return aggregateFinalStockSlotsFromWarehouse(state.warehouseStock, finalOnly);
+  }, [state.warehouseStock, state.warehouseProducts]);
 
   const contextValue = useMemo(
     () => ({
@@ -2233,6 +2292,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       rawMaterialStock,
       semiProductStock,
       finalProductStock,
+      semiStockByProductName,
+      finalStockByProductName,
     }),
     [
       state,
@@ -2243,6 +2304,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       rawMaterialStock,
       semiProductStock,
       finalProductStock,
+      semiStockByProductName,
+      finalStockByProductName,
     ],
   );
 

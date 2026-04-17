@@ -3,7 +3,7 @@ import { Droplets, Factory, Package, ShoppingCart, TrendingUp, TrendingDown, Ale
 import { SimpleBarChart, SimpleAreaChart } from '../components/charts';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatCurrency, getLast7Days, shortDate, TODAY, formatDateTime } from '../utils/format';
+import { formatNumber, formatCurrency, getLast7Days, getInclusiveDateRange, shortDate, TODAY, formatDateTime } from '../utils/format';
 
 // ======================== KPI CARD ========================
 function KpiCard({ title, value, unit, icon: Icon, color, trend, trendVal, warning }: {
@@ -193,16 +193,21 @@ function CurrencyRateWidget() {
 
 // ======================== CHART COMPONENTS ========================
 const ProductionChart = React.memo(function ProductionChart({
-  data, unitPiece,
-}: { data: { date: string; Qolip: number; Bakalashka: number }[]; unitPiece: string }) {
+  data, unitPiece, labelYarim, labelTayyor,
+}: {
+  data: { date: string; yarimTayyor: number; tayyor: number }[];
+  unitPiece: string;
+  labelYarim: string;
+  labelTayyor: string;
+}) {
   return (
     <SimpleAreaChart
       data={data}
       height={200}
       formatValue={v => v.toLocaleString() + ' ' + unitPiece}
       series={[
-        { dataKey: 'Qolip', name: 'Qolip', color: '#818cf8', gradId: 'dash-qolip' },
-        { dataKey: 'Bakalashka', name: 'Bakalashka', color: '#22d3ee', gradId: 'dash-bakalashka' },
+        { dataKey: 'yarimTayyor', name: labelYarim, color: '#818cf8', gradId: 'dash-yarim-tayyor' },
+        { dataKey: 'tayyor', name: labelTayyor, color: '#22d3ee', gradId: 'dash-tayyor' },
       ]}
     />
   );
@@ -229,27 +234,66 @@ export function Dashboard() {
   const { state, rawMaterialStock, semiProductStock, finalProductStock } = useERP();
   const { t, filterLabel, dateFilter } = useApp();
 
+  const machineTypeById = useMemo(
+    () => new Map(state.machines.map(m => [m.id, m.type] as const)),
+    [state.machines],
+  );
+
   const todayProduction = useMemo(() => {
-    const semi = state.semiProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
-    const final = state.finalProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    const semiB = state.semiProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    const finalB = state.finalProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    let semiS = 0;
+    let finalS = 0;
+    for (const r of state.shiftRecords) {
+      if (r.date !== TODAY) continue;
+      const mt = machineTypeById.get(r.machineId);
+      if (mt === 'semi') semiS += r.producedQty;
+      else if (mt === 'final') finalS += r.producedQty;
+    }
+    const semi = semiB + semiS;
+    const final = finalB + finalS;
     return { semi, final, total: semi + final };
-  }, [state]);
+  }, [state, machineTypeById]);
 
   const todaySales = useMemo(() => state.sales.filter(s => s.date === TODAY).reduce((sum, s) => sum + s.total, 0), [state]);
 
-  const last7Days = useMemo(() => getLast7Days(), []);
+  const chartDayKeys = useMemo(() => {
+    if (dateFilter.preset === 'all' || (!dateFilter.from && !dateFilter.to)) {
+      return getLast7Days();
+    }
+    const from = dateFilter.from || dateFilter.to;
+    const to = dateFilter.to || dateFilter.from;
+    if (!from || !to) return getLast7Days();
+    const range = getInclusiveDateRange(from, to);
+    return range.length > 0 ? range : getLast7Days();
+  }, [dateFilter]);
 
-  const productionChartData = useMemo(() => last7Days.map(date => ({
-    date: shortDate(date),
-    Qolip: state.semiProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0),
-    Bakalashka: state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0),
-  })), [state, last7Days]);
+  const chartRangeLabel =
+    dateFilter.preset === 'all' && !dateFilter.from && !dateFilter.to ? t.dashChartLast7 : filterLabel;
 
-  const materialChartData = useMemo(() => last7Days.map(date => ({
+  const productionChartData = useMemo(() => chartDayKeys.map(date => {
+    const semiB = state.semiProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0);
+    const finalB = state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0);
+    let semiS = 0;
+    let finalS = 0;
+    for (const r of state.shiftRecords) {
+      if (r.date !== date) continue;
+      const mt = machineTypeById.get(r.machineId);
+      if (mt === 'semi') semiS += r.producedQty;
+      else if (mt === 'final') finalS += r.producedQty;
+    }
+    return {
+      date: shortDate(date),
+      yarimTayyor: semiB + semiS,
+      tayyor: finalB + finalS,
+    };
+  }), [state, chartDayKeys, machineTypeById]);
+
+  const materialChartData = useMemo(() => chartDayKeys.map(date => ({
     date: shortDate(date),
     incoming: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'incoming').reduce((s, e) => s + e.amount, 0),
     outgoing: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'outgoing').reduce((s, e) => s + e.amount, 0),
-  })), [state, last7Days]);
+  })), [state, chartDayKeys]);
 
   const totalSemiStock = semiProductStock['18g'] + semiProductStock['20g'];
   const totalFinalStock = finalProductStock['0.5L'] + finalProductStock['1L'] + finalProductStock['5L'];
@@ -320,23 +364,28 @@ export function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashChartProd}</h3>
-              <p className="text-slate-400 text-xs mt-0.5">{t.dashChartLast7}</p>
+              <p className="text-slate-400 text-xs mt-0.5">{chartRangeLabel}</p>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400"><Clock size={12} /></div>
           </div>
           {/* Custom legend */}
           <div className="flex items-center gap-4 mb-3">
-            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">Qolip</span></div>
-            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">Bakalashka</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.dashProdYarimTayyor}</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.dashProdTayyor}</span></div>
           </div>
-          <ProductionChart data={productionChartData} unitPiece={t.unitPiece} />
+          <ProductionChart
+            data={productionChartData}
+            unitPiece={t.unitPiece}
+            labelYarim={t.dashProdYarimTayyor}
+            labelTayyor={t.dashProdTayyor}
+          />
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.dashChartMaterial}</h3>
-              <p className="text-slate-400 text-xs mt-0.5">{t.dashChartLast7} ({t.dashChartKg})</p>
+              <p className="text-slate-400 text-xs mt-0.5">{chartRangeLabel} ({t.dashChartKg})</p>
             </div>
             <Droplets size={16} className="text-blue-400" />
           </div>

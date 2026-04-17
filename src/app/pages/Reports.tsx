@@ -33,12 +33,27 @@ export function Reports() {
 
   const last7Days = getLast7Days();
 
-  const productionData = useMemo(() => last7Days.map(date => ({
-    date: shortDate(date),
-    '18g': state.semiProductBatches.filter(b => b.date === date && b.productType === '18g').reduce((s, b) => s + b.quantity, 0),
-    '20g': state.semiProductBatches.filter(b => b.date === date && b.productType === '20g').reduce((s, b) => s + b.quantity, 0),
-    Bakalashka: state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0),
-  })), [state, last7Days]);
+  const machineTypeById = useMemo(
+    () => new Map(state.machines.map(m => [m.id, m.type] as const)),
+    [state.machines],
+  );
+
+  const productionData = useMemo(() => last7Days.map(date => {
+    let g18 = state.semiProductBatches.filter(b => b.date === date && b.productType === '18g').reduce((s, b) => s + b.quantity, 0);
+    let g20 = state.semiProductBatches.filter(b => b.date === date && b.productType === '20g').reduce((s, b) => s + b.quantity, 0);
+    let tayyor = state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0);
+    for (const r of state.shiftRecords) {
+      if (r.date !== date) continue;
+      const mt = machineTypeById.get(r.machineId);
+      if (mt === 'semi') {
+        if (r.productType?.includes('20')) g20 += r.producedQty;
+        else g18 += r.producedQty;
+      } else if (mt === 'final') {
+        tayyor += r.producedQty;
+      }
+    }
+    return { date: shortDate(date), '18g': g18, '20g': g20, tayyor };
+  }), [state, last7Days, machineTypeById]);
 
   const salesData = useMemo(() => last7Days.map(date => ({
     date: shortDate(date),
@@ -107,7 +122,7 @@ export function Reports() {
             <div className="flex items-center gap-4 mb-3">
               <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">18g</span></div>
               <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">20g</span></div>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">Bakalashka</span></div>
+              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.dashProdTayyor}</span></div>
             </div>
             <SimpleBarChart
               data={productionData}
@@ -116,7 +131,7 @@ export function Reports() {
               series={[
                 { dataKey: '18g', name: '18g', color: '#818cf8' },
                 { dataKey: '20g', name: '20g', color: '#a78bfa' },
-                { dataKey: 'Bakalashka', name: 'Bakalashka', color: '#22d3ee' },
+                { dataKey: 'tayyor', name: t.dashProdTayyor, color: '#22d3ee' },
               ]}
             />
           </div>

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp, DatePreset } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
+import { toLocalDateString } from '../utils/format';
 
 // ─── Localized data ──────────────────────────────────────────────────────────
 const DAY_HEADERS: Record<Language, string[]> = {
@@ -57,8 +58,6 @@ function buildCells(year: number, month: number): Cell[] {
   return cells;
 }
 
-const TODAY = new Date().toISOString().split('T')[0];
-
 function fmtShort(dateStr: string) {
   if (!dateStr) return '';
   const [, m, d] = dateStr.split('-');
@@ -81,6 +80,8 @@ export function DateFilterPicker() {
   const [hoverDate, setHoverDate] = useState('');
 
   const ref = useRef<HTMLDivElement>(null);
+  const maxDateStr = toLocalDateString(new Date());
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -94,18 +95,24 @@ export function DateFilterPicker() {
   }, []);
 
   // ── Derived range for display ──────────────────────────────────────────────
-  const rangeFrom = pickPhase === 'end' ? tempFrom : dateFilter.from;
-  const rangeTo   = pickPhase === 'end' ? hoverDate : dateFilter.to;
+  const cappedTempFrom = tempFrom && tempFrom > maxDateStr ? maxDateStr : tempFrom;
+  const cappedHover =
+    hoverDate && hoverDate > maxDateStr ? maxDateStr : hoverDate;
+  const rangeFrom = pickPhase === 'end' ? cappedTempFrom : dateFilter.from;
+  const rangeTo = pickPhase === 'end' ? cappedHover : dateFilter.to;
   const [rangeStart, rangeEnd] = rangeFrom <= rangeTo
     ? [rangeFrom, rangeTo] : [rangeTo, rangeFrom];
 
   // ── Day click ─────────────────────────────────────────────────────────────
   const handleDayClick = (dateStr: string) => {
+    if (dateStr > maxDateStr) return;
     if (pickPhase === 'idle') {
       setTempFrom(dateStr);
       setPickPhase('end');
     } else {
-      const [a, b] = dateStr >= tempFrom ? [tempFrom, dateStr] : [dateStr, tempFrom];
+      const end = dateStr > maxDateStr ? maxDateStr : dateStr;
+      const start = tempFrom > maxDateStr ? maxDateStr : tempFrom;
+      const [a, b] = end >= start ? [start, end] : [end, start];
       setCustomRange(a, b);
       setPickPhase('idle');
       setHoverDate('');
@@ -142,6 +149,11 @@ export function DateFilterPicker() {
     if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
     else setViewMonth(m => m + 1);
   };
+
+  const now = new Date();
+  const atOrBeyondCurrentMonth =
+    viewYear > now.getFullYear() ||
+    (viewYear === now.getFullYear() && viewMonth >= now.getMonth());
 
   const cells = buildCells(viewYear, viewMonth);
   const dayHeaders = DAY_HEADERS[lang];
@@ -219,11 +231,20 @@ export function DateFilterPicker() {
           <div className="p-3">
             {/* Month/Year header */}
             <div className="flex items-center justify-between mb-3">
-              <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+              <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
                 <ChevronLeft size={16} />
               </button>
               <span className="text-slate-800 dark:text-white text-sm font-semibold select-none">{monthLabel}</span>
-              <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+              <button
+                type="button"
+                disabled={atOrBeyondCurrentMonth}
+                onClick={() => { if (!atOrBeyondCurrentMonth) nextMonth(); }}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 transition-colors ${
+                  atOrBeyondCurrentMonth
+                    ? 'opacity-30 cursor-not-allowed'
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -240,7 +261,8 @@ export function DateFilterPicker() {
             {/* Day grid */}
             <div className="grid grid-cols-7">
               {cells.map((cell) => {
-                const isToday       = cell.dateStr === TODAY;
+                const isFuture = cell.dateStr > maxDateStr;
+                const isToday = cell.dateStr === maxDateStr;
                 const isStart       = cell.dateStr === rangeStart && (rangeStart !== '' );
                 const isEnd         = cell.dateStr === rangeEnd   && (rangeEnd !== '');
                 const isSingle      = isStart && isEnd;
@@ -249,7 +271,9 @@ export function DateFilterPicker() {
                 const isStartEdge   = isStart && !isSingle;
                 const isEndEdge     = isEnd && !isSingle;
 
-                let cellClass = 'relative h-8 w-full flex items-center justify-center text-xs cursor-pointer transition-colors select-none ';
+                let cellClass = `relative h-8 w-full flex items-center justify-center text-xs transition-colors select-none ${
+                  isFuture ? 'cursor-not-allowed' : 'cursor-pointer'
+                } `;
                 let innerClass = 'relative z-10 w-7 h-7 flex items-center justify-center rounded-full transition-all ';
 
                 // Range band background
@@ -266,6 +290,8 @@ export function DateFilterPicker() {
                 // Inner circle
                 if (isRangeEdge || isSingle) {
                   innerClass += 'bg-indigo-600 text-white shadow-md shadow-indigo-300/40 dark:shadow-indigo-900/40 ';
+                } else if (isFuture) {
+                  innerClass += 'text-slate-300 dark:text-slate-600 opacity-40 ';
                 } else if (isToday) {
                   innerClass += 'border-2 border-indigo-400 text-indigo-600 dark:text-indigo-400 ';
                 } else if (cell.isCurrentMonth) {
@@ -278,8 +304,11 @@ export function DateFilterPicker() {
                   <div
                     key={cell.dateStr}
                     className={cellClass}
-                    onClick={() => handleDayClick(cell.dateStr)}
-                    onMouseEnter={() => pickPhase === 'end' && setHoverDate(cell.dateStr)}
+                    onClick={() => { if (!isFuture) handleDayClick(cell.dateStr); }}
+                    onMouseEnter={() => {
+                      if (pickPhase !== 'end') return;
+                      setHoverDate(cell.dateStr > maxDateStr ? maxDateStr : cell.dateStr);
+                    }}
                     onMouseLeave={() => pickPhase === 'end' && setHoverDate('')}
                   >
                     <div className={innerClass}>{cell.day}</div>

@@ -205,8 +205,61 @@ function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t'])
   return `${t.whCreatedAt}: ${createdAt}`;
 }
 
+const SEMI_DETAIL_CARD_STYLES = [
+  {
+    color: 'bg-purple-500',
+    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+    iconColor: 'text-purple-600 dark:text-purple-400',
+  },
+  {
+    color: 'bg-violet-500',
+    bgColor: 'bg-violet-100 dark:bg-violet-900/30',
+    iconColor: 'text-violet-600 dark:text-violet-400',
+  },
+  {
+    color: 'bg-fuchsia-500',
+    bgColor: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
+    iconColor: 'text-fuchsia-600 dark:text-fuchsia-400',
+  },
+  {
+    color: 'bg-indigo-500',
+    bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+    iconColor: 'text-indigo-600 dark:text-indigo-400',
+  },
+] as const;
+
+const FINAL_DETAIL_CARD_STYLES = [
+  {
+    color: 'bg-cyan-500',
+    bgColor: 'bg-cyan-100 dark:bg-cyan-900/30',
+    iconColor: 'text-cyan-600 dark:text-cyan-400',
+  },
+  {
+    color: 'bg-teal-500',
+    bgColor: 'bg-teal-100 dark:bg-teal-900/30',
+    iconColor: 'text-teal-600 dark:text-teal-400',
+  },
+  {
+    color: 'bg-sky-500',
+    bgColor: 'bg-sky-100 dark:bg-sky-900/30',
+    iconColor: 'text-sky-600 dark:text-sky-400',
+  },
+  {
+    color: 'bg-blue-500',
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+  },
+] as const;
+
 export function Warehouse() {
-  const { state, semiProductStock, finalProductStock, dispatch } = useERP();
+  const {
+    state,
+    semiProductStock,
+    finalProductStock,
+    semiStockByProductName,
+    finalStockByProductName,
+    dispatch,
+  } = useERP();
   const { user } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
@@ -336,44 +389,23 @@ export function Warehouse() {
   const hasCatalogSiro = siroRawMaterials.length > 0;
   const hasCatalogPaint = paintRawMaterials.length > 0;
   const hasCatalogRaw = hasCatalogSiro || hasCatalogPaint;
-  const hasCatalogSemi18 = semiProducts.some(
-    (p) => semiBucketFromCatalog(p) === '18g',
-  );
-  const hasCatalogSemi20 = semiProducts.some(
-    (p) => semiBucketFromCatalog(p) === '20g',
-  );
-  const hasCatalogSemi = hasCatalogSemi18 || hasCatalogSemi20;
+  const hasCatalogSemi = semiProducts.length > 0;
+  const hasCatalogFinal = finishedProducts.length > 0;
 
-  const hasCatalogFinal05 = finishedProducts.some(
-    (p) => finalBucketFromCatalog(p) === '0.5L',
+  const totalSemiInCatalogStock = useMemo(
+    () => semiProducts.reduce((sum, p) => sum + (semiStockByProductName[p.name] ?? 0), 0),
+    [semiProducts, semiStockByProductName],
   );
-  const hasCatalogFinal1 = finishedProducts.some(
-    (p) => finalBucketFromCatalog(p) === '1L',
+  const totalFinalInCatalogStock = useMemo(
+    () =>
+      finishedProducts.reduce((sum, p) => sum + (finalStockByProductName[p.name] ?? 0), 0),
+    [finishedProducts, finalStockByProductName],
   );
-  const hasCatalogFinal5 = finishedProducts.some(
-    (p) => finalBucketFromCatalog(p) === '5L',
-  );
-  const hasCatalogFinal =
-    hasCatalogFinal05 || hasCatalogFinal1 || hasCatalogFinal5;
-
-  const totalSemiInCatalogStock =
-    (hasCatalogSemi18 ? semiProductStock['18g'] : 0) +
-    (hasCatalogSemi20 ? semiProductStock['20g'] : 0);
-  const totalFinalInCatalogStock =
-    (hasCatalogFinal05 ? finalProductStock['0.5L'] : 0) +
-    (hasCatalogFinal1 ? finalProductStock['1L'] : 0) +
-    (hasCatalogFinal5 ? finalProductStock['5L'] : 0);
   const totalPiecesInCatalogStock =
     totalSemiInCatalogStock + totalFinalInCatalogStock;
 
   const hasAnyStockDetailCard =
-    hasCatalogSiro ||
-    hasCatalogPaint ||
-    hasCatalogSemi18 ||
-    hasCatalogSemi20 ||
-    hasCatalogFinal05 ||
-    hasCatalogFinal1 ||
-    hasCatalogFinal5;
+    hasCatalogSiro || hasCatalogPaint || hasCatalogSemi || hasCatalogFinal;
 
   const warehouseSummaryCards = useMemo(() => {
     const cards: Array<{
@@ -408,13 +440,14 @@ export function Warehouse() {
       });
     }
     if (hasCatalogSemi) {
-      const subParts: string[] = [];
-      if (hasCatalogSemi18) subParts.push(t.whSemi18Label);
-      if (hasCatalogSemi20) subParts.push(t.whSemi20Label);
+      const sub =
+        semiProducts.length <= 2
+          ? semiProducts.map((p) => p.name).join(' · ')
+          : `${semiProducts.length} ${t.whSemiShort}`;
       cards.push({
         key: 'semi',
         label: t.whSemi,
-        sub: subParts.join(' + '),
+        sub,
         val: `${formatNumber(totalSemiInCatalogStock)} ${t.unitPiece}`,
         from: 'from-purple-500 to-purple-600',
         shadow: 'shadow-purple-200 dark:shadow-purple-900/30',
@@ -422,14 +455,14 @@ export function Warehouse() {
       });
     }
     if (hasCatalogFinal) {
-      const subParts: string[] = [];
-      if (hasCatalogFinal05) subParts.push(t.whFinal05Label);
-      if (hasCatalogFinal1) subParts.push(t.whFinal1Label);
-      if (hasCatalogFinal5) subParts.push(t.whFinal5Label);
+      const sub =
+        finishedProducts.length <= 2
+          ? finishedProducts.map((p) => p.name).join(' · ')
+          : `${finishedProducts.length} ${t.whFinal}`;
       cards.push({
         key: 'final',
         label: t.whFinal,
-        sub: subParts.join(' + '),
+        sub,
         val: `${formatNumber(totalFinalInCatalogStock)} ${t.unitPiece}`,
         from: 'from-cyan-500 to-cyan-600',
         shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30',
@@ -453,11 +486,8 @@ export function Warehouse() {
     hasCatalogPaint,
     hasCatalogSemi,
     hasCatalogFinal,
-    hasCatalogSemi18,
-    hasCatalogSemi20,
-    hasCatalogFinal05,
-    hasCatalogFinal1,
-    hasCatalogFinal5,
+    semiProducts,
+    finishedProducts,
     rawStockByKind.siro,
     rawStockByKind.paint,
     totalSemiInCatalogStock,
@@ -2147,3 +2177,4 @@ export function Warehouse() {
     </div>
   );
 }
+                                                                          

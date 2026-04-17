@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useApp } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
+import { toLocalDateString } from '../utils/format';
 
 // ─── Localized data ───────────────────────────────────────────────────────────
 const DAY_HEADERS: Record<Language, string[]> = {
@@ -54,8 +55,6 @@ function buildCells(year: number, month: number): Cell[] {
   return cells;
 }
 
-const TODAY_STR = new Date().toISOString().split('T')[0];
-
 function fmtDisplay(dateStr: string, lang: Language): string {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');
@@ -83,6 +82,7 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
   });
 
   const ref = useRef<HTMLDivElement>(null);
+  const maxDateStr = toLocalDateString(new Date());
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -102,16 +102,23 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
   };
 
   const handleDayClick = (dateStr: string) => {
+    if (dateStr > maxDateStr) return;
     onChange(dateStr);
     setOpen(false);
   };
 
   const handleToday = () => {
-    setViewYear(new Date().getFullYear());
-    setViewMonth(new Date().getMonth());
-    onChange(TODAY_STR);
+    const d = new Date();
+    setViewYear(d.getFullYear());
+    setViewMonth(d.getMonth());
+    onChange(maxDateStr);
     setOpen(false);
   };
+
+  const now = new Date();
+  const atOrBeyondCurrentMonth =
+    viewYear > now.getFullYear() ||
+    (viewYear === now.getFullYear() && viewMonth >= now.getMonth());
 
   const cells = buildCells(viewYear, viewMonth);
   const dayHeaders = DAY_HEADERS[lang];
@@ -158,8 +165,13 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
               </span>
               <button
                 type="button"
-                onClick={nextMonth}
-                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+                disabled={atOrBeyondCurrentMonth}
+                onClick={() => { if (!atOrBeyondCurrentMonth) nextMonth(); }}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 transition-colors ${
+                  atOrBeyondCurrentMonth
+                    ? 'opacity-30 cursor-not-allowed'
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
               >
                 <ChevronRight size={16} />
               </button>
@@ -177,13 +189,18 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
             {/* Day grid */}
             <div className="grid grid-cols-7">
               {cells.map((cell) => {
-                const isToday    = cell.dateStr === TODAY_STR;
+                const isFuture = cell.dateStr > maxDateStr;
+                const isToday = cell.dateStr === maxDateStr;
                 const isSelected = cell.dateStr === value;
 
-                let innerClass = 'w-7 h-7 flex items-center justify-center rounded-full text-xs transition-all cursor-pointer ';
+                let innerClass = `w-7 h-7 flex items-center justify-center rounded-full text-xs transition-all ${
+                  isFuture ? 'cursor-not-allowed' : 'cursor-pointer'
+                } `;
 
                 if (isSelected) {
                   innerClass += 'bg-indigo-600 text-white shadow-md shadow-indigo-300/40 dark:shadow-indigo-900/40 ';
+                } else if (isFuture) {
+                  innerClass += 'text-slate-300 dark:text-slate-600 opacity-40 ';
                 } else if (isToday) {
                   innerClass += 'border-2 border-indigo-400 text-indigo-600 dark:text-indigo-400 ';
                 } else if (cell.isCurrentMonth) {
@@ -196,7 +213,7 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
                   <div
                     key={cell.dateStr}
                     className="h-8 flex items-center justify-center"
-                    onClick={() => handleDayClick(cell.dateStr)}
+                    onClick={() => { if (!isFuture) handleDayClick(cell.dateStr); }}
                   >
                     <div className={innerClass}>{cell.day}</div>
                   </div>

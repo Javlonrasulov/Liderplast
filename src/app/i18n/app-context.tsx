@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { Language, T, translations } from './translations';
-import { TODAY } from '../utils/format';
+import { TODAY, parseYmdLocal, toLocalDateString } from '../utils/format';
 
 // ======================== DATE FILTER ========================
 
@@ -13,30 +13,31 @@ export interface DateFilter {
 }
 
 function getPresetRange(preset: DatePreset): { from: string; to: string } {
-  const today = new Date(TODAY);
+  const anchor = parseYmdLocal(TODAY) ?? new Date();
 
   if (preset === 'today') {
     return { from: TODAY, to: TODAY };
   }
 
   if (preset === 'week') {
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - today.getDay() + 1);
+    const monday = new Date(anchor);
+    monday.setDate(anchor.getDate() - ((anchor.getDay() + 6) % 7));
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    return {
-      from: monday.toISOString().split('T')[0],
-      to: sunday.toISOString().split('T')[0],
-    };
+    let from = toLocalDateString(monday);
+    let to = toLocalDateString(sunday);
+    if (to > TODAY) to = TODAY;
+    if (from > TODAY) return { from: TODAY, to: TODAY };
+    return { from, to };
   }
 
   if (preset === 'month') {
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    return {
-      from: firstDay.toISOString().split('T')[0],
-      to: lastDay.toISOString().split('T')[0],
-    };
+    const firstDay = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    const lastDay = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
+    let from = toLocalDateString(firstDay);
+    let to = toLocalDateString(lastDay);
+    if (to > TODAY) to = TODAY;
+    return { from, to };
   }
 
   // 'all' and 'custom' default
@@ -146,7 +147,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setCustomRange = (from: string, to: string) => {
-    setDateFilter({ preset: 'custom', from, to });
+    const max = toLocalDateString(new Date());
+    let f = from <= to ? from : to;
+    let t = from <= to ? to : from;
+    if (f > max) f = max;
+    if (t > max) t = max;
+    if (f > t) [f, t] = [t, f];
+    setDateFilter({ preset: 'custom', from: f, to: t });
   };
 
   const filterData = <I extends { date: string }>(items: I[]): I[] => {
