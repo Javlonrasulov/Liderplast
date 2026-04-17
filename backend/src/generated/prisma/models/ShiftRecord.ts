@@ -451,7 +451,7 @@ export type ShiftRecordCreateInput = {
   createdAt?: Date | string
   worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
-  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutShiftPaintUsagesInput
+  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
 }
 
 export type ShiftRecordUncheckedCreateInput = {
@@ -491,7 +491,7 @@ export type ShiftRecordUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
-  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutShiftPaintUsagesNestedInput
+  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateInput = {
@@ -801,7 +801,7 @@ export type ShiftRecordCreateWithoutWorkerInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
-  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutShiftPaintUsagesInput
+  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutWorkerInput = {
@@ -952,7 +952,7 @@ export type ShiftRecordCreateWithoutMachineInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
-  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutShiftPaintUsagesInput
+  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutMachineInput = {
@@ -1035,7 +1035,7 @@ export type ShiftRecordUpdateWithoutWorkerInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
-  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutShiftPaintUsagesNestedInput
+  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutWorkerInput = {
@@ -1187,7 +1187,7 @@ export type ShiftRecordUpdateWithoutMachineInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
-  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutShiftPaintUsagesNestedInput
+  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutMachineInput = {
@@ -1356,14 +1356,8 @@ export type $ShiftRecordPayload<ExtArgs extends runtime.Types.Extensions.Interna
     defectCount: number
     electricityKwh: number
     notes: string | null
-    /**
-     * Yarim tayyor smena: kraska/bo‘yoq ishlatilganmi
-     */
     paintUsed: boolean
     paintRawMaterialId: string | null
-    /**
-     * Doimiy saqlash: kg (ombordagi xomashyo bilan bir xil)
-     */
     paintQuantityKg: number | null
     status: $Enums.EntityStatus
     createdAt: Date

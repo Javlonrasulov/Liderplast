@@ -144,6 +144,7 @@ export interface SemiProductCatalogItem extends WarehouseProductBase {
   itemType: 'SEMI_PRODUCT';
   weightGram: number;
   rawMaterials: SemiProductRawMaterialRelation[];
+  machines: FinishedProductMachineRelation[];
 }
 
 export interface FinishedProductSemiRelation {
@@ -661,6 +662,7 @@ type CatalogResponse = {
     createdAt?: string;
     updatedAt?: string;
     rawMaterials: SemiProductRawMaterialRelation[];
+    machines: FinishedProductMachineRelation[];
     audit?: ProductAuditInfo;
   }>;
   finishedProducts: Array<{
@@ -752,9 +754,16 @@ type BackendMachine = {
   description?: string | null;
   powerKw: number;
   maxCapacityPerHour: number;
-  stage: 'SEMI' | 'FINISHED';
+  stage: 'SEMI' | 'FINISHED' | string;
   isActive: boolean;
 };
+
+function mapBackendMachineStage(stage: BackendMachine['stage']): 'semi' | 'final' {
+  const s = String(stage ?? '')
+    .trim()
+    .toUpperCase();
+  return s === 'FINISHED' ? 'final' : 'semi';
+}
 
 type BackendShiftRecord = {
   id: string;
@@ -1368,6 +1377,7 @@ async function loadStateFromApi() {
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       rawMaterials: item.rawMaterials,
+      machines: item.machines ?? [],
       audit: item.audit,
     })),
     ...catalog.finishedProducts.map((item) => ({
@@ -1467,7 +1477,7 @@ async function loadStateFromApi() {
     id: machine.id,
     name: machine.name,
     description: machine.description ?? '',
-    type: machine.stage === 'SEMI' ? 'semi' : 'final',
+    type: mapBackendMachineStage(machine.stage),
     maxCapacityPerHour: machine.maxCapacityPerHour,
     powerKw: machine.powerKw,
     isActive: machine.isActive,

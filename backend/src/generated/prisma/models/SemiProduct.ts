@@ -246,6 +246,7 @@ export type SemiProductWhereInput = {
   outputBatches?: Prisma.ProductionRecordListRelationFilter
   orderItems?: Prisma.OrderItemListRelationFilter
   rawMaterialLinks?: Prisma.SemiProductRawMaterialListRelationFilter
+  machineLinks?: Prisma.SemiProductMachineListRelationFilter
   finishedProductLinks?: Prisma.FinishedProductSemiProductListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
 }
@@ -265,6 +266,7 @@ export type SemiProductOrderByWithRelationInput = {
   outputBatches?: Prisma.ProductionRecordOrderByRelationAggregateInput
   orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialOrderByRelationAggregateInput
+  machineLinks?: Prisma.SemiProductMachineOrderByRelationAggregateInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductOrderByRelationAggregateInput
   productAuditLogs?: Prisma.ProductAuditLogOrderByRelationAggregateInput
 }
@@ -287,6 +289,7 @@ export type SemiProductWhereUniqueInput = Prisma.AtLeast<{
   outputBatches?: Prisma.ProductionRecordListRelationFilter
   orderItems?: Prisma.OrderItemListRelationFilter
   rawMaterialLinks?: Prisma.SemiProductRawMaterialListRelationFilter
+  machineLinks?: Prisma.SemiProductMachineListRelationFilter
   finishedProductLinks?: Prisma.FinishedProductSemiProductListRelationFilter
   productAuditLogs?: Prisma.ProductAuditLogListRelationFilter
 }, "id" | "name">
@@ -336,6 +339,7 @@ export type SemiProductCreateInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -355,6 +359,7 @@ export type SemiProductUncheckedCreateInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -374,6 +379,7 @@ export type SemiProductUpdateInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -393,6 +399,7 @@ export type SemiProductUncheckedUpdateInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -527,6 +534,20 @@ export type SemiProductUpdateOneRequiredWithoutRawMaterialLinksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SemiProductUpdateToOneWithWhereWithoutRawMaterialLinksInput, Prisma.SemiProductUpdateWithoutRawMaterialLinksInput>, Prisma.SemiProductUncheckedUpdateWithoutRawMaterialLinksInput>
 }
 
+export type SemiProductCreateNestedOneWithoutMachineLinksInput = {
+  create?: Prisma.XOR<Prisma.SemiProductCreateWithoutMachineLinksInput, Prisma.SemiProductUncheckedCreateWithoutMachineLinksInput>
+  connectOrCreate?: Prisma.SemiProductCreateOrConnectWithoutMachineLinksInput
+  connect?: Prisma.SemiProductWhereUniqueInput
+}
+
+export type SemiProductUpdateOneRequiredWithoutMachineLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.SemiProductCreateWithoutMachineLinksInput, Prisma.SemiProductUncheckedCreateWithoutMachineLinksInput>
+  connectOrCreate?: Prisma.SemiProductCreateOrConnectWithoutMachineLinksInput
+  upsert?: Prisma.SemiProductUpsertWithoutMachineLinksInput
+  connect?: Prisma.SemiProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SemiProductUpdateToOneWithWhereWithoutMachineLinksInput, Prisma.SemiProductUpdateWithoutMachineLinksInput>, Prisma.SemiProductUncheckedUpdateWithoutMachineLinksInput>
+}
+
 export type SemiProductCreateNestedOneWithoutFinishedProductLinksInput = {
   create?: Prisma.XOR<Prisma.SemiProductCreateWithoutFinishedProductLinksInput, Prisma.SemiProductUncheckedCreateWithoutFinishedProductLinksInput>
   connectOrCreate?: Prisma.SemiProductCreateOrConnectWithoutFinishedProductLinksInput
@@ -619,6 +640,7 @@ export type SemiProductCreateWithoutBalanceInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -637,6 +659,7 @@ export type SemiProductUncheckedCreateWithoutBalanceInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -671,6 +694,7 @@ export type SemiProductUpdateWithoutBalanceInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -689,6 +713,7 @@ export type SemiProductUncheckedUpdateWithoutBalanceInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -707,6 +732,7 @@ export type SemiProductCreateWithoutMovementsInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -725,6 +751,7 @@ export type SemiProductUncheckedCreateWithoutMovementsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -759,6 +786,7 @@ export type SemiProductUpdateWithoutMovementsInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -777,6 +805,7 @@ export type SemiProductUncheckedUpdateWithoutMovementsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -795,6 +824,7 @@ export type SemiProductCreateWithoutRawMaterialLinksInput = {
   consumptions?: Prisma.ProductionConsumptionCreateNestedManyWithoutSemiProductInput
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -813,6 +843,7 @@ export type SemiProductUncheckedCreateWithoutRawMaterialLinksInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedCreateNestedManyWithoutSemiProductInput
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -847,6 +878,7 @@ export type SemiProductUpdateWithoutRawMaterialLinksInput = {
   consumptions?: Prisma.ProductionConsumptionUpdateManyWithoutSemiProductNestedInput
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -865,6 +897,99 @@ export type SemiProductUncheckedUpdateWithoutRawMaterialLinksInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedUpdateManyWithoutSemiProductNestedInput
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
+  finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
+}
+
+export type SemiProductCreateWithoutMachineLinksInput = {
+  id?: string
+  name: string
+  weightGram: number
+  description?: string | null
+  isDeleted?: boolean
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  balance?: Prisma.InventoryBalanceCreateNestedOneWithoutSemiProductInput
+  movements?: Prisma.InventoryMovementCreateNestedManyWithoutSemiProductInput
+  consumptions?: Prisma.ProductionConsumptionCreateNestedManyWithoutSemiProductInput
+  outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
+  rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
+}
+
+export type SemiProductUncheckedCreateWithoutMachineLinksInput = {
+  id?: string
+  name: string
+  weightGram: number
+  description?: string | null
+  isDeleted?: boolean
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  balance?: Prisma.InventoryBalanceUncheckedCreateNestedOneWithoutSemiProductInput
+  movements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutSemiProductInput
+  consumptions?: Prisma.ProductionConsumptionUncheckedCreateNestedManyWithoutSemiProductInput
+  outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
+  rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
+}
+
+export type SemiProductCreateOrConnectWithoutMachineLinksInput = {
+  where: Prisma.SemiProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.SemiProductCreateWithoutMachineLinksInput, Prisma.SemiProductUncheckedCreateWithoutMachineLinksInput>
+}
+
+export type SemiProductUpsertWithoutMachineLinksInput = {
+  update: Prisma.XOR<Prisma.SemiProductUpdateWithoutMachineLinksInput, Prisma.SemiProductUncheckedUpdateWithoutMachineLinksInput>
+  create: Prisma.XOR<Prisma.SemiProductCreateWithoutMachineLinksInput, Prisma.SemiProductUncheckedCreateWithoutMachineLinksInput>
+  where?: Prisma.SemiProductWhereInput
+}
+
+export type SemiProductUpdateToOneWithWhereWithoutMachineLinksInput = {
+  where?: Prisma.SemiProductWhereInput
+  data: Prisma.XOR<Prisma.SemiProductUpdateWithoutMachineLinksInput, Prisma.SemiProductUncheckedUpdateWithoutMachineLinksInput>
+}
+
+export type SemiProductUpdateWithoutMachineLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.InventoryBalanceUpdateOneWithoutSemiProductNestedInput
+  movements?: Prisma.InventoryMovementUpdateManyWithoutSemiProductNestedInput
+  consumptions?: Prisma.ProductionConsumptionUpdateManyWithoutSemiProductNestedInput
+  outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
+  rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
+}
+
+export type SemiProductUncheckedUpdateWithoutMachineLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.InventoryBalanceUncheckedUpdateOneWithoutSemiProductNestedInput
+  movements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutSemiProductNestedInput
+  consumptions?: Prisma.ProductionConsumptionUncheckedUpdateManyWithoutSemiProductNestedInput
+  outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
+  rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -884,6 +1009,7 @@ export type SemiProductCreateWithoutFinishedProductLinksInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
 
@@ -902,6 +1028,7 @@ export type SemiProductUncheckedCreateWithoutFinishedProductLinksInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
 
@@ -936,6 +1063,7 @@ export type SemiProductUpdateWithoutFinishedProductLinksInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
 
@@ -954,6 +1082,7 @@ export type SemiProductUncheckedUpdateWithoutFinishedProductLinksInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
 
@@ -972,6 +1101,7 @@ export type SemiProductCreateWithoutProductAuditLogsInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
 }
 
@@ -990,6 +1120,7 @@ export type SemiProductUncheckedCreateWithoutProductAuditLogsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
 }
 
@@ -1024,6 +1155,7 @@ export type SemiProductUpdateWithoutProductAuditLogsInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
 }
 
@@ -1042,6 +1174,7 @@ export type SemiProductUncheckedUpdateWithoutProductAuditLogsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
 }
 
@@ -1059,6 +1192,7 @@ export type SemiProductCreateWithoutOutputBatchesInput = {
   consumptions?: Prisma.ProductionConsumptionCreateNestedManyWithoutSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -1077,6 +1211,7 @@ export type SemiProductUncheckedCreateWithoutOutputBatchesInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedCreateNestedManyWithoutSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -1111,6 +1246,7 @@ export type SemiProductUpdateWithoutOutputBatchesInput = {
   consumptions?: Prisma.ProductionConsumptionUpdateManyWithoutSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -1129,6 +1265,7 @@ export type SemiProductUncheckedUpdateWithoutOutputBatchesInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedUpdateManyWithoutSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -1147,6 +1284,7 @@ export type SemiProductCreateWithoutConsumptionsInput = {
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -1165,6 +1303,7 @@ export type SemiProductUncheckedCreateWithoutConsumptionsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -1199,6 +1338,7 @@ export type SemiProductUpdateWithoutConsumptionsInput = {
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -1217,6 +1357,7 @@ export type SemiProductUncheckedUpdateWithoutConsumptionsInput = {
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -1235,6 +1376,7 @@ export type SemiProductCreateWithoutOrderItemsInput = {
   consumptions?: Prisma.ProductionConsumptionCreateNestedManyWithoutSemiProductInput
   outputBatches?: Prisma.ProductionRecordCreateNestedManyWithoutOutputSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutSemiProductInput
 }
@@ -1253,6 +1395,7 @@ export type SemiProductUncheckedCreateWithoutOrderItemsInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedCreateNestedManyWithoutSemiProductInput
   outputBatches?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutOutputSemiProductInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedCreateNestedManyWithoutSemiProductInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutSemiProductInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedCreateNestedManyWithoutSemiProductInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutSemiProductInput
 }
@@ -1287,6 +1430,7 @@ export type SemiProductUpdateWithoutOrderItemsInput = {
   consumptions?: Prisma.ProductionConsumptionUpdateManyWithoutSemiProductNestedInput
   outputBatches?: Prisma.ProductionRecordUpdateManyWithoutOutputSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutSemiProductNestedInput
 }
@@ -1305,6 +1449,7 @@ export type SemiProductUncheckedUpdateWithoutOrderItemsInput = {
   consumptions?: Prisma.ProductionConsumptionUncheckedUpdateManyWithoutSemiProductNestedInput
   outputBatches?: Prisma.ProductionRecordUncheckedUpdateManyWithoutOutputSemiProductNestedInput
   rawMaterialLinks?: Prisma.SemiProductRawMaterialUncheckedUpdateManyWithoutSemiProductNestedInput
+  machineLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutSemiProductNestedInput
   finishedProductLinks?: Prisma.FinishedProductSemiProductUncheckedUpdateManyWithoutSemiProductNestedInput
   productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutSemiProductNestedInput
 }
@@ -1320,6 +1465,7 @@ export type SemiProductCountOutputType = {
   outputBatches: number
   orderItems: number
   rawMaterialLinks: number
+  machineLinks: number
   finishedProductLinks: number
   productAuditLogs: number
 }
@@ -1330,6 +1476,7 @@ export type SemiProductCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   outputBatches?: boolean | SemiProductCountOutputTypeCountOutputBatchesArgs
   orderItems?: boolean | SemiProductCountOutputTypeCountOrderItemsArgs
   rawMaterialLinks?: boolean | SemiProductCountOutputTypeCountRawMaterialLinksArgs
+  machineLinks?: boolean | SemiProductCountOutputTypeCountMachineLinksArgs
   finishedProductLinks?: boolean | SemiProductCountOutputTypeCountFinishedProductLinksArgs
   productAuditLogs?: boolean | SemiProductCountOutputTypeCountProductAuditLogsArgs
 }
@@ -1382,6 +1529,13 @@ export type SemiProductCountOutputTypeCountRawMaterialLinksArgs<ExtArgs extends 
 /**
  * SemiProductCountOutputType without action
  */
+export type SemiProductCountOutputTypeCountMachineLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SemiProductMachineWhereInput
+}
+
+/**
+ * SemiProductCountOutputType without action
+ */
 export type SemiProductCountOutputTypeCountFinishedProductLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FinishedProductSemiProductWhereInput
 }
@@ -1409,6 +1563,7 @@ export type SemiProductSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   outputBatches?: boolean | Prisma.SemiProduct$outputBatchesArgs<ExtArgs>
   orderItems?: boolean | Prisma.SemiProduct$orderItemsArgs<ExtArgs>
   rawMaterialLinks?: boolean | Prisma.SemiProduct$rawMaterialLinksArgs<ExtArgs>
+  machineLinks?: boolean | Prisma.SemiProduct$machineLinksArgs<ExtArgs>
   finishedProductLinks?: boolean | Prisma.SemiProduct$finishedProductLinksArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.SemiProduct$productAuditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.SemiProductCountOutputTypeDefaultArgs<ExtArgs>
@@ -1455,6 +1610,7 @@ export type SemiProductInclude<ExtArgs extends runtime.Types.Extensions.Internal
   outputBatches?: boolean | Prisma.SemiProduct$outputBatchesArgs<ExtArgs>
   orderItems?: boolean | Prisma.SemiProduct$orderItemsArgs<ExtArgs>
   rawMaterialLinks?: boolean | Prisma.SemiProduct$rawMaterialLinksArgs<ExtArgs>
+  machineLinks?: boolean | Prisma.SemiProduct$machineLinksArgs<ExtArgs>
   finishedProductLinks?: boolean | Prisma.SemiProduct$finishedProductLinksArgs<ExtArgs>
   productAuditLogs?: boolean | Prisma.SemiProduct$productAuditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.SemiProductCountOutputTypeDefaultArgs<ExtArgs>
@@ -1471,6 +1627,7 @@ export type $SemiProductPayload<ExtArgs extends runtime.Types.Extensions.Interna
     outputBatches: Prisma.$ProductionRecordPayload<ExtArgs>[]
     orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
     rawMaterialLinks: Prisma.$SemiProductRawMaterialPayload<ExtArgs>[]
+    machineLinks: Prisma.$SemiProductMachinePayload<ExtArgs>[]
     finishedProductLinks: Prisma.$FinishedProductSemiProductPayload<ExtArgs>[]
     productAuditLogs: Prisma.$ProductAuditLogPayload<ExtArgs>[]
   }
@@ -1883,6 +2040,7 @@ export interface Prisma__SemiProductClient<T, Null = never, ExtArgs extends runt
   outputBatches<T extends Prisma.SemiProduct$outputBatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$outputBatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderItems<T extends Prisma.SemiProduct$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rawMaterialLinks<T extends Prisma.SemiProduct$rawMaterialLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$rawMaterialLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SemiProductRawMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  machineLinks<T extends Prisma.SemiProduct$machineLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$machineLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SemiProductMachinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   finishedProductLinks<T extends Prisma.SemiProduct$finishedProductLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$finishedProductLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FinishedProductSemiProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productAuditLogs<T extends Prisma.SemiProduct$productAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SemiProduct$productAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2451,6 +2609,30 @@ export type SemiProduct$rawMaterialLinksArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.SemiProductRawMaterialScalarFieldEnum | Prisma.SemiProductRawMaterialScalarFieldEnum[]
+}
+
+/**
+ * SemiProduct.machineLinks
+ */
+export type SemiProduct$machineLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SemiProductMachine
+   */
+  select?: Prisma.SemiProductMachineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SemiProductMachine
+   */
+  omit?: Prisma.SemiProductMachineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SemiProductMachineInclude<ExtArgs> | null
+  where?: Prisma.SemiProductMachineWhereInput
+  orderBy?: Prisma.SemiProductMachineOrderByWithRelationInput | Prisma.SemiProductMachineOrderByWithRelationInput[]
+  cursor?: Prisma.SemiProductMachineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SemiProductMachineScalarFieldEnum | Prisma.SemiProductMachineScalarFieldEnum[]
 }
 
 /**

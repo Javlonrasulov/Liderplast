@@ -313,6 +313,10 @@ export class WarehouseService {
             },
             orderBy: { createdAt: 'asc' },
           },
+          machineLinks: {
+            include: { machine: true },
+            orderBy: { createdAt: 'asc' },
+          },
           productAuditLogs: {
             include: {
               actor: { select: { id: true, fullName: true } },
@@ -587,6 +591,21 @@ export class WarehouseService {
       if (existing.length !== rawMaterials.length) {
         throw new NotFoundException('One or more raw materials were not found');
       }
+
+      const machineIds = relations.machineIds ?? [];
+      if (machineIds.length > 0) {
+        const duplicateMachineIds = this.findDuplicateIds(machineIds);
+        if (duplicateMachineIds.length > 0) {
+          throw new BadRequestException('Machines must be unique');
+        }
+        const machines = await tx.machine.findMany({
+          where: { id: { in: machineIds } },
+          select: { id: true },
+        });
+        if (machines.length !== machineIds.length) {
+          throw new NotFoundException('One or more machines were not found');
+        }
+      }
       return;
     }
 
@@ -671,13 +690,7 @@ export class WarehouseService {
             weightGram: input.weightGram!,
           },
         });
-        await tx.semiProductRawMaterial.createMany({
-          data: (input.relations.rawMaterials ?? []).map((rawMaterial) => ({
-            semiProductId: item.id,
-            rawMaterialId: rawMaterial.rawMaterialId,
-            amountGram: rawMaterial.amountGram,
-          })),
-        });
+        await this.replaceSemiProductRelations(tx, item.id, input.relations);
         return item;
       }
       case InventoryItemType.FINISHED_PRODUCT: {
@@ -801,17 +814,26 @@ export class WarehouseService {
     relations: ResolvedProductInput['relations'],
   ) {
     await tx.semiProductRawMaterial.deleteMany({ where: { semiProductId } });
-    if (!relations.rawMaterials?.length) {
-      return;
+    await tx.semiProductMachine.deleteMany({ where: { semiProductId } });
+
+    if (relations.rawMaterials?.length) {
+      await tx.semiProductRawMaterial.createMany({
+        data: relations.rawMaterials.map((item) => ({
+          semiProductId,
+          rawMaterialId: item.rawMaterialId,
+          amountGram: item.amountGram,
+        })),
+      });
     }
 
-    await tx.semiProductRawMaterial.createMany({
-      data: relations.rawMaterials.map((item) => ({
-        semiProductId,
-        rawMaterialId: item.rawMaterialId,
-        amountGram: item.amountGram,
-      })),
-    });
+    if (relations.machineIds?.length) {
+      await tx.semiProductMachine.createMany({
+        data: relations.machineIds.map((machineId) => ({
+          semiProductId,
+          machineId,
+        })),
+      });
+    }
   }
 
   private async replaceFinishedProductRelations(
@@ -1049,6 +1071,10 @@ export class WarehouseService {
               include: { rawMaterial: true },
               orderBy: { createdAt: 'asc' },
             },
+            machineLinks: {
+              include: { machine: true },
+              orderBy: { createdAt: 'asc' },
+            },
             productAuditLogs: {
               include: {
                 actor: { select: { id: true, fullName: true } },
@@ -1121,6 +1147,10 @@ export class WarehouseService {
           include: {
             rawMaterialLinks: {
               include: { rawMaterial: true },
+              orderBy: { createdAt: 'asc' },
+            },
+            machineLinks: {
+              include: { machine: true },
               orderBy: { createdAt: 'asc' },
             },
             productAuditLogs: {
@@ -1215,6 +1245,16 @@ export class WarehouseService {
         unit: string;
       };
     }>;
+    machineLinks?: Array<{
+      id: string;
+      machineId: string;
+      machine: {
+        id: string;
+        name: string;
+        stage: string;
+        isActive: boolean;
+      };
+    }>;
     productAuditLogs: Array<{
       actionType: ProductAuditActionType;
       createdAt: Date;
@@ -1236,6 +1276,13 @@ export class WarehouseService {
         name: link.rawMaterial.name,
         unit: link.rawMaterial.unit,
         amountGram: link.amountGram,
+      })),
+      machines: (item.machineLinks ?? []).map((link) => ({
+        id: link.id,
+        machineId: link.machineId,
+        name: link.machine.name,
+        stage: link.machine.stage,
+        isActive: link.machine.isActive,
       })),
       audit: this.buildAuditSummary(item.productAuditLogs),
     };

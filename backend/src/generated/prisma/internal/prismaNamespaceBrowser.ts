@@ -60,6 +60,7 @@ export const ModelName = {
   InventoryMovement: 'InventoryMovement',
   Machine: 'Machine',
   SemiProductRawMaterial: 'SemiProductRawMaterial',
+  SemiProductMachine: 'SemiProductMachine',
   FinishedProductSemiProduct: 'FinishedProductSemiProduct',
   FinishedProductMachine: 'FinishedProductMachine',
   ProductAuditLog: 'ProductAuditLog',
@@ -172,6 +173,7 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
+  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -244,6 +246,16 @@ export const SemiProductRawMaterialScalarFieldEnum = {
 } as const
 
 export type SemiProductRawMaterialScalarFieldEnum = (typeof SemiProductRawMaterialScalarFieldEnum)[keyof typeof SemiProductRawMaterialScalarFieldEnum]
+
+
+export const SemiProductMachineScalarFieldEnum = {
+  id: 'id',
+  semiProductId: 'semiProductId',
+  machineId: 'machineId',
+  createdAt: 'createdAt'
+} as const
+
+export type SemiProductMachineScalarFieldEnum = (typeof SemiProductMachineScalarFieldEnum)[keyof typeof SemiProductMachineScalarFieldEnum]
 
 
 export const FinishedProductSemiProductScalarFieldEnum = {

@@ -203,6 +203,7 @@ model SemiProduct {
   outputBatches  ProductionRecord[]      @relation("OutputSemiProduct")
   orderItems     OrderItem[]             @relation("OrderSemiProduct")
   rawMaterialLinks SemiProductRawMaterial[]
+  machineLinks     SemiProductMachine[]
   finishedProductLinks FinishedProductSemiProduct[]
   productAuditLogs ProductAuditLog[]     @relation("ProductAuditSemiProduct")
 }
@@ -276,6 +277,7 @@ model Machine {
   productions        ProductionRecord[]
   shiftRecords       ShiftRecord[]
   bagSessions        BagConnectionSession[]
+  semiProductLinks   SemiProductMachine[]
   finishedProductLinks FinishedProductMachine[]
 }
 
@@ -291,6 +293,18 @@ model SemiProductRawMaterial {
 
   @@unique([semiProductId, rawMaterialId])
   @@index([rawMaterialId])
+}
+
+model SemiProductMachine {
+  id              String       @id @default(cuid())
+  semiProductId   String
+  semiProduct     SemiProduct  @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
+  machineId       String
+  machine         Machine      @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  createdAt       DateTime     @default(now())
+
+  @@unique([semiProductId, machineId])
+  @@index([machineId])
 }
 
 model FinishedProductSemiProduct {

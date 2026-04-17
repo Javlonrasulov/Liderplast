@@ -263,6 +263,7 @@ export type MachineWhereInput = {
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
   bagSessions?: Prisma.BagConnectionSessionListRelationFilter
+  semiProductLinks?: Prisma.SemiProductMachineListRelationFilter
   finishedProductLinks?: Prisma.FinishedProductMachineListRelationFilter
 }
 
@@ -280,6 +281,7 @@ export type MachineOrderByWithRelationInput = {
   productions?: Prisma.ProductionRecordOrderByRelationAggregateInput
   shiftRecords?: Prisma.ShiftRecordOrderByRelationAggregateInput
   bagSessions?: Prisma.BagConnectionSessionOrderByRelationAggregateInput
+  semiProductLinks?: Prisma.SemiProductMachineOrderByRelationAggregateInput
   finishedProductLinks?: Prisma.FinishedProductMachineOrderByRelationAggregateInput
 }
 
@@ -300,6 +302,7 @@ export type MachineWhereUniqueInput = Prisma.AtLeast<{
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
   bagSessions?: Prisma.BagConnectionSessionListRelationFilter
+  semiProductLinks?: Prisma.SemiProductMachineListRelationFilter
   finishedProductLinks?: Prisma.FinishedProductMachineListRelationFilter
 }, "id" | "name">
 
@@ -351,6 +354,7 @@ export type MachineCreateInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineCreateNestedManyWithoutMachineInput
 }
 
@@ -368,6 +372,7 @@ export type MachineUncheckedCreateInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedCreateNestedManyWithoutMachineInput
 }
 
@@ -385,6 +390,7 @@ export type MachineUpdateInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUpdateManyWithoutMachineNestedInput
 }
 
@@ -402,6 +408,7 @@ export type MachineUncheckedUpdateInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedUpdateManyWithoutMachineNestedInput
 }
 
@@ -515,6 +522,20 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type MachineCreateNestedOneWithoutSemiProductLinksInput = {
+  create?: Prisma.XOR<Prisma.MachineCreateWithoutSemiProductLinksInput, Prisma.MachineUncheckedCreateWithoutSemiProductLinksInput>
+  connectOrCreate?: Prisma.MachineCreateOrConnectWithoutSemiProductLinksInput
+  connect?: Prisma.MachineWhereUniqueInput
+}
+
+export type MachineUpdateOneRequiredWithoutSemiProductLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.MachineCreateWithoutSemiProductLinksInput, Prisma.MachineUncheckedCreateWithoutSemiProductLinksInput>
+  connectOrCreate?: Prisma.MachineCreateOrConnectWithoutSemiProductLinksInput
+  upsert?: Prisma.MachineUpsertWithoutSemiProductLinksInput
+  connect?: Prisma.MachineWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MachineUpdateToOneWithWhereWithoutSemiProductLinksInput, Prisma.MachineUpdateWithoutSemiProductLinksInput>, Prisma.MachineUncheckedUpdateWithoutSemiProductLinksInput>
+}
+
 export type MachineCreateNestedOneWithoutFinishedProductLinksInput = {
   create?: Prisma.XOR<Prisma.MachineCreateWithoutFinishedProductLinksInput, Prisma.MachineUncheckedCreateWithoutFinishedProductLinksInput>
   connectOrCreate?: Prisma.MachineCreateOrConnectWithoutFinishedProductLinksInput
@@ -577,6 +598,90 @@ export type MachineUpdateOneWithoutShiftRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MachineUpdateToOneWithWhereWithoutShiftRecordsInput, Prisma.MachineUpdateWithoutShiftRecordsInput>, Prisma.MachineUncheckedUpdateWithoutShiftRecordsInput>
 }
 
+export type MachineCreateWithoutSemiProductLinksInput = {
+  id?: string
+  name: string
+  description?: string | null
+  stage: $Enums.ProductionStage
+  powerKw: number
+  maxCapacityPerHour: number
+  isActive?: boolean
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutMachineInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutMachineInput
+  bagSessions?: Prisma.BagConnectionSessionCreateNestedManyWithoutMachineInput
+  finishedProductLinks?: Prisma.FinishedProductMachineCreateNestedManyWithoutMachineInput
+}
+
+export type MachineUncheckedCreateWithoutSemiProductLinksInput = {
+  id?: string
+  name: string
+  description?: string | null
+  stage: $Enums.ProductionStage
+  powerKw: number
+  maxCapacityPerHour: number
+  isActive?: boolean
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutMachineInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutMachineInput
+  bagSessions?: Prisma.BagConnectionSessionUncheckedCreateNestedManyWithoutMachineInput
+  finishedProductLinks?: Prisma.FinishedProductMachineUncheckedCreateNestedManyWithoutMachineInput
+}
+
+export type MachineCreateOrConnectWithoutSemiProductLinksInput = {
+  where: Prisma.MachineWhereUniqueInput
+  create: Prisma.XOR<Prisma.MachineCreateWithoutSemiProductLinksInput, Prisma.MachineUncheckedCreateWithoutSemiProductLinksInput>
+}
+
+export type MachineUpsertWithoutSemiProductLinksInput = {
+  update: Prisma.XOR<Prisma.MachineUpdateWithoutSemiProductLinksInput, Prisma.MachineUncheckedUpdateWithoutSemiProductLinksInput>
+  create: Prisma.XOR<Prisma.MachineCreateWithoutSemiProductLinksInput, Prisma.MachineUncheckedCreateWithoutSemiProductLinksInput>
+  where?: Prisma.MachineWhereInput
+}
+
+export type MachineUpdateToOneWithWhereWithoutSemiProductLinksInput = {
+  where?: Prisma.MachineWhereInput
+  data: Prisma.XOR<Prisma.MachineUpdateWithoutSemiProductLinksInput, Prisma.MachineUncheckedUpdateWithoutSemiProductLinksInput>
+}
+
+export type MachineUpdateWithoutSemiProductLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumProductionStageFieldUpdateOperationsInput | $Enums.ProductionStage
+  powerKw?: Prisma.FloatFieldUpdateOperationsInput | number
+  maxCapacityPerHour?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  productions?: Prisma.ProductionRecordUpdateManyWithoutMachineNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutMachineNestedInput
+  bagSessions?: Prisma.BagConnectionSessionUpdateManyWithoutMachineNestedInput
+  finishedProductLinks?: Prisma.FinishedProductMachineUpdateManyWithoutMachineNestedInput
+}
+
+export type MachineUncheckedUpdateWithoutSemiProductLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumProductionStageFieldUpdateOperationsInput | $Enums.ProductionStage
+  powerKw?: Prisma.FloatFieldUpdateOperationsInput | number
+  maxCapacityPerHour?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutMachineNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput
+  bagSessions?: Prisma.BagConnectionSessionUncheckedUpdateManyWithoutMachineNestedInput
+  finishedProductLinks?: Prisma.FinishedProductMachineUncheckedUpdateManyWithoutMachineNestedInput
+}
+
 export type MachineCreateWithoutFinishedProductLinksInput = {
   id?: string
   name: string
@@ -591,6 +696,7 @@ export type MachineCreateWithoutFinishedProductLinksInput = {
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutMachineInput
 }
 
 export type MachineUncheckedCreateWithoutFinishedProductLinksInput = {
@@ -607,6 +713,7 @@ export type MachineUncheckedCreateWithoutFinishedProductLinksInput = {
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutMachineInput
 }
 
 export type MachineCreateOrConnectWithoutFinishedProductLinksInput = {
@@ -639,6 +746,7 @@ export type MachineUpdateWithoutFinishedProductLinksInput = {
   productions?: Prisma.ProductionRecordUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUpdateManyWithoutMachineNestedInput
 }
 
 export type MachineUncheckedUpdateWithoutFinishedProductLinksInput = {
@@ -655,6 +763,7 @@ export type MachineUncheckedUpdateWithoutFinishedProductLinksInput = {
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutMachineNestedInput
 }
 
 export type MachineCreateWithoutBagSessionsInput = {
@@ -670,6 +779,7 @@ export type MachineCreateWithoutBagSessionsInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineCreateNestedManyWithoutMachineInput
 }
 
@@ -686,6 +796,7 @@ export type MachineUncheckedCreateWithoutBagSessionsInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutMachineInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedCreateNestedManyWithoutMachineInput
 }
 
@@ -718,6 +829,7 @@ export type MachineUpdateWithoutBagSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUpdateManyWithoutMachineNestedInput
 }
 
@@ -734,6 +846,7 @@ export type MachineUncheckedUpdateWithoutBagSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutMachineNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedUpdateManyWithoutMachineNestedInput
 }
 
@@ -750,6 +863,7 @@ export type MachineCreateWithoutProductionsInput = {
   updatedAt?: Date | string
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineCreateNestedManyWithoutMachineInput
 }
 
@@ -766,6 +880,7 @@ export type MachineUncheckedCreateWithoutProductionsInput = {
   updatedAt?: Date | string
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedCreateNestedManyWithoutMachineInput
 }
 
@@ -798,6 +913,7 @@ export type MachineUpdateWithoutProductionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUpdateManyWithoutMachineNestedInput
 }
 
@@ -814,6 +930,7 @@ export type MachineUncheckedUpdateWithoutProductionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedUpdateManyWithoutMachineNestedInput
 }
 
@@ -830,6 +947,7 @@ export type MachineCreateWithoutShiftRecordsInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineCreateNestedManyWithoutMachineInput
 }
 
@@ -846,6 +964,7 @@ export type MachineUncheckedCreateWithoutShiftRecordsInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutMachineInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedCreateNestedManyWithoutMachineInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedCreateNestedManyWithoutMachineInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedCreateNestedManyWithoutMachineInput
 }
 
@@ -878,6 +997,7 @@ export type MachineUpdateWithoutShiftRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUpdateManyWithoutMachineNestedInput
 }
 
@@ -894,6 +1014,7 @@ export type MachineUncheckedUpdateWithoutShiftRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutMachineNestedInput
   bagSessions?: Prisma.BagConnectionSessionUncheckedUpdateManyWithoutMachineNestedInput
+  semiProductLinks?: Prisma.SemiProductMachineUncheckedUpdateManyWithoutMachineNestedInput
   finishedProductLinks?: Prisma.FinishedProductMachineUncheckedUpdateManyWithoutMachineNestedInput
 }
 
@@ -906,6 +1027,7 @@ export type MachineCountOutputType = {
   productions: number
   shiftRecords: number
   bagSessions: number
+  semiProductLinks: number
   finishedProductLinks: number
 }
 
@@ -913,6 +1035,7 @@ export type MachineCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   productions?: boolean | MachineCountOutputTypeCountProductionsArgs
   shiftRecords?: boolean | MachineCountOutputTypeCountShiftRecordsArgs
   bagSessions?: boolean | MachineCountOutputTypeCountBagSessionsArgs
+  semiProductLinks?: boolean | MachineCountOutputTypeCountSemiProductLinksArgs
   finishedProductLinks?: boolean | MachineCountOutputTypeCountFinishedProductLinksArgs
 }
 
@@ -950,6 +1073,13 @@ export type MachineCountOutputTypeCountBagSessionsArgs<ExtArgs extends runtime.T
 /**
  * MachineCountOutputType without action
  */
+export type MachineCountOutputTypeCountSemiProductLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SemiProductMachineWhereInput
+}
+
+/**
+ * MachineCountOutputType without action
+ */
 export type MachineCountOutputTypeCountFinishedProductLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FinishedProductMachineWhereInput
 }
@@ -969,6 +1099,7 @@ export type MachineSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   productions?: boolean | Prisma.Machine$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.Machine$shiftRecordsArgs<ExtArgs>
   bagSessions?: boolean | Prisma.Machine$bagSessionsArgs<ExtArgs>
+  semiProductLinks?: boolean | Prisma.Machine$semiProductLinksArgs<ExtArgs>
   finishedProductLinks?: boolean | Prisma.Machine$finishedProductLinksArgs<ExtArgs>
   _count?: boolean | Prisma.MachineCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["machine"]>
@@ -1017,6 +1148,7 @@ export type MachineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   productions?: boolean | Prisma.Machine$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.Machine$shiftRecordsArgs<ExtArgs>
   bagSessions?: boolean | Prisma.Machine$bagSessionsArgs<ExtArgs>
+  semiProductLinks?: boolean | Prisma.Machine$semiProductLinksArgs<ExtArgs>
   finishedProductLinks?: boolean | Prisma.Machine$finishedProductLinksArgs<ExtArgs>
   _count?: boolean | Prisma.MachineCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1029,6 +1161,7 @@ export type $MachinePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     productions: Prisma.$ProductionRecordPayload<ExtArgs>[]
     shiftRecords: Prisma.$ShiftRecordPayload<ExtArgs>[]
     bagSessions: Prisma.$BagConnectionSessionPayload<ExtArgs>[]
+    semiProductLinks: Prisma.$SemiProductMachinePayload<ExtArgs>[]
     finishedProductLinks: Prisma.$FinishedProductMachinePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1439,6 +1572,7 @@ export interface Prisma__MachineClient<T, Null = never, ExtArgs extends runtime.
   productions<T extends Prisma.Machine$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Machine$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shiftRecords<T extends Prisma.Machine$shiftRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Machine$shiftRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bagSessions<T extends Prisma.Machine$bagSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Machine$bagSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BagConnectionSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  semiProductLinks<T extends Prisma.Machine$semiProductLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Machine$semiProductLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SemiProductMachinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   finishedProductLinks<T extends Prisma.Machine$finishedProductLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Machine$finishedProductLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FinishedProductMachinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1941,6 +2075,30 @@ export type Machine$bagSessionsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.BagConnectionSessionScalarFieldEnum | Prisma.BagConnectionSessionScalarFieldEnum[]
+}
+
+/**
+ * Machine.semiProductLinks
+ */
+export type Machine$semiProductLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SemiProductMachine
+   */
+  select?: Prisma.SemiProductMachineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SemiProductMachine
+   */
+  omit?: Prisma.SemiProductMachineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SemiProductMachineInclude<ExtArgs> | null
+  where?: Prisma.SemiProductMachineWhereInput
+  orderBy?: Prisma.SemiProductMachineOrderByWithRelationInput | Prisma.SemiProductMachineOrderByWithRelationInput[]
+  cursor?: Prisma.SemiProductMachineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SemiProductMachineScalarFieldEnum | Prisma.SemiProductMachineScalarFieldEnum[]
 }
 
 /**

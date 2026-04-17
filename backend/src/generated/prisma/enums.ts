@@ -181,3 +181,13 @@ export const RawMaterialKind = {
 } as const
 
 export type RawMaterialKind = (typeof RawMaterialKind)[keyof typeof RawMaterialKind]
+
+
+export const FinishedProductSpecUnit = {
+  LITER: 'LITER',
+  KILOGRAM: 'KILOGRAM',
+  PIECE: 'PIECE',
+  OTHER: 'OTHER'
+} as const
+
+export type FinishedProductSpecUnit = (typeof FinishedProductSpecUnit)[keyof typeof FinishedProductSpecUnit]

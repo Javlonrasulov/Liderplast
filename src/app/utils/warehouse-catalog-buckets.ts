@@ -26,3 +26,18 @@ export function finalBucketFromCatalog(
   if (v < 0.85) return '0.5L';
   return null;
 }
+
+/**
+ * Tayyor mahsulot nomidan ichki `volumeLiter` taxmini (API / slotlar uchun).
+ * Foydalanuvchi litr kiritmaydi — «5L», «0,5 L» каби номдан олинади; топилмаса null.
+ */
+export function inferVolumeLiterFromFinishedProductName(name: string): number | null {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const re = /\b(\d+[.,]\d+|\d+)\s*(?:L|l|л|Л)\b/iu;
+  const m = trimmed.match(re);
+  if (!m) return null;
+  const n = Number(m[1].replace(',', '.'));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}

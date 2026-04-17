@@ -393,6 +393,7 @@ export const ModelName = {
   InventoryMovement: 'InventoryMovement',
   Machine: 'Machine',
   SemiProductRawMaterial: 'SemiProductRawMaterial',
+  SemiProductMachine: 'SemiProductMachine',
   FinishedProductSemiProduct: 'FinishedProductSemiProduct',
   FinishedProductMachine: 'FinishedProductMachine',
   ProductAuditLog: 'ProductAuditLog',
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expense" | "salarySetting" | "employeeProduction" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expense" | "salarySetting" | "employeeProduction" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1098,6 +1099,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SemiProductRawMaterialCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SemiProductRawMaterialCountAggregateOutputType> | number
+        }
+      }
+    }
+    SemiProductMachine: {
+      payload: Prisma.$SemiProductMachinePayload<ExtArgs>
+      fields: Prisma.SemiProductMachineFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SemiProductMachineFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SemiProductMachineFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        findFirst: {
+          args: Prisma.SemiProductMachineFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SemiProductMachineFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        findMany: {
+          args: Prisma.SemiProductMachineFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>[]
+        }
+        create: {
+          args: Prisma.SemiProductMachineCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        createMany: {
+          args: Prisma.SemiProductMachineCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SemiProductMachineCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>[]
+        }
+        delete: {
+          args: Prisma.SemiProductMachineDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        update: {
+          args: Prisma.SemiProductMachineUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        deleteMany: {
+          args: Prisma.SemiProductMachineDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SemiProductMachineUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SemiProductMachineUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>[]
+        }
+        upsert: {
+          args: Prisma.SemiProductMachineUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SemiProductMachinePayload>
+        }
+        aggregate: {
+          args: Prisma.SemiProductMachineAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSemiProductMachine>
+        }
+        groupBy: {
+          args: Prisma.SemiProductMachineGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SemiProductMachineGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SemiProductMachineCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SemiProductMachineCountAggregateOutputType> | number
         }
       }
     }
@@ -2913,6 +2988,7 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
+  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -2985,6 +3061,16 @@ export const SemiProductRawMaterialScalarFieldEnum = {
 } as const
 
 export type SemiProductRawMaterialScalarFieldEnum = (typeof SemiProductRawMaterialScalarFieldEnum)[keyof typeof SemiProductRawMaterialScalarFieldEnum]
+
+
+export const SemiProductMachineScalarFieldEnum = {
+  id: 'id',
+  semiProductId: 'semiProductId',
+  machineId: 'machineId',
+  createdAt: 'createdAt'
+} as const
+
+export type SemiProductMachineScalarFieldEnum = (typeof SemiProductMachineScalarFieldEnum)[keyof typeof SemiProductMachineScalarFieldEnum]
 
 
 export const FinishedProductSemiProductScalarFieldEnum = {
@@ -3526,6 +3612,20 @@ export type ListEnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'FinishedProductSpecUnit'
+ */
+export type EnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit'>
+    
+
+
+/**
+ * Reference to a field of type 'FinishedProductSpecUnit[]'
+ */
+export type ListEnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit[]'>
+    
+
+
+/**
  * Reference to a field of type 'InventoryItemType'
  */
 export type EnumInventoryItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryItemType'>
@@ -3838,6 +3938,7 @@ export type GlobalOmitConfig = {
   inventoryMovement?: Prisma.InventoryMovementOmit
   machine?: Prisma.MachineOmit
   semiProductRawMaterial?: Prisma.SemiProductRawMaterialOmit
+  semiProductMachine?: Prisma.SemiProductMachineOmit
   finishedProductSemiProduct?: Prisma.FinishedProductSemiProductOmit
   finishedProductMachine?: Prisma.FinishedProductMachineOmit
   productAuditLog?: Prisma.ProductAuditLogOmit

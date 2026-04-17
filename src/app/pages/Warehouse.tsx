@@ -30,6 +30,7 @@ import { calcPercent, formatDate, formatNumber } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import {
   finalBucketFromCatalog,
+  inferVolumeLiterFromFinishedProductName,
   semiBucketFromCatalog,
 } from '../utils/warehouse-catalog-buckets';
 import { Button } from '../components/ui/button';
@@ -73,7 +74,6 @@ type ProductFormState = {
   name: string;
   description: string;
   weightGram: string;
-  volumeLiter: string;
   rawMaterials: Array<{
     rawMaterialId: string;
     amountGram: string;
@@ -94,7 +94,6 @@ const DEFAULT_FORM: ProductFormState = {
   name: '',
   description: '',
   weightGram: '',
-  volumeLiter: '',
   rawMaterials: [{ rawMaterialId: '', amountGram: '' }],
   semiProductIds: [],
   machineIds: [],
@@ -179,10 +178,13 @@ function useIsMobile() {
 function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
   if (product.itemType === 'SEMI_PRODUCT') {
     const recipeCount = product.rawMaterials.length;
-    return `${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}`;
+    const machineCount = product.machines.length;
+    return `${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
+      machineCount > 0 ? `, ${machineCount} ${t.whMachinesShort}` : ''
+    }`;
   }
   if (product.itemType === 'FINISHED_PRODUCT') {
-    return `${t.whVolumeLiter}: ${formatNumber(product.volumeLiter)} L, ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
+    return `${t.unitPiece} · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
   }
   return product.defaultBagWeightKg
     ? `${t.whUnit}: ${product.unit}, ${t.rmDefaultBagWeight}: ${formatNumber(product.defaultBagWeightKg)} ${t.unitKg}`
@@ -464,15 +466,11 @@ export function Warehouse() {
     t,
   ]);
 
-  /** Tayyor mahsulot katalogi: backend har qanday `machine.id`ni qabul qiladi; faqat `final` filtrlash ko‘pincha bo‘sh qoldiradi */
-  const machinesForFinishedProduct = useMemo(() => {
-    const list = [...state.machines];
-    list.sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'final' ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-    return list;
-  }, [state.machines]);
+  /** Tayyor mahsulot: barcha apparatlar ko‘rinadi; qaysilarida ish olib borilishi checkbox bilan belgilanadi */
+  const machinesForFinishedProductList = useMemo(
+    () => [...state.machines].sort((a, b) => a.name.localeCompare(b.name)),
+    [state.machines],
+  );
 
   const totalSemiProduced = state.semiProductBatches.reduce(
     (sum, batch) => sum + batch.quantity,
@@ -482,12 +480,33 @@ export function Warehouse() {
     (sum, batch) => sum + batch.quantity,
     0,
   );
-  const totalSemiSold = state.sales
-    .filter((sale) => sale.productCategory === 'semi')
-    .reduce((sum, sale) => sum + sale.quantity, 0);
-  const totalFinalSold = state.sales
-    .filter((sale) => sale.productCategory === 'final')
-    .reduce((sum, sale) => sum + sale.quantity, 0);
+  /** Бир нечта позицияли буюртмаларда категория бўйича тўғри йиғинди */
+  const totalSemiSold = useMemo(() => {
+    let sum = 0;
+    for (const sale of state.sales) {
+      if (sale.items?.length) {
+        for (const line of sale.items) {
+          if (line.productCategory === 'semi') sum += line.quantity;
+        }
+      } else if (sale.productCategory === 'semi') {
+        sum += sale.quantity;
+      }
+    }
+    return sum;
+  }, [state.sales]);
+  const totalFinalSold = useMemo(() => {
+    let sum = 0;
+    for (const sale of state.sales) {
+      if (sale.items?.length) {
+        for (const line of sale.items) {
+          if (line.productCategory === 'final') sum += line.quantity;
+        }
+      } else if (sale.productCategory === 'final') {
+        sum += sale.quantity;
+      }
+    }
+    return sum;
+  }, [state.sales]);
 
   const filteredProducts = useMemo(() => {
     const items = productCatalog.map((item) => ({
@@ -544,8 +563,6 @@ export function Warehouse() {
       description: product.description ?? '',
       weightGram:
         product.itemType === 'SEMI_PRODUCT' ? String(product.weightGram) : '',
-      volumeLiter:
-        product.itemType === 'FINISHED_PRODUCT' ? String(product.volumeLiter) : '',
       rawMaterials:
         product.itemType === 'SEMI_PRODUCT'
           ? product.rawMaterials.map((item) => ({
@@ -558,7 +575,7 @@ export function Warehouse() {
           ? product.semiProducts.map((item) => item.semiProductId)
           : [],
       machineIds:
-        product.itemType === 'FINISHED_PRODUCT'
+        product.itemType === 'SEMI_PRODUCT' || product.itemType === 'FINISHED_PRODUCT'
           ? product.machines.map((item) => item.machineId)
           : [],
     });
@@ -583,7 +600,7 @@ export function Warehouse() {
             : [{ rawMaterialId: '', amountGram: '' }]
           : [],
       semiProductIds: itemType === 'FINISHED_PRODUCT' ? prev.semiProductIds : [],
-      machineIds: itemType === 'FINISHED_PRODUCT' ? prev.machineIds : [],
+      machineIds: prev.machineIds,
     }));
   };
 
@@ -644,26 +661,33 @@ export function Warehouse() {
       ) {
         throw new Error(t.whAmountGramRequired);
       }
+      if (form.machineIds.length === 0) {
+        throw new Error(t.whMachineRequired);
+      }
 
       return {
         itemType: 'SEMI_PRODUCT' as const,
         name: form.name.trim(),
         description: form.description.trim() || undefined,
         weightGram,
-        relations: { rawMaterials: rawMaterialsPayload },
+        relations: {
+          rawMaterials: rawMaterialsPayload,
+          machineIds: form.machineIds,
+        },
       };
     }
 
-    const volumeLiter = Number(form.volumeLiter);
-    if (!Number.isFinite(volumeLiter) || volumeLiter <= 0) {
-      throw new Error(t.whMetricRequired);
-    }
     if (form.semiProductIds.length === 0) {
       throw new Error(t.whSemiProductRequired);
     }
     if (form.machineIds.length === 0) {
       throw new Error(t.whMachineRequired);
     }
+
+    const volumeLiter =
+      editingProduct?.itemType === 'FINISHED_PRODUCT'
+        ? editingProduct.volumeLiter
+        : inferVolumeLiterFromFinishedProductName(form.name.trim()) ?? 1;
 
     return {
       itemType: 'FINISHED_PRODUCT' as const,
@@ -876,8 +900,8 @@ export function Warehouse() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {form.itemType === 'SEMI_PRODUCT' ? (
+      {form.itemType === 'SEMI_PRODUCT' ? (
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
               {t.whWeightGram}
@@ -893,24 +917,21 @@ export function Warehouse() {
               className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
             />
           </div>
-        ) : (
           <div>
             <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
-              {t.whVolumeLiter}
+              {t.labelDesc}
             </label>
-            <input
-              type="number"
-              min="0"
-              step="0.1"
-              value={form.volumeLiter}
+            <textarea
+              rows={3}
+              value={form.description}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, volumeLiter: e.target.value }))
+                setForm((prev) => ({ ...prev, description: e.target.value }))
               }
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
             />
           </div>
-        )}
-
+        </div>
+      ) : (
         <div>
           <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
             {t.labelDesc}
@@ -924,9 +945,10 @@ export function Warehouse() {
             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
           />
         </div>
-      </div>
+      )}
 
       {form.itemType === 'SEMI_PRODUCT' ? (
+        <>
         <div className="space-y-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -1025,6 +1047,55 @@ export function Warehouse() {
             </p>
           )}
         </div>
+
+        <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+            {t.whMachineSelectionTitle}
+          </p>
+          <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
+            {machinesForFinishedProductList.map((machine) => (
+              <label
+                key={machine.id}
+                className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700"
+              >
+                <input
+                  type="checkbox"
+                  className="mt-1 shrink-0"
+                  checked={form.machineIds.includes(machine.id)}
+                  onChange={() => toggleSelection('machineIds', machine.id)}
+                />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-medium text-slate-900 dark:text-white">{machine.name}</span>
+                    <span
+                      className={`inline-flex shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        machine.type === 'final'
+                          ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'
+                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
+                      }`}
+                    >
+                      {machine.type === 'final' ? t.whFinal : t.whSemi}
+                    </span>
+                  </div>
+                  {machine.description?.trim() ? (
+                    <p className="text-xs leading-snug text-slate-500 dark:text-slate-400">
+                      {machine.description}
+                    </p>
+                  ) : null}
+                </div>
+                <span className="shrink-0 self-start text-xs text-slate-400">
+                  {machine.isActive ? t.statusActive : t.statusCritical}
+                </span>
+              </label>
+            ))}
+            {machinesForFinishedProductList.length === 0 && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {t.whNoMachines}
+              </p>
+            )}
+          </div>
+        </div>
+        </>
       ) : (
         <div className="grid gap-4 xl:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
@@ -1065,28 +1136,42 @@ export function Warehouse() {
               {t.whMachineSelectionTitle}
             </p>
             <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
-              {machinesForFinishedProduct.map((machine) => (
+              {machinesForFinishedProductList.map((machine) => (
                 <label
                   key={machine.id}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
+                  className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700"
                 >
                   <input
                     type="checkbox"
+                    className="mt-1 shrink-0"
                     checked={form.machineIds.includes(machine.id)}
                     onChange={() => toggleSelection('machineIds', machine.id)}
                   />
-                  <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-slate-700 dark:text-slate-200 sm:flex-row sm:items-center sm:gap-2">
-                    <span className="truncate">{machine.name}</span>
-                    <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                      {machine.type === 'final' ? t.whFinal : t.whSemi}
-                    </span>
-                  </span>
-                  <span className="text-xs text-slate-400">
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-medium text-slate-900 dark:text-white">{machine.name}</span>
+                      <span
+                        className={`inline-flex shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                          machine.type === 'final'
+                            ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'
+                            : 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
+                        }`}
+                      >
+                        {machine.type === 'final' ? t.whFinal : t.whSemi}
+                      </span>
+                    </div>
+                    {machine.description?.trim() ? (
+                      <p className="text-xs leading-snug text-slate-500 dark:text-slate-400">
+                        {machine.description}
+                      </p>
+                    ) : null}
+                  </div>
+                  <span className="shrink-0 self-start text-xs text-slate-400">
                     {machine.isActive ? t.statusActive : t.statusCritical}
                   </span>
                 </label>
               ))}
-              {machinesForFinishedProduct.length === 0 && (
+              {machinesForFinishedProductList.length === 0 && (
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {t.whNoMachines}
                 </p>

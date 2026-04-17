@@ -87,6 +87,11 @@ export type Machine = Prisma.MachineModel
  */
 export type SemiProductRawMaterial = Prisma.SemiProductRawMaterialModel
 /**
+ * Model SemiProductMachine
+ * 
+ */
+export type SemiProductMachine = Prisma.SemiProductMachineModel
+/**
  * Model FinishedProductSemiProduct
  * 
  */
