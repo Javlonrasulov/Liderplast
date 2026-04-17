@@ -559,6 +559,9 @@ export function ShiftWork() {
   const todayPreviewPanelRef = useRef<HTMLDivElement>(null);
   const [todayPreviewFullscreen, setTodayPreviewFullscreen] = useState(false);
 
+  const historyPanelRef = useRef<HTMLDivElement>(null);
+  const [historyFullscreen, setHistoryFullscreen] = useState(false);
+
   const [catalogProductTypes, setCatalogProductTypes] = useState<string[]>([]);
 
   useEffect(() => {
@@ -589,6 +592,9 @@ export function ShiftWork() {
       setTodayPreviewFullscreen(
         document.fullscreenElement === todayPreviewPanelRef.current,
       );
+      setHistoryFullscreen(
+        document.fullscreenElement === historyPanelRef.current,
+      );
     };
     document.addEventListener('fullscreenchange', sync);
     return () => document.removeEventListener('fullscreenchange', sync);
@@ -596,6 +602,32 @@ export function ShiftWork() {
 
   const toggleTodayPreviewFullscreen = useCallback(async () => {
     const el = todayPreviewPanelRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) {
+          await el.requestFullscreen();
+        } else {
+          const wk = (
+            el as HTMLElement & { webkitRequestFullscreen?: () => void }
+          ).webkitRequestFullscreen;
+          if (wk) wk.call(el);
+        }
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        const doc = document as Document & {
+          webkitExitFullscreen?: () => void;
+        };
+        doc.webkitExitFullscreen?.();
+      }
+    } catch {
+      /* fullscreen declined or unsupported */
+    }
+  }, []);
+
+  const toggleHistoryFullscreen = useCallback(async () => {
+    const el = historyPanelRef.current;
     if (!el) return;
     try {
       if (!document.fullscreenElement) {
@@ -1832,18 +1864,44 @@ export function ShiftWork() {
 
       {/* ── TAB: History ── */}
       {activeTab === 'history' && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3 min-[400px]:px-5 py-3 min-[400px]:py-4 border-b border-slate-200 dark:border-slate-700">
+        <div
+          ref={historyPanelRef}
+          className={`bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 flex flex-col min-h-0 ${
+            historyFullscreen
+              ? '!rounded-none h-screen max-h-screen border-0 shadow-none'
+              : ''
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 px-3 min-[400px]:px-5 py-3 min-[400px]:py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <h3 className="text-slate-800 dark:text-white font-semibold text-xs min-[400px]:text-sm">{t.tab2}</h3>
-            <span className="text-xs text-slate-400">{filteredRecords.length} {t.records}</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-xs text-slate-400">{filteredRecords.length} {t.records}</span>
+              <button
+                type="button"
+                onClick={() => void toggleHistoryFullscreen()}
+                className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/80 p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                title={historyFullscreen ? t.todayPreviewExitFullscreen : t.todayPreviewFullscreen}
+                aria-label={historyFullscreen ? t.todayPreviewExitFullscreen : t.todayPreviewFullscreen}
+              >
+                {historyFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+            </div>
           </div>
           {filteredRecords.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-400 gap-2">
+            <div
+              className={`flex flex-col items-center justify-center text-slate-400 gap-2 ${
+                historyFullscreen ? 'flex-1 min-h-[12rem]' : 'h-48'
+              }`}
+            >
               <Clock size={32} className="opacity-30" />
               <p className="text-sm">{t.noData}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div
+              className={`overflow-x-auto ${
+                historyFullscreen ? 'flex-1 min-h-0 overflow-y-auto' : ''
+              }`}
+            >
               <table className="w-full text-sm min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">

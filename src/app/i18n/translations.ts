@@ -348,6 +348,22 @@ export interface T {
   whTabCatalog: string;
   /** Ombor sahifasi: «статистика» таб */
   whTabStats: string;
+  /** Ombor sahifasi: ishlab chiqarish tarixi */
+  whTabHistory: string;
+  whHistoryTitle: string;
+  whHistorySubtitle: string;
+  whHistoryEmpty: string;
+  whHistoryColWhen: string;
+  whHistoryColType: string;
+  whHistoryColOutput: string;
+  whHistoryColQty: string;
+  whHistoryColConsumed: string;
+  whHistoryTypeSemi: string;
+  whHistoryTypeFinal: string;
+  whHistoryKindRaw: string;
+  whHistoryKindSemi: string;
+  whRecipePerPiece: string;
+  whRecipePerThousand: string;
   whMaterial: string;
   whSemi: string;
   whFinal: string;
@@ -1004,6 +1020,22 @@ const uz_cyrillic: T = {
   whTabOverview: 'Умумий кўрсаткичлар',
   whTabCatalog: 'Каталог',
   whTabStats: 'Статистика',
+  whTabHistory: 'Тарих',
+  whHistoryTitle: 'Ишлаб чиқариш тарихи',
+  whHistorySubtitle:
+    'Сиро / краска сарфи ва қолип сарфи — қайси маҳсулот қанча ишлаб чиқарилгани (/production).',
+  whHistoryEmpty: 'Ҳозирча ишлаб чиқариш ёзувлари мавжуд эмас.',
+  whHistoryColWhen: 'Вақт',
+  whHistoryColType: 'Тур',
+  whHistoryColOutput: 'Чиқарилган',
+  whHistoryColQty: 'Миқдор',
+  whHistoryColConsumed: 'Сарфланган',
+  whHistoryTypeSemi: 'Қолип',
+  whHistoryTypeFinal: 'Тайёр',
+  whHistoryKindRaw: 'Хомашё',
+  whHistoryKindSemi: 'Қолип',
+  whRecipePerPiece: '1 дона қолип учун (каталог)',
+  whRecipePerThousand: '1000 дона ≈',
   whMaterial: 'ПЭТ Сиро',
   whSemi: 'Ярим тайёр (қолип)',
   whFinal: 'Тайёр маҳсулот',
@@ -1076,7 +1108,7 @@ const uz_cyrillic: T = {
   whIncludedInWarehouse: 'Омборда кўринади',
   whSemiBreakdownTitle: 'Ярим тайёр — рецепт ва краска',
   whSemiStockPieces: 'Омборда қолип',
-  whRecipeRaw: 'Рецепт бўйича хомашё (баҳоланма)',
+  whRecipeRaw: 'Каталог бўйича ретсепт (1 дона учун)',
   whShiftPaintTotal: 'Сменаларда сарфланган краска',
 
   slTitle: 'Сотув',
@@ -1655,6 +1687,22 @@ const uz_latin: T = {
   whTabOverview: 'Umumiy ko‘rsatkichlar',
   whTabCatalog: 'Katalog',
   whTabStats: 'Statistika',
+  whTabHistory: 'Tarix',
+  whHistoryTitle: 'Ishlab chiqarish tarixi',
+  whHistorySubtitle:
+    'Siro / kraska va qolip sarfi — qaysi mahsulot qancha chiqarilgani (/production).',
+  whHistoryEmpty: 'Hozircha ishlab chiqarish yozuvlari yo‘q.',
+  whHistoryColWhen: 'Vaqt',
+  whHistoryColType: 'Tur',
+  whHistoryColOutput: 'Chiqarilgan',
+  whHistoryColQty: 'Miqdor',
+  whHistoryColConsumed: 'Sarflangan',
+  whHistoryTypeSemi: 'Qolip',
+  whHistoryTypeFinal: 'Tayyor',
+  whHistoryKindRaw: 'Xomashyo',
+  whHistoryKindSemi: 'Qolip',
+  whRecipePerPiece: '1 dona qolip uchun (katalog)',
+  whRecipePerThousand: '1000 dona ≈',
   whMaterial: 'PET Siro',
   whSemi: 'Yarim tayyor (qolip)',
   whFinal: 'Tayyor mahsulot',
@@ -1727,7 +1775,7 @@ const uz_latin: T = {
   whIncludedInWarehouse: 'Omborda ko‘rinadi',
   whSemiBreakdownTitle: 'Yarim tayyor — retsept va kraska',
   whSemiStockPieces: 'Omborda qolip',
-  whRecipeRaw: 'Retsept bo‘yicha xomashyo (baholanma)',
+  whRecipeRaw: 'Katalog bo‘yicha retsept (1 dona uchun)',
   whShiftPaintTotal: 'Smenalarda sarflangan kraska',
 
   slTitle: 'Sotuv',
@@ -2306,6 +2354,22 @@ const ru: T = {
   whTabOverview: 'Общие показатели',
   whTabCatalog: 'Каталог',
   whTabStats: 'Статистика',
+  whTabHistory: 'История',
+  whHistoryTitle: 'История производства',
+  whHistorySubtitle:
+    'Расход сырья / краски и заготовок — что и сколько произведено (/production).',
+  whHistoryEmpty: 'Записей производства пока нет.',
+  whHistoryColWhen: 'Время',
+  whHistoryColType: 'Тип',
+  whHistoryColOutput: 'Выпуск',
+  whHistoryColQty: 'Кол-во',
+  whHistoryColConsumed: 'Расход',
+  whHistoryTypeSemi: 'Заготовка',
+  whHistoryTypeFinal: 'Готовый',
+  whHistoryKindRaw: 'Сырьё',
+  whHistoryKindSemi: 'Заготовка',
+  whRecipePerPiece: 'На 1 шт. заготовки (каталог)',
+  whRecipePerThousand: '1000 шт. ≈',
   whMaterial: 'ПЭТ Сырьё',
   whSemi: 'Полуфабрикат (заготовка)',
   whFinal: 'Готовый продукт',
@@ -2378,7 +2442,7 @@ const ru: T = {
   whIncludedInWarehouse: 'Отображается на складе',
   whSemiBreakdownTitle: 'Полуфабрикат — рецепт и краска',
   whSemiStockPieces: 'Остаток заготовок',
-  whRecipeRaw: 'Сырьё по рецепту (оценка)',
+  whRecipeRaw: 'Рецепт из каталога (на 1 шт.)',
   whShiftPaintTotal: 'Краска по сменам (всего)',
 
   slTitle: 'Продажи',

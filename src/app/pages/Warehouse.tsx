@@ -14,6 +14,7 @@ import {
   Trash2,
   TrendingDown,
   TrendingUp,
+  History,
   X,
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
@@ -26,7 +27,7 @@ import {
   type WarehouseProduct,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { calcPercent, formatDate, formatNumber } from '../utils/format';
+import { calcPercent, formatDate, formatDateTime, formatNumber } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
 import { Button } from '../components/ui/button';
@@ -274,7 +275,9 @@ export function Warehouse() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics'>('overview');
+  const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics' | 'history'>(
+    'overview',
+  );
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
   const rawMaterials = useMemo(
@@ -347,11 +350,14 @@ export function Warehouse() {
           (s) => s.itemType === 'SEMI_PRODUCT' && s.itemName === semi.name,
         )?.quantity ?? 0;
       const recipeLines = semi.rawMaterials.map((rm) => {
-        const kgPerUnit = rm.amountGram / 1000;
+        const gramsPerPiece = rm.amountGram;
+        /** 1000 дона учун жами грамм → килограмм (омбор қолдиғига боғлиқ эмас) */
+        const kgPerThousandPieces = (gramsPerPiece * 1000) / 1000;
         return {
           name: rm.name,
           unit: rm.unit,
-          estKg: stockQty * kgPerUnit,
+          gramsPerPiece,
+          kgPerThousandPieces,
         };
       });
       const paintTotals = new Map<string, number>();
@@ -1254,6 +1260,14 @@ export function Warehouse() {
             <PieChart size={14} className="shrink-0" />
             <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('history')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'history' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <History size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabHistory}</span>
+          </button>
         </div>
 
         {(error || success) && (
@@ -1401,19 +1415,30 @@ export function Warehouse() {
                     <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       {t.whRecipeRaw}
                     </p>
-                    <ul className="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                    <p className="mt-1 text-[10px] leading-snug text-slate-500 dark:text-slate-400">
+                      {t.whRecipePerPiece}
+                    </p>
+                    <ul className="mt-2 space-y-2 text-xs text-slate-700 dark:text-slate-300">
                       {row.recipeLines.length === 0 ? (
                         <li className="text-slate-400">—</li>
                       ) : (
                         row.recipeLines.map((line) => (
                           <li
                             key={line.name}
-                            className="flex justify-between gap-2 rounded-md bg-white/80 px-2 py-1 dark:bg-slate-900/40"
+                            className="rounded-md bg-white/80 px-2 py-2 dark:bg-slate-900/40"
                           >
-                            <span className="min-w-0 truncate font-medium">{line.name}</span>
-                            <span className="shrink-0 tabular-nums text-slate-600 dark:text-slate-400">
-                              ~{formatNumber(line.estKg)} {t.unitKg}
-                            </span>
+                            <div className="font-medium text-slate-800 dark:text-slate-100">
+                              {line.name}
+                            </div>
+                            <div className="mt-1 tabular-nums text-slate-600 dark:text-slate-300">
+                              {formatNumber(line.gramsPerPiece)} g / 1 {t.unitPiece}
+                            </div>
+                            <div className="mt-0.5 text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+                              {t.whRecipePerThousand}{' '}
+                              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                {formatNumber(line.kgPerThousandPieces)} {t.unitKg}
+                              </span>
+                            </div>
                           </li>
                         ))
                       )}
@@ -1561,6 +1586,101 @@ export function Warehouse() {
       )}
 
           </>
+        )}
+
+        {whTab === 'history' && (
+          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800">
+            <div className="border-b border-slate-200/80 bg-slate-50/90 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/80">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-200 shadow-inner dark:bg-slate-700">
+                  <History className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+                    {t.whHistoryTitle}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {t.whHistorySubtitle}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="max-h-[min(70vh,720px)] overflow-auto p-4 sm:p-5">
+              {state.productionHistory.length === 0 ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t.whHistoryEmpty}</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:text-slate-400">
+                        <th className="py-2 pr-3">{t.whHistoryColWhen}</th>
+                        <th className="py-2 pr-3">{t.whHistoryColType}</th>
+                        <th className="py-2 pr-3">{t.whHistoryColOutput}</th>
+                        <th className="py-2 pr-3 text-right">{t.whHistoryColQty}</th>
+                        <th className="py-2 pl-2">{t.whHistoryColConsumed}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {state.productionHistory.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="border-b border-slate-100 align-top dark:border-slate-700/80"
+                        >
+                          <td className="py-3 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
+                            {formatDateTime(row.createdAt)}
+                            <div className="text-[11px] text-slate-400">{row.date}</div>
+                          </td>
+                          <td className="py-3 pr-3">
+                            <span
+                              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                row.stage === 'SEMI'
+                                  ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
+                                  : 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200'
+                              }`}
+                            >
+                              {row.stage === 'SEMI' ? t.whHistoryTypeSemi : t.whHistoryTypeFinal}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-3 font-medium text-slate-900 dark:text-white">
+                            {row.outputProductName}
+                          </td>
+                          <td className="py-3 pr-3 text-right tabular-nums text-slate-800 dark:text-slate-100">
+                            {formatNumber(row.quantityProduced)} {t.unitPiece}
+                          </td>
+                          <td className="py-3 pl-2">
+                            {row.consumptions.length === 0 ? (
+                              <span className="text-slate-400">—</span>
+                            ) : (
+                              <ul className="space-y-1 text-xs text-slate-700 dark:text-slate-300">
+                                {row.consumptions.map((c, i) => (
+                                  <li key={`${row.id}-${i}`} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                                    <span
+                                      className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold uppercase ${
+                                        c.kind === 'raw'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/35 dark:text-blue-200'
+                                          : 'bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-100'
+                                      }`}
+                                    >
+                                      {c.kind === 'raw' ? t.whHistoryKindRaw : t.whHistoryKindSemi}
+                                    </span>
+                                    <span className="min-w-0 font-medium">{c.resourceName}</span>
+                                    <span className="tabular-nums text-slate-600 dark:text-slate-400">
+                                      — {formatNumber(c.quantity)}{' '}
+                                      {c.unitLabel === 'dona' ? t.unitPiece : c.unitLabel}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {whTab === 'catalog' && (

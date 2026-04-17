@@ -234,6 +234,24 @@ export interface Machine {
   isActive: boolean;
 }
 
+/** `/production` yozuvlari — ombor «Тарих» таби учун */
+export interface ProductionHistoryConsumption {
+  resourceName: string;
+  quantity: number;
+  unitLabel: string;
+  kind: 'raw' | 'semi';
+}
+
+export interface ProductionHistoryRow {
+  id: string;
+  createdAt: string;
+  date: string;
+  stage: 'SEMI' | 'FINISHED';
+  outputProductName: string;
+  quantityProduced: number;
+  consumptions: ProductionHistoryConsumption[];
+}
+
 export interface OperationLog {
   id: string;
   timestamp: string;
@@ -422,6 +440,8 @@ export interface ERPState {
   sales: Sale[];
   expenses: Expense[];
   machines: Machine[];
+  /** Ishlab chiqarish partiyalari (xomashyo / қолип сарфи билан) */
+  productionHistory: ProductionHistoryRow[];
   logs: OperationLog[];
   electricityPrice: number;
   shiftRecords: ShiftRecord[];
@@ -631,6 +651,7 @@ const emptyState: ERPState = {
   sales: [],
   expenses: [],
   machines: [],
+  productionHistory: [],
   logs: [],
   electricityPrice: 800,
   shiftRecords: [],
@@ -810,6 +831,49 @@ type BackendProductionRecord = {
     semiProduct?: { id: string; name: string } | null;
   }>;
 };
+
+function mapProductionHistoryRows(
+  productions: BackendProductionRecord[],
+): ProductionHistoryRow[] {
+  return productions
+    .map((p) => {
+      const consumptions: ProductionHistoryConsumption[] = [];
+      for (const c of p.consumptions) {
+        if (c.semiProduct) {
+          consumptions.push({
+            resourceName: c.semiProduct.name,
+            quantity: c.quantity,
+            unitLabel: 'dona',
+            kind: 'semi',
+          });
+        } else if (c.rawMaterial) {
+          consumptions.push({
+            resourceName: c.rawMaterial.name,
+            quantity: c.quantity,
+            unitLabel: 'kg',
+            kind: 'raw',
+          });
+        }
+      }
+      const outputProductName =
+        p.stage === 'SEMI'
+          ? p.outputSemiProduct?.name ?? '—'
+          : p.outputFinishedProduct?.name ?? '—';
+      return {
+        id: p.id,
+        createdAt: p.createdAt,
+        date: toLocalDateString(p.timestamp),
+        stage: p.stage,
+        outputProductName,
+        quantityProduced: p.quantityProduced,
+        consumptions,
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+}
 
 type BackendClient = {
   id: string;
@@ -1627,6 +1691,7 @@ async function loadStateFromApi() {
     sales,
     expenses: mappedExpenses,
     machines: mappedMachines,
+    productionHistory: mapProductionHistoryRows(productions),
     logs,
     electricityPrice: 800,
     shiftRecords: mappedShifts,
