@@ -1299,7 +1299,7 @@ export function ShiftWork() {
   };
 
   return (
-    <div className="min-w-0 max-w-[100vw] overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6 space-y-4 min-[400px]:space-y-6">
+    <div className="w-full min-w-0 max-w-full overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6 space-y-4 min-[400px]:space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-slate-900 dark:text-white text-lg min-[400px]:text-xl font-bold leading-tight">{t.title}</h1>

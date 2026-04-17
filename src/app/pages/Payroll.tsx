@@ -272,7 +272,7 @@ function VedomostTab() {
 
       {/* ── KPI Summary cards ─────────────────────────────────────── */}
       {allRows.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             label={t.prTotalBrutto}
             value={formatCurrency(totals.brutto)}
@@ -1792,7 +1792,7 @@ export function Payroll() {
   ] as const;
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6">
       {/* Page header */}
       <div>
         <h1 className="text-slate-800 dark:text-white font-bold">{t.prTitle}</h1>

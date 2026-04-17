@@ -374,8 +374,8 @@ export function RawMaterial() {
   // NOTE: quick consume + manual bag creation removed (handled elsewhere)
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
-      <div className="w-full flex flex-col gap-6">
+    <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
+      <div className="flex w-full min-w-0 flex-col gap-6">
         <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
           <button
             type="button"
@@ -697,7 +697,7 @@ export function RawMaterial() {
                 <div className="flex gap-2">
                   <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="0" min="0"
                     className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                  <div className="w-[140px]">
+                  <div className="w-full min-w-[6.5rem] max-w-[42%] sm:w-[140px] sm:max-w-none">
                     <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
                       <SelectTrigger className={SELECT_TRIGGER_CLS}>
                         <SelectValue />

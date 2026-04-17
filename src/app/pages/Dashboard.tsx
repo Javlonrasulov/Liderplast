@@ -135,7 +135,7 @@ function CurrencyRateWidget() {
         </div>
 
         {/* Center: currency rates */}
-        <div className="flex items-center gap-8 flex-wrap flex-1 justify-center">
+        <div className="flex flex-1 flex-wrap items-center justify-center gap-4 min-[400px]:gap-8">
           {loading ? (
             <div className="flex items-center gap-2 text-slate-400 text-xs">
               <RefreshCw size={13} className="animate-spin" />
@@ -152,7 +152,7 @@ function CurrencyRateWidget() {
           ) : (
             currencies.map(({ key, flag, name, obj }) =>
               obj ? (
-                <div key={key} className="flex items-center gap-4 py-1 px-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600">
+                <div key={key} className="flex min-w-0 max-w-full flex-wrap items-center gap-3 py-1 px-3 min-[400px]:gap-4 min-[400px]:px-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600 sm:flex-nowrap">
                   {/* Flag + name */}
                   <div className="flex items-center gap-2">
                     <span className="text-xl leading-none">{flag}</span>
@@ -410,7 +410,7 @@ export function Dashboard() {
   }, [state.logs, dateFilter]);
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -449,7 +449,7 @@ export function Dashboard() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <KpiCard title={t.dashKpiMaterial} value={formatNumber(rawMaterialStock)} unit={t.unitKg} icon={Droplets} color="bg-blue-500" warning={lowStock} />
         <KpiCard title={t.dashKpiSemi} value={formatNumber(totalSemiStock)} unit={t.unitPiece} icon={Factory} color="bg-purple-500" trend="up" trendVal="+5k" />
         <KpiCard title={t.dashKpiFinal} value={formatNumber(totalFinalStock)} unit={t.unitPiece} icon={Package} color="bg-cyan-500" trend="up" trendVal="+5k" />

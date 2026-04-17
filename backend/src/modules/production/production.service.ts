@@ -16,6 +16,7 @@ import { Prisma } from '../../generated/prisma/client.js';
 type Tx = Prisma.TransactionClient;
 import { RealtimeGateway } from '../../socket/realtime.gateway.js';
 import { RawMaterialBagsService } from '../raw-material-bags/raw-material-bags.service.js';
+import { FinanceService } from '../finance/finance.service.js';
 import { CreateMachineDto } from './dto/create-machine.dto.js';
 import { CreateProductionDto } from './dto/create-production.dto.js';
 import { CreateShiftRecordDto } from './dto/create-shift-record.dto.js';
@@ -35,6 +36,7 @@ export class ProductionService {
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
     private readonly rawMaterialBagsService: RawMaterialBagsService,
+    private readonly financeService: FinanceService,
   ) {}
 
   createMachine(dto: CreateMachineDto) {
@@ -741,6 +743,8 @@ export class ProductionService {
       shiftId: created.id,
     });
 
+    await this.financeService.syncShiftElectricityExpense(created.id);
+
     return created;
   }
 
@@ -877,6 +881,8 @@ export class ProductionService {
       source: 'shift',
       shiftId: updated.id,
     });
+
+    await this.financeService.syncShiftElectricityExpense(updated.id);
 
     return updated;
   }

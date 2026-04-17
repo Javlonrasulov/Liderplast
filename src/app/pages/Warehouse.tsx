@@ -1301,8 +1301,8 @@ export function Warehouse() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
-      <div className="w-full flex flex-col gap-6">
+    <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
+      <div className="flex w-full min-w-0 flex-col gap-6">
         <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
           <button
             type="button"

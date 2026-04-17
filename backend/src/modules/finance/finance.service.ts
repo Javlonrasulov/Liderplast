@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import * as XLSX from 'xlsx';
@@ -14,7 +15,9 @@ import {
   SalaryType,
 } from '../../generated/prisma/enums.js';
 import { CreateEmployeeProductionDto } from './dto/create-employee-production.dto.js';
+import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
+import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
 import { UpsertEmployeeProductRateDto } from './dto/upsert-employee-product-rate.dto.js';
@@ -178,6 +181,8 @@ function monthFromDate(date: Date) {
 
 @Injectable()
 export class FinanceService {
+  private readonly logger = new Logger(FinanceService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   private async syncClientBankInfo(
@@ -213,11 +218,32 @@ export class FinanceService {
     client.bankName = client.bankName ?? nextBankName;
   }
 
-  createExpense(dto: CreateExpenseDto, createdById?: string) {
+  async createExpense(dto: CreateExpenseDto, createdById?: string) {
+    const category = await this.prisma.expenseCategory.findUnique({
+      where: { id: dto.categoryId },
+    });
+
+    if (!category || category.deletedAt) {
+      throw new BadRequestException('Expense category not found or inactive');
+    }
+
+    const incurredAt = dto.incurredAt ? new Date(dto.incurredAt) : new Date();
+
     return this.prisma.expense.create({
       data: {
-        ...dto,
+        title: dto.title,
+        type: category.legacyExpenseType,
+        categoryId: category.id,
+        amount: dto.amount,
+        description: dto.description,
+        incurredAt,
         createdById,
+      },
+      include: {
+        category: true,
+        createdBy: {
+          omit: { passwordHash: true },
+        },
       },
     });
   }
@@ -225,12 +251,152 @@ export class FinanceService {
   getExpenses() {
     return this.prisma.expense.findMany({
       include: {
+        category: true,
         createdBy: {
           omit: { passwordHash: true },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async getExpenseCategories() {
+    await this.prisma.expenseCategory.updateMany({
+      where: { legacyExpenseType: 'ELECTRICITY', electricityCalc: false },
+      data: { electricityCalc: true },
+    });
+    return this.prisma.expenseCategory.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ name: 'asc' }],
+    });
+  }
+
+  createExpenseCategory(dto: CreateExpenseCategoryDto) {
+    return this.prisma.expenseCategory.create({
+      data: {
+        name: dto.name.trim(),
+        legacyExpenseType: 'OTHER',
+        electricityCalc: false,
+      },
+    });
+  }
+
+  async updateExpenseCategory(id: string, dto: UpdateExpenseCategoryDto) {
+    const existing = await this.prisma.expenseCategory.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense category not found');
+    }
+    if (dto.name === undefined) {
+      return existing;
+    }
+    return this.prisma.expenseCategory.update({
+      where: { id },
+      data: { name: dto.name.trim() },
+    });
+  }
+
+  async deleteExpenseCategory(id: string) {
+    const existing = await this.prisma.expenseCategory.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense category not found');
+    }
+    if (existing.deletedAt) {
+      return existing;
+    }
+    if (existing.electricityCalc || existing.legacyExpenseType === 'ELECTRICITY') {
+      throw new BadRequestException(
+        'Electricity calculation category cannot be removed. You can rename it.',
+      );
+    }
+    return this.prisma.expenseCategory.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Smena yozuvidagi kVt·soat × bazadagi narx bo‘yicha elektr kategoriyasiga xarajat
+   * (bir smenaga bitta bog‘langan Expense, `sourceShiftId`).
+   */
+  async syncShiftElectricityExpense(shiftId: string) {
+    const shift = await this.prisma.shiftRecord.findUnique({
+      where: { id: shiftId },
+      include: { worker: true, machine: true },
+    });
+    if (!shift) {
+      return;
+    }
+
+    const settings = await this.prisma.salarySetting.findFirst();
+    const pricePerKwh = settings?.electricityPricePerKwh ?? 800;
+
+    const category = await this.prisma.expenseCategory.findFirst({
+      where: {
+        deletedAt: null,
+        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (!category) {
+      return;
+    }
+
+    const kwh = shift.electricityKwh ?? 0;
+    const existing = await this.prisma.expense.findFirst({
+      where: { sourceShiftId: shiftId },
+    });
+
+    if (kwh <= 1e-6) {
+      if (existing) {
+        await this.prisma.expense.delete({ where: { id: existing.id } });
+      }
+      return;
+    }
+
+    const amount = Math.round(kwh * pricePerKwh * 100) / 100;
+    const workerName = shift.worker?.fullName?.trim() || '—';
+    const machineName = shift.machine?.name ?? '—';
+    const dateStr = shift.date.toISOString().slice(0, 10);
+    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwh} kVt·soat × ${pricePerKwh} so'm`;
+    const title = description.length >= 2 ? description.slice(0, 160) : 'Smena elektr';
+
+    const common = {
+      title,
+      type: category.legacyExpenseType,
+      categoryId: category.id,
+      amount,
+      description,
+      incurredAt: shift.date,
+      status: EntityStatus.COMPLETED,
+    };
+
+    if (existing) {
+      await this.prisma.expense.update({
+        where: { id: existing.id },
+        data: common,
+      });
+    } else {
+      await this.prisma.expense.create({
+        data: {
+          ...common,
+          sourceShiftId: shiftId,
+        },
+      });
+    }
+  }
+
+  async resyncAllShiftElectricityExpenses() {
+    const shifts = await this.prisma.shiftRecord.findMany({
+      where: { electricityKwh: { gt: 0 } },
+      select: { id: true },
+    });
+    for (const row of shifts) {
+      await this.syncShiftElectricityExpense(row.id);
+    }
   }
 
   createEmployeeProduction(dto: CreateEmployeeProductionDto) {
@@ -335,14 +501,82 @@ export class FinanceService {
   async updateSalarySettings(dto: UpdateSalarySettingsDto) {
     const existing = await this.prisma.salarySetting.findFirst();
 
+    const data = {
+      incomeTaxPercent: dto.incomeTaxPercent,
+      otherDeductionPercent: dto.otherDeductionPercent,
+      socialTaxPercent: dto.socialTaxPercent,
+      npsPercent: dto.npsPercent,
+      ...(dto.electricityPricePerKwh !== undefined
+        ? { electricityPricePerKwh: dto.electricityPricePerKwh }
+        : {}),
+    };
+
     if (!existing) {
-      return this.prisma.salarySetting.create({ data: dto });
+      return this.prisma.salarySetting.create({
+        data: {
+          ...data,
+          electricityPricePerKwh: dto.electricityPricePerKwh ?? 800,
+        },
+      });
     }
 
-    return this.prisma.salarySetting.update({
+    const updated = await this.prisma.salarySetting.update({
       where: { id: existing.id },
-      data: dto,
+      data,
     });
+
+    if (dto.electricityPricePerKwh !== undefined) {
+      try {
+        await this.resyncAllShiftElectricityExpenses();
+      } catch (err) {
+        this.logger.warn(
+          `resyncAllShiftElectricityExpenses after salary settings: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+
+    return updated;
+  }
+
+  /**
+   * Xarajatlar sahifasidan: faqat kVt·soat narxi yangilanadi (soliq foizlari DBdagi qiymatda qoladi).
+   */
+  async patchElectricityPricePerKwh(electricityPricePerKwh: number) {
+    const existing = await this.prisma.salarySetting.findFirst();
+    if (!existing) {
+      const created = await this.prisma.salarySetting.create({
+        data: {
+          incomeTaxPercent: 12,
+          otherDeductionPercent: 0,
+          socialTaxPercent: 0,
+          npsPercent: 0,
+          electricityPricePerKwh,
+        },
+      });
+      try {
+        await this.resyncAllShiftElectricityExpenses();
+      } catch (err) {
+        this.logger.warn(
+          `resyncAllShiftElectricityExpenses after create salary settings: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+      return created;
+    }
+
+    const updated = await this.prisma.salarySetting.update({
+      where: { id: existing.id },
+      data: { electricityPricePerKwh },
+    });
+
+    try {
+      await this.resyncAllShiftElectricityExpenses();
+    } catch (err) {
+      this.logger.warn(
+        `resyncAllShiftElectricityExpenses after electricity price patch: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    return updated;
   }
 
   getSalarySettings() {

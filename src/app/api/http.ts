@@ -67,11 +67,14 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok) {
+    const raw = await response.text();
     let message = `Request failed with status ${response.status}`;
-    try {
-      const raw = await response.text();
-      if (raw.trim()) {
-        const errorPayload = JSON.parse(raw);
+    if (raw.trim()) {
+      try {
+        const errorPayload = JSON.parse(raw) as {
+          error?: { message?: unknown };
+          message?: unknown;
+        };
         const pickMsg = (v: unknown): string | undefined => {
           if (Array.isArray(v)) return v.map(String).join(', ');
           if (typeof v === 'string' && v.trim()) return v;
@@ -80,9 +83,10 @@ export async function apiRequest<T>(
         const nested = errorPayload?.error?.message;
         const top = errorPayload?.message;
         message = pickMsg(nested) ?? pickMsg(top) ?? message;
+      } catch {
+        const stripped = raw.trim().slice(0, 280);
+        if (stripped.length > 0) message = stripped;
       }
-    } catch {
-      // ignore parse errors
     }
     throw new Error(message);
   }

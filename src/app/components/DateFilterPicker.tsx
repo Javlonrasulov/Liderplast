@@ -180,7 +180,7 @@ export function DateFilterPicker() {
       {/* ── Trigger button ── */}
       <button
         onClick={() => { setOpen(o => !o); setPickPhase('idle'); }}
-        className={`flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm border transition-all select-none ${
+        className={`flex shrink-0 items-center gap-1.5 sm:gap-2 h-9 px-2.5 sm:px-3.5 rounded-xl text-sm border transition-all select-none ${
           isFiltered
             ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300'
             : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300'
@@ -201,7 +201,7 @@ export function DateFilterPicker() {
 
       {/* ── Dropdown ── */}
       {open && (
-        <div className="absolute top-full mt-2 right-0 z-50 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/40 overflow-hidden">
+        <div className="absolute top-full right-0 z-50 mt-2 w-[min(20rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/40 overflow-hidden">
 
           {/* Preset section */}
           <div className="p-3 pb-2">

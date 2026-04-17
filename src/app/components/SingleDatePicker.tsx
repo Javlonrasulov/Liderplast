@@ -147,7 +147,7 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute top-full mt-2 left-0 z-50 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/50 overflow-hidden">
+        <div className="absolute top-full left-0 z-50 mt-2 w-[min(18rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/50 overflow-hidden">
 
           {/* Calendar */}
           <div className="p-3">

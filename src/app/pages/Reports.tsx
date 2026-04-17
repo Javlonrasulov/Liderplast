@@ -130,9 +130,9 @@ export function Reports() {
   ];
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6">
       {/* KPI */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: t.repRevenue, value: formatCurrency(totalRevenue), cls: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
           { label: t.repExpenses, value: formatCurrency(totalExpenses), cls: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' },
@@ -184,9 +184,11 @@ export function Reports() {
             ].map((chart) => (
               <div key={chart.title} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
                 <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{chart.title}</h3>
-                <div className="flex items-center gap-6">
-                  <SimpleDonutChart data={chart.data} colors={PIE_COLORS} size={140} />
-                  <div className="space-y-2 flex-1">
+                <div className="flex flex-col items-stretch gap-4 min-[420px]:flex-row min-[420px]:items-center sm:gap-6">
+                  <div className="flex shrink-0 justify-center min-[420px]:justify-start">
+                    <SimpleDonutChart data={chart.data} colors={PIE_COLORS} size={140} />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-2">
                     {chart.data.map((item, i) => (
                       <div key={item.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -224,7 +226,7 @@ export function Reports() {
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{t.repRawTitle}</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-3 sm:gap-4">
               {[
                 { label: t.repRawIn, val: `${formatNumber(totalRawIn)} kg`, cls: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
                 { label: t.repRawOut, val: `${formatNumber(totalRawOut)} kg`, cls: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },

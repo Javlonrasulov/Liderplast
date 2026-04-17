@@ -489,6 +489,27 @@ export interface T {
   exBtn: string;
   exHistory: string;
   exColAmount: string;
+  exCategoriesTitle: string;
+  exCategoryAdd: string;
+  exCategoryName: string;
+  exCategoryDelete: string;
+  exCategoryDeleteHint: string;
+  exStatsByCategory: string;
+  exStatsRank: string;
+  exNoCategories: string;
+  /** Diagramma va yuqori statistika barcha vaqt; tarix jadvali sana filtri bo‘yicha */
+  exPageStatsNote: string;
+  exNoMachinesElectric: string;
+  exGlobalElectricityPriceTitle: string;
+  exShiftElectricityExplain: string;
+  exFromShiftBadge: string;
+  /** Xarajatlar: kam ishlatiladigan kVt·soat narxi — modal tugmasi */
+  exElectricityPriceButton: string;
+  /** Topbar yonidagi qisqa yorliq (to‘liq matn title atributida) */
+  exElectricityPriceNavShort: string;
+  exElectricityPriceSaved: string;
+  /** PATCH electricity-price 404 yoki «Cannot PATCH» — foydalanuvchiga tushuntirish */
+  exElectricityPriceErrorEndpoint404: string;
 
   // Reports
   repTitle: string;
@@ -1165,6 +1186,27 @@ const uz_cyrillic: T = {
   exBtn: 'Харажат Киритиш',
   exHistory: 'Харажатлар Тарихи',
   exColAmount: 'Сумма',
+  exCategoriesTitle: 'Харажат категориялари',
+  exCategoryAdd: 'Янги категория',
+  exCategoryName: 'Номи',
+  exCategoryDelete: 'Ўчириш',
+  exCategoryDeleteHint: 'Категория рўйхатдан олинади; тарихдаги ёзувлар сақланади.',
+  exStatsByCategory: 'Категория бўйича статистика',
+  exStatsRank: '#',
+  exNoCategories: 'Категория йўқ. Аввал категория яратинг.',
+  exPageStatsNote:
+    'Диаграмма ва юқори статистика — барча вақт. «Тарих» жадвали — танланган сана фильтри бўйича.',
+  exNoMachinesElectric:
+    'Электр харажати учун ишлаб чиқариш машиналари рўйхати бўш. Админ `/production/machines` орқали машина қўшсин.',
+  exGlobalElectricityPriceTitle: 'kVt·soat narxi (барча электр учун)',
+  exShiftElectricityExplain:
+    'Бу нарх «Смена тарихи»даги kVt·soat × сум ҳисоби билан автоматик электр харажатларига қўлланилади; смена сақланса ёки ўзгарса, харажат ҳам янгиланади.',
+  exFromShiftBadge: 'Смена',
+  exElectricityPriceButton: 'Электр нархи (kVt·soat)',
+  exElectricityPriceNavShort: 'kVt·soat',
+  exElectricityPriceSaved: 'kVt·soat нархи янгиланди',
+  exElectricityPriceErrorEndpoint404:
+    '404: серверда «электр нархи» учун янги API йўқ ёки backend эски версияда ишламоқда. Лойиҳадаги backendни янги код билан қайта ишга туширинг (масалан, `npm run start:dev`). Инглизча хато «Cannot PATCH … electricity-price» шуни англатади.',
 
   repTitle: 'Ҳисоботлар',
   repRevenue: 'Жами Даромад',
@@ -1838,6 +1880,27 @@ const uz_latin: T = {
   exBtn: 'Xarajat Kiritish',
   exHistory: 'Xarajatlar Tarixi',
   exColAmount: 'Summa',
+  exCategoriesTitle: 'Xarajat kategoriyalari',
+  exCategoryAdd: 'Yangi kategoriya',
+  exCategoryName: 'Nomi',
+  exCategoryDelete: "O'chirish",
+  exCategoryDeleteHint: "Kategoriya ro'yxatdan olinadi; tarixdagi yozuvlar saqlanadi.",
+  exStatsByCategory: "Kategoriya bo'yicha statistika",
+  exStatsRank: '#',
+  exNoCategories: "Kategoriya yo'q. Avval kategoriya yarating.",
+  exPageStatsNote:
+    "Diagramma va yuqori statistika — barcha vaqt. «Tarix» jadvali — tanlangan sana filtri bo'yicha.",
+  exNoMachinesElectric:
+    "Elektr xarajati uchun ishlab chiqarish mashinalari ro'yxati bo'sh. Admin `/production/machines` orqali mashina qo'shsin.",
+  exGlobalElectricityPriceTitle: "kVt·soat narxi (barcha elektr uchun)",
+  exShiftElectricityExplain:
+    "Bu narx «Smena tarixi»dagi kVt·soat × so'm hisobi bilan avtomatik elektr xarajatlariga qo'llaniladi; smena saqlansa yoki o'zgarsa, xarajat ham yangilanadi.",
+  exFromShiftBadge: 'Smena',
+  exElectricityPriceButton: 'Elektr narxi (kVt·soat)',
+  exElectricityPriceNavShort: 'kVt·soat',
+  exElectricityPriceSaved: "kVt·soat narxi yangilandi",
+  exElectricityPriceErrorEndpoint404:
+    "404: serverda «elektr narxi» uchun yangi API yo'q yoki backend eski versiyada ishlayapti. Loyihadagi `backend`ni yangi kod bilan qayta ishga tushiring (masalan, `npm run start:dev`). Inglizcha «Cannot PATCH … electricity-price» xatoshi shuni anglatadi.",
 
   repTitle: 'Hisobotlar',
   repRevenue: 'Jami Daromad',
@@ -2511,6 +2574,27 @@ const ru: T = {
   exBtn: 'Добавить расход',
   exHistory: 'История расходов',
   exColAmount: 'Сумма',
+  exCategoriesTitle: 'Категории расходов',
+  exCategoryAdd: 'Новая категория',
+  exCategoryName: 'Название',
+  exCategoryDelete: 'Удалить',
+  exCategoryDeleteHint: 'Категория скрывается из списка; записи в истории сохраняются.',
+  exStatsByCategory: 'Статистика по категориям',
+  exStatsRank: '#',
+  exNoCategories: 'Нет категорий. Сначала создайте категорию.',
+  exPageStatsNote:
+    'Диаграмма и сводка сверху — за всё время. Таблица «История» — по выбранному фильтру дат.',
+  exNoMachinesElectric:
+    'Для расхода на электроэнергию список станков пуст. Пусть администратор добавит станки в `/production/machines`.',
+  exGlobalElectricityPriceTitle: 'Цена за кВт·ч (вся электроэнергия)',
+  exShiftElectricityExplain:
+    'Эта цена применяется к автоматическим расходам: кВт·ч из «Истории смен» × сум; при сохранении или изменении смены расход пересчитывается.',
+  exFromShiftBadge: 'Смена',
+  exElectricityPriceButton: 'Тариф электроэнергии (кВт·ч)',
+  exElectricityPriceNavShort: 'кВт·ч',
+  exElectricityPriceSaved: 'Цена за кВт·ч обновлена',
+  exElectricityPriceErrorEndpoint404:
+    '404: на сервере нет нового API для тарифа электроэнергии или запущена старая версия backend. Перезапустите backend из папки проекта с актуальным кодом (например, `npm run start:dev`). Сообщение «Cannot PATCH … electricity-price» означает именно это.',
 
   repTitle: 'Отчёты',
   repRevenue: 'Общий доход',

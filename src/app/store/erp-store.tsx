@@ -212,16 +212,29 @@ export interface Sale {
   items?: SaleOrderItem[];
 }
 
+export interface ExpenseCategory {
+  id: string;
+  name: string;
+  electricityCalc: boolean;
+  legacyExpenseType: 'electricity' | 'caps' | 'packaging' | 'other';
+  createdAt: string;
+}
+
 export interface Expense {
   id: string;
   date: string;
   type: 'electricity' | 'caps' | 'packaging' | 'other';
+  categoryId: string;
+  categoryName: string;
+  electricityCalc?: boolean;
   amount: number;
   description: string;
   machineId?: string;
   hours?: number;
   powerKw?: number;
   createdAt: string;
+  /** Smenadan avtomatik yaratilgan elektr xarajati */
+  sourceShiftId?: string | null;
 }
 
 export interface Machine {
@@ -428,6 +441,8 @@ export interface PayrollSettings {
   incomeTaxPercent: number;
   npsPercent: number;
   socialTaxPercent: number;
+  /** kVt·soat narxi (so‘m) — smena va qo‘lda elektr xarajati */
+  electricityPricePerKwh: number;
 }
 
 export interface ERPState {
@@ -443,6 +458,7 @@ export interface ERPState {
   clients: Client[];
   sales: Sale[];
   expenses: Expense[];
+  expenseCategories: ExpenseCategory[];
   machines: Machine[];
   /** Ishlab chiqarish partiyalari (xomashyo / қолип сарфи билан) */
   productionHistory: ProductionHistoryRow[];
@@ -561,7 +577,21 @@ type ERPAction =
   | { type: 'PRODUCE_FINAL'; payload: { productType: '0.5L' | '1L' | '5L'; quantity: number; semiProductType: '18g' | '20g'; date: string } }
   | { type: 'ADD_SALE'; payload: { clientId: string; clientName: string; productCategory: 'semi' | 'final'; productType: string; quantity: number; pricePerUnit: number; paid: number; date: string } }
   | { type: 'ADD_SALE_ORDER'; payload: { clientId: string; clientName: string; date: string; items: SaleOrderItem[]; paid: number } }
-  | { type: 'ADD_EXPENSE'; payload: { type: 'electricity' | 'caps' | 'packaging' | 'other'; amount: number; description: string; machineId?: string; hours?: number; powerKw?: number; date: string } }
+  | {
+      type: 'ADD_EXPENSE';
+      payload: {
+        categoryId: string;
+        amount: number;
+        description: string;
+        machineId?: string;
+        hours?: number;
+        powerKw?: number;
+        date: string;
+      };
+    }
+  | { type: 'ADD_EXPENSE_CATEGORY'; payload: { name: string } }
+  | { type: 'UPDATE_EXPENSE_CATEGORY'; payload: { id: string; name: string } }
+  | { type: 'DELETE_EXPENSE_CATEGORY'; payload: string }
   | { type: 'ADD_CLIENT'; payload: { name: string; phone: string; bankAccount?: string; bankName?: string } }
   | { type: 'SET_ELECTRICITY_PRICE'; payload: number }
   | { type: 'ADD_SHIFT_RECORD'; payload: Omit<ShiftRecord, 'id' | 'createdAt'> }
@@ -659,6 +689,7 @@ const emptyState: ERPState = {
   clients: [],
   sales: [],
   expenses: [],
+  expenseCategories: [],
   machines: [],
   productionHistory: [],
   logs: [],
@@ -676,6 +707,7 @@ const emptyState: ERPState = {
     incomeTaxPercent: 12,
     npsPercent: 0,
     socialTaxPercent: 0,
+    electricityPricePerKwh: 800,
   },
   payments: [],
 };
@@ -1032,6 +1064,15 @@ type BackendPayment = {
   client: { name: string };
 };
 
+type BackendExpenseCategory = {
+  id: string;
+  name: string;
+  legacyExpenseType: 'ELECTRICITY' | 'CAPS' | 'PACKAGING' | 'OTHER';
+  electricityCalc: boolean;
+  deletedAt: string | null;
+  createdAt: string;
+};
+
 type BackendExpense = {
   id: string;
   type: 'ELECTRICITY' | 'CAPS' | 'PACKAGING' | 'OTHER';
@@ -1040,6 +1081,9 @@ type BackendExpense = {
   description?: string | null;
   incurredAt: string;
   createdAt: string;
+  categoryId?: string | null;
+  category?: BackendExpenseCategory | null;
+  sourceShiftId?: string | null;
 };
 
 type BackendUser = {
@@ -1085,6 +1129,7 @@ type BackendSalarySettings = {
   incomeTaxPercent: number;
   npsPercent: number;
   socialTaxPercent: number;
+  electricityPricePerKwh?: number;
 } | null;
 
 type BackendSalaryRow = {
@@ -1490,7 +1535,49 @@ type LookupMap = {
   usersByName: Map<string, string>;
 };
 
+/** Eski backendda faqat `/finance/expense-categories` bo‘lishi mumkin — 404 bo‘lsa shu yerga tushamiz */
+async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
+  try {
+    return await apiRequest<BackendExpenseCategory[]>('/finance/expenses/categories');
+  } catch {
+    try {
+      return await apiRequest<BackendExpenseCategory[]>('/finance/expense-categories');
+    } catch {
+      return [];
+    }
+  }
+}
+
+async function mutateExpenseCategoryApi(
+  method: 'POST' | 'PATCH' | 'DELETE',
+  id: string | undefined,
+  body?: { name?: string },
+): Promise<void> {
+  const suffix = id ? `/${id}` : '';
+  const paths = [
+    `/finance/expenses/categories${suffix}`,
+    `/finance/expense-categories${suffix}`,
+  ];
+  let lastError: unknown;
+  for (const path of paths) {
+    try {
+      await apiRequest(path, {
+        method,
+        ...(method === 'DELETE'
+          ? {}
+          : { body: JSON.stringify(body ?? {}) }),
+      });
+      return;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError;
+}
+
 async function loadStateFromApi() {
+  const expenseCategoriesPromise = fetchExpenseCategoriesSafe();
+
   const [
     catalog,
     stock,
@@ -1534,6 +1621,8 @@ async function loadStateFromApi() {
     apiRequest<BackendBankVedomost[]>('/finance/vedomosts'),
     apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
   ]);
+
+  const expenseCategories = await expenseCategoriesPromise;
 
   const nameToRawMaterialId = new Map(catalog.rawMaterials.map((r) => [r.name, r.id]));
 
@@ -1690,13 +1779,32 @@ async function loadStateFromApi() {
     createdAt: payment.createdAt,
   }));
 
+  const legacyExpenseLabel: Record<BackendExpense['type'], string> = {
+    ELECTRICITY: 'Elektr energiya',
+    CAPS: 'Qopqoq',
+    PACKAGING: 'Paket',
+    OTHER: 'Boshqa',
+  };
+
+  const mappedExpenseCategories: ExpenseCategory[] = expenseCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    electricityCalc: c.electricityCalc || c.legacyExpenseType === 'ELECTRICITY',
+    legacyExpenseType: c.legacyExpenseType.toLowerCase() as ExpenseCategory['legacyExpenseType'],
+    createdAt: c.createdAt,
+  }));
+
   const mappedExpenses: Expense[] = expenses.map((expense) => ({
     id: expense.id,
     date: expense.incurredAt.slice(0, 10),
     type: expense.type.toLowerCase() as Expense['type'],
+    categoryId: expense.categoryId ?? '',
+    categoryName: expense.category?.name ?? legacyExpenseLabel[expense.type],
+    electricityCalc: expense.category?.electricityCalc ?? expense.type === 'ELECTRICITY',
     amount: expense.amount,
     description: expense.description ?? expense.title,
     createdAt: expense.createdAt,
+    sourceShiftId: expense.sourceShiftId ?? undefined,
   }));
 
   const mappedMachines: Machine[] = machines.map((machine) => ({
@@ -1810,10 +1918,11 @@ async function loadStateFromApi() {
     clients: mappedClients,
     sales,
     expenses: mappedExpenses,
+    expenseCategories: mappedExpenseCategories,
     machines: mappedMachines,
     productionHistory: mapProductionHistoryRows(productions),
     logs,
-    electricityPrice: 800,
+    electricityPrice: salarySettings?.electricityPricePerKwh ?? 800,
     shiftRecords: mappedShifts,
     workers: Array.from(
       new Set([
@@ -1828,7 +1937,14 @@ async function loadStateFromApi() {
     salaryPaymentSummaries: salaryPaymentSummaries,
     bankVedomosts: mappedBankVedomosts,
     selectedBankVedomost,
-    payrollSettings: salarySettings ?? emptyState.payrollSettings,
+    payrollSettings: salarySettings
+      ? {
+          incomeTaxPercent: salarySettings.incomeTaxPercent,
+          npsPercent: salarySettings.npsPercent,
+          socialTaxPercent: salarySettings.socialTaxPercent,
+          electricityPricePerKwh: salarySettings.electricityPricePerKwh ?? 800,
+        }
+      : emptyState.payrollSettings,
     payments: mappedPayments,
   };
 
@@ -1971,17 +2087,33 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             }),
           });
           break;
-        case 'ADD_EXPENSE':
+        case 'ADD_EXPENSE': {
+          const desc = (action.payload.description ?? '').trim();
+          const title = desc.length >= 2 ? desc : 'Xarajat';
           await apiRequest('/finance/expenses', {
             method: 'POST',
             body: JSON.stringify({
-              title: action.payload.description,
-              type: action.payload.type.toUpperCase(),
+              title,
+              categoryId: action.payload.categoryId,
               amount: action.payload.amount,
               description: action.payload.description,
               incurredAt: action.payload.date,
             }),
           });
+          break;
+        }
+        case 'ADD_EXPENSE_CATEGORY':
+          await mutateExpenseCategoryApi('POST', undefined, {
+            name: action.payload.name,
+          });
+          break;
+        case 'UPDATE_EXPENSE_CATEGORY':
+          await mutateExpenseCategoryApi('PATCH', action.payload.id, {
+            name: action.payload.name,
+          });
+          break;
+        case 'DELETE_EXPENSE_CATEGORY':
+          await mutateExpenseCategoryApi('DELETE', action.payload);
           break;
         case 'ADD_PAYMENT':
           await apiRequest('/payments', {
@@ -2149,7 +2281,15 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               socialTaxPercent:
                 action.payload.socialTaxPercent ?? state.payrollSettings.socialTaxPercent,
               otherDeductionPercent: 0,
+              electricityPricePerKwh:
+                action.payload.electricityPricePerKwh ?? state.payrollSettings.electricityPricePerKwh,
             }),
+          });
+          break;
+        case 'SET_ELECTRICITY_PRICE':
+          await apiRequest('/finance/salary-settings/electricity-price', {
+            method: 'PATCH',
+            body: JSON.stringify({ electricityPricePerKwh: action.payload }),
           });
           break;
         case 'UPLOAD_OBOROTKA': {
@@ -2359,7 +2499,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         }
         case 'ADD_SALE':
-        case 'SET_ELECTRICITY_PRICE':
           break;
         case 'DELETE_SHIFT_RECORD':
           await apiRequest(`/production/shifts/${action.payload}`, {

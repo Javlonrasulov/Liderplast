@@ -473,6 +473,7 @@ model ShiftRecord {
   notes         String?
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
+  shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
 }
 
 model Client {
@@ -533,17 +534,31 @@ model Payment {
   createdAt   DateTime     @default(now())
 }
 
+model ExpenseCategory {
+  id                String       @id @default(cuid())
+  name              String
+  legacyExpenseType ExpenseType  @default(OTHER)
+  electricityCalc   Boolean      @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime     @default(now())
+  expenses          Expense[]
+}
+
 model Expense {
-  id          String       @id @default(cuid())
+  id          String           @id @default(cuid())
   title       String
   type        ExpenseType
   amount      Float
   description String?
-  status      EntityStatus @default(COMPLETED)
-  incurredAt  DateTime     @default(now())
-  createdAt   DateTime     @default(now())
+  status      EntityStatus     @default(COMPLETED)
+  incurredAt  DateTime         @default(now())
+  createdAt   DateTime         @default(now())
   createdById String?
-  createdBy   User?        @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?            @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  categoryId  String?
+  category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  sourceShiftId String?        @unique
+  sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
 }
 
 model SalarySetting {
@@ -552,6 +567,8 @@ model SalarySetting {
   otherDeductionPercent Float        @default(0)
   socialTaxPercent      Float        @default(0)
   npsPercent            Float        @default(0)
+  /// kVt·soat narxi (so‘m) — smena elektr sarfi xarajatiga
+  electricityPricePerKwh Float     @default(800)
   status                EntityStatus @default(COMPLETED)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt

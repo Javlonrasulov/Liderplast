@@ -446,7 +446,7 @@ export function SystemUsers() {
   );
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8">
+    <div className="mx-auto w-full min-w-0 max-w-6xl space-y-8 overflow-x-hidden p-3 min-[400px]:p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
           <UserCog className="text-indigo-600 dark:text-indigo-400" size={22} />

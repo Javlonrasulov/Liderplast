@@ -1,20 +1,20 @@
 import {
-  IsEnum,
+  IsDateString,
   IsNumber,
   IsOptional,
   IsString,
   Min,
   MinLength,
 } from 'class-validator';
-import { ExpenseType } from '../../../generated/prisma/enums.js';
 
 export class CreateExpenseDto {
   @IsString()
   @MinLength(2)
   title!: string;
 
-  @IsEnum(ExpenseType)
-  type!: ExpenseType;
+  @IsString()
+  @MinLength(1)
+  categoryId!: string;
 
   @IsNumber()
   @Min(0)
@@ -23,4 +23,8 @@ export class CreateExpenseDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsDateString()
+  incurredAt?: string;
 }

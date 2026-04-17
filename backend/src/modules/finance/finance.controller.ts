@@ -16,10 +16,13 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { CreateEmployeeProductionDto } from './dto/create-employee-production.dto.js';
+import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
+import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
 import { UpsertEmployeeProductRateDto } from './dto/upsert-employee-product-rate.dto.js';
+import { PatchElectricityPriceDto } from './dto/patch-electricity-price.dto.js';
 import { UpdateSalarySettingsDto } from './dto/update-salary-settings.dto.js';
 import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 import { FinanceService } from './finance.service.js';
@@ -37,10 +40,65 @@ export class FinanceController {
     return this.financeService.createExpense(dto, userId);
   }
 
+  @Get('expenses/categories')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getExpenseCategories() {
+    return this.financeService.getExpenseCategories();
+  }
+
+  @Post('expenses/categories')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createExpenseCategory(@Body() dto: CreateExpenseCategoryDto) {
+    return this.financeService.createExpenseCategory(dto);
+  }
+
+  @Patch('expenses/categories/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateExpenseCategory(
+    @Param('id') id: string,
+    @Body() dto: UpdateExpenseCategoryDto,
+  ) {
+    return this.financeService.updateExpenseCategory(id, dto);
+  }
+
+  @Delete('expenses/categories/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteExpenseCategory(@Param('id') id: string) {
+    return this.financeService.deleteExpenseCategory(id);
+  }
+
   @Get('expenses')
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   getExpenses() {
     return this.financeService.getExpenses();
+  }
+
+  /** @deprecated — ikkala URL ham qo‘llab-quvvatlanadi (proxy / eski mijozlar) */
+  @Get('expense-categories')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getExpenseCategoriesLegacy() {
+    return this.financeService.getExpenseCategories();
+  }
+
+  @Post('expense-categories')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createExpenseCategoryLegacy(@Body() dto: CreateExpenseCategoryDto) {
+    return this.financeService.createExpenseCategory(dto);
+  }
+
+  @Patch('expense-categories/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateExpenseCategoryLegacy(
+    @Param('id') id: string,
+    @Body() dto: UpdateExpenseCategoryDto,
+  ) {
+    return this.financeService.updateExpenseCategory(id, dto);
+  }
+
+  @Delete('expense-categories/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteExpenseCategoryLegacy(@Param('id') id: string) {
+    return this.financeService.deleteExpenseCategory(id);
   }
 
   @Post('employee-productions')
@@ -89,6 +147,13 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   updateSalarySettings(@Body() dto: UpdateSalarySettingsDto) {
     return this.financeService.updateSalarySettings(dto);
+  }
+
+  /** Faqat kVt·soat narxi (xarajatlar sahifasi) — soliq maydonlari yuborilmaydi */
+  @Patch('salary-settings/electricity-price')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  patchElectricityPrice(@Body() dto: PatchElectricityPriceDto) {
+    return this.financeService.patchElectricityPricePerKwh(dto.electricityPricePerKwh);
   }
 
   @Get('salary-settings')

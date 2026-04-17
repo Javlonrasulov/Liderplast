@@ -230,7 +230,7 @@ export function AktSverka({ clientId }: AktSverkaProps) {
     : 'text-emerald-600 dark:text-emerald-400';
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5 overflow-x-hidden">
 
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -318,7 +318,7 @@ export function AktSverka({ clientId }: AktSverkaProps) {
       {generated && (
         <>
           {/* ── Summary Cards ──────────────────────────────────────── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Opening Balance */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">

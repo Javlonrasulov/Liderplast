@@ -31,6 +31,7 @@ export type SalarySettingAvgAggregateOutputType = {
   otherDeductionPercent: number | null
   socialTaxPercent: number | null
   npsPercent: number | null
+  electricityPricePerKwh: number | null
 }
 
 export type SalarySettingSumAggregateOutputType = {
@@ -38,6 +39,7 @@ export type SalarySettingSumAggregateOutputType = {
   otherDeductionPercent: number | null
   socialTaxPercent: number | null
   npsPercent: number | null
+  electricityPricePerKwh: number | null
 }
 
 export type SalarySettingMinAggregateOutputType = {
@@ -46,6 +48,7 @@ export type SalarySettingMinAggregateOutputType = {
   otherDeductionPercent: number | null
   socialTaxPercent: number | null
   npsPercent: number | null
+  electricityPricePerKwh: number | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -57,6 +60,7 @@ export type SalarySettingMaxAggregateOutputType = {
   otherDeductionPercent: number | null
   socialTaxPercent: number | null
   npsPercent: number | null
+  electricityPricePerKwh: number | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -68,6 +72,7 @@ export type SalarySettingCountAggregateOutputType = {
   otherDeductionPercent: number
   socialTaxPercent: number
   npsPercent: number
+  electricityPricePerKwh: number
   status: number
   createdAt: number
   updatedAt: number
@@ -80,6 +85,7 @@ export type SalarySettingAvgAggregateInputType = {
   otherDeductionPercent?: true
   socialTaxPercent?: true
   npsPercent?: true
+  electricityPricePerKwh?: true
 }
 
 export type SalarySettingSumAggregateInputType = {
@@ -87,6 +93,7 @@ export type SalarySettingSumAggregateInputType = {
   otherDeductionPercent?: true
   socialTaxPercent?: true
   npsPercent?: true
+  electricityPricePerKwh?: true
 }
 
 export type SalarySettingMinAggregateInputType = {
@@ -95,6 +102,7 @@ export type SalarySettingMinAggregateInputType = {
   otherDeductionPercent?: true
   socialTaxPercent?: true
   npsPercent?: true
+  electricityPricePerKwh?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -106,6 +114,7 @@ export type SalarySettingMaxAggregateInputType = {
   otherDeductionPercent?: true
   socialTaxPercent?: true
   npsPercent?: true
+  electricityPricePerKwh?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -117,6 +126,7 @@ export type SalarySettingCountAggregateInputType = {
   otherDeductionPercent?: true
   socialTaxPercent?: true
   npsPercent?: true
+  electricityPricePerKwh?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -215,6 +225,7 @@ export type SalarySettingGroupByOutputType = {
   otherDeductionPercent: number
   socialTaxPercent: number
   npsPercent: number
+  electricityPricePerKwh: number
   status: $Enums.EntityStatus
   createdAt: Date
   updatedAt: Date
@@ -249,6 +260,7 @@ export type SalarySettingWhereInput = {
   otherDeductionPercent?: Prisma.FloatFilter<"SalarySetting"> | number
   socialTaxPercent?: Prisma.FloatFilter<"SalarySetting"> | number
   npsPercent?: Prisma.FloatFilter<"SalarySetting"> | number
+  electricityPricePerKwh?: Prisma.FloatFilter<"SalarySetting"> | number
   status?: Prisma.EnumEntityStatusFilter<"SalarySetting"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"SalarySetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalarySetting"> | Date | string
@@ -260,6 +272,7 @@ export type SalarySettingOrderByWithRelationInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -274,6 +287,7 @@ export type SalarySettingWhereUniqueInput = Prisma.AtLeast<{
   otherDeductionPercent?: Prisma.FloatFilter<"SalarySetting"> | number
   socialTaxPercent?: Prisma.FloatFilter<"SalarySetting"> | number
   npsPercent?: Prisma.FloatFilter<"SalarySetting"> | number
+  electricityPricePerKwh?: Prisma.FloatFilter<"SalarySetting"> | number
   status?: Prisma.EnumEntityStatusFilter<"SalarySetting"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"SalarySetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalarySetting"> | Date | string
@@ -285,6 +299,7 @@ export type SalarySettingOrderByWithAggregationInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -304,6 +319,7 @@ export type SalarySettingScalarWhereWithAggregatesInput = {
   otherDeductionPercent?: Prisma.FloatWithAggregatesFilter<"SalarySetting"> | number
   socialTaxPercent?: Prisma.FloatWithAggregatesFilter<"SalarySetting"> | number
   npsPercent?: Prisma.FloatWithAggregatesFilter<"SalarySetting"> | number
+  electricityPricePerKwh?: Prisma.FloatWithAggregatesFilter<"SalarySetting"> | number
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"SalarySetting"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SalarySetting"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SalarySetting"> | Date | string
@@ -315,6 +331,7 @@ export type SalarySettingCreateInput = {
   otherDeductionPercent?: number
   socialTaxPercent?: number
   npsPercent?: number
+  electricityPricePerKwh?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -326,6 +343,7 @@ export type SalarySettingUncheckedCreateInput = {
   otherDeductionPercent?: number
   socialTaxPercent?: number
   npsPercent?: number
+  electricityPricePerKwh?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -337,6 +355,7 @@ export type SalarySettingUpdateInput = {
   otherDeductionPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   socialTaxPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   npsPercent?: Prisma.FloatFieldUpdateOperationsInput | number
+  electricityPricePerKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -348,6 +367,7 @@ export type SalarySettingUncheckedUpdateInput = {
   otherDeductionPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   socialTaxPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   npsPercent?: Prisma.FloatFieldUpdateOperationsInput | number
+  electricityPricePerKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -359,6 +379,7 @@ export type SalarySettingCreateManyInput = {
   otherDeductionPercent?: number
   socialTaxPercent?: number
   npsPercent?: number
+  electricityPricePerKwh?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -370,6 +391,7 @@ export type SalarySettingUpdateManyMutationInput = {
   otherDeductionPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   socialTaxPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   npsPercent?: Prisma.FloatFieldUpdateOperationsInput | number
+  electricityPricePerKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -381,6 +403,7 @@ export type SalarySettingUncheckedUpdateManyInput = {
   otherDeductionPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   socialTaxPercent?: Prisma.FloatFieldUpdateOperationsInput | number
   npsPercent?: Prisma.FloatFieldUpdateOperationsInput | number
+  electricityPricePerKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -392,6 +415,7 @@ export type SalarySettingCountOrderByAggregateInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -402,6 +426,7 @@ export type SalarySettingAvgOrderByAggregateInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
 }
 
 export type SalarySettingMaxOrderByAggregateInput = {
@@ -410,6 +435,7 @@ export type SalarySettingMaxOrderByAggregateInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -421,6 +447,7 @@ export type SalarySettingMinOrderByAggregateInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -431,6 +458,7 @@ export type SalarySettingSumOrderByAggregateInput = {
   otherDeductionPercent?: Prisma.SortOrder
   socialTaxPercent?: Prisma.SortOrder
   npsPercent?: Prisma.SortOrder
+  electricityPricePerKwh?: Prisma.SortOrder
 }
 
 
@@ -441,6 +469,7 @@ export type SalarySettingSelect<ExtArgs extends runtime.Types.Extensions.Interna
   otherDeductionPercent?: boolean
   socialTaxPercent?: boolean
   npsPercent?: boolean
+  electricityPricePerKwh?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -452,6 +481,7 @@ export type SalarySettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   otherDeductionPercent?: boolean
   socialTaxPercent?: boolean
   npsPercent?: boolean
+  electricityPricePerKwh?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -463,6 +493,7 @@ export type SalarySettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   otherDeductionPercent?: boolean
   socialTaxPercent?: boolean
   npsPercent?: boolean
+  electricityPricePerKwh?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -474,12 +505,13 @@ export type SalarySettingSelectScalar = {
   otherDeductionPercent?: boolean
   socialTaxPercent?: boolean
   npsPercent?: boolean
+  electricityPricePerKwh?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SalarySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "incomeTaxPercent" | "otherDeductionPercent" | "socialTaxPercent" | "npsPercent" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["salarySetting"]>
+export type SalarySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "incomeTaxPercent" | "otherDeductionPercent" | "socialTaxPercent" | "npsPercent" | "electricityPricePerKwh" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["salarySetting"]>
 
 export type $SalarySettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalarySetting"
@@ -490,6 +522,10 @@ export type $SalarySettingPayload<ExtArgs extends runtime.Types.Extensions.Inter
     otherDeductionPercent: number
     socialTaxPercent: number
     npsPercent: number
+    /**
+     * kVt·soat narxi (so‘m) — smena elektr sarfi xarajatiga
+     */
+    electricityPricePerKwh: number
     status: $Enums.EntityStatus
     createdAt: Date
     updatedAt: Date
@@ -921,6 +957,7 @@ export interface SalarySettingFieldRefs {
   readonly otherDeductionPercent: Prisma.FieldRef<"SalarySetting", 'Float'>
   readonly socialTaxPercent: Prisma.FieldRef<"SalarySetting", 'Float'>
   readonly npsPercent: Prisma.FieldRef<"SalarySetting", 'Float'>
+  readonly electricityPricePerKwh: Prisma.FieldRef<"SalarySetting", 'Float'>
   readonly status: Prisma.FieldRef<"SalarySetting", 'EntityStatus'>
   readonly createdAt: Prisma.FieldRef<"SalarySetting", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SalarySetting", 'DateTime'>

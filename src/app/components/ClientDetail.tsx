@@ -93,7 +93,7 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
   ];
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="flex min-h-0 min-w-0 flex-col overflow-x-hidden">
 
       {/* ── Page Header ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-5">
@@ -134,7 +134,7 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
       </div>
 
       {/* ── KPI strip ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-3 mb-5">
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 shadow-sm">
           <p className="text-slate-400 text-xs mb-0.5">{t.cdTotalPurchases}</p>
           <p className="text-slate-800 dark:text-white font-bold">{formatCurrency(totalPurchases)}</p>

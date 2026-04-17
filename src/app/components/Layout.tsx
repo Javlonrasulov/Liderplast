@@ -11,6 +11,7 @@ import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber } from '../utils/format';
 import { DateFilterPicker } from './DateFilterPicker';
+import { ExpensesElectricityNavButton } from './ExpensesElectricityNavButton';
 import { Language } from '../i18n/translations';
 import { type FontSize } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
@@ -48,7 +49,7 @@ function LanguageDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500 transition-all text-sm font-semibold"
+        className="flex h-9 shrink-0 items-center gap-1 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold text-slate-600 transition-all hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 sm:gap-1.5 sm:px-3"
       >
         <Globe size={14} className="text-slate-400" />
         <span>{current.short}</span>
@@ -56,7 +57,7 @@ function LanguageDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-200/60 dark:shadow-black/40 overflow-hidden py-1.5">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(13rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/40 overflow-hidden">
           {LANG_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -177,9 +178,11 @@ export function Layout() {
 
   const pageTitle = PAGE_TITLES[location.pathname] || 'Lider Plast ERP';
   const lowStock = rawMaterialStock < 1000;
+  const showExpensesElectricityNav =
+    location.pathname === '/expenses' && hasPermission('view_expenses');
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
+    <div className="flex h-screen min-w-0 overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setMobileOpen(false)} />
@@ -282,75 +285,83 @@ export function Layout() {
       </aside>
 
       {/* Main area */}
-      <div className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
-        {/* Top bar */}
-        <header className="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center px-3 lg:px-5 gap-3 flex-shrink-0 z-10">
-          {/* Mobile menu */}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+      <div className={`flex min-h-0 min-w-0 flex-1 flex-col transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
+        {/* Top bar — toolbar scrolls horizontally on very narrow viewports */}
+        <header className="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-700 dark:bg-slate-900 sm:px-3 lg:h-14 lg:px-5 lg:py-0">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
+          >
             <Menu size={18} />
           </button>
 
-          {/* Page title */}
-          <div className="flex items-center gap-2 min-w-0">
-            <h1 className="text-slate-800 dark:text-white font-semibold text-sm truncate">{pageTitle}</h1>
+          <div className="flex min-w-0 max-w-[min(72vw,22rem)] shrink items-center gap-1 min-[400px]:max-w-[min(70vw,26rem)] sm:max-w-md md:max-w-lg lg:max-w-xl">
+            <h1 className="min-w-0 truncate text-sm font-semibold text-slate-800 dark:text-white">
+              {pageTitle}
+            </h1>
+            {showExpensesElectricityNav ? <ExpensesElectricityNavButton /> : null}
           </div>
 
-          <div className="flex-1" />
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto hide-scrollbar sm:gap-2">
+            <DateFilterPicker />
 
-          {/* Date filter picker */}
-          <DateFilterPicker />
+            {lowStock && (
+              <div className="hidden items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 dark:border-amber-700 dark:bg-amber-900/20 md:flex">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">{t.layoutMaterialLow}</span>
+              </div>
+            )}
 
-          {/* Low stock alert */}
-          {lowStock && (
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-amber-700 dark:text-amber-400 text-xs font-medium">{t.layoutMaterialLow}</span>
-            </div>
-          )}
-
-          {/* Notification */}
-          <button className="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <Bell size={16} />
-            {lowStock && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />}
-          </button>
-
-          {/* Theme toggle */}
-          <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')} className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-
-          {/* Font size control */}
-          <FontSizeControl />
-
-          {/* Language switcher */}
-          <LanguageDropdown />
-
-          {/* Profile */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
-              <User size={12} className="text-white" />
-            </div>
-            <div className="hidden md:block min-w-0 max-w-[140px]">
-              <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate" title={user?.fullName}>
-                {user?.fullName ?? '—'}
-              </p>
-              <p className="text-[10px] text-slate-400 truncate">
-                {user?.role ? `${t.suRole}: ${user.role}` : ''}
-              </p>
-            </div>
             <button
               type="button"
-              onClick={() => void logout()}
-              className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title={t.layoutLogout}
+              className="relative shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              <LogOut size={16} />
+              <Bell size={16} />
+              {lowStock && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
             </button>
+
+            <button
+              type="button"
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <div className="hidden shrink-0 min-[380px]:block">
+              <FontSizeControl />
+            </div>
+
+            <div className="shrink-0">
+              <LanguageDropdown />
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1 border-l border-slate-200 pl-2 dark:border-slate-700 sm:gap-2 sm:pl-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600">
+                <User size={12} className="text-white" />
+              </div>
+              <div className="hidden min-w-0 max-w-[120px] md:block lg:max-w-[140px]">
+                <p className="truncate text-xs font-medium text-slate-700 dark:text-slate-200" title={user?.fullName}>
+                  {user?.fullName ?? '—'}
+                </p>
+                <p className="truncate text-[10px] text-slate-400">
+                  {user?.role ? `${t.suRole}: ${user.role}` : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                title={t.layoutLogout}
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <Outlet />
         </main>
       </div>

@@ -123,6 +123,46 @@ function requiredPermissionGroups(
     { test: /^\/finance\/expenses$/, method: 'GET', anyOf: ['view_expenses'] },
     { test: /^\/finance\/expenses$/, method: 'POST', anyOf: ['view_expenses'] },
     {
+      test: /^\/finance\/expenses\/categories$/,
+      method: 'GET',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expenses\/categories$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expenses\/categories\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expenses\/categories\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expense-categories$/,
+      method: 'GET',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expense-categories$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expense-categories\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expense-categories\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['view_expenses'],
+    },
+    {
       test: /^\/finance\/employee-productions$/,
       method: 'GET',
       anyOf: ['view_payroll'],
@@ -146,6 +186,11 @@ function requiredPermissionGroups(
       test: /^\/finance\/salary-settings$/,
       method: 'PUT',
       anyOf: ['create_vedemost'],
+    },
+    {
+      test: /^\/finance\/salary-settings\/electricity-price$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses', 'create_vedemost'],
     },
     { test: /^\/finance\/salary\/generate$/, method: 'POST', anyOf: ['create_vedemost'] },
     {

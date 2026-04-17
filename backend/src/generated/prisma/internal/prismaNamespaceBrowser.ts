@@ -75,6 +75,7 @@ export const ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
+  ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
   SalarySetting: 'SalarySetting',
   EmployeeProduction: 'EmployeeProduction',
@@ -143,7 +144,6 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
-  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -173,7 +173,6 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
-  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -398,9 +397,6 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
-  paintUsed: 'paintUsed',
-  paintRawMaterialId: 'paintRawMaterialId',
-  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -466,6 +462,18 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const ExpenseCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  legacyExpenseType: 'legacyExpenseType',
+  electricityCalc: 'electricityCalc',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ExpenseCategoryScalarFieldEnum = (typeof ExpenseCategoryScalarFieldEnum)[keyof typeof ExpenseCategoryScalarFieldEnum]
+
+
 export const ExpenseScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -475,7 +483,9 @@ export const ExpenseScalarFieldEnum = {
   status: 'status',
   incurredAt: 'incurredAt',
   createdAt: 'createdAt',
-  createdById: 'createdById'
+  createdById: 'createdById',
+  categoryId: 'categoryId',
+  sourceShiftId: 'sourceShiftId'
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
@@ -487,6 +497,7 @@ export const SalarySettingScalarFieldEnum = {
   otherDeductionPercent: 'otherDeductionPercent',
   socialTaxPercent: 'socialTaxPercent',
   npsPercent: 'npsPercent',
+  electricityPricePerKwh: 'electricityPricePerKwh',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
