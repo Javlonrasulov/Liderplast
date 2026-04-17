@@ -44,6 +44,9 @@ function loadShiftDefinitions(): ShiftDefinition[] {
   }
 }
 
+/** Bugungi smena kartochkalarida dastlab ko‘rinadigan yozuvlar soni */
+const TIMELINE_CARD_VISIBLE = 3;
+
 const SHIFT_STYLE_PRESETS = [
   { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700', dot: 'bg-amber-500' },
   { badge: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700', dot: 'bg-indigo-500' },
@@ -158,6 +161,8 @@ const TR = {
     todayPreviewTitle: 'Бугун',
     todayPreviewFullscreen: 'Тўлиқ экран',
     todayPreviewExitFullscreen: 'Экрандан чиқиш',
+    timelineShowMore: 'Яна {n} та',
+    timelineCollapse: 'Қисқартириш',
     editShiftRecord: 'Ёзувни таҳрирлаш',
     saveChanges: 'Ўзгаришларни сақлаш',
     close: 'Ёпиш',
@@ -273,6 +278,8 @@ const TR = {
     todayPreviewTitle: 'Bugun',
     todayPreviewFullscreen: 'To\'liq ekran',
     todayPreviewExitFullscreen: 'Ekrandan chiqish',
+    timelineShowMore: 'Yana {n} ta',
+    timelineCollapse: 'Qisqartirish',
     editShiftRecord: 'Yozuvni tahrirlash',
     saveChanges: 'O\'zgarishlarni saqlash',
     close: 'Yopish',
@@ -388,6 +395,8 @@ const TR = {
     todayPreviewTitle: 'Сегодня',
     todayPreviewFullscreen: 'На весь экран',
     todayPreviewExitFullscreen: 'Выйти из полноэкранного режима',
+    timelineShowMore: 'Ещё {n}',
+    timelineCollapse: 'Свернуть',
     editShiftRecord: 'Редактировать запись',
     saveChanges: 'Сохранить изменения',
     close: 'Закрыть',
@@ -678,6 +687,10 @@ export function ShiftWork() {
     notes: '',
   });
   const [recordEditError, setRecordEditError] = useState('');
+
+  const [timelineShiftExpanded, setTimelineShiftExpanded] = useState<
+    Record<number, boolean>
+  >({});
 
   useEffect(() => {
     try {
@@ -1233,6 +1246,12 @@ export function ShiftWork() {
           const sc = shiftStyleFor(s);
           const label = getShiftLabel(shiftDefinitions, s, t);
           const timeDisp = getShiftTimeDisplay(shiftDefinitions, s, t);
+          const expanded = timelineShiftExpanded[s] === true;
+          const hiddenCount = Math.max(0, sRecs.length - TIMELINE_CARD_VISIBLE);
+          const displayRecs =
+            expanded || sRecs.length <= TIMELINE_CARD_VISIBLE
+              ? sRecs
+              : sRecs.slice(0, TIMELINE_CARD_VISIBLE);
           return (
             <div key={s} className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-3 min-[400px]:p-4 shadow-sm min-w-0">
               <div className="flex flex-wrap items-center gap-2 min-[400px]:gap-3 mb-3">
@@ -1249,7 +1268,7 @@ export function ShiftWork() {
                 <p className="text-slate-400 text-sm text-center py-4">{t.noData}</p>
               ) : (
                 <div className="space-y-2">
-                  {sRecs.map(r => {
+                  {displayRecs.map(r => {
                     const machine = state.machines.find(m => m.id === r.machineId);
                     const brakPct = r.producedQty + r.defectCount > 0 ? ((r.defectCount / (r.producedQty + r.defectCount)) * 100).toFixed(1) : '0';
                     return (
@@ -1272,6 +1291,22 @@ export function ShiftWork() {
                       </div>
                     );
                   })}
+                  {hiddenCount > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTimelineShiftExpanded((prev) => ({
+                          ...prev,
+                          [s]: !prev[s],
+                        }))
+                      }
+                      className="w-full mt-1 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                    >
+                      {expanded
+                        ? t.timelineCollapse
+                        : t.timelineShowMore.replace('{n}', String(hiddenCount))}
+                    </button>
+                  ) : null}
                 </div>
               )}
             </div>

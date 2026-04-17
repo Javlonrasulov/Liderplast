@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  BarChart3,
   Boxes,
   Droplets,
   Factory,
+  LayoutGrid,
   Package,
+  PieChart,
   Palette,
   Pencil,
   Plus,
@@ -227,6 +230,7 @@ export function Warehouse() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics'>('overview');
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
   const rawMaterials = useMemo(
@@ -1119,33 +1123,75 @@ export function Warehouse() {
   };
 
   return (
-    <div className="space-y-6 p-4 lg:p-6">
-      {warehouseSummaryCards.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {warehouseSummaryCards.map((card) => (
-            <div
-              key={card.key}
-              className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
-            >
-              <card.icon size={20} className="mb-3 opacity-80" />
-              <p className="mb-1 text-xs text-white/80">{card.label}</p>
-              <p className="text-2xl font-bold">{card.val}</p>
-              <p className="mt-1 text-xs text-white/70">{card.sub}</p>
-            </div>
-          ))}
+    <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
+      <div className="w-full flex flex-col gap-6">
+        <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
+          <button
+            type="button"
+            onClick={() => setWhTab('overview')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <BarChart3 size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabOverview}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('catalog')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <LayoutGrid size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabCatalog}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('statistics')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'statistics' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <PieChart size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
+          </button>
         </div>
-      ) : (
-        <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
-          {t.whStockBreakdownEmpty}
-        </p>
-      )}
 
-      <div>
-        <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
-          {t.whDetailed}
-        </h3>
-        {hasAnyStockDetailCard ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {(error || success) && (
+          <div
+            className={`rounded-2xl border px-4 py-3 text-sm ${
+              error
+                ? 'border-red-200 text-red-600 dark:border-red-900 dark:text-red-400'
+                : 'border-emerald-200 text-emerald-600 dark:border-emerald-900 dark:text-emerald-400'
+            }`}
+          >
+            {error || success}
+          </div>
+        )}
+
+        {whTab === 'overview' && (
+          <>
+            {warehouseSummaryCards.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                {warehouseSummaryCards.map((card) => (
+                  <div
+                    key={card.key}
+                    className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
+                  >
+                    <card.icon size={20} className="mb-3 opacity-80" />
+                    <p className="mb-1 text-xs text-white/80">{card.label}</p>
+                    <p className="text-2xl font-bold">{card.val}</p>
+                    <p className="mt-1 text-xs text-white/70">{card.sub}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+                {t.whStockBreakdownEmpty}
+              </p>
+            )}
+
+            <div>
+              <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {t.whDetailed}
+              </h3>
+              {hasAnyStockDetailCard ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {hasCatalogSiro && (
               <StockItem
                 label={t.rmMetricsCaptionSiro}
@@ -1225,12 +1271,17 @@ export function Warehouse() {
                 icon={<Package size={18} className="text-blue-600 dark:text-blue-400" />}
               />
             )}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
-        )}
-      </div>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
+              )}
+            </div>
 
+          </>
+        )}
+
+        {whTab === 'statistics' && (
+          <>
       {semiRecipePaintBreakdown.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-violet-50/90 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-violet-950/25 dark:via-slate-800 dark:to-slate-800">
           <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
@@ -1445,18 +1496,12 @@ export function Warehouse() {
         </div>
       )}
 
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            error
-              ? 'border-red-200 text-red-600 dark:border-red-900 dark:text-red-400'
-              : 'border-emerald-200 text-emerald-600 dark:border-emerald-900 dark:text-emerald-400'
-          }`}
-        >
-          {error || success}
-        </div>
-      )}
+          </>
+        )}
 
+        {whTab === 'catalog' && (
+          <>
+      <div className="flex flex-col-reverse gap-6">
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-sky-50/80 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
         <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
           <div className="flex flex-wrap items-center gap-3">
@@ -1724,6 +1769,10 @@ export function Warehouse() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+      </div>
+          </>
         )}
       </div>
 

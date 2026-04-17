@@ -12,6 +12,7 @@ import {
   Package,
   History,
   ChevronDown,
+  BarChart3,
 } from 'lucide-react';
 import {
   useERP,
@@ -79,6 +80,7 @@ export function RawMaterial() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [bagLogsOpen, setBagLogsOpen] = useState(false);
   const [otherBagsOpen, setOtherBagsOpen] = useState(false);
+  const [rmTab, setRmTab] = useState<'bags' | 'catalog' | 'overview'>('bags');
 
   const stockByKind = useMemo(
     () => computeRawMaterialStockByKind(state.rawMaterialEntries, state.warehouseProducts),
@@ -391,9 +393,39 @@ export function RawMaterial() {
 
   return (
     <div className="min-h-full bg-slate-50 p-4 lg:p-6 flex flex-col gap-6 dark:bg-slate-950">
-      {/* Summary: сиро ва краска алоҳида */}
-      <div className="flex flex-col gap-6">
-        <div>
+      <div className="w-full flex flex-col gap-6">
+        <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
+          <button
+            type="button"
+            onClick={() => setRmTab('bags')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'bags' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <Package size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionBags}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRmTab('catalog')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <Plus size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionCreateIncoming}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRmTab('overview')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <BarChart3 size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionOverview}</span>
+          </button>
+        </div>
+
+        {rmTab === 'overview' && (
+        <div className="mt-0 space-y-4 focus-visible:outline-none">
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionOverviewDesc}</p>
+        <div className="flex flex-col gap-6">
+          <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
             {t.rmMetricsCaptionSiro}
           </p>
@@ -458,8 +490,8 @@ export function RawMaterial() {
               )}
             </div>
           </div>
-        </div>
-        <div>
+          </div>
+          <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
             {t.rmMetricsCaptionPaint}
           </p>
@@ -501,97 +533,14 @@ export function RawMaterial() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {siroMaterialAlerts.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
-              <AlertTriangle size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {siroMaterialAlerts.map((item) => (
-              <div
-                key={item.id}
-                className={`rounded-xl border px-4 py-3 ${
-                  item.level === 'critical'
-                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
-                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {formatNumber(item.quantityKg)} {t.unitKg}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
-                      item.level === 'critical'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                    }`}
-                  >
-                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
-                  </span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
-      )}
-
-      {paintMaterialAlerts.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
-              <AlertTriangle size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {paintMaterialAlerts.map((item) => (
-              <div
-                key={item.id}
-                className={`rounded-xl border px-4 py-3 ${
-                  item.level === 'critical'
-                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
-                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {formatNumber(item.quantityKg)} {t.unitKg}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
-                      item.level === 'critical'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                    }`}
-                  >
-                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
-      )}
+        )}
 
+        {rmTab === 'catalog' && (
+        <div className="mt-0 space-y-4 focus-visible:outline-none">
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionCreateIncomingDesc}</p>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
@@ -823,81 +772,104 @@ export function RawMaterial() {
             </form>
         </div>
       </div>
+        </div>
+        )}
 
-      <Collapsible
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
-        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <History size={16} className="text-indigo-500" />
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
+        {rmTab === 'bags' && (
+        <div className="mt-0 space-y-6 focus-visible:outline-none">
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionBagsDesc}</p>
+
+      {(siroMaterialAlerts.length > 0 || paintMaterialAlerts.length > 0) && (
+        <div className="space-y-4">
+      {siroMaterialAlerts.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+              <AlertTriangle size={18} className="text-white" />
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
-              <ChevronDown
-                size={16}
-                className={`text-slate-400 transition-transform ${historyOpen ? 'rotate-180' : ''}`}
-              />
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
             </div>
           </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          {filteredEntries.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colDate}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colType}</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colAmount}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 hidden md:table-cell">{t.colNote}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEntries.map((entry, idx) => (
-                    <tr key={entry.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${idx % 2 !== 0 ? 'bg-slate-50/50 dark:bg-slate-800/50' : ''}`}>
-                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">{formatDate(entry.date)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${entry.type === 'incoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
-                          {entry.type === 'incoming' ? t.rmIncoming : t.rmOutgoing}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`text-sm font-semibold ${entry.type === 'incoming' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                          {entry.type === 'incoming' ? '+' : '-'}{formatNumber(entry.amount)} {t.unitKg}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs truncate">{entry.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
-                    <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.rmBalance}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
-                      >
-                        {formatNumber(siroStockKg + paintStockKg)} {t.unitKg}
-                      </span>
-                      <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
-                        {t.rmMetricsCaptionSiro}: {formatNumber(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
-                        {formatNumber(paintStockKg)}
-                      </span>
-                    </td>
-                    <td className="hidden md:table-cell" />
-                  </tr>
-                </tfoot>
-              </table>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {siroMaterialAlerts.map((item) => (
+              <div
+                key={item.id}
+                className={`rounded-xl border px-4 py-3 ${
+                  item.level === 'critical'
+                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {formatNumber(item.quantityKg)} {t.unitKg}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                      item.level === 'critical'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                    }`}
+                  >
+                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {paintMaterialAlerts.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+              <AlertTriangle size={18} className="text-white" />
             </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
+            <div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {paintMaterialAlerts.map((item) => (
+              <div
+                key={item.id}
+                className={`rounded-xl border px-4 py-3 ${
+                  item.level === 'critical'
+                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {formatNumber(item.quantityKg)} {t.unitKg}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                      item.level === 'critical'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                    }`}
+                  >
+                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 flex flex-col gap-6">
@@ -1220,6 +1192,85 @@ export function RawMaterial() {
             </CollapsibleContent>
           </Collapsible>
         </div>
+      </div>
+
+      <Collapsible
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+      >
+        <CollapsibleTrigger className="w-full">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <History size={16} className="text-indigo-500" />
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
+              <ChevronDown
+                size={16}
+                className={`text-slate-400 transition-transform ${historyOpen ? 'rotate-180' : ''}`}
+              />
+            </div>
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {filteredEntries.length === 0 ? (
+            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-700/50">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colDate}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colType}</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colAmount}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 hidden md:table-cell">{t.colNote}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEntries.map((entry, idx) => (
+                    <tr key={entry.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${idx % 2 !== 0 ? 'bg-slate-50/50 dark:bg-slate-800/50' : ''}`}>
+                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">{formatDate(entry.date)}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${entry.type === 'incoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                          {entry.type === 'incoming' ? t.rmIncoming : t.rmOutgoing}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`text-sm font-semibold ${entry.type === 'incoming' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                          {entry.type === 'incoming' ? '+' : '-'}{formatNumber(entry.amount)} {t.unitKg}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs truncate">{entry.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
+                    <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.rmBalance}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span
+                        className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
+                      >
+                        {formatNumber(siroStockKg + paintStockKg)} {t.unitKg}
+                      </span>
+                      <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                        {t.rmMetricsCaptionSiro}: {formatNumber(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
+                        {formatNumber(paintStockKg)}
+                      </span>
+                    </td>
+                    <td className="hidden md:table-cell" />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
+        </div>
+        )}
       </div>
 
       {(error || success) && (

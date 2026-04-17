@@ -275,6 +275,17 @@ export interface T {
   rmKindPaint: string;
   rmPaintHint: string;
   rmCreatePaintButton: string;
+  /** Raw Material page — section headings */
+  rmSectionOverview: string;
+  rmSectionOverviewDesc: string;
+  rmSectionAlerts: string;
+  rmSectionAlertsDesc: string;
+  rmSectionCreateIncoming: string;
+  rmSectionCreateIncomingDesc: string;
+  rmSectionLedger: string;
+  rmSectionLedgerDesc: string;
+  rmSectionBags: string;
+  rmSectionBagsDesc: string;
 
   // Semi Production
   spTitle: string;
@@ -315,6 +326,12 @@ export interface T {
 
   // Warehouse
   whTitle: string;
+  /** Ombor sahifasi: «умумий» таб */
+  whTabOverview: string;
+  /** Ombor sahifasi: «каталог» таб */
+  whTabCatalog: string;
+  /** Ombor sahifasi: «статистика» таб */
+  whTabStats: string;
   whMaterial: string;
   whSemi: string;
   whFinal: string;
@@ -851,6 +868,16 @@ const uz_cyrillic: T = {
   rmPaintHint:
     'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
   rmCreatePaintButton: 'Краскани сақлаш',
+  rmSectionOverview: 'Умумий кўрсаткичлар',
+  rmSectionOverviewDesc: 'PET сиро ва краска бўйича кирим, сарф ва қолдиқ',
+  rmSectionAlerts: 'Огоҳлантиришлар',
+  rmSectionAlertsDesc: 'Кам қолдиқ бўйича турлар',
+  rmSectionCreateIncoming: 'Каталог ва омборга кирим',
+  rmSectionCreateIncomingDesc: 'Янги хомашё тури ёки миқдорни рўйхатга қўшиш',
+  rmSectionLedger: 'Харакатлар журнали',
+  rmSectionLedgerDesc: 'Кирим ва сарф ёзувлари',
+  rmSectionBags: 'Қоплар ва аппарат',
+  rmSectionBagsDesc: 'Фаол қоп, улаш / алмаштириш ва қоплар рўйхати',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -944,6 +971,9 @@ const uz_cyrillic: T = {
   fpColUsed: 'Сарфланган қолип',
 
   whTitle: 'Омбор',
+  whTabOverview: 'Умумий кўрсаткичлар',
+  whTabCatalog: 'Каталог',
+  whTabStats: 'Статистика',
   whMaterial: 'ПЭТ Сиро',
   whSemi: 'Ярим тайёр (қолип)',
   whFinal: 'Тайёр маҳсулот (бакалашка)',
@@ -1475,6 +1505,16 @@ const uz_latin: T = {
   rmPaintHint:
     'Turni «kraska» deb belgilang — smenada faqat shu turdagi pozitsiyalar tanlanadi.',
   rmCreatePaintButton: 'Kraskani saqlash',
+  rmSectionOverview: 'Umumiy ko‘rsatkichlar',
+  rmSectionOverviewDesc: 'PET siro va kraska bo‘yicha kirim, sarf va qoldiq',
+  rmSectionAlerts: 'Ogohlantirishlar',
+  rmSectionAlertsDesc: 'Kam qoldiq bo‘yicha turlar',
+  rmSectionCreateIncoming: 'Katalog va omborga kirim',
+  rmSectionCreateIncomingDesc: 'Yangi xomashyo turi yoki miqdorni ro‘yxatga qo‘shish',
+  rmSectionLedger: 'Harakatlar jurnali',
+  rmSectionLedgerDesc: 'Kirim va sarf yozuvlari',
+  rmSectionBags: 'Qoplar va apparat',
+  rmSectionBagsDesc: 'Faol qop, ulash / almashtirish va qoplar ro‘yxati',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -1568,6 +1608,9 @@ const uz_latin: T = {
   fpColUsed: 'Sarflangan qolip',
 
   whTitle: 'Ombor',
+  whTabOverview: 'Umumiy ko‘rsatkichlar',
+  whTabCatalog: 'Katalog',
+  whTabStats: 'Statistika',
   whMaterial: 'PET Siro',
   whSemi: 'Yarim tayyor (qolip)',
   whFinal: 'Tayyor mahsulot (bakalashka)',
@@ -2099,6 +2142,16 @@ const ru: T = {
   rmPaintHint:
     'Отметьте тип «краска» — в смене будут доступны только позиции этого типа.',
   rmCreatePaintButton: 'Сохранить краску',
+  rmSectionOverview: 'Сводные показатели',
+  rmSectionOverviewDesc: 'Поступление, расход и остаток: PET и краска',
+  rmSectionAlerts: 'Предупреждения',
+  rmSectionAlertsDesc: 'Типы сырья с низким остатком',
+  rmSectionCreateIncoming: 'Справочник и поступление на склад',
+  rmSectionCreateIncomingDesc: 'Новый тип сырья или ввод количества на склад',
+  rmSectionLedger: 'Журнал движений',
+  rmSectionLedgerDesc: 'Записи поступлений и расхода',
+  rmSectionBags: 'Мешки и аппарат',
+  rmSectionBagsDesc: 'Активный мешок, подключение и списки',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',
@@ -2192,6 +2245,9 @@ const ru: T = {
   fpColUsed: 'Использовано заготовок',
 
   whTitle: 'Склад',
+  whTabOverview: 'Общие показатели',
+  whTabCatalog: 'Каталог',
+  whTabStats: 'Статистика',
   whMaterial: 'ПЭТ Сырьё',
   whSemi: 'Полуфабрикат (заготовка)',
   whFinal: 'Готовый продукт (бутылка)',
