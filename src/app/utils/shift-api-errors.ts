@@ -17,7 +17,12 @@ export function parseShiftInventoryErr(
   }
 }
 
+const BACKEND_EN_BAG_INSUFFICIENT = 'Active bag quantity is insufficient';
+
 export function translateShiftInventoryApiError(message: string, t: T): string {
+  if (message === BACKEND_EN_BAG_INSUFFICIENT) {
+    return t.apiShiftActiveBagInsufficient;
+  }
   const p = parseShiftInventoryErr(message);
   if (!p) return message;
   const { code, param = '' } = p;

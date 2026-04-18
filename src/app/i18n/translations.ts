@@ -97,6 +97,8 @@ export interface T {
   apiShiftFinishedNoSemiRecipe: string;
   apiShiftInsufficientSemiStock: string;
   apiShiftFinishedBalanceMissing: string;
+  /** raw-material-bags: consumFromActiveBag — faol qopdagi qoldiq sarfga yetmasа */
+  apiShiftActiveBagInsufficient: string;
 
   // Common
   btnAdd: string;
@@ -812,6 +814,8 @@ const uz_cyrillic: T = {
   apiShiftFinishedNoSemiRecipe: 'Тайёр маҳсулот учун ярим тайёр ретсепти йўқ',
   apiShiftInsufficientSemiStock: 'Ярим тайёр омборда етарли эмас: {name}',
   apiShiftFinishedBalanceMissing: 'Тайёр маҳсулот учун омбор қолдиғи топилмади',
+  apiShiftActiveBagInsufficient:
+    'Уланган хом ашё қопида (фаол) сарф учун етарли миқдор йўқ — қопдаги қолдиқ камроқ ё сарф катта.',
 
   btnAdd: 'Қўшиш',
   btnSave: 'Сақлаш',
@@ -1508,6 +1512,8 @@ const uz_latin: T = {
   apiShiftFinishedNoSemiRecipe: 'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
   apiShiftInsufficientSemiStock: 'Yarim tayyor omborda yetarli emas: {name}',
   apiShiftFinishedBalanceMissing: 'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+  apiShiftActiveBagInsufficient:
+    "Ulangan xomashyo qopida (faol) sarf uchun yetarli miqdor yo'q — qopdagi qoldiq kichikroq yoki sarf katta.",
 
   btnAdd: "Qo'shish",
   btnSave: 'Saqlash',
@@ -2204,6 +2210,8 @@ const ru: T = {
   apiShiftFinishedNoSemiRecipe: 'Для готовой продукции нет рецепта полуфабрикатов',
   apiShiftInsufficientSemiStock: 'Недостаточно полуфабриката на складе: {name}',
   apiShiftFinishedBalanceMissing: 'Не найден складской остаток для готовой продукции',
+  apiShiftActiveBagInsufficient:
+    'В привязанной сумке (сырьё) недостаточно остатка для списания: в сумке меньше, чем запрашиваемый расход.',
 
   btnAdd: 'Добавить',
   btnSave: 'Сохранить',
