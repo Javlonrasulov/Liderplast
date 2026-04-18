@@ -2,7 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, CheckCircle2, BarChart3, Pencil, Trash2, FolderPlus } from 'lucide-react';
 import { useERP, type ExpenseCategory } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
+import {
+  displayGroupedIntInput,
+  formatNumber,
+  formatCurrency,
+  formatDate,
+  parseDigitsFromAmountInput,
+  TODAY,
+} from '../utils/format';
+import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
 
 const CHART_BAR = [
   'bg-yellow-500',
@@ -107,12 +115,15 @@ export function Expenses() {
     const map = new Map<string, { id: string; name: string; amount: number }>();
     for (const e of statsSortedExpenses) {
       const cid = e.categoryId || `legacy-${e.id}`;
-      const row = map.get(cid) ?? { id: cid, name: e.categoryName, amount: 0 };
+      const name =
+        e.type === 'electricity' || e.electricityCalc ? t.exElectricity : e.categoryName;
+      const row = map.get(cid) ?? { id: cid, name, amount: 0 };
+      row.name = name;
       row.amount += e.amount;
       map.set(cid, row);
     }
     return [...map.values()].sort((a, b) => b.amount - a.amount);
-  }, [statsSortedExpenses]);
+  }, [statsSortedExpenses, t.exElectricity]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,11 +146,13 @@ export function Expenses() {
       amount = electricityCost;
       description = `${selectedMachine?.name} - ${hours}h (${powerKw}kW × ${hours}h = ${kWh.toFixed(1)} kWh)`;
     } else {
-      if (!form.amount || parseFloat(form.amount) <= 0) {
+      const digits = form.amount.replace(/\D/g, '');
+      const num = parseInt(digits, 10);
+      if (!digits || !Number.isFinite(num) || num <= 0) {
         setError(t.labelAmount + '!');
         return;
       }
-      amount = parseFloat(form.amount);
+      amount = num;
     }
     void dispatch({
       type: 'ADD_EXPENSE',
@@ -431,9 +444,15 @@ export function Expenses() {
                       {t.exColAmount} ({t.unitSum})
                     </label>
                     <input
-                      type="number"
-                      value={form.amount}
-                      onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={displayGroupedIntInput(form.amount)}
+                      onChange={(e) => {
+                        const d = parseDigitsFromAmountInput(e.target.value);
+                        if (d.length > 15) return;
+                        setForm({ ...form, amount: d });
+                      }}
                       placeholder="0"
                       className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
@@ -575,6 +594,12 @@ export function Expenses() {
                 <tbody>
                   {filteredExpenses.map((expense, idx) => {
                     const si = styleIndex(expense.categoryId || expense.id);
+                    const isElectricity =
+                      expense.type === 'electricity' || Boolean(expense.electricityCalc);
+                    const categoryLabel = isElectricity ? t.exElectricity : expense.categoryName;
+                    const noteText = expense.sourceShiftId
+                      ? formatShiftExpenseTableNote(expense.description, t)
+                      : expense.description;
                     return (
                       <tr
                         key={expense.id}
@@ -583,7 +608,7 @@ export function Expenses() {
                         <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{formatDate(expense.date)}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${BADGE_STYLES[si]}`}>
-                            {expense.categoryName}
+                            {categoryLabel}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
@@ -592,11 +617,13 @@ export function Expenses() {
                         <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs">
                           <div className="flex items-center gap-2 min-w-0">
                             {expense.sourceShiftId ? (
-                              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+                              <span className="shrink-0 text-[10px] font-semibold tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
                                 {t.exFromShiftBadge}
                               </span>
                             ) : null}
-                            <span className="truncate">{expense.description}</span>
+                            <span className="truncate" title={noteText || undefined}>
+                              {noteText}
+                            </span>
                           </div>
                         </td>
                       </tr>

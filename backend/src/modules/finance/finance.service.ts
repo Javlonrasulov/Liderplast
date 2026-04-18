@@ -388,8 +388,18 @@ export class FinanceService {
     const workerName = shift.worker?.fullName?.trim() || '—';
     const machineName = shift.machine?.name ?? '—';
     const dateStr = shift.date.toISOString().slice(0, 10);
-    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwh} kVt·soat × ${pricePerKwh} so'm`;
-    const title = description.length >= 2 ? description.slice(0, 160) : 'Smena elektr';
+    /** Mijoz tilida: frontend `exShiftExpenseNote` — JSON (v1) tafsilotlari */
+    const descPayload = {
+      v: 1 as const,
+      d: dateStr,
+      n: shift.shiftNumber,
+      w: workerName,
+      m: machineName,
+      k: kwh,
+      p: pricePerKwh,
+    };
+    const description = JSON.stringify(descPayload);
+    const title = `Smena·elektr ${dateStr} · ${workerName}`.slice(0, 160);
 
     const common = {
       title,
@@ -996,6 +1006,16 @@ export class FinanceService {
           },
         },
       });
+      const shiftRecords = await this.prisma.shiftRecord.findMany({
+        where: {
+          workerId: worker.id,
+          date: {
+            gte: start,
+            lt: end,
+          },
+        },
+        select: { producedQty: true, productLabel: true },
+      });
       const configuredRates = await this.prisma.employeeProductRate.findMany({
         where: { workerId: worker.id },
       });
@@ -1017,11 +1037,31 @@ export class FinanceService {
         return sum + rateConfig.rateValue * item.quantity;
       }, 0);
 
-      const producedQuantity = productions.reduce(
+      const shiftProductionAmount = shiftRecords.reduce((sum, rec) => {
+        if (!rec.productLabel) {
+          return sum;
+        }
+        const rateConfig = rateMap.get(rec.productLabel);
+        if (!rateConfig) {
+          return sum;
+        }
+        if (rateConfig.rateType === EmployeeRateType.PERCENT) {
+          const baseAmount = rateConfig.baseAmount ?? 0;
+          return sum + ((baseAmount * rateConfig.rateValue) / 100) * rec.producedQty;
+        }
+        return sum + rateConfig.rateValue * rec.producedQty;
+      }, 0);
+
+      const productionAmount = computedProductionAmount + shiftProductionAmount;
+      const producedFromEmployeeProd = productions.reduce(
         (sum, item) => sum + item.quantity,
         0,
       );
-      const productionAmount = computedProductionAmount;
+      const producedFromShifts = shiftRecords.reduce(
+        (sum, rec) => sum + rec.producedQty,
+        0,
+      );
+      const producedQuantity = producedFromEmployeeProd + producedFromShifts;
 
       const brutto =
         worker.salaryType === SalaryType.FIXED

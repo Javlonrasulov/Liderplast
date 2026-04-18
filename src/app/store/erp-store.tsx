@@ -290,6 +290,8 @@ export interface ShiftRecord {
   id: string;
   date: string;
   shift: number;
+  /** `User.id` (ishchi) — ro‘yxat / filtrlash uchun */
+  employeeId: string;
   workerName: string;
   machineId: string;
   hoursWorked: number;
@@ -853,8 +855,8 @@ type BackendShiftRecord = {
   paintRawMaterialId?: string | null;
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
-  worker: { fullName: string };
-  machine?: { id: string } | null;
+  worker: { id: string; fullName: string };
+  machine?: { id: string; name?: string } | null;
 };
 
 type BackendProductionRecord = {
@@ -1821,6 +1823,7 @@ async function loadStateFromApi() {
     id: shift.id,
     date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
+    employeeId: shift.worker.id,
     workerName: shift.worker.fullName,
     machineId: shift.machine?.id ?? '',
     hoursWorked: shift.hoursWorked,

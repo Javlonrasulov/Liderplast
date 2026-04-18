@@ -507,6 +507,8 @@ export interface T {
   /** Narx o'zgarganda avvalgi smena xarajatlari qayta hisoblanmaydi */
   exElectricityPriceAffectsNewOnly: string;
   exFromShiftBadge: string;
+  /** Smena-elektr xarajati tavsifi: {date} {n} {worker} {machine} {kwh} {price} {unit} */
+  exShiftExpenseNote: string;
   /** Xarajatlar: kam ishlatiladigan kVt·soat narxi — modal tugmasi */
   exElectricityPriceButton: string;
   /** Topbar yonidagi qisqa yorliq (to‘liq matn title atributida) */
@@ -660,6 +662,16 @@ export interface T {
   prAddProduction: string;
   prEmployee: string;
   prNoEmployees: string;
+  /** «Ишчилар» таб: танланган сана (header) — факат шу оралиқдагӣ смена жадвали */
+  prShiftLogTitle: string;
+  prShiftLogFilterHint: string;
+  prShiftLogEmpty: string;
+  prShiftLogTotals: string;
+  prColShift: string;
+  prColDefect: string;
+  prColKwh: string;
+  prColPaint: string;
+  prColCounter: string;
   prNoVedomost: string;
   prTotalBrutto: string;
   prTotalNet: string;
@@ -676,6 +688,14 @@ export interface T {
   prIncomeTaxOnly: string;
   prNpsNote: string;
   prSocialNote: string;
+  /** Vedomost jadvali: daromad soliqi ostidagi qisqa eslatma */
+  prVedColHintDeduct: string;
+  /** NPS / ijt. soliq («чегирмайди») */
+  prVedColHintExempt: string;
+  /** NET ustuni: B − S / Б − Н */
+  prVedColNetShort: string;
+  /** KPI: ijtimoiy soliq qisqartmasi (NPS: … · …: …) */
+  prKpiLabelSocial: string;
   prBankUploadTitle: string;
   prBankUploadHint: string;
   prBankUploadAction: string;
@@ -1210,6 +1230,8 @@ const uz_cyrillic: T = {
   exElectricityPriceAffectsNewOnly:
     'Нархни ўзгартирганда, аввалги сменаларга богланган харажат суммаси қайта ҳисобланмайди; фақат шундан кейин сақланадиган ёки янгиланадиган сменалар жорий нарх бўйича.',
   exFromShiftBadge: 'Смена',
+  exShiftExpenseNote:
+    'Смена — электр: {date}, {n}-смена — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}',
   exElectricityPriceButton: 'Электр нархи (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
   exElectricityPriceSaved: 'kVt·soat нархи янгиланди',
@@ -1358,6 +1380,15 @@ const uz_cyrillic: T = {
   prAddProduction: 'Иш ҳажми қўшиш',
   prEmployee: 'Ишчи',
   prNoEmployees: 'Ишчилар рўйхати бўш',
+  prShiftLogTitle: 'Смена бўйича батафсил (танланган сана оралиғи)',
+  prShiftLogFilterHint: 'Пастдаги ёзувлар фақат танланган сана оралиғида: {label}',
+  prShiftLogEmpty: 'Бу ишчи учун танланган оралиқда смена ёзуви йўқ',
+  prShiftLogTotals: 'Оралиқ бўйича жамӣ',
+  prColShift: '№',
+  prColDefect: 'Брак',
+  prColKwh: 'кВт·соат',
+  prColPaint: 'Краска',
+  prColCounter: 'Ўткич',
   prNoVedomost: 'Ведомост яратилмаган. "Ведомост яратиш" тугмасини босинг.',
   prTotalBrutto: 'Жами брутто',
   prTotalNet: 'Жами нет',
@@ -1374,6 +1405,10 @@ const uz_cyrillic: T = {
   prIncomeTaxOnly: 'Фақат даромад солиғи чегирилади',
   prNpsNote: 'НПС — чегирилмайди',
   prSocialNote: 'Ижт. солиқ — чегирилмайди',
+  prVedColHintDeduct: 'NETдан чегирлади',
+  prVedColHintExempt: 'чегирмайди',
+  prVedColNetShort: 'B − S',
+  prKpiLabelSocial: 'Ижт.',
   prBankUploadTitle: 'Обортка юклаш',
   prBankUploadHint: 'Биринчи sheet автоматик ўқилади',
   prBankUploadAction: '.xlsx файл танлаш',
@@ -1908,6 +1943,8 @@ const uz_latin: T = {
   exElectricityPriceAffectsNewOnly:
     "Narx o'zgartirilganda avvalgi smenalarga bog'langan xarajat summasi qayta hisoblanmaydi; faqat keyin saqlangan yoki yangilangan smenalar joriy narx bo'yicha hisoblanadi.",
   exFromShiftBadge: 'Smena',
+  exShiftExpenseNote:
+    "Smena — elektr: {date}, {n}-smena — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}",
   exElectricityPriceButton: 'Elektr narxi (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
   exElectricityPriceSaved: "kVt·soat narxi yangilandi",
@@ -2056,6 +2093,15 @@ const uz_latin: T = {
   prAddProduction: 'Ish hajmi kiritish',
   prEmployee: 'Ishchi',
   prNoEmployees: "Ishchilar ro'yxati bo'sh",
+  prShiftLogTitle: 'Smena bo‘yicha batafsil (tanlangan sana oralig‘i)',
+  prShiftLogFilterHint: "Quyidagi yozuvlar faqat tanlangan sana oralig'ida: {label}",
+  prShiftLogEmpty: "Bu ishchi uchun tanlangan oraliqda smena yozuvi yo'q",
+  prShiftLogTotals: 'Oraliq bo‘yicha jami',
+  prColShift: '№',
+  prColDefect: 'Brak',
+  prColKwh: 'kVt·soat',
+  prColPaint: 'Kraska',
+  prColCounter: "O'tkich",
   prNoVedomost: "Vedomost yaratilmagan. \"Vedomost yaratish\" tugmasini bosing.",
   prTotalBrutto: 'Jami brutto',
   prTotalNet: 'Jami net',
@@ -2072,6 +2118,10 @@ const uz_latin: T = {
   prIncomeTaxOnly: "Faqat daromad solig'i chegiriladi",
   prNpsNote: "NPS — chegirilamaydi",
   prSocialNote: "Ijt. soliq — chegirilamaydi",
+  prVedColHintDeduct: 'NETdan chegirildi',
+  prVedColHintExempt: 'chegirilmaydi',
+  prVedColNetShort: 'B − S',
+  prKpiLabelSocial: 'Ijt.',
   prBankUploadTitle: 'Oborotka yuklash',
   prBankUploadHint: 'Birinchi sheet avtomatik o‘qiladi',
   prBankUploadAction: '.xlsx fayl tanlash',
@@ -2606,6 +2656,8 @@ const ru: T = {
   exElectricityPriceAffectsNewOnly:
     'При смене тарифа суммы, уже привязанные к прошлым сменам, не пересчитываются; с новой ценой считаются только смены, сохранённые или изменённые после этого.',
   exFromShiftBadge: 'Смена',
+  exShiftExpenseNote:
+    'Смена — электроэнергия: {date}, смена {n} — {worker}; {machine} — {kwh} кВт·ч × {price} {unit}',
   exElectricityPriceButton: 'Тариф электроэнергии (кВт·ч)',
   exElectricityPriceNavShort: 'кВт·ч',
   exElectricityPriceSaved: 'Цена за кВт·ч обновлена',
@@ -2754,6 +2806,15 @@ const ru: T = {
   prAddProduction: 'Добавить выработку',
   prEmployee: 'Сотрудник',
   prNoEmployees: 'Список сотрудников пуст',
+  prShiftLogTitle: 'Смена — детализация (по датам в шапке)',
+  prShiftLogFilterHint: 'Ниже только записи в выбранном диапазоне: {label}',
+  prShiftLogEmpty: 'У сотрудника нет смен в выбранном диапазоне',
+  prShiftLogTotals: 'Итого за период',
+  prColShift: '№',
+  prColDefect: 'Брак',
+  prColKwh: 'кВт·ч',
+  prColPaint: 'Краска',
+  prColCounter: 'Счётчик',
   prNoVedomost: 'Ведомость не сформирована. Нажмите "Сформировать ведомость".',
   prTotalBrutto: 'Итого брутто',
   prTotalNet: 'Итого нет',
@@ -2770,6 +2831,10 @@ const ru: T = {
   prIncomeTaxOnly: 'Только подоходный налог вычитается',
   prNpsNote: 'НПС — не вычитается',
   prSocialNote: 'Соц. налог — не вычитается',
+  prVedColHintDeduct: 'Удерж. из НЕТ',
+  prVedColHintExempt: 'не удерж.',
+  prVedColNetShort: 'Б − Н',
+  prKpiLabelSocial: 'Соц.',
   prBankUploadTitle: 'Загрузка оборотки',
   prBankUploadHint: 'Автоматически читается первый лист',
   prBankUploadAction: 'Выбрать .xlsx файл',

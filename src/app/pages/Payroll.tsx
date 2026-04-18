@@ -3,12 +3,12 @@ import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
-  UploadCloud, CheckCircle2, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2
+  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatCurrency, formatDateTime, formatNumber, TODAY } from '../utils/format';
-import type { Employee, EmployeeProductRate } from '../store/erp-store';
+import { formatCurrency, formatDateTime, formatNumber, formatKgAmount, TODAY } from '../utils/format';
+import type { Employee, EmployeeProductRate, ShiftRecord } from '../store/erp-store';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,8 +111,6 @@ function VedomostTab() {
   const [editBonus, setEditBonus] = useState(0);
   const [editDays, setEditDays] = useState(26);
   const [generated, setGenerated] = useState(false);
-  const [fileMsg, setFileMsg] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const rows = useMemo(() =>
     state.salaryVedomost
@@ -141,16 +139,6 @@ function VedomostTab() {
 
   const handleToggleStatus = (id: string, current: 'paid' | 'unpaid') => {
     dispatch({ type: 'SET_SALARY_STATUS', payload: { id, status: current === 'paid' ? 'unpaid' : 'paid' } });
-  };
-
-  // Upload file → marks ALL rows for this month as "Berildi" (paid)
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    dispatch({ type: 'SET_MONTH_STATUS', payload: { month, status: 'paid' } });
-    setFileMsg(t.prFileUploaded);
-    setTimeout(() => setFileMsg(''), 7000);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const startEdit = (id: string, bonus: number, days: number) => {
@@ -214,24 +202,6 @@ function VedomostTab() {
           {generated ? '✓ ' + t.prGenerate : t.prGenerate}
         </button>
 
-        {/* File upload trigger — triggers "Berildi" status for whole month */}
-        {allRows.length > 0 && (
-          <label
-            className="flex items-center gap-2 h-9 px-4 rounded-xl border-2 border-dashed border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-sm font-medium cursor-pointer transition-all select-none"
-            title={t.prUploadFile}
-          >
-            <UploadCloud size={15} />
-            <span>{t.prUploadFile}</span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFileUpload}
-              accept=".xlsx,.xls,.csv,.pdf,.txt,.zip"
-            />
-          </label>
-        )}
-
         {/* Status filter pills */}
         <div className="flex gap-1 ml-auto">
           {(['all', 'paid', 'unpaid'] as const).map(f => (
@@ -260,16 +230,6 @@ function VedomostTab() {
         </button>
       </div>
 
-      {/* ── File upload success banner ────────────────────────────── */}
-      {fileMsg && (
-        <div className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-2xl animate-pulse-once">
-          <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-emerald-800 dark:text-emerald-300 text-sm font-medium">{fileMsg}</p>
-          </div>
-        </div>
-      )}
-
       {/* ── KPI Summary cards ─────────────────────────────────────── */}
       {allRows.length > 0 && (
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -288,7 +248,7 @@ function VedomostTab() {
           <StatCard
             label={t.prIncomeTax}
             value={formatCurrency(totals.incomeTax)}
-            sub={`NPS: ${formatCurrency(totals.nps)} · Ijt: ${formatCurrency(totals.social)}`}
+            sub={`${t.prNps}: ${formatCurrency(totals.nps)} · ${t.prKpiLabelSocial}: ${formatCurrency(totals.social)}`}
             color="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
           />
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
@@ -380,22 +340,22 @@ function VedomostTab() {
                   {/* Income Tax — DEDUCTED (-) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap bg-orange-50/40 dark:bg-orange-900/10">
                     <div>{t.prIncomeTax}</div>
-                    <div className="text-[9px] font-normal text-red-500 dark:text-red-400">NETdan chegirila-di</div>
+                    <div className="text-[9px] font-normal text-red-500 dark:text-red-400">{t.prVedColHintDeduct}</div>
                   </th>
                   {/* NPS — NOT deducted (*) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     <div>{t.prNps} <span className="text-[9px] text-slate-400">*</span></div>
-                    <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">Chegirila-maydi</div>
+                    <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">{t.prVedColHintExempt}</div>
                   </th>
                   {/* Social Tax — NOT deducted (*) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     <div>{t.prSocialTax} <span className="text-[9px] text-slate-400">*</span></div>
-                    <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">Chegirila-maydi</div>
+                    <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">{t.prVedColHintExempt}</div>
                   </th>
                   {/* NET — highlighted emerald */}
                   <th className="text-right px-3 py-2.5 font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap bg-emerald-50/50 dark:bg-emerald-900/10">
                     <div>{t.prNet}</div>
-                    <div className="text-[9px] font-normal text-emerald-500">B − I</div>
+                    <div className="text-[9px] font-normal text-emerald-500">{t.prVedColNetShort}</div>
                   </th>
                   {/* Status */}
                   <th className="text-left px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
@@ -1201,7 +1161,7 @@ function BankTab() {
 
 function EmployeesTab() {
   const { state, dispatch } = useERP();
-  const { t } = useApp();
+  const { t, filterData, filterLabel, dateFilter } = useApp();
   const PRODUCT_TYPES = ['18g Қолип', '20g Қолип', '0.5L Бакалашка', '1L Бакалашка', '5L Бакалашка'];
   const [form, setForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
@@ -1246,6 +1206,38 @@ function EmployeesTab() {
     () => state.employeeProductRates.filter((item) => item.employeeId === selectedEmployeeId),
     [selectedEmployeeId, state.employeeProductRates],
   );
+
+  const machineNameById = useMemo(
+    () => new Map(state.machines.map((m) => [m.id, m.name])),
+    [state.machines],
+  );
+
+  const selectedShiftLog = useMemo((): ShiftRecord[] => {
+    if (!selectedEmployeeId) return [];
+    const forEmp = state.shiftRecords.filter((s) => s.employeeId === selectedEmployeeId);
+    return filterData(forEmp).sort((a, b) => {
+      const byDate = a.date.localeCompare(b.date);
+      if (byDate !== 0) return byDate;
+      return a.shift - b.shift;
+    });
+  }, [state.shiftRecords, selectedEmployeeId, filterData, dateFilter]);
+
+  const selectedShiftTotals = useMemo(() => {
+    let hours = 0;
+    let produced = 0;
+    let defect = 0;
+    let kwh = 0;
+    for (const s of selectedShiftLog) {
+      hours += s.hoursWorked;
+      produced += s.producedQty;
+      defect += s.defectCount;
+      kwh += s.electricityKwh;
+    }
+    return { hours, produced, defect, kwh };
+  }, [selectedShiftLog]);
+
+  const fmtQty = (n: number) => formatNumber(Math.round(n));
+  const fmtDec = (n: number) => formatKgAmount(n);
 
   const handleEmployeeUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1466,15 +1458,38 @@ function EmployeesTab() {
         )}
       </div>
 
-      <div className="lg:col-span-3 space-y-3">
+      <div className="lg:col-span-3 space-y-4">
+        <div className="flex items-start gap-2 rounded-2xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 text-xs text-indigo-900/90 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-200/90">
+          <Calendar size={16} className="mt-0.5 shrink-0 opacity-80" />
+          <p>{t.prShiftLogFilterHint.replace(/\{label\}/g, filterLabel)}</p>
+        </div>
+
         {state.employees.length === 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-10 text-center">
             <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
             <p className="text-slate-500 text-sm">{t.prNoEmployees}</p>
           </div>
         ) : (
-          state.employees.map(emp => (
-            <div key={emp.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex items-center gap-4">
+          state.employees.map((emp) => {
+            const selected = emp.id === selectedEmployeeId;
+            return (
+            <div
+              key={emp.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEmployeeId(emp.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEmployeeId(emp.id);
+                }
+              }}
+              className={`bg-white dark:bg-slate-800 rounded-2xl border p-4 shadow-sm flex items-center gap-4 cursor-pointer transition-shadow outline-none ${
+                selected
+                  ? 'border-indigo-400 ring-2 ring-indigo-400/40 dark:border-indigo-500/60'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+              }`}
+            >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-sm font-bold">{emp.fullName.charAt(0)}</span>
               </div>
@@ -1493,14 +1508,107 @@ function EmployeesTab() {
                 </div>
               </div>
               <button
-                onClick={() => setDeleteEmployeeTarget(emp)}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteEmployeeTarget(emp);
+                }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <Trash2 size={14} />
               </button>
             </div>
-          ))
+            );
+          })
         )}
+
+        {state.employees.length > 0 && selectedEmployee ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.prShiftLogTitle}</h3>
+            <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">{selectedEmployee.fullName}</p>
+            {selectedShiftLog.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t.prShiftLogEmpty}</p>
+            ) : (
+              <div className="mt-3 overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700/80">
+                <table className="w-full min-w-[880px] text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.labelDate}</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prColShift}</th>
+                      <th className="min-w-[7rem] px-2 py-2.5 font-medium">{t.labelMachine}</th>
+                      <th className="min-w-[8rem] px-2 py-2.5 font-medium">{t.prProductType}</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.labelHours}</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prProducedQty}</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prColDefect}</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prColKwh}</th>
+                      <th className="min-w-[6.5rem] px-2 py-2.5 font-medium">{t.prColPaint}</th>
+                      <th className="min-w-[4rem] px-2 py-2.5 font-medium">{t.prColCounter}</th>
+                      <th className="min-w-[6rem] px-2 py-2.5 font-medium">{t.labelDesc}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedShiftLog.map((row) => {
+                      const mName = row.machineId
+                        ? machineNameById.get(row.machineId) || '—'
+                        : '—';
+                      const paintStr =
+                        row.paintUsed && (row.paintQuantityKg ?? 0) > 0
+                          ? `${row.paintRawMaterialName ? `${row.paintRawMaterialName} · ` : ''}${formatKgAmount(row.paintQuantityKg ?? 0)} kg`
+                          : '—';
+                      return (
+                        <tr
+                          key={row.id}
+                          className="border-b border-slate-100 last:border-0 dark:border-slate-700/60"
+                        >
+                          <td className="whitespace-nowrap px-2 py-2 text-slate-800 dark:text-slate-200">{row.date}</td>
+                          <td className="whitespace-nowrap px-2 py-2 text-slate-700 dark:text-slate-300">{row.shift}</td>
+                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{mName}</td>
+                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{row.productType || '—'}</td>
+                          <td className="whitespace-nowrap px-2 py-2 tabular-nums text-slate-800 dark:text-slate-200">
+                            {fmtDec(row.hoursWorked)}
+                          </td>
+                          <td className="whitespace-nowrap px-2 py-2 tabular-nums text-slate-800 dark:text-slate-200">
+                            {fmtQty(row.producedQty)}
+                          </td>
+                          <td className="whitespace-nowrap px-2 py-2 tabular-nums text-amber-700 dark:text-amber-400/90">
+                            {fmtQty(row.defectCount)}
+                          </td>
+                          <td className="whitespace-nowrap px-2 py-2 tabular-nums text-slate-600 dark:text-slate-400">
+                            {fmtDec(row.electricityKwh)}
+                          </td>
+                          <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{paintStr}</td>
+                          <td className="max-w-[6rem] truncate px-2 py-2 text-slate-600 dark:text-slate-400" title={row.machineReading}>
+                            {row.machineReading || '—'}
+                          </td>
+                          <td
+                            className="max-w-[8rem] truncate px-2 py-2 text-slate-500 dark:text-slate-500"
+                            title={row.notes}
+                          >
+                            {row.notes || '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-slate-200 bg-slate-50/90 font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-900/70 dark:text-slate-200">
+                      <td colSpan={4} className="px-2 py-2.5">{t.prShiftLogTotals}</td>
+                      <td className="whitespace-nowrap px-2 py-2.5 tabular-nums">{fmtDec(selectedShiftTotals.hours)}</td>
+                      <td className="whitespace-nowrap px-2 py-2.5 tabular-nums">{fmtQty(selectedShiftTotals.produced)}</td>
+                      <td className="whitespace-nowrap px-2 py-2.5 tabular-nums text-amber-800 dark:text-amber-400">
+                        {fmtQty(selectedShiftTotals.defect)}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2.5 tabular-nums">
+                        {fmtDec(selectedShiftTotals.kwh)}
+                      </td>
+                      <td colSpan={3} className="px-2 py-2.5 text-slate-400" />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <AlertDialog

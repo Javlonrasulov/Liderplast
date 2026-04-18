@@ -14,6 +14,21 @@ export function formatNumber(num: number): string {
   return new Intl.NumberFormat('ru-RU').format(Math.round(num));
 }
 
+/** Kiritish: faqat raqamlar qoladi. */
+export function parseDigitsFromAmountInput(input: string): string {
+  return input.replace(/\D/g, '');
+}
+
+/**
+ * Butun son kiritilganda ko‘rinish (masalan: 1 000 000).
+ * `form` holatida saqlanadigan string faqat raqamlar bo‘lishi kerak.
+ */
+export function displayGroupedIntInput(onlyDigits: string): string {
+  const d = onlyDigits.replace(/\D/g, '');
+  if (d === '') return '';
+  return d.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 /**
  * kg (PET, kraska): кичик миқдорлар 0 га яхлитланмайди (масалан 300 г → 0,3 kg).
  */

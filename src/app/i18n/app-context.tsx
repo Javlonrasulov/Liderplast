@@ -108,8 +108,30 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+const LANG_STORAGE = 'erp_lang';
+const SUPPORTED: Language[] = ['uz_cyrillic', 'uz_latin', 'ru'];
+
+function readStoredLang(): Language {
+  try {
+    const s = localStorage.getItem(LANG_STORAGE) as Language | null;
+    if (s && SUPPORTED.includes(s)) return s;
+  } catch {
+    // ignore
+  }
+  return 'uz_cyrillic';
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>('uz_cyrillic');
+  const [lang, setLangState] = useState<Language>(readStoredLang);
+
+  const setLang = (l: Language) => {
+    setLangState(l);
+    try {
+      localStorage.setItem(LANG_STORAGE, l);
+    } catch {
+      // ignore
+    }
+  };
   const [dateFilter, setDateFilter] = useState<DateFilter>({
     preset: 'all',
     from: '',
