@@ -3033,6 +3033,7 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
+  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -3062,6 +3063,7 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
+  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -3286,6 +3288,9 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
+  paintUsed: 'paintUsed',
+  paintRawMaterialId: 'paintRawMaterialId',
+  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -3669,6 +3674,20 @@ export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
+ * Reference to a field of type 'RawMaterialKind'
+ */
+export type EnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind'>
+    
+
+
+/**
+ * Reference to a field of type 'RawMaterialKind[]'
+ */
+export type ListEnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'EntityStatus'
  */
 export type EnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntityStatus'>
@@ -3679,6 +3698,20 @@ export type EnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'EntityStatus[]'
  */
 export type ListEnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntityStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FinishedProductSpecUnit'
+ */
+export type EnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit'>
+    
+
+
+/**
+ * Reference to a field of type 'FinishedProductSpecUnit[]'
+ */
+export type ListEnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit[]'>
     
 
 

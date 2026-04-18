@@ -11,6 +11,7 @@ import {
   BankVedomostStatus,
   EmployeeRateType,
   EntityStatus,
+  ExpenseType,
   Role,
   SalaryType,
 } from '../../generated/prisma/enums.js';
@@ -319,6 +320,41 @@ export class FinanceService {
   }
 
   /**
+   * Smena-elektr xarajati kategoriyasi bo‘lmasa, avtomatik yaratiladi; aks holda hech
+   * qanday `Expense` yozilmay, xarajatlar ro‘yxatida smena yansunmay qoladi.
+   */
+  private async ensureElectricityExpenseCategory() {
+    const found = await this.prisma.expenseCategory.findFirst({
+      where: {
+        deletedAt: null,
+        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (found) {
+      return found;
+    }
+    this.logger.warn(
+      'No electricity ExpenseCategory — creating default (Elektr energiya). Resyncing shift kWh…',
+    );
+    const created = await this.prisma.expenseCategory.create({
+      data: {
+        name: 'Elektr energiya',
+        legacyExpenseType: ExpenseType.ELECTRICITY,
+        electricityCalc: true,
+      },
+    });
+    void this.resyncAllShiftElectricityExpenses().catch((err) =>
+      this.logger.warn(
+        `resync after default electricity category: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      ),
+    );
+    return created;
+  }
+
+  /**
    * Smena yozuvidagi kVt·soat × bazadagi narx bo‘yicha elektr kategoriyasiga xarajat
    * (bir smenaga bitta bog‘langan Expense, `sourceShiftId`).
    */
@@ -334,19 +370,10 @@ export class FinanceService {
     const settings = await this.prisma.salarySetting.findFirst();
     const pricePerKwh = settings?.electricityPricePerKwh ?? 800;
 
-    const category = await this.prisma.expenseCategory.findFirst({
-      where: {
-        deletedAt: null,
-        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
-      },
-      orderBy: { createdAt: 'asc' },
-    });
-    if (!category) {
-      return;
-    }
+    const category = await this.ensureElectricityExpenseCategory();
 
     const kwh = shift.electricityKwh ?? 0;
-    const existing = await this.prisma.expense.findFirst({
+    const existing = await this.prisma.expense.findUnique({
       where: { sourceShiftId: shiftId },
     });
 
@@ -520,31 +547,20 @@ export class FinanceService {
       });
     }
 
-    const updated = await this.prisma.salarySetting.update({
+    return this.prisma.salarySetting.update({
       where: { id: existing.id },
       data,
     });
-
-    if (dto.electricityPricePerKwh !== undefined) {
-      try {
-        await this.resyncAllShiftElectricityExpenses();
-      } catch (err) {
-        this.logger.warn(
-          `resyncAllShiftElectricityExpenses after salary settings: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    }
-
-    return updated;
   }
 
   /**
    * Xarajatlar sahifasidan: faqat kVt·soat narxi yangilanadi (soliq foizlari DBdagi qiymatda qoladi).
+   * Eski smenaga bog‘langan summalar o‘zgarmaydi; keyingi saqlangan smenalar yangi narxda hisoblanadi.
    */
   async patchElectricityPricePerKwh(electricityPricePerKwh: number) {
     const existing = await this.prisma.salarySetting.findFirst();
     if (!existing) {
-      const created = await this.prisma.salarySetting.create({
+      return this.prisma.salarySetting.create({
         data: {
           incomeTaxPercent: 12,
           otherDeductionPercent: 0,
@@ -553,30 +569,12 @@ export class FinanceService {
           electricityPricePerKwh,
         },
       });
-      try {
-        await this.resyncAllShiftElectricityExpenses();
-      } catch (err) {
-        this.logger.warn(
-          `resyncAllShiftElectricityExpenses after create salary settings: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-      return created;
     }
 
-    const updated = await this.prisma.salarySetting.update({
+    return this.prisma.salarySetting.update({
       where: { id: existing.id },
       data: { electricityPricePerKwh },
     });
-
-    try {
-      await this.resyncAllShiftElectricityExpenses();
-    } catch (err) {
-      this.logger.warn(
-        `resyncAllShiftElectricityExpenses after electricity price patch: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-
-    return updated;
   }
 
   getSalarySettings() {

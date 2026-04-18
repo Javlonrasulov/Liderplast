@@ -502,6 +502,8 @@ export interface T {
   exNoMachinesElectric: string;
   exGlobalElectricityPriceTitle: string;
   exShiftElectricityExplain: string;
+  /** Narx o'zgarganda avvalgi smena xarajatlari qayta hisoblanmaydi */
+  exElectricityPriceAffectsNewOnly: string;
   exFromShiftBadge: string;
   /** Xarajatlar: kam ishlatiladigan kVt·soat narxi — modal tugmasi */
   exElectricityPriceButton: string;
@@ -1201,6 +1203,8 @@ const uz_cyrillic: T = {
   exGlobalElectricityPriceTitle: 'kVt·soat narxi (барча электр учун)',
   exShiftElectricityExplain:
     'Бу нарх «Смена тарихи»даги kVt·soat × сум ҳисоби билан автоматик электр харажатларига қўлланилади; смена сақланса ёки ўзгарса, харажат ҳам янгиланади.',
+  exElectricityPriceAffectsNewOnly:
+    'Нархни ўзгартирганда, аввалги сменаларга богланган харажат суммаси қайта ҳисобланмайди; фақат шундан кейин сақланадиган ёки янгиланадиган сменалар жорий нарх бўйича.',
   exFromShiftBadge: 'Смена',
   exElectricityPriceButton: 'Электр нархи (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
@@ -1895,6 +1899,8 @@ const uz_latin: T = {
   exGlobalElectricityPriceTitle: "kVt·soat narxi (barcha elektr uchun)",
   exShiftElectricityExplain:
     "Bu narx «Smena tarixi»dagi kVt·soat × so'm hisobi bilan avtomatik elektr xarajatlariga qo'llaniladi; smena saqlansa yoki o'zgarsa, xarajat ham yangilanadi.",
+  exElectricityPriceAffectsNewOnly:
+    "Narx o'zgartirilganda avvalgi smenalarga bog'langan xarajat summasi qayta hisoblanmaydi; faqat keyin saqlangan yoki yangilangan smenalar joriy narx bo'yicha hisoblanadi.",
   exFromShiftBadge: 'Smena',
   exElectricityPriceButton: 'Elektr narxi (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
@@ -2589,6 +2595,8 @@ const ru: T = {
   exGlobalElectricityPriceTitle: 'Цена за кВт·ч (вся электроэнергия)',
   exShiftElectricityExplain:
     'Эта цена применяется к автоматическим расходам: кВт·ч из «Истории смен» × сум; при сохранении или изменении смены расход пересчитывается.',
+  exElectricityPriceAffectsNewOnly:
+    'При смене тарифа суммы, уже привязанные к прошлым сменам, не пересчитываются; с новой ценой считаются только смены, сохранённые или изменённые после этого.',
   exFromShiftBadge: 'Смена',
   exElectricityPriceButton: 'Тариф электроэнергии (кВт·ч)',
   exElectricityPriceNavShort: 'кВт·ч',

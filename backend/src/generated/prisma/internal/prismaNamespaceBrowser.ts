@@ -144,6 +144,7 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
+  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -173,6 +174,7 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
+  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -397,6 +399,9 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
+  paintUsed: 'paintUsed',
+  paintRawMaterialId: 'paintRawMaterialId',
+  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const

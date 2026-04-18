@@ -119,6 +119,18 @@ enum ProductAuditEntityType {
   FINISHED_PRODUCT
 }
 
+enum RawMaterialKind {
+  SIRO
+  PAINT
+}
+
+enum FinishedProductSpecUnit {
+  LITER
+  KILOGRAM
+  PIECE
+  OTHER
+}
+
 model User {
   id                  String              @id @default(cuid())
   fullName            String
@@ -173,6 +185,7 @@ model RawMaterial {
   id           String                  @id @default(cuid())
   name         String                  @unique
   unit         String                  @default("kg")
+  kind         RawMaterialKind         @default(SIRO)
   defaultBagWeightKg Float?
   description  String?
   isDeleted    Boolean                 @default(false)
@@ -186,6 +199,7 @@ model RawMaterial {
   bagAuditLogs BagAuditLog[]
   semiProductLinks SemiProductRawMaterial[]
   productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
+  paintShiftRecords ShiftRecord[]      @relation("PaintRawMaterial")
 }
 
 model SemiProduct {
@@ -212,6 +226,7 @@ model FinishedProduct {
   id            String               @id @default(cuid())
   name          String               @unique
   volumeLiter   Float
+  specUnit      FinishedProductSpecUnit @default(LITER)
   description   String?
   isDeleted     Boolean              @default(false)
   status        EntityStatus         @default(COMPLETED)
@@ -471,6 +486,10 @@ model ShiftRecord {
   defectCount   Int           @default(0)
   electricityKwh Float        @default(0)
   notes         String?
+  paintUsed            Boolean       @default(false)
+  paintRawMaterialId   String?
+  paintQuantityKg      Float?
+  paintRawMaterial     RawMaterial?  @relation("PaintRawMaterial", fields: [paintRawMaterialId], references: [id], onDelete: SetNull)
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
   shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")

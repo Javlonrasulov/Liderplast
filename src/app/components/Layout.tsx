@@ -287,7 +287,7 @@ export function Layout() {
       {/* Main area */}
       <div className={`flex min-h-0 min-w-0 flex-1 flex-col transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Top bar — toolbar scrolls horizontally on very narrow viewports */}
-        <header className="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-700 dark:bg-slate-900 sm:px-3 lg:h-14 lg:px-5 lg:py-0">
+        <header className="z-10 flex min-h-14 shrink-0 items-center gap-2 overflow-visible border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-700 dark:bg-slate-900 sm:px-3 lg:h-14 lg:px-5 lg:py-0">
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -303,9 +303,14 @@ export function Layout() {
             {showExpensesElectricityNav ? <ExpensesElectricityNavButton /> : null}
           </div>
 
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto hide-scrollbar sm:gap-2">
-            <DateFilterPicker />
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
+            {/* Date outside overflow-x (no clip). Inner row must not use flex-1 or the group splits: date by title, icons on the right */}
+            <div className="flex min-w-0 max-w-full items-center justify-end gap-1 sm:gap-2">
+            <div className="shrink-0 overflow-visible">
+              <DateFilterPicker />
+            </div>
 
+            <div className="flex min-w-0 min-h-0 items-center justify-end gap-1 overflow-x-auto hide-scrollbar sm:gap-2">
             {lowStock && (
               <div className="hidden items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 dark:border-amber-700 dark:bg-amber-900/20 md:flex">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
@@ -357,6 +362,8 @@ export function Layout() {
               >
                 <LogOut size={16} />
               </button>
+            </div>
+            </div>
             </div>
           </div>
         </header>

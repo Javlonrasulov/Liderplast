@@ -84,7 +84,10 @@ export function ExpensesElectricityNavButton() {
         <DialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">{t.exGlobalElectricityPriceTitle}</DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">{t.exShiftElectricityExplain}</DialogDescription>
+            <DialogDescription className="text-slate-600 dark:text-slate-400 space-y-2">
+              <span className="block">{t.exShiftElectricityExplain}</span>
+              <span className="block text-slate-500 dark:text-slate-500">{t.exElectricityPriceAffectsNewOnly}</span>
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-3 pt-1">
             {modalError ? (

@@ -38,6 +38,7 @@ export type FinishedProductMinAggregateOutputType = {
   id: string | null
   name: string | null
   volumeLiter: number | null
+  specUnit: $Enums.FinishedProductSpecUnit | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -49,6 +50,7 @@ export type FinishedProductMaxAggregateOutputType = {
   id: string | null
   name: string | null
   volumeLiter: number | null
+  specUnit: $Enums.FinishedProductSpecUnit | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -60,6 +62,7 @@ export type FinishedProductCountAggregateOutputType = {
   id: number
   name: number
   volumeLiter: number
+  specUnit: number
   description: number
   isDeleted: number
   status: number
@@ -81,6 +84,7 @@ export type FinishedProductMinAggregateInputType = {
   id?: true
   name?: true
   volumeLiter?: true
+  specUnit?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -92,6 +96,7 @@ export type FinishedProductMaxAggregateInputType = {
   id?: true
   name?: true
   volumeLiter?: true
+  specUnit?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -103,6 +108,7 @@ export type FinishedProductCountAggregateInputType = {
   id?: true
   name?: true
   volumeLiter?: true
+  specUnit?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -201,6 +207,7 @@ export type FinishedProductGroupByOutputType = {
   id: string
   name: string
   volumeLiter: number
+  specUnit: $Enums.FinishedProductSpecUnit
   description: string | null
   isDeleted: boolean
   status: $Enums.EntityStatus
@@ -235,6 +242,7 @@ export type FinishedProductWhereInput = {
   id?: Prisma.StringFilter<"FinishedProduct"> | string
   name?: Prisma.StringFilter<"FinishedProduct"> | string
   volumeLiter?: Prisma.FloatFilter<"FinishedProduct"> | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFilter<"FinishedProduct"> | $Enums.FinishedProductSpecUnit
   description?: Prisma.StringNullableFilter<"FinishedProduct"> | string | null
   isDeleted?: Prisma.BoolFilter<"FinishedProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"FinishedProduct"> | $Enums.EntityStatus
@@ -253,6 +261,7 @@ export type FinishedProductOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   volumeLiter?: Prisma.SortOrder
+  specUnit?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -274,6 +283,7 @@ export type FinishedProductWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.FinishedProductWhereInput[]
   NOT?: Prisma.FinishedProductWhereInput | Prisma.FinishedProductWhereInput[]
   volumeLiter?: Prisma.FloatFilter<"FinishedProduct"> | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFilter<"FinishedProduct"> | $Enums.FinishedProductSpecUnit
   description?: Prisma.StringNullableFilter<"FinishedProduct"> | string | null
   isDeleted?: Prisma.BoolFilter<"FinishedProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"FinishedProduct"> | $Enums.EntityStatus
@@ -292,6 +302,7 @@ export type FinishedProductOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   volumeLiter?: Prisma.SortOrder
+  specUnit?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -311,6 +322,7 @@ export type FinishedProductScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"FinishedProduct"> | string
   name?: Prisma.StringWithAggregatesFilter<"FinishedProduct"> | string
   volumeLiter?: Prisma.FloatWithAggregatesFilter<"FinishedProduct"> | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitWithAggregatesFilter<"FinishedProduct"> | $Enums.FinishedProductSpecUnit
   description?: Prisma.StringNullableWithAggregatesFilter<"FinishedProduct"> | string | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"FinishedProduct"> | boolean
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"FinishedProduct"> | $Enums.EntityStatus
@@ -322,6 +334,7 @@ export type FinishedProductCreateInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -340,6 +353,7 @@ export type FinishedProductUncheckedCreateInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -358,6 +372,7 @@ export type FinishedProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -376,6 +391,7 @@ export type FinishedProductUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -394,6 +410,7 @@ export type FinishedProductCreateManyInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -405,6 +422,7 @@ export type FinishedProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -416,6 +434,7 @@ export type FinishedProductUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -427,6 +446,7 @@ export type FinishedProductCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   volumeLiter?: Prisma.SortOrder
+  specUnit?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -442,6 +462,7 @@ export type FinishedProductMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   volumeLiter?: Prisma.SortOrder
+  specUnit?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -453,6 +474,7 @@ export type FinishedProductMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   volumeLiter?: Prisma.SortOrder
+  specUnit?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -472,6 +494,10 @@ export type FinishedProductNullableScalarRelationFilter = {
 export type FinishedProductScalarRelationFilter = {
   is?: Prisma.FinishedProductWhereInput
   isNot?: Prisma.FinishedProductWhereInput
+}
+
+export type EnumFinishedProductSpecUnitFieldUpdateOperationsInput = {
+  set?: $Enums.FinishedProductSpecUnit
 }
 
 export type FinishedProductCreateNestedOneWithoutBalanceInput = {
@@ -586,6 +612,7 @@ export type FinishedProductCreateWithoutBalanceInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -603,6 +630,7 @@ export type FinishedProductUncheckedCreateWithoutBalanceInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -636,6 +664,7 @@ export type FinishedProductUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -653,6 +682,7 @@ export type FinishedProductUncheckedUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -670,6 +700,7 @@ export type FinishedProductCreateWithoutMovementsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -687,6 +718,7 @@ export type FinishedProductUncheckedCreateWithoutMovementsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -720,6 +752,7 @@ export type FinishedProductUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -737,6 +770,7 @@ export type FinishedProductUncheckedUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -754,6 +788,7 @@ export type FinishedProductCreateWithoutSemiProductLinksInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -771,6 +806,7 @@ export type FinishedProductUncheckedCreateWithoutSemiProductLinksInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -804,6 +840,7 @@ export type FinishedProductUpdateWithoutSemiProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -821,6 +858,7 @@ export type FinishedProductUncheckedUpdateWithoutSemiProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -838,6 +876,7 @@ export type FinishedProductCreateWithoutMachineLinksInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -855,6 +894,7 @@ export type FinishedProductUncheckedCreateWithoutMachineLinksInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -888,6 +928,7 @@ export type FinishedProductUpdateWithoutMachineLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -905,6 +946,7 @@ export type FinishedProductUncheckedUpdateWithoutMachineLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -922,6 +964,7 @@ export type FinishedProductCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -939,6 +982,7 @@ export type FinishedProductUncheckedCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -972,6 +1016,7 @@ export type FinishedProductUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -989,6 +1034,7 @@ export type FinishedProductUncheckedUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1006,6 +1052,7 @@ export type FinishedProductCreateWithoutOutputBatchesInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1023,6 +1070,7 @@ export type FinishedProductUncheckedCreateWithoutOutputBatchesInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1056,6 +1104,7 @@ export type FinishedProductUpdateWithoutOutputBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1073,6 +1122,7 @@ export type FinishedProductUncheckedUpdateWithoutOutputBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1090,6 +1140,7 @@ export type FinishedProductCreateWithoutOrderItemsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1107,6 +1158,7 @@ export type FinishedProductUncheckedCreateWithoutOrderItemsInput = {
   id?: string
   name: string
   volumeLiter: number
+  specUnit?: $Enums.FinishedProductSpecUnit
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1140,6 +1192,7 @@ export type FinishedProductUpdateWithoutOrderItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1157,6 +1210,7 @@ export type FinishedProductUncheckedUpdateWithoutOrderItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   volumeLiter?: Prisma.FloatFieldUpdateOperationsInput | number
+  specUnit?: Prisma.EnumFinishedProductSpecUnitFieldUpdateOperationsInput | $Enums.FinishedProductSpecUnit
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1250,6 +1304,7 @@ export type FinishedProductSelect<ExtArgs extends runtime.Types.Extensions.Inter
   id?: boolean
   name?: boolean
   volumeLiter?: boolean
+  specUnit?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1269,6 +1324,7 @@ export type FinishedProductSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   id?: boolean
   name?: boolean
   volumeLiter?: boolean
+  specUnit?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1280,6 +1336,7 @@ export type FinishedProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   id?: boolean
   name?: boolean
   volumeLiter?: boolean
+  specUnit?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1291,6 +1348,7 @@ export type FinishedProductSelectScalar = {
   id?: boolean
   name?: boolean
   volumeLiter?: boolean
+  specUnit?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1298,7 +1356,7 @@ export type FinishedProductSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FinishedProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "volumeLiter" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["finishedProduct"]>
+export type FinishedProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "volumeLiter" | "specUnit" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["finishedProduct"]>
 export type FinishedProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balance?: boolean | Prisma.FinishedProduct$balanceArgs<ExtArgs>
   movements?: boolean | Prisma.FinishedProduct$movementsArgs<ExtArgs>
@@ -1327,6 +1385,7 @@ export type $FinishedProductPayload<ExtArgs extends runtime.Types.Extensions.Int
     id: string
     name: string
     volumeLiter: number
+    specUnit: $Enums.FinishedProductSpecUnit
     description: string | null
     isDeleted: boolean
     status: $Enums.EntityStatus
@@ -1765,6 +1824,7 @@ export interface FinishedProductFieldRefs {
   readonly id: Prisma.FieldRef<"FinishedProduct", 'String'>
   readonly name: Prisma.FieldRef<"FinishedProduct", 'String'>
   readonly volumeLiter: Prisma.FieldRef<"FinishedProduct", 'Float'>
+  readonly specUnit: Prisma.FieldRef<"FinishedProduct", 'FinishedProductSpecUnit'>
   readonly description: Prisma.FieldRef<"FinishedProduct", 'String'>
   readonly isDeleted: Prisma.FieldRef<"FinishedProduct", 'Boolean'>
   readonly status: Prisma.FieldRef<"FinishedProduct", 'EntityStatus'>
