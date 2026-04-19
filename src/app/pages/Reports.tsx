@@ -89,7 +89,9 @@ function EffBar({
           <span className="text-slate-600 dark:text-slate-300">{t.repEffLimitShort}</span> {formatNumber(max)}
         </span>
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{t.repEffAssumedHours.replace('{{h}}', String(hoursAssumed))}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+        {(t.repEffAssumedHours ?? '').replace('{{h}}', String(hoursAssumed))}
+      </p>
     </div>
   );
 }

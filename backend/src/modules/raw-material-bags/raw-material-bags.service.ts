@@ -32,13 +32,18 @@ import { WriteoffBagDto } from './dto/writeoff-bag.dto.js';
 
 type Tx = Prisma.TransactionClient;
 
-/** UI/DBda ko‘rinadigan qop nomi — ichki `cuid` o‘rniga qisqa belgi */
+/** UI/DBda ko‘rinadigan qop nomi — ichki `cuid` o‘rniga qisqa belgi (`Qop:` prefiksi tashqi qatorda) */
 function formatBagLabelForExpenseDescription(bagName: string, bagId: string): string {
-  const t = bagName?.trim() ?? '';
-  if (t && !/^c[a-z0-9_-]{12,}$/i.test(t)) {
-    return t;
-  }
-  return `Qop №…${bagId.slice(-4)}`;
+  const name = (bagName ?? '').trim();
+  const tail = (bagId ?? '').replace(/\s/g, '').slice(-4) || '—';
+  const id = (bagId ?? '').trim();
+  const looksLikeInternalId = (s: string) =>
+    !s ||
+    s === id ||
+    (s.length >= 16 && /^c[a-z0-9]+$/i.test(s)) ||
+    /^c[a-z0-9_-]{12,40}$/i.test(s);
+  if (looksLikeInternalId(name)) return `№…${tail}`;
+  return name;
 }
 
 type ConsumeBagParams = {

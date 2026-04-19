@@ -62,6 +62,8 @@ export interface T {
   suPermViewShift: string;
   suPermManageShiftWorkers: string;
   suPermViewRawMaterial: string;
+  suPermViewRawMaterialBags: string;
+  suPermManageRawMaterialBags: string;
   suPermViewWarehouse: string;
   suPermViewSales: string;
   suPermViewExpenses: string;
@@ -511,6 +513,9 @@ export interface T {
   exPricePerKwh: string;
   exBtn: string;
   exHistory: string;
+  /** Тарих жадвали — to‘liq ekran */
+  exHistoryFullscreenEnter: string;
+  exHistoryFullscreenExit: string;
   exColAmount: string;
   exCategoriesTitle: string;
   exCategoryAdd: string;
@@ -536,6 +541,15 @@ export interface T {
   exGlobalElectricityPriceTitle: string;
   exShiftElectricityExplain: string;
   exFromShiftBadge: string;
+  /** Тарих изоҳи: ichki qop ID → «Қоп №…{suffix}» */
+  exNoteBagCuidDisplay: string;
+  /** Ташқи буюртма изоҳи: {kg} {currency} {amount} {rate} {uzs} {unit} */
+  exNotePurchaseOrderTpl: string;
+  /** «Kg narxi: X (oxirgi etib kelgan buyurtma…)» */
+  exNoteKgPriceLastOrder: string;
+  /** «Kg narxi: X (tashqi buyurtma, hali omborga kelmagan)» */
+  exNoteKgPricePendingOrder: string;
+  exNoteKgPriceMissing: string;
   /** Смена-электр: тарих қатори; {date} {n} {worker} {machine} {kwh} {price} {unit} */
   exShiftExpenseNote: string;
   /** Xarajatlar: kam ishlatiladigan kVt·soat narxi — modal tugmasi */
@@ -561,6 +575,14 @@ export interface T {
   repEffFormula: string;
   repEffActual: string;
   repEffMax: string;
+  repEffNoMachines: string;
+  repEffPlannedHourly: string;
+  repEffActualHourly: string;
+  repEffUnitPcsPerHour: string;
+  repEffTotalShort: string;
+  repEffLimitShort: string;
+  /** {{h}} = raqam */
+  repEffAssumedHours: string;
   repRawTitle: string;
   repRawIn: string;
   repRawOut: string;
@@ -858,6 +880,8 @@ const uz_cyrillic: T = {
   suPermViewShift: 'Смена (кўриш)',
   suPermManageShiftWorkers: 'Сменада ишчилар',
   suPermViewRawMaterial: 'Хомашё',
+  suPermViewRawMaterialBags: 'Хомашё қоплари (кўриш)',
+  suPermManageRawMaterialBags: 'Хомашё қопларини бошқариш',
   suPermViewWarehouse: 'Омбор',
   suPermViewSales: 'Сотув',
   suPermViewExpenses: 'Харажатлар',
@@ -1289,6 +1313,8 @@ const uz_cyrillic: T = {
   exPricePerKwh: 'Нарх (кВт·с)',
   exBtn: 'Харажат Киритиш',
   exHistory: 'Харажатлар Тарихи',
+  exHistoryFullscreenEnter: 'Тўлиқ экран',
+  exHistoryFullscreenExit: 'Ёпиш (Esc)',
   exColAmount: 'Сумма',
   exCategoriesTitle: 'Харажат категориялари',
   exCategoryAdd: 'Янги категория',
@@ -1312,6 +1338,14 @@ const uz_cyrillic: T = {
   exShiftElectricityExplain:
     'Бу нарх «Смена тарихи»даги kVt·soat × сум ҳисоби билан автоматик электр харажатларига қўлланилади; смена сақланса ёки ўзгарса, харажат ҳам янгиланади.',
   exFromShiftBadge: 'Смена',
+  exNoteBagCuidDisplay: 'Қоп №…{suffix}',
+  exNotePurchaseOrderTpl:
+    '{kg} кг · {currency} {amount} · курс {rate} → {uzs} {unit}',
+  exNoteKgPriceLastOrder:
+    'Кг нархи: {price} сўм (охирги етган ташқи буюртма бўйича)',
+  exNoteKgPricePendingOrder:
+    'Кг нархи: {price} сўм (кутилмоқдаги ташқи буюртма, омборга ҳали келмаган)',
+  exNoteKgPriceMissing: 'Ташқи буюртма бўйича кг нархи топилмади — 0 сўм',
   exShiftExpenseNote:
     '{date}, {n}-смена — {worker}; {machine} — {kwh} кВт·соат × {price} {unit}',
   exElectricityPriceButton: 'Электр нархи (kVt·soat)',
@@ -1334,6 +1368,14 @@ const uz_cyrillic: T = {
   repEffFormula: 'Формула: (Ҳақиқий / Максимал) × 100%',
   repEffActual: 'Ҳақиқий:',
   repEffMax: 'Максимал:',
+  repEffNoMachines:
+    'Аппаратлар рўйхати бўш. «Смена» саҳифасида аппарат қўшинг — шу ерда самарадорлик чиқади.',
+  repEffPlannedHourly: 'Соатига режа (дана)',
+  repEffActualHourly: 'Амалда ўртача (жами ÷ вақт)',
+  repEffUnitPcsPerHour: 'дана/соат',
+  repEffTotalShort: 'Жами чиқим:',
+  repEffLimitShort: 'Режа бўйича лимит:',
+  repEffAssumedHours: 'Ҳисобланган вақт: {{h}} соат (ҳар бир партия/смена ~8 соат).',
   repRawTitle: 'Хомашё Самарадорлиги',
   repRawIn: 'Жами Кирди',
   repRawOut: 'Ишлатилди',
@@ -1631,6 +1673,8 @@ const uz_latin: T = {
   suPermViewShift: 'Smena (ko‘rish)',
   suPermManageShiftWorkers: 'Smenada ishchilar',
   suPermViewRawMaterial: 'Xomashyo',
+  suPermViewRawMaterialBags: 'Xomashyo qoplari (ko‘rish)',
+  suPermManageRawMaterialBags: 'Xomashyo qoplarini boshqarish',
   suPermViewWarehouse: 'Ombor',
   suPermViewSales: 'Sotuv',
   suPermViewExpenses: 'Xarajatlar',
@@ -2062,6 +2106,8 @@ const uz_latin: T = {
   exPricePerKwh: 'Narx (kWh)',
   exBtn: 'Xarajat Kiritish',
   exHistory: 'Xarajatlar Tarixi',
+  exHistoryFullscreenEnter: "To'liq ekran",
+  exHistoryFullscreenExit: 'Yopish (Esc)',
   exColAmount: 'Summa',
   exCategoriesTitle: 'Xarajat kategoriyalari',
   exCategoryAdd: 'Yangi kategoriya',
@@ -2085,6 +2131,14 @@ const uz_latin: T = {
   exShiftElectricityExplain:
     "Bu narx «Smena tarixi»dagi kVt·soat × so'm hisobi bilan avtomatik elektr xarajatlariga qo'llaniladi; smena saqlansa yoki o'zgarsa, xarajat ham yangilanadi.",
   exFromShiftBadge: 'Smena',
+  exNoteBagCuidDisplay: 'Qop №…{suffix}',
+  exNotePurchaseOrderTpl:
+    '{kg} kg · {currency} {amount} · kurs {rate} → {uzs} {unit}',
+  exNoteKgPriceLastOrder:
+    "Kg narxi: {price} so'm (oxirgi kelgan tashqi buyurtma bo'yicha)",
+  exNoteKgPricePendingOrder:
+    "Kg narxi: {price} so'm (kutilayotchi tashqi buyurtma, omborga hali kelmagan)",
+  exNoteKgPriceMissing: "Tashqi buyurtma bo'yicha kg narxi topilmadi — 0 so'm",
   exShiftExpenseNote:
     "{date}, {n}-smena — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}",
   exElectricityPriceButton: 'Elektr narxi (kVt·soat)',
@@ -2107,6 +2161,14 @@ const uz_latin: T = {
   repEffFormula: 'Formula: (Haqiqiy / Maksimal) × 100%',
   repEffActual: 'Haqiqiy:',
   repEffMax: 'Maksimal:',
+  repEffNoMachines:
+    "Apparatlar ro'yxati bo'sh. «Smena» sahifasidan apparat qo'shing — samaradorlik shu yerda chiqadi.",
+  repEffPlannedHourly: 'Soatiga reja (dona)',
+  repEffActualHourly: "Amalda o'rtacha (jami ÷ vaqt)",
+  repEffUnitPcsPerHour: 'dona/soat',
+  repEffTotalShort: 'Jami chiqim:',
+  repEffLimitShort: "Reja bo'yicha limit:",
+  repEffAssumedHours: 'Hisoblangan vaqt: {{h}} soat (har bir partiya/smena ~8 soat).',
   repRawTitle: 'Xomashyo Samaradorligi',
   repRawIn: 'Jami Kirdi',
   repRawOut: 'Ishlatildi',
@@ -2404,6 +2466,8 @@ const ru: T = {
   suPermViewShift: 'Смены (просмотр)',
   suPermManageShiftWorkers: 'Работники в смене',
   suPermViewRawMaterial: 'Сырьё',
+  suPermViewRawMaterialBags: 'Мешки сырья (просмотр)',
+  suPermManageRawMaterialBags: 'Управление мешками сырья',
   suPermViewWarehouse: 'Склад',
   suPermViewSales: 'Продажи',
   suPermViewExpenses: 'Расходы',
@@ -2835,6 +2899,8 @@ const ru: T = {
   exPricePerKwh: 'Цена (кВт·ч)',
   exBtn: 'Добавить расход',
   exHistory: 'История расходов',
+  exHistoryFullscreenEnter: 'На весь экран',
+  exHistoryFullscreenExit: 'Закрыть (Esc)',
   exColAmount: 'Сумма',
   exCategoriesTitle: 'Категории расходов',
   exCategoryAdd: 'Новая категория',
@@ -2858,6 +2924,14 @@ const ru: T = {
   exShiftElectricityExplain:
     'Эта цена применяется к автоматическим расходам: кВт·ч из «Истории смен» × сум; при сохранении или изменении смены расход пересчитывается.',
   exFromShiftBadge: 'Смена',
+  exNoteBagCuidDisplay: 'Мешок №…{suffix}',
+  exNotePurchaseOrderTpl:
+    '{kg} кг · {currency} {amount} · курс {rate} → {uzs} {unit}',
+  exNoteKgPriceLastOrder:
+    'Цена за кг: {price} сум (по последнему внешнему заказу)',
+  exNoteKgPricePendingOrder:
+    'Цена за кг: {price} сум (ожидающий внешний заказ, на склад ещё не поступил)',
+  exNoteKgPriceMissing: 'Цена за кг по внешнему заказу не найдена — 0 сум',
   exShiftExpenseNote:
     '{date}, смена {n} — {worker}; {machine} — {kwh} кВт·ч × {price} {unit}',
   exElectricityPriceButton: 'Тариф электроэнергии (кВт·ч)',
@@ -2880,6 +2954,14 @@ const ru: T = {
   repEffFormula: 'Формула: (Фактическое / Максимальное) × 100%',
   repEffActual: 'Фактически:',
   repEffMax: 'Максимально:',
+  repEffNoMachines:
+    'Список аппаратов пуст. Добавьте аппарат на странице «Смены» — здесь появится эффективность.',
+  repEffPlannedHourly: 'Норма в час (шт)',
+  repEffActualHourly: 'Фактически в среднем (всего ÷ время)',
+  repEffUnitPcsPerHour: 'шт/ч',
+  repEffTotalShort: 'Всего выпущено:',
+  repEffLimitShort: 'Лимит по норме:',
+  repEffAssumedHours: 'Учётное время: {{h}} ч (~8 ч на партию/смену).',
   repRawTitle: 'Эффективность использования сырья',
   repRawIn: 'Всего поступило',
   repRawOut: 'Использовано',

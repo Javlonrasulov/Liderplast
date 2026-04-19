@@ -1,6 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, CheckCircle2, BarChart3, Pencil, Trash2, FolderPlus, Table2, PieChart, BarChart2 } from 'lucide-react';
-import { useERP, type ExpenseCategory } from '../store/erp-store';
+import { createPortal } from 'react-dom';
+import {
+  Plus,
+  CheckCircle2,
+  BarChart3,
+  Pencil,
+  Trash2,
+  FolderPlus,
+  Table2,
+  PieChart,
+  BarChart2,
+  Maximize2,
+  X,
+} from 'lucide-react';
+import { useERP, type Expense, type ExpenseCategory } from '../store/erp-store';
+import type { T } from '../i18n/translations';
 import { useApp } from '../i18n/app-context';
 import {
   displayGroupedIntInput,
@@ -11,6 +25,7 @@ import {
   TODAY,
 } from '../utils/format';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
+import { formatExpenseHistoryNote } from '../utils/expense-history-note';
 import {
   EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF,
   labelExpenseCategory,
@@ -104,17 +119,105 @@ function chartHexForCategory(categoryId: string, index: number) {
   return EXPENSE_CATEGORY_CHART_HEX[index % EXPENSE_CATEGORY_CHART_HEX.length];
 }
 
-/** Eski API tavsiflaridagi `ref:bw:…` va `baholash:` qisqartmalari */
-function sanitizeExpenseTableNote(text: string | null | undefined): string {
-  if (!text) return '';
-  return text
-    .replace(/\s*·\s*ref:bw:[a-z0-9]+/gi, '')
-    .replace(/\bbaholash:\s*/gi, 'Kg narxi: ')
-    .trim();
-}
-
 function isElectricityCategory(c: ExpenseCategory) {
   return c.electricityCalc || c.legacyExpenseType === 'electricity';
+}
+
+function ExpenseHistoryTableView({
+  expenses,
+  categories,
+  t,
+  totalFiltered,
+  wideNote,
+}: {
+  expenses: Expense[];
+  categories: ExpenseCategory[];
+  t: T;
+  totalFiltered: number;
+  wideNote: boolean;
+}) {
+  const noteCol = wideNote ? 'table-cell max-w-[min(48rem,55vw)]' : 'hidden md:table-cell max-w-xs';
+  if (expenses.length === 0) {
+    return (
+      <div className="flex h-40 items-center justify-center text-sm text-slate-400 lg:h-48">{t.noData}</div>
+    );
+  }
+  return (
+    <div className="min-h-0 overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-700/50">
+            {[t.colDate, t.colType, t.exColAmount, t.colNote].map((h, i) => (
+              <th
+                key={h}
+                className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 ${
+                  i === 3 ? noteCol : ''
+                }`}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {expenses.map((expense, idx) => {
+            const isElectricity = expense.type === 'electricity' || Boolean(expense.electricityCalc);
+            const dbName = resolveExpenseCategoryNameFromState(
+              expense.categoryId,
+              expense.categoryName,
+              categories,
+            );
+            const categoryLabel = isElectricity
+              ? t.exElectricity
+              : labelExpenseCategory(expense.categoryId, dbName, t);
+            const rawNote = expense.sourceShiftId
+              ? formatShiftExpenseTableNote(expense.description, t)
+              : expense.description;
+            const noteText = formatExpenseHistoryNote(rawNote, t);
+            return (
+              <tr
+                key={expense.id}
+                className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''}`}
+              >
+                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{formatDate(expense.date)}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${expenseCategoryBadgeClass(expense.categoryId || expense.id)}`}
+                  >
+                    {categoryLabel}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
+                  {formatCurrency(expense.amount)}
+                </td>
+                <td className={`px-4 py-3 text-xs text-slate-500 dark:text-slate-400 ${noteCol}`}>
+                  <div className="flex min-w-0 items-start gap-2">
+                    {expense.sourceShiftId ? (
+                      <span className="mt-0.5 shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+                        {t.exFromShiftBadge}
+                      </span>
+                    ) : null}
+                    <span className={wideNote ? 'min-w-0 whitespace-pre-wrap break-words' : 'truncate'} title={wideNote ? undefined : noteText || undefined}>
+                      {noteText}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
+            <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {t.exTotalLabel}
+            </td>
+            <td className="px-4 py-3 text-right text-sm font-bold text-red-600">{formatCurrency(totalFiltered)}</td>
+            <td className={noteCol} />
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
 }
 
 export function Expenses() {
@@ -136,6 +239,7 @@ export function Expenses() {
   const [editName, setEditName] = useState('');
   const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
   const [statsChartView, setStatsChartView] = useState<ExStatsChartView>(readStoredStatsChartView);
+  const [historyFullscreen, setHistoryFullscreen] = useState(false);
 
   const categories = state.expenseCategories;
 
@@ -146,6 +250,24 @@ export function Expenses() {
       /* ignore */
     }
   }, [statsChartView]);
+
+  useEffect(() => {
+    if (!historyFullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setHistoryFullscreen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [historyFullscreen]);
+
+  useEffect(() => {
+    if (!historyFullscreen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [historyFullscreen]);
 
   useEffect(() => {
     if (categories.length === 0) return;
@@ -754,93 +876,70 @@ export function Expenses() {
         </div>
 
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.exHistory}</h3>
-            <span className="text-xs text-slate-400">
-              {filteredExpenses.length} {t.totalRecords}
-            </span>
-          </div>
-          {filteredExpenses.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    {[t.colDate, t.colType, t.exColAmount, t.colNote].map((h, i) => (
-                      <th
-                        key={h}
-                        className={`text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 ${i === 3 ? 'hidden md:table-cell' : ''}`}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredExpenses.map((expense, idx) => {
-                    const isElectricity =
-                      expense.type === 'electricity' || Boolean(expense.electricityCalc);
-                    const dbName = resolveExpenseCategoryNameFromState(
-                      expense.categoryId,
-                      expense.categoryName,
-                      categories,
-                    );
-                    const categoryLabel = isElectricity
-                      ? t.exElectricity
-                      : labelExpenseCategory(expense.categoryId, dbName, t);
-                    const rawNote = expense.sourceShiftId
-                      ? formatShiftExpenseTableNote(expense.description, t)
-                      : expense.description;
-                    const noteText = sanitizeExpenseTableNote(rawNote);
-                    return (
-                      <tr
-                        key={expense.id}
-                        className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''}`}
-                      >
-                        <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{formatDate(expense.date)}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${expenseCategoryBadgeClass(expense.categoryId || expense.id)}`}
-                          >
-                            {categoryLabel}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
-                          {formatCurrency(expense.amount)}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs">
-                          <div className="flex items-center gap-2 min-w-0">
-                            {expense.sourceShiftId ? (
-                              <span className="shrink-0 text-[10px] font-semibold tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
-                                {t.exFromShiftBadge}
-                              </span>
-                            ) : null}
-                            <span className="truncate" title={noteText || undefined}>
-                              {noteText}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
-                    <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                      {t.exTotalLabel}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm font-bold text-red-600">
-                      {formatCurrency(totalTableFiltered)}
-                    </td>
-                    <td className="hidden md:table-cell" />
-                  </tr>
-                </tfoot>
-              </table>
+          <div className="flex items-center justify-between gap-2 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-slate-800 dark:text-white font-semibold text-sm min-w-0">{t.exHistory}</h3>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="text-xs text-slate-400 hidden sm:inline">
+                {filteredExpenses.length} {t.totalRecords}
+              </span>
+              <button
+                type="button"
+                onClick={() => setHistoryFullscreen(true)}
+                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                title={t.exHistoryFullscreenEnter}
+                aria-label={t.exHistoryFullscreenEnter}
+              >
+                <Maximize2 size={18} />
+              </button>
             </div>
-          )}
+          </div>
+          <ExpenseHistoryTableView
+            expenses={filteredExpenses}
+            categories={categories}
+            t={t}
+            totalFiltered={totalTableFiltered}
+            wideNote={false}
+          />
         </div>
       </div>
+
+      {historyFullscreen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[130] flex flex-col bg-white dark:bg-slate-900"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.exHistory}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-5">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold text-slate-900 dark:text-white">{t.exHistory}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {filteredExpenses.length} {t.totalRecords}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHistoryFullscreen(false)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                <X size={18} aria-hidden />
+                {t.exHistoryFullscreenExit}
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto px-3 pb-6 pt-2 sm:px-5">
+              <ExpenseHistoryTableView
+                expenses={filteredExpenses}
+                categories={categories}
+                t={t}
+                totalFiltered={totalTableFiltered}
+                wideNote
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <AlertDialog
         open={Boolean(categoryDeleteId)}
