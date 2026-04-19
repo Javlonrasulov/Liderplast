@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { SimpleBarChart, SimpleLineChart, SimpleDonutChart } from '../components/charts';
+import { SimpleBarChart, SimpleLineChart, SimpleDonutChart, type BarSeries } from '../components/charts';
 import { BarChart3, TrendingUp, FileText, Cpu } from 'lucide-react';
 import {
   useERP,
@@ -7,25 +7,89 @@ import {
   type SemiProductCatalogItem,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
+import type { T } from '../i18n/translations';
 import { formatNumber, formatCurrency, shortDate, getLast7Days, calcPercent } from '../utils/format';
 
-const PIE_COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#14b8a6', '#3b82f6', '#f59e0b'];
+const PIE_COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#14b8a6', '#3b82f6', '#f59e0b', '#ec4899', '#84cc16', '#f97316'];
 
-function EffBar({ label, actual, max }: { label: string; actual: number; max: number }) {
+function semiRowKey(name: string) {
+  return `semi_${name}`;
+}
+function finalRowKey(name: string) {
+  return `final_${name}`;
+}
+
+function EffBar({
+  label,
+  plannedPerHour,
+  actualAvgPerHour,
+  actual,
+  max,
+  hoursAssumed,
+  t,
+}: {
+  label: string;
+  plannedPerHour: number | null;
+  actualAvgPerHour: number;
+  actual: number;
+  max: number;
+  hoursAssumed: number;
+  t: T;
+}) {
   const pct = calcPercent(actual, max);
+  const hasPlan = plannedPerHour != null && plannedPerHour > 0;
+  const onTarget = !hasPlan || actualAvgPerHour >= plannedPerHour * 0.8;
+  const actualRateCls = hasPlan
+    ? onTarget
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : 'text-amber-600 dark:text-amber-500'
+    : 'text-slate-800 dark:text-slate-100';
+
   return (
     <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">{label}</span>
-        <span className={`text-lg font-bold ${pct >= 80 ? 'text-emerald-600' : pct >= 50 ? 'text-amber-500' : 'text-red-500'}`}>{pct.toFixed(1)}%</span>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <span className="text-slate-800 dark:text-slate-100 text-sm font-semibold leading-snug">{label}</span>
+        <span
+          className={`text-lg font-bold tabular-nums shrink-0 ${pct >= 80 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 50 ? 'text-amber-500' : 'text-red-500'}`}
+        >
+          {pct.toFixed(1)}%
+        </span>
+      </div>
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 mb-3">
+        <div className="rounded-lg border border-slate-200/90 bg-white/70 px-3 py-2.5 dark:border-slate-600/70 dark:bg-slate-800/50">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t.repEffPlannedHourly}</p>
+          <p className="mt-1 text-base font-semibold tabular-nums text-slate-800 dark:text-white">
+            {hasPlan ? (
+              <>
+                {formatNumber(plannedPerHour)} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{t.repEffUnitPcsPerHour}</span>
+              </>
+            ) : (
+              '—'
+            )}
+          </p>
+        </div>
+        <div className="rounded-lg border border-slate-200/90 bg-white/70 px-3 py-2.5 dark:border-slate-600/70 dark:bg-slate-800/50">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t.repEffActualHourly}</p>
+          <p className={`mt-1 text-base font-semibold tabular-nums ${actualRateCls}`}>
+            {formatNumber(actualAvgPerHour)} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{t.repEffUnitPcsPerHour}</span>
+          </p>
+        </div>
       </div>
       <div className="h-3 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-700 ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <div className="flex justify-between mt-1.5 text-xs text-slate-400">
-        <span>{formatNumber(actual)}</span>
-        <span>Max: {formatNumber(max)}</span>
+      <div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+        <span>
+          <span className="text-slate-600 dark:text-slate-300">{t.repEffTotalShort}</span> {formatNumber(actual)}
+        </span>
+        <span>
+          <span className="text-slate-600 dark:text-slate-300">{t.repEffLimitShort}</span> {formatNumber(max)}
+        </span>
       </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{t.repEffAssumedHours.replace('{{h}}', String(hoursAssumed))}</p>
     </div>
   );
 }
@@ -79,22 +143,120 @@ export function Reports() {
     [state.machines],
   );
 
-  const productionData = useMemo(() => last7Days.map(date => {
-    let g18 = state.semiProductBatches.filter(b => b.date === date && b.productType === '18g').reduce((s, b) => s + b.quantity, 0);
-    let g20 = state.semiProductBatches.filter(b => b.date === date && b.productType === '20g').reduce((s, b) => s + b.quantity, 0);
-    let tayyor = state.finalProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0);
+  /** Barcha ko‘rinadigan mahsulot turlari: katalog + partiyalar + smenalar */
+  const productionSemiKeys = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of semiCatalog) s.add(p.name);
+    for (const b of state.semiProductBatches) s.add(String(b.productType));
     for (const r of state.shiftRecords) {
-      if (r.date !== date) continue;
-      const mt = machineTypeById.get(r.machineId);
-      if (mt === 'semi') {
-        if (r.productType?.includes('20')) g20 += r.producedQty;
-        else g18 += r.producedQty;
-      } else if (mt === 'final') {
-        tayyor += r.producedQty;
-      }
+      if (machineTypeById.get(r.machineId) !== 'semi') continue;
+      const pt = r.productType?.trim();
+      if (pt) s.add(pt);
     }
-    return { date: shortDate(date), '18g': g18, '20g': g20, tayyor };
-  }), [state, last7Days, machineTypeById]);
+    const unlabeledSemi = state.shiftRecords.some(
+      (r) => machineTypeById.get(r.machineId) === 'semi' && !r.productType?.trim(),
+    );
+    if (unlabeledSemi) {
+      const fallback = semiCatalog[0]?.name ?? '18g';
+      s.add(fallback);
+    }
+    return [...s].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [semiCatalog, state.semiProductBatches, state.shiftRecords, machineTypeById]);
+
+  const productionFinalKeys = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of finalCatalog) s.add(p.name);
+    for (const b of state.finalProductBatches) s.add(String(b.productType));
+    for (const r of state.shiftRecords) {
+      if (machineTypeById.get(r.machineId) !== 'final') continue;
+      const pt = r.productType?.trim();
+      if (pt) s.add(pt);
+    }
+    const unlabeledFinal = state.shiftRecords.some(
+      (r) => machineTypeById.get(r.machineId) === 'final' && !r.productType?.trim(),
+    );
+    if (unlabeledFinal) {
+      const fallback = finalCatalog[0]?.name ?? '0.5L';
+      s.add(fallback);
+    }
+    return [...s].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [finalCatalog, state.finalProductBatches, state.shiftRecords, machineTypeById]);
+
+  const productionSeries = useMemo((): BarSeries[] => {
+    const out: BarSeries[] = [];
+    let i = 0;
+    for (const name of productionSemiKeys) {
+      out.push({
+        dataKey: semiRowKey(name),
+        name,
+        color: PIE_COLORS[i % PIE_COLORS.length],
+      });
+      i++;
+    }
+    for (const name of productionFinalKeys) {
+      out.push({
+        dataKey: finalRowKey(name),
+        name: `${name} · ${t.dashProdTayyor}`,
+        color: PIE_COLORS[i % PIE_COLORS.length],
+      });
+      i++;
+    }
+    return out;
+  }, [productionSemiKeys, productionFinalKeys, t.dashProdTayyor]);
+
+  const productionData = useMemo(() => {
+    return last7Days.map((date) => {
+      const row: Record<string, string | number> = { date: shortDate(date) };
+      for (const k of productionSemiKeys) row[semiRowKey(k)] = 0;
+      for (const k of productionFinalKeys) row[finalRowKey(k)] = 0;
+
+      for (const b of state.semiProductBatches) {
+        if (b.date !== date) continue;
+        const key = semiRowKey(String(b.productType));
+        if (row[key] === undefined) row[key] = 0;
+        row[key] = Number(row[key]) + b.quantity;
+      }
+      for (const b of state.finalProductBatches) {
+        if (b.date !== date) continue;
+        const key = finalRowKey(String(b.productType));
+        if (row[key] === undefined) row[key] = 0;
+        row[key] = Number(row[key]) + b.quantity;
+      }
+      for (const r of state.shiftRecords) {
+        if (r.date !== date) continue;
+        const mt = machineTypeById.get(r.machineId);
+        const pt = r.productType?.trim() || '';
+        if (mt === 'semi') {
+          let target = pt;
+          if (!target) {
+            target = semiCatalog[0]?.name ?? productionSemiKeys[0] ?? '18g';
+          }
+          const key = semiRowKey(target);
+          if (row[key] === undefined) row[key] = 0;
+          row[key] = Number(row[key]) + r.producedQty;
+        } else if (mt === 'final') {
+          let target = pt;
+          if (!target) {
+            target = finalCatalog[0]?.name ?? productionFinalKeys[0] ?? '0.5L';
+          }
+          const key = finalRowKey(target);
+          if (row[key] === undefined) row[key] = 0;
+          row[key] = Number(row[key]) + r.producedQty;
+        }
+      }
+      return row;
+    });
+  }, [
+    last7Days,
+    state.semiProductBatches,
+    state.finalProductBatches,
+    state.shiftRecords,
+    machineTypeById,
+    productionSemiKeys,
+    productionFinalKeys,
+    semiCatalog,
+    finalCatalog,
+  ]);
 
   const salesData = useMemo(() => last7Days.map(date => ({
     date: shortDate(date),
@@ -107,13 +269,31 @@ export function Reports() {
     outgoing: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'outgoing').reduce((s, e) => s + e.amount, 0),
   })), [state, last7Days]);
 
-  const machineEfficiency = useMemo(() => state.machines.map(machine => {
-    const batches = machine.type === 'semi' ? state.semiProductBatches.filter(b => b.machineId === machine.id) : state.finalProductBatches;
-    const actual = batches.reduce((s, b: any) => s + b.quantity, 0);
-    const maxH = batches.length * 8 || 8;
-    const max = machine.maxCapacityPerHour * maxH;
-    return { machine, actual, max: max || machine.maxCapacityPerHour * 8 };
-  }), [state]);
+  const machineEfficiency = useMemo(() => {
+    return state.machines.map((machine) => {
+      const shiftsForMachine = state.shiftRecords.filter((r) => r.machineId === machine.id);
+      const cap = machine.maxCapacityPerHour || 0;
+
+      if (machine.type === 'semi') {
+        const semiBatches = state.semiProductBatches.filter((b) => b.machineId === machine.id);
+        const actual =
+          semiBatches.reduce((s, b) => s + b.quantity, 0) +
+          shiftsForMachine.reduce((s, r) => s + r.producedQty, 0);
+        const sessions = semiBatches.length + shiftsForMachine.length;
+        const maxH = sessions * 8 || 8;
+        let max = cap * maxH;
+        if (max <= 0) max = Math.max(cap * 8, 1);
+        return { machine, actual, max, hoursAssumed: maxH, capacityPerHour: cap };
+      }
+
+      const actual = shiftsForMachine.reduce((s, r) => s + r.producedQty, 0);
+      const sessions = shiftsForMachine.length;
+      const maxH = sessions * 8 || 8;
+      let max = cap * maxH;
+      if (max <= 0) max = Math.max(cap * 8, 1);
+      return { machine, actual, max, hoursAssumed: maxH, capacityPerHour: cap };
+    });
+  }, [state.machines, state.semiProductBatches, state.shiftRecords]);
 
   const totalRevenue = state.sales.reduce((s, sale) => s + sale.total, 0);
   const totalExpenses = state.expenses.reduce((s, e) => s + e.amount, 0);
@@ -160,21 +340,30 @@ export function Reports() {
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-2">{t.repProdTitle}</h3>
-            <div className="flex items-center gap-4 mb-3">
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">18g</span></div>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">20g</span></div>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.dashProdTayyor}</span></div>
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {productionSeries.length === 0 ? (
+                <span className="text-xs text-slate-500 dark:text-slate-400">{t.noData}</span>
+              ) : (
+                productionSeries.map((s) => (
+                  <div key={s.dataKey} className="flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ background: s.color }} />
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{s.name}</span>
+                  </div>
+                ))
+              )}
             </div>
-            <SimpleBarChart
-              data={productionData}
-              height={260}
-              formatValue={v => formatNumber(v) + ' ' + t.unitPiece}
-              series={[
-                { dataKey: '18g', name: '18g', color: '#818cf8' },
-                { dataKey: '20g', name: '20g', color: '#a78bfa' },
-                { dataKey: 'tayyor', name: t.dashProdTayyor, color: '#22d3ee' },
-              ]}
-            />
+            {productionSeries.length === 0 ? (
+              <div className="flex h-44 items-center justify-center rounded-lg border border-dashed border-slate-200 text-sm text-slate-500 dark:border-slate-600 dark:text-slate-400">
+                {t.noData}
+              </div>
+            ) : (
+              <SimpleBarChart
+                data={productionData}
+                height={280}
+                formatValue={(v) => formatNumber(v) + ' ' + t.unitPiece}
+                series={productionSeries}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -219,9 +408,24 @@ export function Reports() {
               <span className="text-xs text-slate-400">{t.repEffFormula}</span>
             </div>
             <div className="space-y-4">
-              {machineEfficiency.map(({ machine, actual, max }) => (
-                <EffBar key={machine.id} label={machine.name} actual={actual} max={max} />
-              ))}
+              {machineEfficiency.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/40 dark:text-slate-400">
+                  {t.repEffNoMachines}
+                </div>
+              ) : (
+                machineEfficiency.map(({ machine, actual, max, hoursAssumed, capacityPerHour }) => (
+                  <EffBar
+                    key={machine.id}
+                    label={machine.name}
+                    plannedPerHour={capacityPerHour > 0 ? capacityPerHour : null}
+                    actualAvgPerHour={hoursAssumed > 0 ? actual / hoursAssumed : 0}
+                    actual={actual}
+                    max={max}
+                    hoursAssumed={hoursAssumed}
+                    t={t}
+                  />
+                ))
+              )}
             </div>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">

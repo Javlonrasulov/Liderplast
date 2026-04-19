@@ -497,6 +497,10 @@ export interface T {
   exCategoryDeleteTitle: string;
   exCategoryDeleteHint: string;
   exStatsByCategory: string;
+  /** Категория статистикаси: жадвал / доира / устунлар */
+  exStatsViewTable: string;
+  exStatsViewDonut: string;
+  exStatsViewBars: string;
   exStatsRank: string;
   exNoCategories: string;
   /** Diagramma va yuqori statistika barcha vaqt; tarix jadvali sana filtri bo‘yicha */
@@ -841,7 +845,7 @@ const uz_cyrillic: T = {
   dfTitle: 'Сана оралиғи',
   dfToday: 'Бугун',
   dfWeek: 'Бу ҳафта',
-  dfMonth: 'Бу ой',
+  dfMonth: 'Б ой',
   dfAll: 'Барчаси',
   dfFrom: 'Дан',
   dfTo: 'Гача',
@@ -1243,6 +1247,9 @@ const uz_cyrillic: T = {
   exCategoryDeleteTitle: 'Категорияни рўйхатдан оламизми?',
   exCategoryDeleteHint: 'Категория рўйхатдан олинади; тарихдаги ёзувлар сақланади.',
   exStatsByCategory: 'Категория бўйича статистика',
+  exStatsViewTable: 'Жадвал',
+  exStatsViewDonut: 'Доира',
+  exStatsViewBars: 'Устунлар',
   exStatsRank: '#',
   exNoCategories: 'Категория йўқ. Аввал категория яратинг.',
   exPageStatsNote:
@@ -1425,8 +1432,7 @@ const uz_cyrillic: T = {
   prRmStatusPending: 'Кутилмоқда',
   prRmStatusFulfilled: 'Етиб келган',
   prRmNoOrders: 'Буюртмалар йўқ',
-  rmPendingExternalOrdersTitle:
-    'Хомашё — ташқи буюртма (бухгалтерия); омбор киримини белгиланг',
+  rmPendingExternalOrdersTitle: 'Бухгалтериядан ташқи буюртма (омбор киримини белгиланг)',
   rmOrderMarkArrived: 'Етиб келди',
   rmOrderArrivedToast: 'Буюртма ёпилди',
   rmIncomingQtyMismatchTitle: 'Миқдор бўйича огоҳлантириш',
@@ -1989,6 +1995,9 @@ const uz_latin: T = {
   exCategoryDeleteTitle: "Kategoriyani ro'yxatdan olamizmi?",
   exCategoryDeleteHint: "Kategoriya ro'yxatdan olinadi; tarixdagi yozuvlar saqlanadi.",
   exStatsByCategory: "Kategoriya bo'yicha statistika",
+  exStatsViewTable: 'Jadval',
+  exStatsViewDonut: 'Doira',
+  exStatsViewBars: 'Ustunlar',
   exStatsRank: '#',
   exNoCategories: "Kategoriya yo'q. Avval kategoriya yarating.",
   exPageStatsNote:
@@ -2171,8 +2180,7 @@ const uz_latin: T = {
   prRmStatusPending: 'Kutilmoqda',
   prRmStatusFulfilled: 'Yetib kelgan',
   prRmNoOrders: 'Buyurtmalar yo\'q',
-  rmPendingExternalOrdersTitle:
-    'Xom ashyo — tashqi buyurtma (buxgalteriya); ombor kirimini belgilang',
+  rmPendingExternalOrdersTitle: 'Buxgalteriyadan tashqi buyurtma (ombor kirimini belgilang)',
   rmOrderMarkArrived: 'Yetib keldi',
   rmOrderArrivedToast: 'Buyurtma yopildi',
   rmIncomingQtyMismatchTitle: 'Miqdor bo\'yicha ogohlantirish',
@@ -2735,6 +2743,9 @@ const ru: T = {
   exCategoryDeleteTitle: 'Убрать категорию из списка?',
   exCategoryDeleteHint: 'Категория скрывается из списка; записи в истории сохраняются.',
   exStatsByCategory: 'Статистика по категориям',
+  exStatsViewTable: 'Таблица',
+  exStatsViewDonut: 'Круговая',
+  exStatsViewBars: 'Столбцы',
   exStatsRank: '#',
   exNoCategories: 'Нет категорий. Сначала создайте категорию.',
   exPageStatsNote:
@@ -2917,8 +2928,7 @@ const ru: T = {
   prRmStatusPending: 'Ожидает',
   prRmStatusFulfilled: 'Поступило',
   prRmNoOrders: 'Нет заказов',
-  rmPendingExternalOrdersTitle:
-    'Сырьё — внешний заказ (бухгалтерия); отметьте поступление на склад',
+  rmPendingExternalOrdersTitle: 'Внешний заказ из бухгалтерии (отметьте поступление)',
   rmOrderMarkArrived: 'Поступило',
   rmOrderArrivedToast: 'Заказ закрыт',
   rmIncomingQtyMismatchTitle: 'Предупреждение по количеству',

@@ -304,8 +304,6 @@ export interface OperationLog {
 
 export interface ShiftRecord {
   id: string;
-  /** User.id — backenddan; yangi yozuv POSTдан кейин refresh билан тўлади */
-  employeeId?: string;
   date: string;
   shift: number;
   workerName: string;
@@ -857,7 +855,6 @@ function mapBackendMachineStage(stage: BackendMachine['stage']): 'semi' | 'final
 
 type BackendShiftRecord = {
   id: string;
-  workerId: string;
   date: string;
   shiftNumber: number;
   producedQty: number;
@@ -872,7 +869,7 @@ type BackendShiftRecord = {
   paintRawMaterialId?: string | null;
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
-  worker: { id: string; fullName: string };
+  worker: { fullName: string };
   machine?: { id: string } | null;
 };
 
@@ -1891,7 +1888,6 @@ async function loadStateFromApi() {
 
   const mappedShifts: ShiftRecord[] = shifts.map((shift) => ({
     id: shift.id,
-    employeeId: shift.workerId ?? shift.worker.id,
     date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
     workerName: shift.worker.fullName,

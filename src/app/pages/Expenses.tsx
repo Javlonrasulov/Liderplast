@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, CheckCircle2, BarChart3, Pencil, Trash2, FolderPlus } from 'lucide-react';
+import { Plus, CheckCircle2, BarChart3, Pencil, Trash2, FolderPlus, Table2, PieChart, BarChart2 } from 'lucide-react';
 import { useERP, type ExpenseCategory } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import {
@@ -11,6 +11,7 @@ import {
   TODAY,
 } from '../utils/format';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
+import { labelExpenseCategory, resolveExpenseCategoryNameFromState } from '../utils/expense-category-label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
+import { SimpleDonutChart, CategoryExpenseHorizontalBars } from '../components/charts';
+import { cn } from '../components/ui/utils';
 
 const CHART_BAR = [
   'bg-yellow-500',
@@ -44,6 +47,31 @@ const BADGE_STYLES = [
   'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
   'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
 ];
+
+/** `CHART_BAR` билан индекс бўйича мос (donut / горизонт. диаграмма) */
+const EXPENSE_CATEGORY_CHART_HEX = [
+  '#eab308',
+  '#3b82f6',
+  '#f97316',
+  '#10b981',
+  '#8b5cf6',
+  '#f43f5e',
+  '#06b6d4',
+  '#f59e0b',
+  '#64748b',
+] as const;
+
+type ExStatsChartView = 'table' | 'donut' | 'hbar';
+
+function readStoredStatsChartView(): ExStatsChartView {
+  try {
+    const s = sessionStorage.getItem('erp_ex_stats_chart');
+    if (s === 'table' || s === 'donut' || s === 'hbar') return s;
+  } catch {
+    /* ignore */
+  }
+  return 'table';
+}
 
 function styleIndex(id: string) {
   let h = 0;
@@ -73,8 +101,17 @@ export function Expenses() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
+  const [statsChartView, setStatsChartView] = useState<ExStatsChartView>(readStoredStatsChartView);
 
   const categories = state.expenseCategories;
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('erp_ex_stats_chart', statsChartView);
+    } catch {
+      /* ignore */
+    }
+  }, [statsChartView]);
 
   useEffect(() => {
     if (categories.length === 0) return;
@@ -126,15 +163,29 @@ export function Expenses() {
     const map = new Map<string, { id: string; name: string; amount: number }>();
     for (const e of statsSortedExpenses) {
       const cid = e.categoryId || `legacy-${e.id}`;
-      const name =
-        e.type === 'electricity' || e.electricityCalc ? t.exElectricity : e.categoryName;
-      const row = map.get(cid) ?? { id: cid, name, amount: 0 };
-      row.name = name;
+      const dbName = resolveExpenseCategoryNameFromState(e.categoryId, e.categoryName, categories);
+      const piece =
+        e.type === 'electricity' || e.electricityCalc
+          ? t.exElectricity
+          : labelExpenseCategory(e.categoryId, dbName, t);
+      const row = map.get(cid) ?? { id: cid, name: '', amount: 0 };
+      /* Ba’zi API yozuvlarida categoryName bo‘sh; oxirgi (eskiroq) yozuv nomni «ёқотиб» қўймасин */
+      row.name = piece.trim() ? piece : row.name;
       row.amount += e.amount;
       map.set(cid, row);
     }
     return [...map.values()].sort((a, b) => b.amount - a.amount);
-  }, [statsSortedExpenses, t.exElectricity]);
+  }, [statsSortedExpenses, t, categories]);
+
+  const categoryChartRows = useMemo(
+    () =>
+      categoryStats.map((row, i) => ({
+        name: row.name,
+        value: row.amount,
+        color: EXPENSE_CATEGORY_CHART_HEX[i % EXPENSE_CATEGORY_CHART_HEX.length],
+      })),
+    [categoryStats],
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -288,53 +339,136 @@ export function Expenses() {
         </div>
 
         <div className="border-t border-slate-200 dark:border-slate-600 pt-4">
-          <h4 className="text-sm font-semibold text-slate-800 dark:text-white mb-3">{t.exStatsByCategory}</h4>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-700/50">
-                  <th className="text-left px-3 py-2 text-xs font-semibold text-slate-500 w-10">{t.exStatsRank}</th>
-                  <th className="text-left px-3 py-2 text-xs font-semibold text-slate-500">{t.colType}</th>
-                  <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500">{t.exColAmount}</th>
-                  <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500 hidden sm:table-cell">%</th>
-                  <th className="hidden md:table-cell min-w-[120px]" aria-hidden />
-                </tr>
-              </thead>
-              <tbody>
-                {categoryStats.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-3 py-6 text-center text-slate-500 text-sm">
-                      {t.noData}
-                    </td>
-                  </tr>
-                ) : (
-                  categoryStats.map((row, idx) => {
-                    const pct = totalForStats > 0 ? (row.amount / totalForStats) * 100 : 0;
-                    return (
-                      <tr key={row.id} className="border-t border-slate-100 dark:border-slate-700">
-                        <td className="px-3 py-2 text-slate-500 text-xs">{idx + 1}</td>
-                        <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{row.name}</td>
-                        <td className="px-3 py-2 text-right font-semibold text-red-600 dark:text-red-400">
-                          {formatCurrency(row.amount)}
-                        </td>
-                        <td className="px-3 py-2 text-right text-slate-600 dark:text-slate-300 hidden sm:table-cell">
-                          {pct.toFixed(1)}%
-                        </td>
-                        <td className="px-3 py-2 hidden md:table-cell">
-                          <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${CHART_BAR[idx % CHART_BAR.length]}`}
-                              style={{ width: `${Math.min(100, pct)}%` }}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h4 className="text-sm font-semibold text-slate-800 dark:text-white">{t.exStatsByCategory}</h4>
+            <div
+              className="inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-600 dark:bg-slate-900/50"
+              role="tablist"
+              aria-label={t.exStatsByCategory}
+            >
+              {(
+                [
+                  { key: 'table' as const, label: t.exStatsViewTable, icon: Table2 },
+                  { key: 'donut' as const, label: t.exStatsViewDonut, icon: PieChart },
+                  { key: 'hbar' as const, label: t.exStatsViewBars, icon: BarChart2 },
+                ] as const
+              ).map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={statsChartView === key}
+                  onClick={() => setStatsChartView(key)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3',
+                    statsChartView === key
+                      ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
+                  )}
+                >
+                  <Icon size={14} className="shrink-0 opacity-80" aria-hidden />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {statsChartView === 'table' && (
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-700/50">
+                    <th className="w-10 px-3 py-2 text-left text-xs font-semibold text-slate-500">{t.exStatsRank}</th>
+                    <th className="px-3 py-2 text-left text-xs font-semibold text-slate-500">{t.colType}</th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold text-slate-500">{t.exColAmount}</th>
+                    <th className="hidden px-3 py-2 text-right text-xs font-semibold text-slate-500 sm:table-cell">%</th>
+                    <th className="hidden min-w-[120px] md:table-cell" aria-hidden />
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoryStats.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-500">
+                        {t.noData}
+                      </td>
+                    </tr>
+                  ) : (
+                    categoryStats.map((row, idx) => {
+                      const pct = totalForStats > 0 ? (row.amount / totalForStats) * 100 : 0;
+                      return (
+                        <tr key={row.id} className="border-t border-slate-100 dark:border-slate-700">
+                          <td className="px-3 py-2 text-xs text-slate-500">{idx + 1}</td>
+                          <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{row.name}</td>
+                          <td className="px-3 py-2 text-right font-semibold text-red-600 dark:text-red-400">
+                            {formatCurrency(row.amount)}
+                          </td>
+                          <td className="hidden px-3 py-2 text-right text-slate-600 dark:text-slate-300 sm:table-cell">
+                            {pct.toFixed(1)}%
+                          </td>
+                          <td className="hidden px-3 py-2 md:table-cell">
+                            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                              <div
+                                className={`h-full ${CHART_BAR[idx % CHART_BAR.length]}`}
+                                style={{ width: `${Math.min(100, pct)}%` }}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {statsChartView === 'donut' &&
+            (categoryStats.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <div className="flex flex-col items-stretch gap-5 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-600 dark:bg-slate-900/20 md:flex-row md:items-center">
+                <div className="flex shrink-0 justify-center md:justify-start">
+                  <SimpleDonutChart
+                    data={categoryChartRows.map((r) => ({ name: r.name, value: r.value }))}
+                    colors={categoryChartRows.map((r) => r.color)}
+                    size={188}
+                  />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  {categoryChartRows.map((row, i) => {
+                    const pct = totalForStats > 0 ? ((row.value / totalForStats) * 100).toFixed(1) : '0';
+                    return (
+                      <div key={`${row.name}-${i}`} className="flex items-start gap-2 text-xs">
+                        <span
+                          className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: row.color }}
+                        />
+                        <span className="min-w-0 flex-1 leading-snug text-slate-600 dark:text-slate-300">
+                          <span className="font-medium text-slate-800 dark:text-slate-100">{row.name}</span>
+                          <span className="text-slate-500 dark:text-slate-400">
+                            {' '}
+                            — {pct}% · {formatCurrency(row.value)}
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+          {statsChartView === 'hbar' &&
+            (categoryStats.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-600 dark:bg-slate-900/20">
+                <CategoryExpenseHorizontalBars
+                  items={categoryChartRows}
+                  formatValue={formatCurrency}
+                  total={totalForStats}
+                />
+              </div>
+            ))}
         </div>
       </div>
 
@@ -364,7 +498,9 @@ export function Expenses() {
                           : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'
                       }`}
                     >
-                      {isElectricityCategory(c) ? `⚡ ${c.name}` : c.name}
+                      {isElectricityCategory(c)
+                        ? `⚡ ${labelExpenseCategory(c.id, c.name, t)}`
+                        : labelExpenseCategory(c.id, c.name, t)}
                     </button>
                   );
                 })}
@@ -555,7 +691,9 @@ export function Expenses() {
                       </>
                     ) : (
                       <>
-                        <span className={`text-xs px-2 py-1 rounded-lg font-medium flex-1 ${BADGE_STYLES[si]}`}>{c.name}</span>
+                        <span className={`text-xs px-2 py-1 rounded-lg font-medium flex-1 ${BADGE_STYLES[si]}`}>
+                          {labelExpenseCategory(c.id, c.name, t)}
+                        </span>
                         <button
                           type="button"
                           onClick={() => startEdit(c.id, c.name)}
@@ -612,7 +750,14 @@ export function Expenses() {
                     const si = styleIndex(expense.categoryId || expense.id);
                     const isElectricity =
                       expense.type === 'electricity' || Boolean(expense.electricityCalc);
-                    const categoryLabel = isElectricity ? t.exElectricity : expense.categoryName;
+                    const dbName = resolveExpenseCategoryNameFromState(
+                      expense.categoryId,
+                      expense.categoryName,
+                      categories,
+                    );
+                    const categoryLabel = isElectricity
+                      ? t.exElectricity
+                      : labelExpenseCategory(expense.categoryId, dbName, t);
                     const noteText = expense.sourceShiftId
                       ? formatShiftExpenseTableNote(expense.description, t)
                       : expense.description;

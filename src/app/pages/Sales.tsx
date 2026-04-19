@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink } from 'lucide-react';
 import {
   useERP,
@@ -20,6 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 
 // ---- Cart item row (inline editable) ----
 interface CartItemRow extends SaleOrderItem {
@@ -39,6 +49,7 @@ export function Sales() {
     dispatch,
     semiStockByProductName,
     finalStockByProductName,
+    isLoading,
   } = useERP();
   const { t, filterData } = useApp();
 
@@ -249,6 +260,27 @@ export function Sales() {
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedClientDetail, setSelectedClientDetail] = useState<string | null>(null);
+  const [clientIdToDelete, setClientIdToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (clientId && !state.clients.some((c) => c.id === clientId)) {
+      setClientId(state.clients[0]?.id ?? '');
+    }
+  }, [state.clients, clientId]);
+
+  const handleConfirmDeleteClient = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!clientIdToDelete) return;
+    const id = clientIdToDelete;
+    try {
+      await dispatch({ type: 'DELETE_CLIENT', payload: id });
+      setSelectedClientDetail((prev) => (prev === id ? null : prev));
+    } catch {
+      /* refresh / error surfaced via ERP context */
+    } finally {
+      setClientIdToDelete(null);
+    }
+  };
 
   const handleCopyAccount = (accountNum: string, clientId: string) => {
     navigator.clipboard.writeText(accountNum).catch(() => {});
@@ -701,13 +733,26 @@ export function Sales() {
                         <p className={`font-bold text-sm ${client.debt > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(client.debt)}</p>
                         <p className="text-slate-400 text-xs mt-0.5">{client.debt > 0 ? t.labelDebt : t.slDebtPaid}</p>
                       </div>
-                      <button
-                        onClick={() => setSelectedClientDetail(client.id)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-medium transition-colors"
-                      >
-                        <ExternalLink size={11} />
-                        {t.cdInfo}
-                      </button>
+                      <div className="flex flex-wrap items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          disabled={isLoading}
+                          onClick={() => setSelectedClientDetail(client.id)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                        >
+                          <ExternalLink size={11} />
+                          {t.cdInfo}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isLoading}
+                          onClick={() => setClientIdToDelete(client.id)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                          title={t.slDeleteClientTitle}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -796,6 +841,28 @@ export function Sales() {
           )}
         </div>
       )}
+
+      <AlertDialog open={Boolean(clientIdToDelete)} onOpenChange={(open) => !open && setClientIdToDelete(null)}>
+        <AlertDialogContent className="border-slate-200 dark:border-slate-700 sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">{t.slDeleteClientTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+              {t.slDeleteClientHint}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
+              {t.btnCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+              onClick={(e) => void handleConfirmDeleteClient(e)}
+            >
+              {t.slDeleteClientAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

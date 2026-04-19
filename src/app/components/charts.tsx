@@ -347,6 +347,53 @@ function arc(cx: number, cy: number, r: number, a1: number, a2: number) {
   return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${lg} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
 }
 
+/** Xarajatlar: kategoriya ulushi — gorizontal ustunlar (nom + foiz) */
+export interface CategoryExpenseBarRow {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export function CategoryExpenseHorizontalBars({
+  items,
+  formatValue,
+  total,
+}: {
+  items: CategoryExpenseBarRow[];
+  formatValue: (n: number) => string;
+  total: number;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-3">
+      {items.map((row, i) => {
+        const pct = total > 0 ? (row.value / total) * 100 : 0;
+        return (
+          <div key={`${row.name}-${i}`} className="space-y-1.5">
+            <div className="flex justify-between gap-3 text-xs">
+              <span
+                className="truncate font-medium text-slate-700 dark:text-slate-200 min-w-0"
+                title={row.name}
+              >
+                {row.name}
+              </span>
+              <span className="shrink-0 text-slate-500 dark:text-slate-400 tabular-nums">
+                {formatValue(row.value)} · {pct.toFixed(1)}%
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+              <div
+                className="h-full rounded-full transition-[width] duration-300"
+                style={{ width: `${Math.min(100, pct)}%`, backgroundColor: row.color }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function SimpleDonutChart({ data, colors, size = 140 }: DonutProps) {
   const total = data.reduce((s, d) => s + d.value, 0);
   const cx = size / 2, cy = size / 2;

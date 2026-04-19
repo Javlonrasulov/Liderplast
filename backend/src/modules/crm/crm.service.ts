@@ -17,6 +17,11 @@ import { CreateClientDto } from './dto/create-client.dto.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
 
+/** Bazada `deletedAt` bo‘lmasa ham ishlaydi — o‘chirilgan mijoz telefoni `__del__` qatorini o‘z ichiga oladi */
+function isClientRemoved(client: { phone: string }): boolean {
+  return client.phone.includes('__del__');
+}
+
 @Injectable()
 export class CrmService {
   constructor(
@@ -90,8 +95,28 @@ export class CrmService {
     });
   }
 
+  async deleteClient(id: string) {
+    const client = await this.prisma.client.findUnique({ where: { id } });
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+    if (isClientRemoved(client)) {
+      throw new BadRequestException('Client already removed');
+    }
+
+    await this.prisma.client.update({
+      where: { id },
+      data: {
+        phone: `${client.phone}__del__${id}`,
+      },
+    });
+
+    return { success: true };
+  }
+
   async getClients() {
     const clients = await this.prisma.client.findMany({
+      where: { NOT: { phone: { contains: '__del__' } } },
       include: {
         orders: true,
         payments: true,
@@ -128,6 +153,9 @@ export class CrmService {
     });
     if (!client) {
       throw new NotFoundException('Client not found');
+    }
+    if (isClientRemoved(client)) {
+      throw new BadRequestException('Client has been removed');
     }
 
     const order = await this.prisma.$transaction(async (tx) => {
@@ -249,6 +277,9 @@ export class CrmService {
     });
     if (!client) {
       throw new NotFoundException('Client not found');
+    }
+    if (isClientRemoved(client)) {
+      throw new BadRequestException('Client has been removed');
     }
 
     return this.prisma.$transaction(async (tx) => {

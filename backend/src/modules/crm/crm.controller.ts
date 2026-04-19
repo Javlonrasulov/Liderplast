@@ -23,6 +23,12 @@ export class CrmController {
     return this.crmService.getClients();
   }
 
+  @Delete('clients/:id')
+  @Roles(Role.DIRECTOR, Role.MANAGER)
+  deleteClient(@Param('id') id: string) {
+    return this.crmService.deleteClient(id);
+  }
+
   @Post('orders')
   @Roles(Role.DIRECTOR, Role.MANAGER)
   createOrder(
