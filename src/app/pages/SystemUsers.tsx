@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import { Checkbox } from '../components/ui/checkbox';
+import { cn } from '../components/ui/utils';
 
 const EXTRA_POSITIONS_KEY = 'liderplast-su-extra-positions';
 
@@ -610,20 +612,29 @@ export function SystemUsers() {
               {t.suPermissionsHint}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
-              {APP_PERMISSION_KEYS.map((key) => (
-                <label
-                  key={key}
-                  className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected.has(key)}
-                    onChange={() => toggle(key)}
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span>{labelForPermission(t, key)}</span>
-                </label>
-              ))}
+              {APP_PERMISSION_KEYS.map((key) => {
+                const isOn = selected.has(key);
+                return (
+                  <label
+                    key={key}
+                    htmlFor={`su-perm-${key}`}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm cursor-pointer transition-colors select-none',
+                      isOn
+                        ? 'border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-950/30 text-slate-800 dark:text-slate-100 shadow-sm'
+                        : 'border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/70',
+                    )}
+                  >
+                    <Checkbox
+                      id={`su-perm-${key}`}
+                      checked={isOn}
+                      onCheckedChange={() => toggle(key)}
+                      className="shrink-0"
+                    />
+                    <span className="flex-1 min-w-0 leading-snug">{labelForPermission(t, key)}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
