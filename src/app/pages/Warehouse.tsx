@@ -20,7 +20,6 @@ import {
 import { useAuth } from '../auth/auth-context';
 import {
   buildShiftRecordsToProductionHistory,
-  computeRawMaterialStockByKind,
   type FinishedProductCatalogItem,
   mergeWarehouseProductionHistory,
   type RawMaterialKind,
@@ -314,24 +313,24 @@ export function Warehouse() {
     [rawMaterials],
   );
 
-  const rawStockByKind = useMemo(
-    () =>
-      computeRawMaterialStockByKind(
-        state.rawMaterialEntries,
-        state.warehouseProducts,
-      ),
-    [state.rawMaterialEntries, state.warehouseProducts],
-  );
-
   const rawStockByName = useMemo(() => {
     const map = new Map<string, number>();
     for (const item of state.warehouseStock ?? []) {
       if (item.itemType === 'RAW_MATERIAL' && item.itemName) {
-        map.set(item.itemName, item.quantity);
+        map.set(item.itemName, (map.get(item.itemName) ?? 0) + item.quantity);
       }
     }
     return map;
   }, [state.warehouseStock]);
+
+  const siroRawMaterialsSorted = useMemo(
+    () => [...siroRawMaterials].sort((a, b) => a.name.localeCompare(b.name)),
+    [siroRawMaterials],
+  );
+  const paintRawMaterialsSorted = useMemo(
+    () => [...paintRawMaterials].sort((a, b) => a.name.localeCompare(b.name)),
+    [paintRawMaterials],
+  );
   const productCatalog = useMemo(
     () =>
       state.warehouseProducts.filter(
@@ -446,23 +445,25 @@ export function Warehouse() {
       shadow: string;
       icon: React.ComponentType<{ size?: number; className?: string }>;
     }> = [];
-    if (hasCatalogSiro) {
+    for (const rm of siroRawMaterialsSorted) {
+      const kg = rawStockByName.get(rm.name) ?? 0;
       cards.push({
-        key: 'raw-siro',
-        label: t.rmMetricsCaptionSiro,
-        sub: `${calcPercent(rawStockByKind.siro, 5000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatKgAmount(rawStockByKind.siro)} ${t.unitKg}`,
+        key: `raw-siro-${rm.id}`,
+        label: rm.name,
+        sub: `${calcPercent(kg, 5000).toFixed(0)}% ${t.whInWarehouse}`,
+        val: `${formatKgAmount(kg)} ${t.unitKg}`,
         from: 'from-blue-500 to-blue-600',
         shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
         icon: Droplets,
       });
     }
-    if (hasCatalogPaint) {
+    for (const rm of paintRawMaterialsSorted) {
+      const kg = rawStockByName.get(rm.name) ?? 0;
       cards.push({
-        key: 'raw-paint',
-        label: t.rmMetricsCaptionPaint,
-        sub: `${calcPercent(rawStockByKind.paint, 2000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatKgAmount(rawStockByKind.paint)} ${t.unitKg}`,
+        key: `raw-paint-${rm.id}`,
+        label: rm.name,
+        sub: `${calcPercent(kg, 2000).toFixed(0)}% ${t.whInWarehouse}`,
+        val: `${formatKgAmount(kg)} ${t.unitKg}`,
         from: 'from-fuchsia-500 to-pink-600',
         shadow: 'shadow-fuchsia-200 dark:shadow-fuchsia-900/30',
         icon: Palette,
@@ -517,8 +518,9 @@ export function Warehouse() {
     hasCatalogFinal,
     semiProducts,
     finishedProducts,
-    rawStockByKind.siro,
-    rawStockByKind.paint,
+    siroRawMaterialsSorted,
+    paintRawMaterialsSorted,
+    rawStockByName,
     totalSemiInCatalogStock,
     totalFinalInCatalogStock,
     totalPiecesInCatalogStock,
@@ -1378,32 +1380,40 @@ export function Warehouse() {
               </h3>
               {hasAnyStockDetailCard ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {hasCatalogSiro && (
-              <StockItem
-                label={t.rmMetricsCaptionSiro}
-                value={rawStockByKind.siro}
-                max={5000}
-                unit={t.unitKg}
-                valueMode="massKg"
-                color={rawStockByKind.siro < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
-                bgColor="bg-blue-100 dark:bg-blue-900/30"
-                icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
-                warning={rawStockByKind.siro < 1000}
-              />
-            )}
-            {hasCatalogPaint && (
-              <StockItem
-                label={t.rmMetricsCaptionPaint}
-                value={rawStockByKind.paint}
-                max={2000}
-                unit={t.unitKg}
-                valueMode="massKg"
-                color={rawStockByKind.paint < 200 ? 'bg-amber-500' : 'bg-fuchsia-500'}
-                bgColor="bg-fuchsia-100 dark:bg-fuchsia-900/30"
-                icon={<Palette size={18} className="text-fuchsia-600 dark:text-fuchsia-400" />}
-                warning={rawStockByKind.paint < 200}
-              />
-            )}
+            {siroRawMaterialsSorted.map((rm) => {
+              const kg = rawStockByName.get(rm.name) ?? 0;
+              return (
+                <StockItem
+                  key={rm.id}
+                  label={rm.name}
+                  value={kg}
+                  max={5000}
+                  unit={t.unitKg}
+                  valueMode="massKg"
+                  color={kg < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
+                  bgColor="bg-blue-100 dark:bg-blue-900/30"
+                  icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
+                  warning={kg < 1000}
+                />
+              );
+            })}
+            {paintRawMaterialsSorted.map((rm) => {
+              const kg = rawStockByName.get(rm.name) ?? 0;
+              return (
+                <StockItem
+                  key={rm.id}
+                  label={rm.name}
+                  value={kg}
+                  max={2000}
+                  unit={t.unitKg}
+                  valueMode="massKg"
+                  color={kg < 200 ? 'bg-amber-500' : 'bg-fuchsia-500'}
+                  bgColor="bg-fuchsia-100 dark:bg-fuchsia-900/30"
+                  icon={<Palette size={18} className="text-fuchsia-600 dark:text-fuchsia-400" />}
+                  warning={kg < 200}
+                />
+              );
+            })}
             {semiProducts.map((p, idx) => {
               const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
               return (
