@@ -77,6 +77,7 @@ export const ModelName = {
   Payment: 'Payment',
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
+  RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
   SalarySetting: 'SalarySetting',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
@@ -488,6 +489,25 @@ export const ExpenseScalarFieldEnum = {
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const RawMaterialPurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  rawMaterialId: 'rawMaterialId',
+  quantityKg: 'quantityKg',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  amountOriginal: 'amountOriginal',
+  amountUzs: 'amountUzs',
+  expenseId: 'expenseId',
+  status: 'status',
+  orderedAt: 'orderedAt',
+  fulfilledAt: 'fulfilledAt',
+  notes: 'notes',
+  createdById: 'createdById'
+} as const
+
+export type RawMaterialPurchaseOrderScalarFieldEnum = (typeof RawMaterialPurchaseOrderScalarFieldEnum)[keyof typeof RawMaterialPurchaseOrderScalarFieldEnum]
 
 
 export const SalarySettingScalarFieldEnum = {

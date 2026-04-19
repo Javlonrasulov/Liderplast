@@ -609,6 +609,7 @@ export interface T {
   prTabVedomost: string;
   prTabBank: string;
   prTabEmployees: string;
+  prTabRawOrders: string;
   prTabSettings: string;
   prGenerate: string;
   prMonth: string;
@@ -656,6 +657,35 @@ export interface T {
   prWorkedDays: string;
   prPricePerUnit: string;
   prProductType: string;
+  prRmSubtabNew: string;
+  prRmSubtabHistory: string;
+  prRmWeightLabel: string;
+  prRmPendingAlert: string;
+  prRmNoPendingOrders: string;
+  prRmDaysWaitingTpl: string;
+  prRmWeightUnitKg: string;
+  prRmWeightUnitTon: string;
+  prRmCurrencyLabel: string;
+  prRmFxRateLabel: string;
+  prRmFxCbuHint: string;
+  prRmPricePerKgLabel: string;
+  prRmPricePerKgHint: string;
+  prRmTotalOrderInCurrency: string;
+  prRmAmountUzsEst: string;
+  prRmCostPerKg: string;
+  prRmSubmitOrder: string;
+  prRmOrdersHistory: string;
+  prRmColOrderedAt: string;
+  prRmMarkFulfilled: string;
+  prRmFulfilledHint: string;
+  prRmStatusPending: string;
+  prRmStatusFulfilled: string;
+  prRmNoOrders: string;
+  rmPendingExternalOrdersTitle: string;
+  rmOrderMarkArrived: string;
+  rmOrderArrivedToast: string;
+  rmIncomingQtyMismatchTitle: string;
+  rmIncomingQtyMismatchBody: string;
   prEmployee: string;
   prNoEmployees: string;
   prNoVedomost: string;
@@ -1322,6 +1352,7 @@ const uz_cyrillic: T = {
   prTabVedomost: 'Ведомост',
   prTabBank: 'Банк',
   prTabEmployees: 'Ишчилар',
+  prTabRawOrders: 'Хомашё буюртма',
   prTabSettings: 'Солиқ созламалари',
   prGenerate: 'Ведомост яратиш',
   prMonth: 'Ой',
@@ -1369,6 +1400,37 @@ const uz_cyrillic: T = {
   prWorkedDays: 'Иш кунлари',
   prPricePerUnit: 'Нарх (дона)',
   prProductType: 'Маҳсулот тури',
+  prRmSubtabNew: 'Янги буюртма',
+  prRmSubtabHistory: 'Тарих',
+  prRmWeightLabel: 'Оғирлик',
+  prRmPendingAlert: 'Омборга кирим кутилмоқда',
+  prRmNoPendingOrders: 'Кутилувчи буюртма йўқ',
+  prRmDaysWaitingTpl: '{name} · {kg} кг · {days} кун',
+  prRmWeightUnitKg: 'кг',
+  prRmWeightUnitTon: 'тонна',
+  prRmCurrencyLabel: 'Валюта',
+  prRmFxRateLabel: '1 валюта = неча сўм (МБ)',
+  prRmFxCbuHint: 'Курс https://cbu.uz дан; керак бўлса қўлда тузатиш мумкин',
+  prRmPricePerKgLabel: 'Нарх — 1 кг учун (танланган валютада)',
+  prRmPricePerKgHint:
+    'Нарх фақат битта килограмм учун киритилади. Умумий сумма (бутун буюртма) қуйда автоматик ҳисобланади.',
+  prRmTotalOrderInCurrency: 'Буюртма бўйича жами',
+  prRmAmountUzsEst: 'Сўмда (баҳолаш)',
+  prRmCostPerKg: 'кг нархи (сўм)',
+  prRmSubmitOrder: 'Буюртма бериш',
+  prRmOrdersHistory: 'Буюртмалар',
+  prRmColOrderedAt: 'Сана',
+  prRmMarkFulfilled: 'Етиб келди',
+  prRmFulfilledHint: 'Омборда хақиқий кирим алоҳида саҳифада',
+  prRmStatusPending: 'Кутилмоқда',
+  prRmStatusFulfilled: 'Етиб келган',
+  prRmNoOrders: 'Буюртмалар йўқ',
+  rmPendingExternalOrdersTitle: 'Бухгалтериядан ташқи буюртма (омбор киримини белгиланг)',
+  rmOrderMarkArrived: 'Етиб келди',
+  rmOrderArrivedToast: 'Буюртма ёпилди',
+  rmIncomingQtyMismatchTitle: 'Миқдор бўйича огоҳлантириш',
+  rmIncomingQtyMismatchBody:
+    'Бухгалтериядаги кутилувчи буюртма: {orderedKg} кг. Сиз киритган миқдор: {enteredKg} кг. Шу миқдорда омборга қўшасизми?',
   prEmployee: 'Ишчи',
   prNoEmployees: 'Ишчилар рўйхати бўш',
   prNoVedomost: 'Ведомост яратилмаган. "Ведомост яратиш" тугмасини босинг.',
@@ -2035,6 +2097,7 @@ const uz_latin: T = {
   prTabVedomost: 'Vedomost',
   prTabBank: 'Bank',
   prTabEmployees: 'Ishchilar',
+  prTabRawOrders: 'Xomashyo buyurtma',
   prTabSettings: 'Soliq sozlamalari',
   prGenerate: 'Vedomost yaratish',
   prMonth: 'Oy',
@@ -2082,6 +2145,37 @@ const uz_latin: T = {
   prWorkedDays: 'Ish kunlari',
   prPricePerUnit: 'Narx (dona)',
   prProductType: 'Mahsulot turi',
+  prRmSubtabNew: 'Yangi buyurtma',
+  prRmSubtabHistory: 'Tarix',
+  prRmWeightLabel: 'Og\'irlik',
+  prRmPendingAlert: 'Omborga kirim kutilmoqda',
+  prRmNoPendingOrders: 'Kutilayotchi buyurtma yo\'q',
+  prRmDaysWaitingTpl: '{name} · {kg} kg · {days} kun',
+  prRmWeightUnitKg: 'kg',
+  prRmWeightUnitTon: 'tonna',
+  prRmCurrencyLabel: 'Valyuta',
+  prRmFxRateLabel: '1 valyuta = necha so\'m (MB)',
+  prRmFxCbuHint: 'Kurs https://cbu.uz dan; kerak bo\'lsa qo\'lda tuzatish mumkin',
+  prRmPricePerKgLabel: 'Narx — 1 kg uchun (tanlangan valyuta)',
+  prRmPricePerKgHint:
+    'Narx faqat bitta kilogramm uchun kiritiladi. Umumiy summa (butun buyurtma) quyda avtomatik hisoblanadi.',
+  prRmTotalOrderInCurrency: 'Buyurtma bo\'yicha jami',
+  prRmAmountUzsEst: 'So\'mda (baholash)',
+  prRmCostPerKg: 'kg narxi (so\'m)',
+  prRmSubmitOrder: 'Buyurtma berish',
+  prRmOrdersHistory: 'Buyurtmalar',
+  prRmColOrderedAt: 'Sana',
+  prRmMarkFulfilled: 'Yetib keldi',
+  prRmFulfilledHint: 'Omborda haqiqiy kirim alohida sahifada',
+  prRmStatusPending: 'Kutilmoqda',
+  prRmStatusFulfilled: 'Yetib kelgan',
+  prRmNoOrders: 'Buyurtmalar yo\'q',
+  rmPendingExternalOrdersTitle: 'Buxgalteriyadan tashqi buyurtma (ombor kirimini belgilang)',
+  rmOrderMarkArrived: 'Yetib keldi',
+  rmOrderArrivedToast: 'Buyurtma yopildi',
+  rmIncomingQtyMismatchTitle: 'Miqdor bo\'yicha ogohlantirish',
+  rmIncomingQtyMismatchBody:
+    'Buxgalteriyadagi kutilayotchi buyurtma: {orderedKg} kg. Siz kiritgan miqdor: {enteredKg} kg. Shu miqdorda omborga qo\'shasizmi?',
   prEmployee: 'Ishchi',
   prNoEmployees: "Ishchilar ro'yxati bo'sh",
   prNoVedomost: "Vedomost yaratilmagan. \"Vedomost yaratish\" tugmasini bosing.",
@@ -2748,6 +2842,7 @@ const ru: T = {
   prTabVedomost: 'Ведомость',
   prTabBank: 'Банк',
   prTabEmployees: 'Сотрудники',
+  prTabRawOrders: 'Заказ сырья',
   prTabSettings: 'Налоговые ставки',
   prGenerate: 'Сформировать ведомость',
   prMonth: 'Месяц',
@@ -2795,6 +2890,37 @@ const ru: T = {
   prWorkedDays: 'Рабочих дней',
   prPricePerUnit: 'Цена (шт)',
   prProductType: 'Тип продукта',
+  prRmSubtabNew: 'Новый заказ',
+  prRmSubtabHistory: 'История',
+  prRmWeightLabel: 'Масса',
+  prRmPendingAlert: 'Ожидается оприходование',
+  prRmNoPendingOrders: 'Нет ожидающих заказов',
+  prRmDaysWaitingTpl: '{name} · {kg} кг · {days} дн.',
+  prRmWeightUnitKg: 'кг',
+  prRmWeightUnitTon: 'т',
+  prRmCurrencyLabel: 'Валюта',
+  prRmFxRateLabel: '1 ед. валюты = сум (ЦБ)',
+  prRmFxCbuHint: 'Курс с https://cbu.uz; при необходимости вручную',
+  prRmPricePerKgLabel: 'Цена за 1 кг (в выбранной валюте)',
+  prRmPricePerKgHint:
+    'Вводится цена только за один килограмм. Общая сумма по заказу ниже считается автоматически.',
+  prRmTotalOrderInCurrency: 'Итого по заказу',
+  prRmAmountUzsEst: 'В сумах (оценка)',
+  prRmCostPerKg: 'Цена за кг (сум)',
+  prRmSubmitOrder: 'Разместить заказ',
+  prRmOrdersHistory: 'Заказы',
+  prRmColOrderedAt: 'Дата',
+  prRmMarkFulfilled: 'Поступило',
+  prRmFulfilledHint: 'Фактическое оприходование — на другой странице',
+  prRmStatusPending: 'Ожидает',
+  prRmStatusFulfilled: 'Поступило',
+  prRmNoOrders: 'Нет заказов',
+  rmPendingExternalOrdersTitle: 'Внешний заказ из бухгалтерии (отметьте поступление)',
+  rmOrderMarkArrived: 'Поступило',
+  rmOrderArrivedToast: 'Заказ закрыт',
+  rmIncomingQtyMismatchTitle: 'Предупреждение по количеству',
+  rmIncomingQtyMismatchBody:
+    'Ожидается по заказу из бухгалтерии: {orderedKg} кг. Вы вводите: {enteredKg} кг. Оприходовать именно это количество?',
   prEmployee: 'Сотрудник',
   prNoEmployees: 'Список сотрудников пуст',
   prNoVedomost: 'Ведомость не сформирована. Нажмите "Сформировать ведомость".',

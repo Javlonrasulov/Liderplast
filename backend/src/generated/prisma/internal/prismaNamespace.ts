@@ -410,6 +410,7 @@ export const ModelName = {
   Payment: 'Payment',
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
+  RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
   SalarySetting: 'SalarySetting',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2360,6 +2361,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RawMaterialPurchaseOrder: {
+      payload: Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>
+      fields: Prisma.RawMaterialPurchaseOrderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RawMaterialPurchaseOrderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RawMaterialPurchaseOrderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        findFirst: {
+          args: Prisma.RawMaterialPurchaseOrderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RawMaterialPurchaseOrderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        findMany: {
+          args: Prisma.RawMaterialPurchaseOrderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>[]
+        }
+        create: {
+          args: Prisma.RawMaterialPurchaseOrderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        createMany: {
+          args: Prisma.RawMaterialPurchaseOrderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RawMaterialPurchaseOrderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>[]
+        }
+        delete: {
+          args: Prisma.RawMaterialPurchaseOrderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        update: {
+          args: Prisma.RawMaterialPurchaseOrderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        deleteMany: {
+          args: Prisma.RawMaterialPurchaseOrderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RawMaterialPurchaseOrderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RawMaterialPurchaseOrderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>[]
+        }
+        upsert: {
+          args: Prisma.RawMaterialPurchaseOrderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RawMaterialPurchaseOrderPayload>
+        }
+        aggregate: {
+          args: Prisma.RawMaterialPurchaseOrderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRawMaterialPurchaseOrder>
+        }
+        groupBy: {
+          args: Prisma.RawMaterialPurchaseOrderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RawMaterialPurchaseOrderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RawMaterialPurchaseOrderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RawMaterialPurchaseOrderCountAggregateOutputType> | number
+        }
+      }
+    }
     SalarySetting: {
       payload: Prisma.$SalarySettingPayload<ExtArgs>
       fields: Prisma.SalarySettingFieldRefs
@@ -3305,6 +3380,25 @@ export const ExpenseScalarFieldEnum = {
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
 
 
+export const RawMaterialPurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  rawMaterialId: 'rawMaterialId',
+  quantityKg: 'quantityKg',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  amountOriginal: 'amountOriginal',
+  amountUzs: 'amountUzs',
+  expenseId: 'expenseId',
+  status: 'status',
+  orderedAt: 'orderedAt',
+  fulfilledAt: 'fulfilledAt',
+  notes: 'notes',
+  createdById: 'createdById'
+} as const
+
+export type RawMaterialPurchaseOrderScalarFieldEnum = (typeof RawMaterialPurchaseOrderScalarFieldEnum)[keyof typeof RawMaterialPurchaseOrderScalarFieldEnum]
+
+
 export const SalarySettingScalarFieldEnum = {
   id: 'id',
   incomeTaxPercent: 'incomeTaxPercent',
@@ -3747,6 +3841,34 @@ export type ListEnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'PurchaseOrderCurrency'
+ */
+export type EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchaseOrderCurrency[]'
+ */
+export type ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency[]'>
+    
+
+
+/**
+ * Reference to a field of type 'RawMaterialOrderStatus'
+ */
+export type EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialOrderStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'RawMaterialOrderStatus[]'
+ */
+export type ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialOrderStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'EmployeeRateType'
  */
 export type EnumEmployeeRateTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmployeeRateType'>
@@ -3922,6 +4044,7 @@ export type GlobalOmitConfig = {
   payment?: Prisma.PaymentOmit
   expenseCategory?: Prisma.ExpenseCategoryOmit
   expense?: Prisma.ExpenseOmit
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOmit
   salarySetting?: Prisma.SalarySettingOmit
   employeeProductRate?: Prisma.EmployeeProductRateOmit
   salaryRecord?: Prisma.SalaryRecordOmit

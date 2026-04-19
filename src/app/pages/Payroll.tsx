@@ -3,12 +3,14 @@ import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
-  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar
+  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar,
+  ShoppingCart, RefreshCw, Package,
 } from 'lucide-react';
+import { useCbuRates, parseCbuRate } from '../hooks/use-cbu-rates';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatCurrency, formatDateTime, formatNumber, formatKgAmount, TODAY } from '../utils/format';
-import type { Employee, EmployeeProductRate, ShiftRecord } from '../store/erp-store';
+import type { Employee, EmployeeProductRate, ShiftRecord, RawMaterialProduct } from '../store/erp-store';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1641,6 +1643,414 @@ function EmployeesTab() {
   );
 }
 
+// ======================== RAW MATERIAL ORDERS (BUXGALTERIYA) ========================
+
+function daysSinceOrder(orderedAtIso: string) {
+  const t0 = new Date(orderedAtIso).getTime();
+  return Math.max(0, Math.floor((Date.now() - t0) / 86400000));
+}
+
+function formatAmountInCurrency(amount: number, currency: 'UZS' | 'USD' | 'EUR'): string {
+  if (!Number.isFinite(amount) || amount < 0) return '—';
+  return `${new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount)} ${currency}`;
+}
+
+function RawMaterialOrdersTab() {
+  const { state, dispatch } = useERP();
+  const { t } = useApp();
+  const { usd, eur, loading: fxLoading, error: fxErr, updatedAt, refetch } = useCbuRates();
+  const [sub, setSub] = useState<'new' | 'history'>('new');
+  const [rawMaterialId, setRawMaterialId] = useState('');
+  const [weight, setWeight] = useState('');
+  const [wu, setWu] = useState<'kg' | 'ton'>('kg');
+  const [cur, setCur] = useState<'UZS' | 'USD' | 'EUR'>('UZS');
+  const [fxMan, setFxMan] = useState('1');
+  /** 1 kg narxi — tanlangan valyutada */
+  const [pricePerKg, setPricePerKg] = useState('');
+  const [notes, setNotes] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const rawList = useMemo(
+    () =>
+      state.warehouseProducts.filter((p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL'),
+    [state.warehouseProducts],
+  );
+
+  const pending = useMemo(
+    () =>
+      [...state.rawMaterialPurchaseOrders]
+        .filter((o) => o.status === 'PENDING')
+        .sort((a, b) => new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime()),
+    [state.rawMaterialPurchaseOrders],
+  );
+
+  const historySorted = useMemo(
+    () =>
+      [...state.rawMaterialPurchaseOrders].sort(
+        (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
+      ),
+    [state.rawMaterialPurchaseOrders],
+  );
+
+  const qKg = useMemo(() => {
+    const w = parseFloat(String(weight).replace(',', '.'));
+    if (!Number.isFinite(w) || w <= 0) return 0;
+    return wu === 'ton' ? w * 1000 : w;
+  }, [weight, wu]);
+
+  useEffect(() => {
+    if (cur === 'UZS') {
+      setFxMan('1');
+      return;
+    }
+    if (cur === 'USD' && usd) {
+      setFxMan(String(parseCbuRate(usd.Rate)));
+      return;
+    }
+    if (cur === 'EUR' && eur) {
+      setFxMan(String(parseCbuRate(eur.Rate)));
+    }
+  }, [cur, usd, eur]);
+
+  const fx = useMemo(() => {
+    if (cur === 'UZS') return 1;
+    const m = parseFloat(String(fxMan).replace(',', '.'));
+    return Number.isFinite(m) && m > 0 ? m : 0;
+  }, [cur, fxMan]);
+
+  const pricePerKgOrig = useMemo(() => {
+    const a = parseFloat(String(pricePerKg).replace(',', '.'));
+    return Number.isFinite(a) && a >= 0 ? a : 0;
+  }, [pricePerKg]);
+
+  const totalOriginal = useMemo(
+    () => (qKg > 0 && pricePerKgOrig > 0 ? pricePerKgOrig * qKg : 0),
+    [pricePerKgOrig, qKg],
+  );
+
+  const amountUzs = useMemo(() => {
+    if (totalOriginal <= 0) return 0;
+    return cur === 'UZS' ? totalOriginal : totalOriginal * fx;
+  }, [totalOriginal, cur, fx]);
+
+  const perKgUzs = qKg > 0 && amountUzs > 0 ? amountUzs / qKg : 0;
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rawMaterialId || qKg <= 0) return;
+    if (pricePerKgOrig <= 0 || totalOriginal <= 0) return;
+    if (cur !== 'UZS' && fx <= 0) return;
+    setBusy(true);
+    try {
+      await dispatch({
+        type: 'CREATE_RAW_MATERIAL_PURCHASE_ORDER',
+        payload: {
+          rawMaterialId,
+          quantityKg: qKg,
+          currency: cur,
+          fxRateToUzs: fx,
+          amountOriginal: totalOriginal,
+          notes: notes.trim() || undefined,
+        },
+      });
+      setPricePerKg('');
+      setWeight('');
+      setNotes('');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onFulfill = async (id: string) => {
+    await dispatch({ type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER', payload: id });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+        <div className="flex items-center gap-2 mb-2">
+          <Package size={16} className="text-amber-700 dark:text-amber-400" />
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t.prRmPendingAlert}</p>
+        </div>
+        {pending.length === 0 ? (
+          <p className="text-xs text-amber-800/80 dark:text-amber-300/90">{t.prRmNoPendingOrders}</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {pending.map((o) => {
+              const d = daysSinceOrder(o.orderedAt);
+              return (
+                <li
+                  key={o.id}
+                  className="text-xs rounded-xl border border-amber-300/60 bg-white/80 px-3 py-2 dark:border-amber-700 dark:bg-slate-900/40"
+                >
+                  {t.prRmDaysWaitingTpl
+                    .replace('{name}', o.rawMaterialName)
+                    .replace('{kg}', formatNumber(o.quantityKg))
+                    .replace('{days}', String(d))}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+        {(['new', 'history'] as const).map((k) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setSub(k)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              sub === k
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'
+            }`}
+          >
+            {k === 'new' ? t.prRmSubtabNew : t.prRmSubtabHistory}
+          </button>
+        ))}
+      </div>
+
+      {sub === 'new' ? (
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <form
+            onSubmit={onSubmit}
+            className="xl:col-span-3 space-y-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                <ShoppingCart size={16} className="text-teal-600 dark:text-teal-400" />
+              </div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prRmSubtabNew}</h3>
+            </div>
+            <div>
+              <Label>{t.prProductType}</Label>
+              <StyledSelect
+                value={rawMaterialId}
+                onValueChange={setRawMaterialId}
+                options={rawList.map((p) => ({ value: p.id, label: p.name }))}
+                placeholder="—"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t.prRmWeightLabel}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.001"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>
+                  {t.prRmWeightUnitKg} / {t.prRmWeightUnitTon}
+                </Label>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setWu('kg')}
+                    className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
+                      wu === 'kg'
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-slate-200 dark:border-slate-600'
+                    }`}
+                  >
+                    {t.prRmWeightUnitKg}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWu('ton')}
+                    className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
+                      wu === 'ton'
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-slate-200 dark:border-slate-600'
+                    }`}
+                  >
+                    {t.prRmWeightUnitTon}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <Label>{t.prRmCurrencyLabel}</Label>
+              <StyledSelect
+                value={cur}
+                onValueChange={(v) => setCur(v as 'UZS' | 'USD' | 'EUR')}
+                options={[
+                  { value: 'UZS', label: 'UZS' },
+                  { value: 'USD', label: 'USD' },
+                  { value: 'EUR', label: 'EUR' },
+                ]}
+              />
+            </div>
+            {cur !== 'UZS' && (
+              <div>
+                <Label>{t.prRmFxRateLabel}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={fxMan}
+                  onChange={(e) => setFxMan(e.target.value)}
+                />
+                <p className="text-xs text-slate-400 mt-1">{t.prRmFxCbuHint}</p>
+              </div>
+            )}
+            <div>
+              <Label>{t.prRmPricePerKgLabel}</Label>
+              <Input
+                type="number"
+                min={0}
+                step="0.0001"
+                value={pricePerKg}
+                onChange={(e) => setPricePerKg(e.target.value)}
+              />
+              <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1.5 leading-relaxed">
+                {t.prRmPricePerKgHint}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs space-y-1">
+              <p className="text-slate-600 dark:text-slate-300">
+                {t.prRmTotalOrderInCurrency}:{' '}
+                <strong>{formatAmountInCurrency(totalOriginal, cur)}</strong>
+              </p>
+              <p className="text-slate-600 dark:text-slate-300">
+                {t.prRmAmountUzsEst}: <strong>{formatCurrency(amountUzs)}</strong>
+              </p>
+              <p className="text-slate-600 dark:text-slate-300">
+                {t.prRmCostPerKg}:{' '}
+                <strong>{qKg > 0 && perKgUzs > 0 ? formatCurrency(perKgUzs) : '—'}</strong>
+              </p>
+            </div>
+            <div>
+              <Label>{t.labelDesc}</Label>
+              <textarea
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full min-h-[4rem] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full h-10 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium"
+            >
+              {busy ? '…' : t.prRmSubmitOrder}
+            </button>
+          </form>
+
+          <div className="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">CBU</p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                title="Refresh"
+              >
+                <RefreshCw size={14} className={fxLoading ? 'animate-spin' : ''} />
+              </button>
+            </div>
+            {fxErr ? (
+              <p className="text-xs text-amber-600">{t.dashCbuFetchError}</p>
+            ) : (
+              <div className="space-y-2 text-xs">
+                {usd && (
+                  <p className="text-slate-600 dark:text-slate-300">
+                    USD: <strong>{parseCbuRate(usd.Rate)}</strong> {t.labelDate}: {updatedAt || usd.Date}
+                  </p>
+                )}
+                {eur && (
+                  <p className="text-slate-600 dark:text-slate-300">
+                    EUR: <strong>{parseCbuRate(eur.Rate)}</strong>
+                  </p>
+                )}
+              </div>
+            )}
+            <p className="text-xs text-slate-400 mt-3">{t.prRmFulfilledHint}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.prRmOrdersHistory}</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
+          <table className="w-full text-xs min-w-[720px]">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prRmColOrderedAt}</th>
+                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prProductType}</th>
+                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">kg</th>
+                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prRmCurrencyLabel}</th>
+                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">{t.labelAmount}</th>
+                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">UZS</th>
+                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">{t.prRmCostPerKg}</th>
+                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prStatusLabel}</th>
+                <th className="text-right px-3 py-2.5 font-semibold text-slate-500" />
+              </tr>
+            </thead>
+            <tbody>
+              {historySorted.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                    {t.prRmNoOrders}
+                  </td>
+                </tr>
+              ) : (
+                historySorted.map((o, idx) => (
+                  <tr
+                    key={o.id}
+                    className={`border-t border-slate-100 dark:border-slate-700 ${
+                      idx % 2 ? 'bg-slate-50/50 dark:bg-slate-800/40' : ''
+                    }`}
+                  >
+                    <td className="px-3 py-2 text-slate-500 font-mono whitespace-nowrap">
+                      {o.orderedAt.slice(0, 10)}
+                    </td>
+                    <td className="px-3 py-2 font-medium text-slate-700 dark:text-slate-200">{o.rawMaterialName}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{formatNumber(o.quantityKg)}</td>
+                    <td className="px-3 py-2">{o.currency}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{formatNumber(o.amountOriginal)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(o.amountUzs)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {formatCurrency(o.quantityKg > 0 ? o.amountUzs / o.quantityKg : 0)}
+                    </td>
+                    <td className="px-3 py-2">
+                      {o.status === 'PENDING' ? (
+                        <span className="text-amber-700 dark:text-amber-400">{t.prRmStatusPending}</span>
+                      ) : (
+                        <span className="text-emerald-700 dark:text-emerald-400">{t.prRmStatusFulfilled}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {o.status === 'PENDING' && (
+                        <button
+                          type="button"
+                          onClick={() => onFulfill(o.id)}
+                          className="text-indigo-600 hover:underline text-xs font-medium"
+                        >
+                          {t.prRmMarkFulfilled}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ======================== SETTINGS TAB ========================
 
 function SettingsTab() {
@@ -1726,12 +2136,15 @@ function SettingsTab() {
 
 export function Payroll() {
   const { t } = useApp();
-  const [activeTab, setActiveTab] = useState<'vedomost' | 'bank' | 'employees' | 'settings'>('vedomost');
+  const [activeTab, setActiveTab] = useState<
+    'vedomost' | 'bank' | 'employees' | 'rawOrders' | 'settings'
+  >('vedomost');
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
     { key: 'bank', label: t.prTabBank, icon: Landmark },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
+    { key: 'rawOrders', label: t.prTabRawOrders, icon: ShoppingCart },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
   ] as const;
 
@@ -1765,6 +2178,7 @@ export function Payroll() {
       {activeTab === 'vedomost' && <VedomostTab />}
       {activeTab === 'bank' && <BankTab />}
       {activeTab === 'employees' && <EmployeesTab />}
+      {activeTab === 'rawOrders' && <RawMaterialOrdersTab />}
       {activeTab === 'settings' && <SettingsTab />}
     </div>
   );

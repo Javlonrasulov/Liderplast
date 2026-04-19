@@ -237,6 +237,22 @@ export interface Expense {
   sourceShiftId?: string | null;
 }
 
+export interface RawMaterialPurchaseOrder {
+  id: string;
+  rawMaterialId: string;
+  rawMaterialName: string;
+  quantityKg: number;
+  currency: 'UZS' | 'USD' | 'EUR';
+  fxRateToUzs: number;
+  amountOriginal: number;
+  amountUzs: number;
+  expenseId: string;
+  status: 'PENDING' | 'FULFILLED';
+  orderedAt: string;
+  fulfilledAt?: string | null;
+  notes?: string | null;
+}
+
 export interface Machine {
   id: string;
   name: string;
@@ -449,6 +465,7 @@ export interface ERPState {
   sales: Sale[];
   expenses: Expense[];
   expenseCategories: ExpenseCategory[];
+  rawMaterialPurchaseOrders: RawMaterialPurchaseOrder[];
   machines: Machine[];
   /** Ishlab chiqarish partiyalari (xomashyo / қолип сарфи билан) */
   productionHistory: ProductionHistoryRow[];
@@ -646,7 +663,19 @@ type ERPAction =
   | { type: 'RECONCILE_BANK_VEDOMOST'; payload: { id: string } }
   | { type: 'ADD_PAYMENT'; payload: Omit<Payment, 'id' | 'createdAt'> }
   | { type: 'DELETE_PAYMENT'; payload: string }
-  | { type: 'SET_MONTH_STATUS'; payload: { month: string; status: 'paid' | 'unpaid' } };
+  | { type: 'SET_MONTH_STATUS'; payload: { month: string; status: 'paid' | 'unpaid' } }
+  | {
+      type: 'CREATE_RAW_MATERIAL_PURCHASE_ORDER';
+      payload: {
+        rawMaterialId: string;
+        quantityKg: number;
+        currency: 'UZS' | 'USD' | 'EUR';
+        fxRateToUzs: number;
+        amountOriginal: number;
+        notes?: string;
+      };
+    }
+  | { type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER'; payload: string };
 
 interface ERPContextValue {
   state: ERPState;
@@ -677,6 +706,7 @@ const emptyState: ERPState = {
   sales: [],
   expenses: [],
   expenseCategories: [],
+  rawMaterialPurchaseOrders: [],
   machines: [],
   productionHistory: [],
   logs: [],
@@ -1070,6 +1100,23 @@ type BackendExpense = {
   categoryId?: string | null;
   category?: BackendExpenseCategory | null;
   sourceShiftId?: string | null;
+};
+
+type BackendRawMaterialPurchaseOrder = {
+  id: string;
+  rawMaterialId: string;
+  quantityKg: number;
+  currency: 'UZS' | 'USD' | 'EUR';
+  fxRateToUzs: number;
+  amountOriginal: number;
+  amountUzs: number;
+  expenseId: string;
+  status: 'PENDING' | 'FULFILLED';
+  orderedAt: string;
+  fulfilledAt: string | null;
+  notes: string | null;
+  rawMaterial: { id: string; name: string };
+  expense: { id: string; amount: number; title: string; incurredAt: string };
 };
 
 type BackendUser = {
@@ -1524,6 +1571,36 @@ async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
   }
 }
 
+async function fetchRawMaterialPurchaseOrdersSafe(): Promise<BackendRawMaterialPurchaseOrder[]> {
+  try {
+    return await apiRequest<BackendRawMaterialPurchaseOrder[]>(
+      '/finance/raw-material-purchase-orders',
+    );
+  } catch {
+    return [];
+  }
+}
+
+function mapRawMaterialPurchaseOrders(
+  rows: BackendRawMaterialPurchaseOrder[],
+): RawMaterialPurchaseOrder[] {
+  return rows.map((r) => ({
+    id: r.id,
+    rawMaterialId: r.rawMaterialId,
+    rawMaterialName: r.rawMaterial?.name ?? '',
+    quantityKg: r.quantityKg,
+    currency: r.currency,
+    fxRateToUzs: r.fxRateToUzs,
+    amountOriginal: r.amountOriginal,
+    amountUzs: r.amountUzs,
+    expenseId: r.expenseId,
+    status: r.status,
+    orderedAt: r.orderedAt,
+    fulfilledAt: r.fulfilledAt,
+    notes: r.notes,
+  }));
+}
+
 async function mutateExpenseCategoryApi(
   method: 'POST' | 'PATCH' | 'DELETE',
   id: string | undefined,
@@ -1553,6 +1630,7 @@ async function mutateExpenseCategoryApi(
 
 async function loadStateFromApi() {
   const expenseCategoriesPromise = fetchExpenseCategoriesSafe();
+  const rawMaterialOrdersPromise = fetchRawMaterialPurchaseOrdersSafe();
 
   const [
     catalog,
@@ -1574,6 +1652,7 @@ async function loadStateFromApi() {
     salaryRows,
     bankVedomosts,
     salaryPaymentSummaries,
+    rawMaterialOrders,
   ] = await Promise.all([
     apiRequest<CatalogResponse>('/warehouse/catalog'),
     apiRequest<WarehouseStockItem[]>('/warehouse/stock'),
@@ -1594,6 +1673,7 @@ async function loadStateFromApi() {
     apiRequest<BackendSalaryRow[]>('/finance/salary'),
     apiRequest<BackendBankVedomost[]>('/finance/vedomosts'),
     apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
+    rawMaterialOrdersPromise,
   ]);
 
   const expenseCategories = await expenseCategoriesPromise;
@@ -1826,6 +1906,9 @@ async function loadStateFromApi() {
     createdAt: user.createdAt,
   }));
 
+  const rawMaterialPurchaseOrdersState =
+    mapRawMaterialPurchaseOrders(rawMaterialOrders);
+
   const employeeProductRatesState: EmployeeProductRate[] = employeeProductRates.map((item) => ({
     id: item.id,
     employeeId: item.workerId,
@@ -1883,6 +1966,7 @@ async function loadStateFromApi() {
     sales,
     expenses: mappedExpenses,
     expenseCategories: mappedExpenseCategories,
+    rawMaterialPurchaseOrders: rawMaterialPurchaseOrdersState,
     machines: mappedMachines,
     productionHistory: mapProductionHistoryRows(productions),
     logs,
@@ -2065,6 +2149,25 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
+        case 'CREATE_RAW_MATERIAL_PURCHASE_ORDER':
+          await apiRequest('/finance/raw-material-purchase-orders', {
+            method: 'POST',
+            body: JSON.stringify({
+              rawMaterialId: action.payload.rawMaterialId,
+              quantityKg: action.payload.quantityKg,
+              currency: action.payload.currency,
+              fxRateToUzs: action.payload.fxRateToUzs,
+              amountOriginal: action.payload.amountOriginal,
+              notes: action.payload.notes,
+            }),
+          });
+          break;
+        case 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER':
+          await apiRequest(
+            `/finance/raw-material-purchase-orders/${action.payload}/fulfill`,
+            { method: 'PATCH' },
+          );
+          break;
         case 'ADD_EXPENSE_CATEGORY':
           await mutateExpenseCategoryApi('POST', undefined, {
             name: action.payload.name,

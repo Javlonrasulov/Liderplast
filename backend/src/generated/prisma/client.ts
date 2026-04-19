@@ -172,6 +172,11 @@ export type ExpenseCategory = Prisma.ExpenseCategoryModel
  */
 export type Expense = Prisma.ExpenseModel
 /**
+ * Model RawMaterialPurchaseOrder
+ * Buxgalteriyada berilgan xom ashyo tashqi buyurtmasi (ombor kirimi alohida)
+ */
+export type RawMaterialPurchaseOrder = Prisma.RawMaterialPurchaseOrderModel
+/**
  * Model SalarySetting
  * 
  */

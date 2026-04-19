@@ -11,10 +11,13 @@ import {
   BankVedomostStatus,
   EmployeeRateType,
   EntityStatus,
+  PurchaseOrderCurrency,
+  RawMaterialOrderStatus,
   Role,
   SalaryType,
 } from '../../generated/prisma/enums.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
+import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
@@ -24,6 +27,8 @@ import { UpdateSalarySettingsDto } from './dto/update-salary-settings.dto.js';
 import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 
 const SALARY_PURPOSE_KEYWORDS = ['oylik', 'ish haqi', 'zarplata', 'salary'];
+
+const RAW_MATERIAL_ORDER_CATEGORY_ID = 'expseed_raw_material_orders';
 
 type ParsedBankRow = {
   documentDate: Date | null;
@@ -256,6 +261,123 @@ export class FinanceService {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createRawMaterialPurchaseOrder(
+    dto: CreateRawMaterialPurchaseOrderDto,
+    createdById?: string,
+  ) {
+    const rm = await this.prisma.rawMaterial.findFirst({
+      where: { id: dto.rawMaterialId, isDeleted: false },
+    });
+    if (!rm) {
+      throw new BadRequestException('Raw material not found');
+    }
+
+    const category = await this.prisma.expenseCategory.findFirst({
+      where: { id: RAW_MATERIAL_ORDER_CATEGORY_ID, deletedAt: null },
+    });
+    if (!category) {
+      throw new BadRequestException(
+        'Expense category for raw material orders is missing (run migrations).',
+      );
+    }
+
+    let fx = dto.fxRateToUzs;
+    if (dto.currency === PurchaseOrderCurrency.UZS) {
+      fx = 1;
+    }
+    if (!Number.isFinite(fx) || fx <= 0) {
+      throw new BadRequestException('Invalid CBU / exchange rate');
+    }
+
+    const amountUzs =
+      dto.currency === PurchaseOrderCurrency.UZS
+        ? dto.amountOriginal
+        : dto.amountOriginal * fx;
+
+    if (!Number.isFinite(amountUzs) || amountUzs < 0) {
+      throw new BadRequestException('Invalid amounts');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const expense = await tx.expense.create({
+        data: {
+          title: `Buyurtma: ${rm.name}`,
+          type: category.legacyExpenseType,
+          categoryId: category.id,
+          amount: amountUzs,
+          description: [
+            `${dto.quantityKg} kg`,
+            `${dto.currency} ${dto.amountOriginal}`,
+            `kurs ${fx}`,
+            `→ ${Math.round(amountUzs)} UZS`,
+            dto.notes?.trim(),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          incurredAt: new Date(),
+          createdById,
+        },
+      });
+
+      return tx.rawMaterialPurchaseOrder.create({
+        data: {
+          rawMaterialId: rm.id,
+          quantityKg: dto.quantityKg,
+          currency: dto.currency,
+          fxRateToUzs: fx,
+          amountOriginal: dto.amountOriginal,
+          amountUzs,
+          expenseId: expense.id,
+          notes: dto.notes?.trim() || null,
+          createdById: createdById ?? null,
+        },
+        include: {
+          rawMaterial: { select: { id: true, name: true } },
+          expense: {
+            select: { id: true, amount: true, title: true, incurredAt: true },
+          },
+        },
+      });
+    });
+  }
+
+  getRawMaterialPurchaseOrders() {
+    return this.prisma.rawMaterialPurchaseOrder.findMany({
+      orderBy: [{ orderedAt: 'desc' }],
+      include: {
+        rawMaterial: { select: { id: true, name: true } },
+        expense: {
+          select: { id: true, amount: true, title: true, incurredAt: true },
+        },
+      },
+    });
+  }
+
+  async fulfillRawMaterialPurchaseOrder(id: string) {
+    const row = await this.prisma.rawMaterialPurchaseOrder.findUnique({
+      where: { id },
+    });
+    if (!row) {
+      throw new NotFoundException('Purchase order not found');
+    }
+    if (row.status !== RawMaterialOrderStatus.PENDING) {
+      throw new BadRequestException('Order is not pending');
+    }
+    return this.prisma.rawMaterialPurchaseOrder.update({
+      where: { id },
+      data: {
+        status: RawMaterialOrderStatus.FULFILLED,
+        fulfilledAt: new Date(),
+      },
+      include: {
+        rawMaterial: { select: { id: true, name: true } },
+        expense: {
+          select: { id: true, amount: true, title: true, incurredAt: true },
+        },
+      },
     });
   }
 

@@ -24,6 +24,7 @@ import { UpsertEmployeeProductRateDto } from './dto/upsert-employee-product-rate
 import { PatchElectricityPriceDto } from './dto/patch-electricity-price.dto.js';
 import { UpdateSalarySettingsDto } from './dto/update-salary-settings.dto.js';
 import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
+import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
 import { FinanceService } from './finance.service.js';
 
 @Controller('finance')
@@ -70,6 +71,27 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   getExpenses() {
     return this.financeService.getExpenses();
+  }
+
+  @Post('raw-material-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createRawMaterialPurchaseOrder(
+    @Body() dto: CreateRawMaterialPurchaseOrderDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.createRawMaterialPurchaseOrder(dto, userId);
+  }
+
+  @Get('raw-material-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  getRawMaterialPurchaseOrders() {
+    return this.financeService.getRawMaterialPurchaseOrders();
+  }
+
+  @Patch('raw-material-purchase-orders/:id/fulfill')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  fulfillRawMaterialPurchaseOrder(@Param('id') id: string) {
+    return this.financeService.fulfillRawMaterialPurchaseOrder(id);
   }
 
   /** @deprecated — ikkala URL ham qo‘llab-quvvatlanadi (proxy / eski mijozlar) */

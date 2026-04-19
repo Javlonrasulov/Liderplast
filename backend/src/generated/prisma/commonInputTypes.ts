@@ -545,6 +545,40 @@ export type EnumExpenseTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
 }
 
+export type EnumPurchaseOrderCurrencyFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderCurrency | Prisma.EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel> | $Enums.PurchaseOrderCurrency
+}
+
+export type EnumRawMaterialOrderStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialOrderStatus | Prisma.EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel> | $Enums.RawMaterialOrderStatus
+}
+
+export type EnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderCurrency | Prisma.EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseOrderCurrency
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
+}
+
+export type EnumRawMaterialOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialOrderStatus | Prisma.EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.RawMaterialOrderStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel>
+}
+
 export type EnumEmployeeRateTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.EmployeeRateType | Prisma.EnumEmployeeRateTypeFieldRefInput<$PrismaModel>
   in?: $Enums.EmployeeRateType[] | Prisma.ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel>
@@ -1106,6 +1140,40 @@ export type NestedEnumExpenseTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumExpenseTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderCurrency | Prisma.EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel> | $Enums.PurchaseOrderCurrency
+}
+
+export type NestedEnumRawMaterialOrderStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialOrderStatus | Prisma.EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel> | $Enums.RawMaterialOrderStatus
+}
+
+export type NestedEnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderCurrency | Prisma.EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseOrderCurrency[] | Prisma.ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseOrderCurrency
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
+}
+
+export type NestedEnumRawMaterialOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RawMaterialOrderStatus | Prisma.EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RawMaterialOrderStatus[] | Prisma.ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRawMaterialOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.RawMaterialOrderStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRawMaterialOrderStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumEmployeeRateTypeFilter<$PrismaModel = never> = {

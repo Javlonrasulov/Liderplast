@@ -134,6 +134,23 @@ export const ExpenseType = {
 export type ExpenseType = (typeof ExpenseType)[keyof typeof ExpenseType]
 
 
+export const RawMaterialOrderStatus = {
+  PENDING: 'PENDING',
+  FULFILLED: 'FULFILLED'
+} as const
+
+export type RawMaterialOrderStatus = (typeof RawMaterialOrderStatus)[keyof typeof RawMaterialOrderStatus]
+
+
+export const PurchaseOrderCurrency = {
+  UZS: 'UZS',
+  USD: 'USD',
+  EUR: 'EUR'
+} as const
+
+export type PurchaseOrderCurrency = (typeof PurchaseOrderCurrency)[keyof typeof PurchaseOrderCurrency]
+
+
 export const BagStatus = {
   IN_STORAGE: 'IN_STORAGE',
   CONNECTED: 'CONNECTED',

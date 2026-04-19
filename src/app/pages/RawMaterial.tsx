@@ -44,8 +44,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 
 const NONE = '__none__';
+
+/** Kutilayotchi buyurtma (kg) bilan kirim miqdorini solishtirish — juda kichik float farqini e’tiborsiz qoldiramiz */
+function incomingKgMatchesOrderedOrder(enteredKg: number, orderedKg: number): boolean {
+  if (!Number.isFinite(enteredKg) || !Number.isFinite(orderedKg) || orderedKg <= 0) return true;
+  const diff = Math.abs(enteredKg - orderedKg);
+  const scale = Math.max(enteredKg, orderedKg, 1);
+  return diff <= Math.max(0.5, scale * 0.001);
+}
 
 const SELECT_TRIGGER_CLS =
   'h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white';
@@ -81,6 +99,16 @@ export function RawMaterial() {
   const [bagLogsOpen, setBagLogsOpen] = useState(false);
   const [otherBagsOpen, setOtherBagsOpen] = useState(false);
   const [rmTab, setRmTab] = useState<'bags' | 'catalog' | 'overview'>('bags');
+  const [incomingQtyMismatchPayload, setIncomingQtyMismatchPayload] = useState<
+    | null
+    | {
+        rawMaterialId: string;
+        amountKg: number;
+        orderedKg: number;
+        description: string;
+        date: string;
+      }
+  >(null);
 
   const stockByKind = useMemo(
     () => computeRawMaterialStockByKind(state.rawMaterialEntries, state.warehouseProducts),
@@ -89,6 +117,11 @@ export function RawMaterial() {
   const flowByKind = useMemo(
     () => computeRawMaterialFlowByKind(state.rawMaterialEntries, state.warehouseProducts),
     [state.rawMaterialEntries, state.warehouseProducts],
+  );
+
+  const pendingExternalOrders = useMemo(
+    () => state.rawMaterialPurchaseOrders.filter((o) => o.status === 'PENDING'),
+    [state.rawMaterialPurchaseOrders],
   );
 
   const siroStockKg = stockByKind.siro;
@@ -228,6 +261,15 @@ export function RawMaterial() {
     return incomingCatalogItems[0]?.id ?? '';
   }, [incomingCatalogItems, incomingRawMaterialId]);
 
+  const primaryPendingPurchaseOrder = useMemo(() => {
+    const id = resolvedIncomingRawMaterialId;
+    if (!id) return null;
+    const rows = state.rawMaterialPurchaseOrders
+      .filter((o) => o.status === 'PENDING' && o.rawMaterialId === id)
+      .sort((a, b) => new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime());
+    return rows[0] ?? null;
+  }, [resolvedIncomingRawMaterialId, state.rawMaterialPurchaseOrders]);
+
   const incomingRawMaterial = useMemo(
     () =>
       state.warehouseProducts.find(
@@ -250,6 +292,21 @@ export function RawMaterial() {
     setIncomingRawMaterialId('');
   }, [incomingKind]);
 
+  const runIncomingSubmit = (
+    rawMaterialId: string,
+    amountKg: number,
+    description: string,
+    date: string,
+  ) => {
+    dispatch({
+      type: 'ADD_RAW_MATERIAL',
+      payload: { rawMaterialId, amount: amountKg, description, date },
+    });
+    setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
+    setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -258,13 +315,32 @@ export function RawMaterial() {
       return;
     }
     const rawMaterialId = resolvedIncomingRawMaterialId;
-    const amountKg = form.unit === 'ton' ? parseFloat(form.amount) * 1000 : parseFloat(form.amount);
-    if (!rawMaterialId) { setError(t.rmSelectRawMaterialRequired); return; }
-    if (!form.amount || isNaN(amountKg) || amountKg <= 0) { setError(t.labelAmount + '!'); return; }
-    dispatch({ type: 'ADD_RAW_MATERIAL', payload: { rawMaterialId, amount: amountKg, description: form.description || t.rmDefaultIncomingNote, date: form.date } });
-    setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
-    setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
-    setTimeout(() => setSuccess(''), 3000);
+    const rawVal = parseFloat(String(form.amount).replace(',', '.'));
+    const amountKg = form.unit === 'ton' ? rawVal * 1000 : rawVal;
+    if (!rawMaterialId) {
+      setError(t.rmSelectRawMaterialRequired);
+      return;
+    }
+    if (!form.amount || isNaN(amountKg) || amountKg <= 0) {
+      setError(t.labelAmount + '!');
+      return;
+    }
+    const description = form.description || t.rmDefaultIncomingNote;
+    const order = primaryPendingPurchaseOrder;
+    if (
+      order &&
+      !incomingKgMatchesOrderedOrder(amountKg, order.quantityKg)
+    ) {
+      setIncomingQtyMismatchPayload({
+        rawMaterialId,
+        amountKg,
+        orderedKg: order.quantityKg,
+        description,
+        date: form.date,
+      });
+      return;
+    }
+    runIncomingSubmit(rawMaterialId, amountKg, description, form.date);
   };
 
   const bagStatusTone: Record<string, string> = {
@@ -619,6 +695,61 @@ export function RawMaterial() {
                 {incomingKind === 'PAINT' ? t.rmIncomingTitlePaint : t.rmIncomingTitleSiro}
               </h3>
             </div>
+            {pendingExternalOrders.length > 0 && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/90 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package size={14} className="text-amber-700 dark:text-amber-400" />
+                  <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                    {t.rmPendingExternalOrdersTitle}
+                  </p>
+                </div>
+                <ul className="space-y-2">
+                  {pendingExternalOrders.map((o) => {
+                    const days = Math.max(
+                      0,
+                      Math.floor(
+                        (Date.now() - new Date(o.orderedAt).getTime()) / 86400000,
+                      ),
+                    );
+                    return (
+                      <li
+                        key={o.id}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200/70 bg-white/80 px-2 py-2 text-xs dark:border-amber-800 dark:bg-slate-900/40"
+                      >
+                        <span className="text-slate-700 dark:text-slate-200">
+                          {t.prRmDaysWaitingTpl
+                            .replace('{name}', o.rawMaterialName)
+                            .replace('{kg}', formatNumber(o.quantityKg))
+                            .replace('{days}', String(days))}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await dispatch({
+                                type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER',
+                                payload: o.id,
+                              });
+                              setSuccess(t.rmOrderArrivedToast);
+                              setTimeout(() => setSuccess(''), 3000);
+                            } catch (err) {
+                              setError(
+                                err instanceof Error
+                                  ? translateWarehouseApiError(err.message, t)
+                                  : String(err),
+                              );
+                            }
+                          }}
+                          className="shrink-0 rounded-lg bg-indigo-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-indigo-700"
+                        >
+                          {t.rmOrderMarkArrived}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
             <div className="flex flex-wrap gap-2 mb-5">
               <button
                 type="button"
@@ -1241,6 +1372,38 @@ export function RawMaterial() {
           )}
         </div>
       )}
+
+      <AlertDialog
+        open={Boolean(incomingQtyMismatchPayload)}
+        onOpenChange={(open) => !open && setIncomingQtyMismatchPayload(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.rmIncomingQtyMismatchTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {incomingQtyMismatchPayload
+                ? t.rmIncomingQtyMismatchBody
+                    .replace('{orderedKg}', formatNumber(incomingQtyMismatchPayload.orderedKg))
+                    .replace('{enteredKg}', formatNumber(incomingQtyMismatchPayload.amountKg))
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const p = incomingQtyMismatchPayload;
+                if (!p) return;
+                runIncomingSubmit(p.rawMaterialId, p.amountKg, p.description, p.date);
+                setIncomingQtyMismatchPayload(null);
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {t.btnConfirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={Boolean(editingBagId)} onOpenChange={(open) => !open && closeEditBagName()}>
         <DialogContent className="max-w-md">

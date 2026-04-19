@@ -123,6 +123,21 @@ function requiredPermissionGroups(
     { test: /^\/finance\/expenses$/, method: 'GET', anyOf: ['view_expenses'] },
     { test: /^\/finance\/expenses$/, method: 'POST', anyOf: ['view_expenses'] },
     {
+      test: /^\/finance\/raw-material-purchase-orders$/,
+      method: 'GET',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
+      test: /^\/finance\/raw-material-purchase-orders$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/raw-material-purchase-orders\/[^/]+\/fulfill$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
       test: /^\/finance\/expenses\/categories$/,
       method: 'GET',
       anyOf: ['view_expenses'],

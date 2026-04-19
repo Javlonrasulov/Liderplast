@@ -267,6 +267,7 @@ export type ExpenseWhereInput = {
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   category?: Prisma.XOR<Prisma.ExpenseCategoryNullableScalarRelationFilter, Prisma.ExpenseCategoryWhereInput> | null
   sourceShift?: Prisma.XOR<Prisma.ShiftRecordNullableScalarRelationFilter, Prisma.ShiftRecordWhereInput> | null
+  rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
 }
 
 export type ExpenseOrderByWithRelationInput = {
@@ -284,6 +285,7 @@ export type ExpenseOrderByWithRelationInput = {
   createdBy?: Prisma.UserOrderByWithRelationInput
   category?: Prisma.ExpenseCategoryOrderByWithRelationInput
   sourceShift?: Prisma.ShiftRecordOrderByWithRelationInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOrderByWithRelationInput
 }
 
 export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
@@ -304,6 +306,7 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   category?: Prisma.XOR<Prisma.ExpenseCategoryNullableScalarRelationFilter, Prisma.ExpenseCategoryWhereInput> | null
   sourceShift?: Prisma.XOR<Prisma.ShiftRecordNullableScalarRelationFilter, Prisma.ShiftRecordWhereInput> | null
+  rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
 }, "id" | "sourceShiftId">
 
 export type ExpenseOrderByWithAggregationInput = {
@@ -354,6 +357,7 @@ export type ExpenseCreateInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateInput = {
@@ -368,6 +372,7 @@ export type ExpenseUncheckedCreateInput = {
   createdById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUpdateInput = {
@@ -382,6 +387,7 @@ export type ExpenseUpdateInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateInput = {
@@ -396,6 +402,7 @@ export type ExpenseUncheckedUpdateInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateManyInput = {
@@ -500,6 +507,11 @@ export type ExpenseMinOrderByAggregateInput = {
 
 export type ExpenseSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+}
+
+export type ExpenseScalarRelationFilter = {
+  is?: Prisma.ExpenseWhereInput
+  isNot?: Prisma.ExpenseWhereInput
 }
 
 export type ExpenseCreateNestedManyWithoutCreatedByInput = {
@@ -618,6 +630,20 @@ export type ExpenseUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
 }
 
+export type ExpenseCreateNestedOneWithoutRawMaterialPurchaseOrderInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutRawMaterialPurchaseOrderInput
+  connect?: Prisma.ExpenseWhereUniqueInput
+}
+
+export type ExpenseUpdateOneRequiredWithoutRawMaterialPurchaseOrderNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutRawMaterialPurchaseOrderInput
+  upsert?: Prisma.ExpenseUpsertWithoutRawMaterialPurchaseOrderInput
+  connect?: Prisma.ExpenseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ExpenseUpdateToOneWithWhereWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUpdateWithoutRawMaterialPurchaseOrderInput>, Prisma.ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput>
+}
+
 export type ExpenseCreateWithoutCreatedByInput = {
   id?: string
   title: string
@@ -629,6 +655,7 @@ export type ExpenseCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutCreatedByInput = {
@@ -642,6 +669,7 @@ export type ExpenseUncheckedCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   categoryId?: string | null
   sourceShiftId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutCreatedByInput = {
@@ -698,6 +726,7 @@ export type ExpenseCreateWithoutSourceShiftInput = {
   createdAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
@@ -711,6 +740,7 @@ export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
   createdAt?: Date | string
   createdById?: string | null
   categoryId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutSourceShiftInput = {
@@ -740,6 +770,7 @@ export type ExpenseUpdateWithoutSourceShiftInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
@@ -753,6 +784,7 @@ export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutCategoryInput = {
@@ -766,6 +798,7 @@ export type ExpenseCreateWithoutCategoryInput = {
   createdAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutCategoryInput = {
@@ -779,6 +812,7 @@ export type ExpenseUncheckedCreateWithoutCategoryInput = {
   createdAt?: Date | string
   createdById?: string | null
   sourceShiftId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutCategoryInput = {
@@ -807,6 +841,78 @@ export type ExpenseUpdateManyWithWhereWithoutCategoryInput = {
   data: Prisma.XOR<Prisma.ExpenseUpdateManyMutationInput, Prisma.ExpenseUncheckedUpdateManyWithoutCategoryInput>
 }
 
+export type ExpenseCreateWithoutRawMaterialPurchaseOrderInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
+  sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+}
+
+export type ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  createdById?: string | null
+  categoryId?: string | null
+  sourceShiftId?: string | null
+}
+
+export type ExpenseCreateOrConnectWithoutRawMaterialPurchaseOrderInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput>
+}
+
+export type ExpenseUpsertWithoutRawMaterialPurchaseOrderInput = {
+  update: Prisma.XOR<Prisma.ExpenseUpdateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput>
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput>
+  where?: Prisma.ExpenseWhereInput
+}
+
+export type ExpenseUpdateToOneWithWhereWithoutRawMaterialPurchaseOrderInput = {
+  where?: Prisma.ExpenseWhereInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateWithoutRawMaterialPurchaseOrderInput, Prisma.ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput>
+}
+
+export type ExpenseUpdateWithoutRawMaterialPurchaseOrderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
+  sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+}
+
+export type ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 export type ExpenseCreateManyCreatedByInput = {
   id?: string
   title: string
@@ -831,6 +937,7 @@ export type ExpenseUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
@@ -844,6 +951,7 @@ export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutCreatedByInput = {
@@ -883,6 +991,7 @@ export type ExpenseUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutCategoryInput = {
@@ -896,6 +1005,7 @@ export type ExpenseUncheckedUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutCategoryInput = {
@@ -928,6 +1038,7 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
+  rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
 export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -983,6 +1094,7 @@ export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
+  rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
 }
 export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
@@ -1001,6 +1113,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdBy: Prisma.$UserPayload<ExtArgs> | null
     category: Prisma.$ExpenseCategoryPayload<ExtArgs> | null
     sourceShift: Prisma.$ShiftRecordPayload<ExtArgs> | null
+    rawMaterialPurchaseOrder: Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1411,6 +1524,7 @@ export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends runtime.
   createdBy<T extends Prisma.Expense$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.Expense$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$categoryArgs<ExtArgs>>): Prisma.Prisma__ExpenseCategoryClient<runtime.Types.Result.GetResult<Prisma.$ExpenseCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sourceShift<T extends Prisma.Expense$sourceShiftArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$sourceShiftArgs<ExtArgs>>): Prisma.Prisma__ShiftRecordClient<runtime.Types.Result.GetResult<Prisma.$ShiftRecordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  rawMaterialPurchaseOrder<T extends Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>>): Prisma.Prisma__RawMaterialPurchaseOrderClient<runtime.Types.Result.GetResult<Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1906,6 +2020,25 @@ export type Expense$sourceShiftArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.ShiftRecordInclude<ExtArgs> | null
   where?: Prisma.ShiftRecordWhereInput
+}
+
+/**
+ * Expense.rawMaterialPurchaseOrder
+ */
+export type Expense$rawMaterialPurchaseOrderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RawMaterialPurchaseOrder
+   */
+  select?: Prisma.RawMaterialPurchaseOrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RawMaterialPurchaseOrder
+   */
+  omit?: Prisma.RawMaterialPurchaseOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RawMaterialPurchaseOrderInclude<ExtArgs> | null
+  where?: Prisma.RawMaterialPurchaseOrderWhereInput
 }
 
 /**
