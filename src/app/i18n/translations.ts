@@ -268,6 +268,29 @@ export interface T {
   rmLogDepleted: string;
   rmLogWrittenOff: string;
   rmNoLogNote: string;
+  /** Қоп тарихи — backend `note` (инглизча) таржимаси; `{reason}`, `{name}` */
+  rmBagLogNoteConnectedAfterSwitch: string;
+  rmBagLogNoteConnectedToMachine: string;
+  rmBagLogNoteConnectedReplacement: string;
+  rmBagLogNoteDisconnected: string;
+  rmBagLogNoteDisconnectedTpl: string;
+  rmBagLogNoteDisconnectedBeforeWriteoff: string;
+  rmBagLogNoteWrittenOff: string;
+  rmBagLogNoteWrittenOffTpl: string;
+  rmBagLogNoteWrittenOffAfterDisconnect: string;
+  rmBagLogNoteReturnedToWarehouse: string;
+  rmBagLogNoteDepleted: string;
+  rmBagLogNoteQuickConsume: string;
+  rmBagLogNoteMaterialConsumed: string;
+  rmBagLogNoteShiftRecipeSiro: string;
+  rmBagLogNoteShiftRecipeSiroBag: string;
+  rmBagLogNoteShiftProduction: string;
+  rmBagLogNoteShiftSemiForFinal: string;
+  rmBagLogNoteShiftPaint: string;
+  rmBagLogNoteShiftPaintBag: string;
+  rmBagLogNoteProductionConsumption: string;
+  rmBagLogNoteBagCreated: string;
+  rmBagLogNoteBagCreatedTpl: string;
   rmCreateTypeTitle: string;
   rmCreateTypeButton: string;
   rmCreateTypePlaceholder: string;
@@ -496,6 +519,10 @@ export interface T {
   /** Категорияни рўйхатдан олиш (модал сарлавҳаси) */
   exCategoryDeleteTitle: string;
   exCategoryDeleteHint: string;
+  /** Seeded kategoriya: buxgalteriya tashqi buyurtmasi */
+  exCategoryLabelRawMaterialExternalOrder: string;
+  /** Seeded kategoriya: qopdan chiqim (buyurtma emas) */
+  exCategoryLabelRawMaterialBagWriteoff: string;
   exStatsByCategory: string;
   /** Категория статистикаси: жадвал / доира / устунлар */
   exStatsViewTable: string;
@@ -969,6 +996,29 @@ const uz_cyrillic: T = {
   rmLogDepleted: 'Тугаган',
   rmLogWrittenOff: 'Чиқимга чиқарилди',
   rmNoLogNote: 'Изоҳ йўқ',
+  rmBagLogNoteConnectedAfterSwitch:
+    'Янги қоп уланишида аввалги қоп алмаштирилган — қоп аппаратга уланди',
+  rmBagLogNoteConnectedToMachine: 'Қоп аппаратга уланди',
+  rmBagLogNoteConnectedReplacement: 'Қоп алмаштириш: янги қоп аппаратга уланди',
+  rmBagLogNoteDisconnected: 'Қоп узилди',
+  rmBagLogNoteDisconnectedTpl: 'Қоп узилди · {reason}',
+  rmBagLogNoteDisconnectedBeforeWriteoff: 'Чиқимга чиқаришдан олдин қоп узилди',
+  rmBagLogNoteWrittenOff: 'Қоп чиқимга чиқарилди',
+  rmBagLogNoteWrittenOffTpl: 'Чиқимга чиқарилди · {reason}',
+  rmBagLogNoteWrittenOffAfterDisconnect: 'Узилгандан кейин қолдиқ чиқимга чиқарилди',
+  rmBagLogNoteReturnedToWarehouse: 'Узилгандан кейин қоп омборга қайтарилди',
+  rmBagLogNoteDepleted: 'Қоп тўгаган',
+  rmBagLogNoteQuickConsume: 'Қопдан тезкор сарф',
+  rmBagLogNoteMaterialConsumed: 'Фаол қопдан материал сарфланди',
+  rmBagLogNoteShiftRecipeSiro: 'Смена: ретсепт бўйича сиро сарфи',
+  rmBagLogNoteShiftRecipeSiroBag: 'Смена: ретсепт бўйича сиро сарфи (уланган қоп)',
+  rmBagLogNoteShiftProduction: 'Смена: ишлаб чиқариш',
+  rmBagLogNoteShiftSemiForFinal: 'Смена: тайёр маҳсулот учун ярим тайёр сарфи',
+  rmBagLogNoteShiftPaint: 'Смена: краска/бўёқ сарфи',
+  rmBagLogNoteShiftPaintBag: 'Смена: краска/бўёқ сарфи (уланган қоп)',
+  rmBagLogNoteProductionConsumption: 'Ишлаб чиқариш сарфи',
+  rmBagLogNoteBagCreated: 'Қоп яратилди',
+  rmBagLogNoteBagCreatedTpl: 'Қоп яратилди · {name}',
   rmCreateTypeTitle: 'Сиро турини яратиш',
   rmCreateTypeButton: 'Сиро турини сақлаш',
   rmCreateTypePlaceholder: 'Масалан: PET 9921',
@@ -1246,6 +1296,8 @@ const uz_cyrillic: T = {
   exCategoryDelete: 'Ўчириш',
   exCategoryDeleteTitle: 'Категорияни рўйхатдан оламизми?',
   exCategoryDeleteHint: 'Категория рўйхатдан олинади; тарихдаги ёзувлар сақланади.',
+  exCategoryLabelRawMaterialExternalOrder: 'Хом ашё ташқи буюртма',
+  exCategoryLabelRawMaterialBagWriteoff: 'Хом ашё — қоп чиқими',
   exStatsByCategory: 'Категория бўйича статистика',
   exStatsViewTable: 'Жадвал',
   exStatsViewDonut: 'Доира',
@@ -1717,6 +1769,29 @@ const uz_latin: T = {
   rmLogDepleted: 'Tugagan',
   rmLogWrittenOff: 'Chiqimga chiqarildi',
   rmNoLogNote: 'Izoh yo‘q',
+  rmBagLogNoteConnectedAfterSwitch:
+    'Yangi qop ulanishda avvalgi qop almashtirilgan — qop apparatga ulandi',
+  rmBagLogNoteConnectedToMachine: 'Qop apparatga ulandi',
+  rmBagLogNoteConnectedReplacement: 'Qop almashtirish: yangi qop apparatga ulandi',
+  rmBagLogNoteDisconnected: 'Qop uzildi',
+  rmBagLogNoteDisconnectedTpl: 'Qop uzildi · {reason}',
+  rmBagLogNoteDisconnectedBeforeWriteoff: 'Chiqimga chiqarishdan oldin qop uzildi',
+  rmBagLogNoteWrittenOff: 'Qop chiqimga chiqarildi',
+  rmBagLogNoteWrittenOffTpl: 'Chiqimga chiqarildi · {reason}',
+  rmBagLogNoteWrittenOffAfterDisconnect: 'Uzilgandan keyin qoldiq chiqimga chiqarildi',
+  rmBagLogNoteReturnedToWarehouse: 'Uzilgandan keyin qop omborga qaytarildi',
+  rmBagLogNoteDepleted: 'Qop tugagan',
+  rmBagLogNoteQuickConsume: 'Qopdan tezkor sarf',
+  rmBagLogNoteMaterialConsumed: 'Faol qopdan material sarflandi',
+  rmBagLogNoteShiftRecipeSiro: 'Smena: retsept bo‘yicha siro sarfi',
+  rmBagLogNoteShiftRecipeSiroBag: 'Smena: retsept bo‘yicha siro sarfi (ulangan qop)',
+  rmBagLogNoteShiftProduction: 'Smena: ishlab chiqarish',
+  rmBagLogNoteShiftSemiForFinal: 'Smena: tayyor mahsulot uchun yarim tayyor sarfi',
+  rmBagLogNoteShiftPaint: 'Smena: kraska/bo‘yoq sarfi',
+  rmBagLogNoteShiftPaintBag: 'Smena: kraska/bo‘yoq sarfi (ulangan qop)',
+  rmBagLogNoteProductionConsumption: 'Ishlab chiqarish sarfi',
+  rmBagLogNoteBagCreated: 'Qop yaratildi',
+  rmBagLogNoteBagCreatedTpl: 'Qop yaratildi · {name}',
   rmCreateTypeTitle: 'Siro turini yaratish',
   rmCreateTypeButton: 'Siro turini saqlash',
   rmCreateTypePlaceholder: 'Masalan: PET 9921',
@@ -1994,6 +2069,8 @@ const uz_latin: T = {
   exCategoryDelete: "O'chirish",
   exCategoryDeleteTitle: "Kategoriyani ro'yxatdan olamizmi?",
   exCategoryDeleteHint: "Kategoriya ro'yxatdan olinadi; tarixdagi yozuvlar saqlanadi.",
+  exCategoryLabelRawMaterialExternalOrder: 'Xom ashyo tashqi buyurtma',
+  exCategoryLabelRawMaterialBagWriteoff: 'Xom ashyo — qop chiqimi',
   exStatsByCategory: "Kategoriya bo'yicha statistika",
   exStatsViewTable: 'Jadval',
   exStatsViewDonut: 'Doira',
@@ -2465,6 +2542,29 @@ const ru: T = {
   rmLogDepleted: 'Закончился',
   rmLogWrittenOff: 'Списан',
   rmNoLogNote: 'Без примечания',
+  rmBagLogNoteConnectedAfterSwitch:
+    'При подключении нового мешка предыдущий заменён — мешок подключён к аппарату',
+  rmBagLogNoteConnectedToMachine: 'Мешок подключён к аппарату',
+  rmBagLogNoteConnectedReplacement: 'Замена: новый мешок подключён к аппарату',
+  rmBagLogNoteDisconnected: 'Мешок отключён',
+  rmBagLogNoteDisconnectedTpl: 'Мешок отключён · {reason}',
+  rmBagLogNoteDisconnectedBeforeWriteoff: 'Мешок отключён перед списанием',
+  rmBagLogNoteWrittenOff: 'Мешок списан',
+  rmBagLogNoteWrittenOffTpl: 'Списано · {reason}',
+  rmBagLogNoteWrittenOffAfterDisconnect: 'После отключения остаток списан',
+  rmBagLogNoteReturnedToWarehouse: 'После отключения мешок возвращён на склад',
+  rmBagLogNoteDepleted: 'Мешок исчерпан',
+  rmBagLogNoteQuickConsume: 'Быстрый расход из мешка',
+  rmBagLogNoteMaterialConsumed: 'Расход материала из активного мешка',
+  rmBagLogNoteShiftRecipeSiro: 'Смена: расход сирья по рецепту',
+  rmBagLogNoteShiftRecipeSiroBag: 'Смена: расход сирья по рецепту (подключённый мешок)',
+  rmBagLogNoteShiftProduction: 'Смена: производство',
+  rmBagLogNoteShiftSemiForFinal: 'Смена: расход полуфабриката на готовую продукцию',
+  rmBagLogNoteShiftPaint: 'Смена: расход краски',
+  rmBagLogNoteShiftPaintBag: 'Смена: расход краски (подключённый мешок)',
+  rmBagLogNoteProductionConsumption: 'Производственный расход',
+  rmBagLogNoteBagCreated: 'Мешок создан',
+  rmBagLogNoteBagCreatedTpl: 'Мешок создан · {name}',
   rmCreateTypeTitle: 'Создать тип сырья',
   rmCreateTypeButton: 'Сохранить тип сырья',
   rmCreateTypePlaceholder: 'Например: PET 9921',
@@ -2742,6 +2842,8 @@ const ru: T = {
   exCategoryDelete: 'Удалить',
   exCategoryDeleteTitle: 'Убрать категорию из списка?',
   exCategoryDeleteHint: 'Категория скрывается из списка; записи в истории сохраняются.',
+  exCategoryLabelRawMaterialExternalOrder: 'Сырьё: внешний заказ',
+  exCategoryLabelRawMaterialBagWriteoff: 'Сырьё: списание мешка',
   exStatsByCategory: 'Статистика по категориям',
   exStatsViewTable: 'Таблица',
   exStatsViewDonut: 'Круговая',

@@ -23,6 +23,7 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
+import { translateBagLogNote } from '../utils/bag-log-notes';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -1263,7 +1264,9 @@ export function RawMaterial() {
                         <span className="text-[11px] text-slate-400">{formatDate(log.date)}</span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{log.bagName}</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">{log.note || t.rmNoLogNote}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">
+                        {translateBagLogNote(log.note, t) || t.rmNoLogNote}
+                      </p>
                       {log.quantityKg !== undefined && (
                         <p className="text-xs text-indigo-600 dark:text-indigo-300 mt-2">
                           {formatNumber(log.quantityKg)} {t.unitKg}

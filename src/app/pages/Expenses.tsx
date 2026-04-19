@@ -11,7 +11,11 @@ import {
   TODAY,
 } from '../utils/format';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
-import { labelExpenseCategory, resolveExpenseCategoryNameFromState } from '../utils/expense-category-label';
+import {
+  EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF,
+  labelExpenseCategory,
+  resolveExpenseCategoryNameFromState,
+} from '../utils/expense-category-label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,6 +81,36 @@ function styleIndex(id: string) {
   let h = 0;
   for (let i = 0; i < id.length; i += 1) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return h % BADGE_STYLES.length;
+}
+
+/** Qop chiqimi — sariqdan farq qiladi (diagramma / nishon) */
+const BADGE_BAG_WRITEOFF =
+  'bg-teal-100 text-teal-800 border border-teal-200/70 dark:bg-teal-950/45 dark:text-teal-100 dark:border-teal-800/50';
+const CHART_BAR_BAG_WRITEOFF = 'bg-teal-500';
+const CHART_HEX_BAG_WRITEOFF = '#0d9488';
+
+function expenseCategoryBadgeClass(categoryId: string) {
+  if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF) return BADGE_BAG_WRITEOFF;
+  return BADGE_STYLES[styleIndex(categoryId || 'x')];
+}
+
+function chartBarClassForCategory(categoryId: string, index: number) {
+  if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF) return CHART_BAR_BAG_WRITEOFF;
+  return CHART_BAR[index % CHART_BAR.length];
+}
+
+function chartHexForCategory(categoryId: string, index: number) {
+  if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF) return CHART_HEX_BAG_WRITEOFF;
+  return EXPENSE_CATEGORY_CHART_HEX[index % EXPENSE_CATEGORY_CHART_HEX.length];
+}
+
+/** Eski API tavsiflaridagi `ref:bw:…` va `baholash:` qisqartmalari */
+function sanitizeExpenseTableNote(text: string | null | undefined): string {
+  if (!text) return '';
+  return text
+    .replace(/\s*·\s*ref:bw:[a-z0-9]+/gi, '')
+    .replace(/\bbaholash:\s*/gi, 'Kg narxi: ')
+    .trim();
 }
 
 function isElectricityCategory(c: ExpenseCategory) {
@@ -182,7 +216,7 @@ export function Expenses() {
       categoryStats.map((row, i) => ({
         name: row.name,
         value: row.amount,
-        color: EXPENSE_CATEGORY_CHART_HEX[i % EXPENSE_CATEGORY_CHART_HEX.length],
+        color: chartHexForCategory(row.id, i),
       })),
     [categoryStats],
   );
@@ -281,14 +315,13 @@ export function Expenses() {
           </div>
         ) : (
           categoryStats.slice(0, 8).map((row) => {
-            const si = styleIndex(row.id);
             return (
               <div
                 key={row.id}
                 className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm"
               >
                 <div
-                  className={`inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg font-medium mb-3 ${BADGE_STYLES[si]}`}
+                  className={`inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg font-medium mb-3 ${expenseCategoryBadgeClass(row.id)}`}
                 >
                   {row.name}
                 </div>
@@ -317,7 +350,7 @@ export function Expenses() {
               return pct > 0 ? (
                 <div
                   key={row.id}
-                  className={CHART_BAR[i % CHART_BAR.length]}
+                  className={chartBarClassForCategory(row.id, i)}
                   style={{ width: `${pct}%` }}
                   title={`${row.name}: ${formatCurrency(row.amount)}`}
                 />
@@ -329,7 +362,7 @@ export function Expenses() {
             const pct = totalForStats > 0 ? ((row.amount / totalForStats) * 100).toFixed(0) : '0';
             return (
               <div key={row.id} className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${CHART_BAR[i % CHART_BAR.length]}`} />
+                <div className={`w-2 h-2 rounded-full ${chartBarClassForCategory(row.id, i)}`} />
                 <span className="text-xs text-slate-600 dark:text-slate-300">
                   {row.name}: {pct}% ({formatCurrency(row.amount)})
                 </span>
@@ -408,7 +441,7 @@ export function Expenses() {
                           <td className="hidden px-3 py-2 md:table-cell">
                             <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                               <div
-                                className={`h-full ${CHART_BAR[idx % CHART_BAR.length]}`}
+                                className={`h-full ${chartBarClassForCategory(row.id, idx)}`}
                                 style={{ width: `${Math.min(100, pct)}%` }}
                               />
                             </div>
@@ -661,7 +694,6 @@ export function Expenses() {
             </form>
             <ul className="space-y-2">
               {categories.map((c) => {
-                const si = styleIndex(c.id);
                 return (
                   <li
                     key={c.id}
@@ -691,7 +723,7 @@ export function Expenses() {
                       </>
                     ) : (
                       <>
-                        <span className={`text-xs px-2 py-1 rounded-lg font-medium flex-1 ${BADGE_STYLES[si]}`}>
+                        <span className={`text-xs px-2 py-1 rounded-lg font-medium flex-1 ${expenseCategoryBadgeClass(c.id)}`}>
                           {labelExpenseCategory(c.id, c.name, t)}
                         </span>
                         <button
@@ -747,7 +779,6 @@ export function Expenses() {
                 </thead>
                 <tbody>
                   {filteredExpenses.map((expense, idx) => {
-                    const si = styleIndex(expense.categoryId || expense.id);
                     const isElectricity =
                       expense.type === 'electricity' || Boolean(expense.electricityCalc);
                     const dbName = resolveExpenseCategoryNameFromState(
@@ -758,9 +789,10 @@ export function Expenses() {
                     const categoryLabel = isElectricity
                       ? t.exElectricity
                       : labelExpenseCategory(expense.categoryId, dbName, t);
-                    const noteText = expense.sourceShiftId
+                    const rawNote = expense.sourceShiftId
                       ? formatShiftExpenseTableNote(expense.description, t)
                       : expense.description;
+                    const noteText = sanitizeExpenseTableNote(rawNote);
                     return (
                       <tr
                         key={expense.id}
@@ -768,7 +800,9 @@ export function Expenses() {
                       >
                         <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{formatDate(expense.date)}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${BADGE_STYLES[si]}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${expenseCategoryBadgeClass(expense.categoryId || expense.id)}`}
+                          >
                             {categoryLabel}
                           </span>
                         </td>

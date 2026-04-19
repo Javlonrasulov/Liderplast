@@ -24,9 +24,9 @@ function getPresetRange(preset: DatePreset): { from: string; to: string } {
     monday.setDate(anchor.getDate() - ((anchor.getDay() + 6) % 7));
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    let from = toLocalDateString(monday);
-    let to = toLocalDateString(sunday);
-    if (to > TODAY) to = TODAY;
+    const from = toLocalDateString(monday);
+    const to = toLocalDateString(sunday);
+    /** Hafta/oy — to‘liq kalendar oralig‘i; kelajak sanali xarajatlar ham ko‘rinsin (masalan qop chiqimi). */
     if (from > TODAY) return { from: TODAY, to: TODAY };
     return { from, to };
   }
@@ -34,10 +34,10 @@ function getPresetRange(preset: DatePreset): { from: string; to: string } {
   if (preset === 'month') {
     const firstDay = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
     const lastDay = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
-    let from = toLocalDateString(firstDay);
-    let to = toLocalDateString(lastDay);
-    if (to > TODAY) to = TODAY;
-    return { from, to };
+    return {
+      from: toLocalDateString(firstDay),
+      to: toLocalDateString(lastDay),
+    };
   }
 
   // 'all' and 'custom' default

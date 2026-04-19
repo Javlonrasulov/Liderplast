@@ -1865,7 +1865,7 @@ async function loadStateFromApi() {
 
   const mappedExpenses: Expense[] = expenses.map((expense) => ({
     id: expense.id,
-    date: expense.incurredAt.slice(0, 10),
+    date: toLocalDateString(expense.incurredAt),
     type: expense.type.toLowerCase() as Expense['type'],
     categoryId: expense.categoryId ?? '',
     categoryName: expense.category?.name ?? legacyExpenseLabel[expense.type],

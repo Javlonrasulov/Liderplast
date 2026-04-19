@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { Prisma } from '../../generated/prisma/client.js';
@@ -9,9 +11,14 @@ import {
   BagAuditActionType,
   BagStatus,
   EntityStatus,
+  ExpenseType,
   InventoryItemType,
   MovementType,
+  RawMaterialOrderStatus,
 } from '../../generated/prisma/enums.js';
+
+/** Finance seed — qop chiqimi (tashqi buyurtma emas) */
+const RAW_MATERIAL_BAG_WRITEOFF_CATEGORY_ID = 'expseed_raw_material_bag_writeoff';
 import { RealtimeGateway } from '../../socket/realtime.gateway.js';
 import {
   ConnectBagDto,
@@ -24,6 +31,15 @@ import { UpdateBagDto } from './dto/update-bag.dto.js';
 import { WriteoffBagDto } from './dto/writeoff-bag.dto.js';
 
 type Tx = Prisma.TransactionClient;
+
+/** UI/DBda ko‘rinadigan qop nomi — ichki `cuid` o‘rniga qisqa belgi */
+function formatBagLabelForExpenseDescription(bagName: string, bagId: string): string {
+  const t = bagName?.trim() ?? '';
+  if (t && !/^c[a-z0-9_-]{12,}$/i.test(t)) {
+    return t;
+  }
+  return `Qop №…${bagId.slice(-4)}`;
+}
 
 type ConsumeBagParams = {
   rawMaterialId: string;
@@ -38,11 +54,97 @@ type ConsumeBagParams = {
 };
 
 @Injectable()
-export class RawMaterialBagsService {
+export class RawMaterialBagsService implements OnModuleInit {
+  private readonly logger = new Logger(RawMaterialBagsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
   ) {}
+
+  /** Eski yozuvlar: `BagWriteoff` bor, `Expense` yo‘q yoki bog‘lanmagan — ishga tushganda tiklash */
+  async onModuleInit() {
+    try {
+      await this.backfillBagWriteoffExpenses();
+    } catch (err: unknown) {
+      this.logger.warn(`bag-writeoff expenses backfill failed: ${String(err)}`);
+    }
+  }
+
+  async backfillBagWriteoffExpenses() {
+    const writeoffs = await this.prisma.bagWriteoff.findMany({
+      where: { expenseId: null },
+      include: {
+        bag: { include: { rawMaterial: { select: { id: true, name: true } } } },
+      },
+      orderBy: { writtenOffAt: 'asc' },
+    });
+    if (writeoffs.length === 0) {
+      return;
+    }
+
+    let linked = 0;
+    let created = 0;
+
+    for (const w of writeoffs) {
+      try {
+        const bagName = w.bag.name?.trim() || w.bagId;
+        const windowStart = new Date(w.writtenOffAt.getTime() - 12 * 60 * 60 * 1000);
+        const windowEnd = new Date(w.writtenOffAt.getTime() + 12 * 60 * 60 * 1000);
+        const kgStr = (Math.round(w.remainingQuantityKg * 1000) / 1000).toString();
+
+        const existing = await this.prisma.expense.findFirst({
+          where: {
+            title: { startsWith: 'Qop chiqimi:' },
+            incurredAt: { gte: windowStart, lte: windowEnd },
+            AND: [
+              { description: { contains: w.bag.rawMaterial.name } },
+              { description: { contains: `${kgStr} kg` } },
+            ],
+          },
+          include: { bagWriteoff: true },
+          orderBy: { createdAt: 'asc' },
+        });
+        if (existing && !existing.bagWriteoff) {
+          const taken = await this.prisma.bagWriteoff.findFirst({
+            where: { expenseId: existing.id },
+          });
+          if (!taken) {
+            await this.prisma.bagWriteoff.update({
+              where: { id: w.id },
+              data: { expenseId: existing.id },
+            });
+            linked++;
+            continue;
+          }
+        }
+
+        await this.prisma.$transaction(async (tx) => {
+          const expense = await this.createExpenseForBagWriteoff(tx, {
+            bagId: w.bagId,
+            rawMaterialId: w.bag.rawMaterialId,
+            rawMaterialName: w.bag.rawMaterial.name,
+            bagName,
+            remainingQuantityKg: w.remainingQuantityKg,
+            writtenOffAt: w.writtenOffAt,
+            reason: w.reason ?? undefined,
+            createdById: w.createdById ?? undefined,
+          });
+          await tx.bagWriteoff.update({
+            where: { id: w.id },
+            data: { expenseId: expense.id },
+          });
+        });
+        created++;
+      } catch (err) {
+        this.logger.warn(`bag-writeoff backfill skip ${w.id}: ${String(err)}`);
+      }
+    }
+
+    if (linked + created > 0) {
+      this.logger.log(`bag-writeoff expenses backfill: linked=${linked} created=${created}`);
+    }
+  }
 
   getBags(query: ListBagsDto) {
     return this.prisma.rawMaterialBag.findMany({
@@ -759,6 +861,102 @@ export class RawMaterialBagsService {
     });
   }
 
+  /**
+   * So‘mdagi kg narxi — avvalo oxirgi etib kelgan buyurtma, bo‘lmasa
+   * shu xom ashyo bo‘yicha oxirgi kiritilgan (hali PENDING) tashqi buyurtma.
+   */
+  private async resolvePurchaseCostPerKgUzs(
+    tx: Tx,
+    rawMaterialId: string,
+  ): Promise<{ perKg: number | null; source: 'fulfilled' | 'pending' | null }> {
+    const fulfilled = await tx.rawMaterialPurchaseOrder.findFirst({
+      where: {
+        rawMaterialId,
+        status: RawMaterialOrderStatus.FULFILLED,
+        quantityKg: { gt: 0 },
+        amountUzs: { gt: 0 },
+      },
+      orderBy: [{ fulfilledAt: 'desc' }, { orderedAt: 'desc' }],
+    });
+    if (fulfilled) {
+      const perKg = fulfilled.amountUzs / fulfilled.quantityKg;
+      if (Number.isFinite(perKg) && perKg > 0) {
+        return { perKg, source: 'fulfilled' };
+      }
+    }
+    const pending = await tx.rawMaterialPurchaseOrder.findFirst({
+      where: {
+        rawMaterialId,
+        status: RawMaterialOrderStatus.PENDING,
+        quantityKg: { gt: 0 },
+        amountUzs: { gt: 0 },
+      },
+      orderBy: { orderedAt: 'desc' },
+    });
+    if (pending) {
+      const perKg = pending.amountUzs / pending.quantityKg;
+      if (Number.isFinite(perKg) && perKg > 0) {
+        return { perKg, source: 'pending' };
+      }
+    }
+    return { perKg: null, source: null };
+  }
+
+  private async createExpenseForBagWriteoff(
+    tx: Tx,
+    params: {
+      bagId: string;
+      rawMaterialId: string;
+      rawMaterialName: string;
+      bagName: string;
+      remainingQuantityKg: number;
+      writtenOffAt: Date;
+      reason?: string;
+      createdById?: string;
+    },
+  ): Promise<{ id: string }> {
+    const category = await tx.expenseCategory.findFirst({
+      where: { id: RAW_MATERIAL_BAG_WRITEOFF_CATEGORY_ID, deletedAt: null },
+    });
+    const { perKg: costPerKg, source: costSource } = await this.resolvePurchaseCostPerKgUzs(
+      tx,
+      params.rawMaterialId,
+    );
+    const amountUzs =
+      costPerKg != null
+        ? Math.round(costPerKg * params.remainingQuantityKg * 100) / 100
+        : 0;
+
+    const kgStr = (Math.round(params.remainingQuantityKg * 1000) / 1000).toString();
+    const bagLine = formatBagLabelForExpenseDescription(params.bagName, params.bagId);
+    const costHint =
+      costPerKg != null
+        ? costSource === 'fulfilled'
+          ? `Kg narxi: ${(Math.round(costPerKg * 100) / 100).toString()} so'm (oxirgi etib kelgan buyurtma bo'yicha)`
+          : `Kg narxi: ${(Math.round(costPerKg * 100) / 100).toString()} so'm (tashqi buyurtma, hali omborga kelmagan)`
+        : "Tashqi buyurtma bo'yicha kg narxi topilmadi — 0 so'm";
+    const descParts = [
+      `${params.rawMaterialName} — ${kgStr} kg chiqim`,
+      `Qop: ${bagLine}`,
+      costHint,
+      params.reason?.trim() ? `Sabab: ${params.reason.trim()}` : null,
+    ].filter(Boolean) as string[];
+
+    return tx.expense.create({
+      data: {
+        title: `Qop chiqimi: ${params.rawMaterialName}`,
+        type: category?.legacyExpenseType ?? ExpenseType.OTHER,
+        categoryId: category?.id ?? null,
+        amount: amountUzs,
+        description: descParts.join(' · '),
+        incurredAt: params.writtenOffAt,
+        status: EntityStatus.COMPLETED,
+        createdById: params.createdById ?? null,
+      },
+      select: { id: true },
+    });
+  }
+
   private async applyWriteoff(
     tx: Tx,
     params: {
@@ -774,6 +972,14 @@ export class RawMaterialBagsService {
       movementNote: string;
     },
   ) {
+    const bagMeta = await tx.rawMaterialBag.findUnique({
+      where: { id: params.bagId },
+      include: { rawMaterial: { select: { name: true } } },
+    });
+    if (!bagMeta) {
+      throw new NotFoundException('Bag not found');
+    }
+
     const balance = await this.getRawMaterialBalance(tx, params.rawMaterialId);
     if (balance.quantity + 0.0001 < params.remainingQuantityKg) {
       throw new BadRequestException('Raw material stock is insufficient for writeoff');
@@ -813,7 +1019,7 @@ export class RawMaterialBagsService {
       },
     });
 
-    await tx.bagWriteoff.create({
+    const writeoff = await tx.bagWriteoff.create({
       data: {
         bagId: params.bagId,
         initialQuantityKg: params.initialQuantityKg,
@@ -824,6 +1030,22 @@ export class RawMaterialBagsService {
         reason: params.reason?.trim() || null,
         createdById: params.createdById,
       },
+    });
+
+    const expense = await this.createExpenseForBagWriteoff(tx, {
+      bagId: params.bagId,
+      rawMaterialId: params.rawMaterialId,
+      rawMaterialName: bagMeta.rawMaterial.name,
+      bagName: bagMeta.name?.trim() || params.bagId,
+      remainingQuantityKg: params.remainingQuantityKg,
+      writtenOffAt: params.writtenOffAt,
+      reason: params.reason,
+      createdById: params.createdById,
+    });
+
+    await tx.bagWriteoff.update({
+      where: { id: writeoff.id },
+      data: { expenseId: expense.id },
     });
 
     await this.createAuditLog(tx, {

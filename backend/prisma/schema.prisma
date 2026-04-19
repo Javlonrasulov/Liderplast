@@ -418,6 +418,9 @@ model BagWriteoff {
   createdAt         DateTime       @default(now())
   createdById       String?
   createdBy         User?          @relation("BagWriteoffCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  /// Qop chiqimi bo‘yicha `Expense` (xarajatlar sahifasi)
+  expenseId         String?        @unique
+  expense           Expense?       @relation(fields: [expenseId], references: [id], onDelete: SetNull)
 
   @@index([bagId])
   @@index([writtenOffAt])
@@ -584,6 +587,7 @@ model Expense {
   sourceShiftId String?        @unique
   sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
   rawMaterialPurchaseOrder RawMaterialPurchaseOrder?
+  bagWriteoff              BagWriteoff?
 }
 
 /// Buxgalteriyada berilgan xom ashyo tashqi buyurtmasi (ombor kirimi alohida)

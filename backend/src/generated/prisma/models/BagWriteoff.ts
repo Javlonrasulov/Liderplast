@@ -47,6 +47,7 @@ export type BagWriteoffMinAggregateOutputType = {
   writtenOffAt: Date | null
   createdAt: Date | null
   createdById: string | null
+  expenseId: string | null
 }
 
 export type BagWriteoffMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type BagWriteoffMaxAggregateOutputType = {
   writtenOffAt: Date | null
   createdAt: Date | null
   createdById: string | null
+  expenseId: string | null
 }
 
 export type BagWriteoffCountAggregateOutputType = {
@@ -73,6 +75,7 @@ export type BagWriteoffCountAggregateOutputType = {
   writtenOffAt: number
   createdAt: number
   createdById: number
+  expenseId: number
   _all: number
 }
 
@@ -98,6 +101,7 @@ export type BagWriteoffMinAggregateInputType = {
   writtenOffAt?: true
   createdAt?: true
   createdById?: true
+  expenseId?: true
 }
 
 export type BagWriteoffMaxAggregateInputType = {
@@ -111,6 +115,7 @@ export type BagWriteoffMaxAggregateInputType = {
   writtenOffAt?: true
   createdAt?: true
   createdById?: true
+  expenseId?: true
 }
 
 export type BagWriteoffCountAggregateInputType = {
@@ -124,6 +129,7 @@ export type BagWriteoffCountAggregateInputType = {
   writtenOffAt?: true
   createdAt?: true
   createdById?: true
+  expenseId?: true
   _all?: true
 }
 
@@ -224,6 +230,7 @@ export type BagWriteoffGroupByOutputType = {
   writtenOffAt: Date
   createdAt: Date
   createdById: string | null
+  expenseId: string | null
   _count: BagWriteoffCountAggregateOutputType | null
   _avg: BagWriteoffAvgAggregateOutputType | null
   _sum: BagWriteoffSumAggregateOutputType | null
@@ -260,8 +267,10 @@ export type BagWriteoffWhereInput = {
   writtenOffAt?: Prisma.DateTimeFilter<"BagWriteoff"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"BagWriteoff"> | Date | string
   createdById?: Prisma.StringNullableFilter<"BagWriteoff"> | string | null
+  expenseId?: Prisma.StringNullableFilter<"BagWriteoff"> | string | null
   bag?: Prisma.XOR<Prisma.RawMaterialBagScalarRelationFilter, Prisma.RawMaterialBagWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  expense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
 }
 
 export type BagWriteoffOrderByWithRelationInput = {
@@ -275,12 +284,15 @@ export type BagWriteoffOrderByWithRelationInput = {
   writtenOffAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  expenseId?: Prisma.SortOrderInput | Prisma.SortOrder
   bag?: Prisma.RawMaterialBagOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
+  expense?: Prisma.ExpenseOrderByWithRelationInput
 }
 
 export type BagWriteoffWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  expenseId?: string
   AND?: Prisma.BagWriteoffWhereInput | Prisma.BagWriteoffWhereInput[]
   OR?: Prisma.BagWriteoffWhereInput[]
   NOT?: Prisma.BagWriteoffWhereInput | Prisma.BagWriteoffWhereInput[]
@@ -295,7 +307,8 @@ export type BagWriteoffWhereUniqueInput = Prisma.AtLeast<{
   createdById?: Prisma.StringNullableFilter<"BagWriteoff"> | string | null
   bag?: Prisma.XOR<Prisma.RawMaterialBagScalarRelationFilter, Prisma.RawMaterialBagWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-}, "id">
+  expense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
+}, "id" | "expenseId">
 
 export type BagWriteoffOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -308,6 +321,7 @@ export type BagWriteoffOrderByWithAggregationInput = {
   writtenOffAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  expenseId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.BagWriteoffCountOrderByAggregateInput
   _avg?: Prisma.BagWriteoffAvgOrderByAggregateInput
   _max?: Prisma.BagWriteoffMaxOrderByAggregateInput
@@ -329,6 +343,7 @@ export type BagWriteoffScalarWhereWithAggregatesInput = {
   writtenOffAt?: Prisma.DateTimeWithAggregatesFilter<"BagWriteoff"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BagWriteoff"> | Date | string
   createdById?: Prisma.StringNullableWithAggregatesFilter<"BagWriteoff"> | string | null
+  expenseId?: Prisma.StringNullableWithAggregatesFilter<"BagWriteoff"> | string | null
 }
 
 export type BagWriteoffCreateInput = {
@@ -342,6 +357,7 @@ export type BagWriteoffCreateInput = {
   createdAt?: Date | string
   bag: Prisma.RawMaterialBagCreateNestedOneWithoutWriteoffsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutBagWriteoffsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBagWriteoffInput
 }
 
 export type BagWriteoffUncheckedCreateInput = {
@@ -355,6 +371,7 @@ export type BagWriteoffUncheckedCreateInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   createdById?: string | null
+  expenseId?: string | null
 }
 
 export type BagWriteoffUpdateInput = {
@@ -368,6 +385,7 @@ export type BagWriteoffUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bag?: Prisma.RawMaterialBagUpdateOneRequiredWithoutWriteoffsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutBagWriteoffsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBagWriteoffNestedInput
 }
 
 export type BagWriteoffUncheckedUpdateInput = {
@@ -381,6 +399,7 @@ export type BagWriteoffUncheckedUpdateInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type BagWriteoffCreateManyInput = {
@@ -394,6 +413,7 @@ export type BagWriteoffCreateManyInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   createdById?: string | null
+  expenseId?: string | null
 }
 
 export type BagWriteoffUpdateManyMutationInput = {
@@ -418,6 +438,7 @@ export type BagWriteoffUncheckedUpdateManyInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type BagWriteoffListRelationFilter = {
@@ -441,6 +462,7 @@ export type BagWriteoffCountOrderByAggregateInput = {
   writtenOffAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
 }
 
 export type BagWriteoffAvgOrderByAggregateInput = {
@@ -459,6 +481,7 @@ export type BagWriteoffMaxOrderByAggregateInput = {
   writtenOffAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
 }
 
 export type BagWriteoffMinOrderByAggregateInput = {
@@ -472,11 +495,17 @@ export type BagWriteoffMinOrderByAggregateInput = {
   writtenOffAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
 }
 
 export type BagWriteoffSumOrderByAggregateInput = {
   initialQuantityKg?: Prisma.SortOrder
   remainingQuantityKg?: Prisma.SortOrder
+}
+
+export type BagWriteoffNullableScalarRelationFilter = {
+  is?: Prisma.BagWriteoffWhereInput | null
+  isNot?: Prisma.BagWriteoffWhereInput | null
 }
 
 export type BagWriteoffCreateNestedManyWithoutCreatedByInput = {
@@ -563,6 +592,38 @@ export type BagWriteoffUncheckedUpdateManyWithoutBagNestedInput = {
   deleteMany?: Prisma.BagWriteoffScalarWhereInput | Prisma.BagWriteoffScalarWhereInput[]
 }
 
+export type BagWriteoffCreateNestedOneWithoutExpenseInput = {
+  create?: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BagWriteoffCreateOrConnectWithoutExpenseInput
+  connect?: Prisma.BagWriteoffWhereUniqueInput
+}
+
+export type BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput = {
+  create?: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BagWriteoffCreateOrConnectWithoutExpenseInput
+  connect?: Prisma.BagWriteoffWhereUniqueInput
+}
+
+export type BagWriteoffUpdateOneWithoutExpenseNestedInput = {
+  create?: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BagWriteoffCreateOrConnectWithoutExpenseInput
+  upsert?: Prisma.BagWriteoffUpsertWithoutExpenseInput
+  disconnect?: Prisma.BagWriteoffWhereInput | boolean
+  delete?: Prisma.BagWriteoffWhereInput | boolean
+  connect?: Prisma.BagWriteoffWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BagWriteoffUpdateToOneWithWhereWithoutExpenseInput, Prisma.BagWriteoffUpdateWithoutExpenseInput>, Prisma.BagWriteoffUncheckedUpdateWithoutExpenseInput>
+}
+
+export type BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput = {
+  create?: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BagWriteoffCreateOrConnectWithoutExpenseInput
+  upsert?: Prisma.BagWriteoffUpsertWithoutExpenseInput
+  disconnect?: Prisma.BagWriteoffWhereInput | boolean
+  delete?: Prisma.BagWriteoffWhereInput | boolean
+  connect?: Prisma.BagWriteoffWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BagWriteoffUpdateToOneWithWhereWithoutExpenseInput, Prisma.BagWriteoffUpdateWithoutExpenseInput>, Prisma.BagWriteoffUncheckedUpdateWithoutExpenseInput>
+}
+
 export type BagWriteoffCreateWithoutCreatedByInput = {
   id?: string
   initialQuantityKg: number
@@ -573,6 +634,7 @@ export type BagWriteoffCreateWithoutCreatedByInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   bag: Prisma.RawMaterialBagCreateNestedOneWithoutWriteoffsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBagWriteoffInput
 }
 
 export type BagWriteoffUncheckedCreateWithoutCreatedByInput = {
@@ -585,6 +647,7 @@ export type BagWriteoffUncheckedCreateWithoutCreatedByInput = {
   reason?: string | null
   writtenOffAt?: Date | string
   createdAt?: Date | string
+  expenseId?: string | null
 }
 
 export type BagWriteoffCreateOrConnectWithoutCreatedByInput = {
@@ -627,6 +690,7 @@ export type BagWriteoffScalarWhereInput = {
   writtenOffAt?: Prisma.DateTimeFilter<"BagWriteoff"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"BagWriteoff"> | Date | string
   createdById?: Prisma.StringNullableFilter<"BagWriteoff"> | string | null
+  expenseId?: Prisma.StringNullableFilter<"BagWriteoff"> | string | null
 }
 
 export type BagWriteoffCreateWithoutBagInput = {
@@ -639,6 +703,7 @@ export type BagWriteoffCreateWithoutBagInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutBagWriteoffsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBagWriteoffInput
 }
 
 export type BagWriteoffUncheckedCreateWithoutBagInput = {
@@ -651,6 +716,7 @@ export type BagWriteoffUncheckedCreateWithoutBagInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   createdById?: string | null
+  expenseId?: string | null
 }
 
 export type BagWriteoffCreateOrConnectWithoutBagInput = {
@@ -679,6 +745,74 @@ export type BagWriteoffUpdateManyWithWhereWithoutBagInput = {
   data: Prisma.XOR<Prisma.BagWriteoffUpdateManyMutationInput, Prisma.BagWriteoffUncheckedUpdateManyWithoutBagInput>
 }
 
+export type BagWriteoffCreateWithoutExpenseInput = {
+  id?: string
+  initialQuantityKg: number
+  remainingQuantityKg: number
+  connectedAt?: Date | string | null
+  disconnectedAt?: Date | string | null
+  reason?: string | null
+  writtenOffAt?: Date | string
+  createdAt?: Date | string
+  bag: Prisma.RawMaterialBagCreateNestedOneWithoutWriteoffsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutBagWriteoffsInput
+}
+
+export type BagWriteoffUncheckedCreateWithoutExpenseInput = {
+  id?: string
+  bagId: string
+  initialQuantityKg: number
+  remainingQuantityKg: number
+  connectedAt?: Date | string | null
+  disconnectedAt?: Date | string | null
+  reason?: string | null
+  writtenOffAt?: Date | string
+  createdAt?: Date | string
+  createdById?: string | null
+}
+
+export type BagWriteoffCreateOrConnectWithoutExpenseInput = {
+  where: Prisma.BagWriteoffWhereUniqueInput
+  create: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+}
+
+export type BagWriteoffUpsertWithoutExpenseInput = {
+  update: Prisma.XOR<Prisma.BagWriteoffUpdateWithoutExpenseInput, Prisma.BagWriteoffUncheckedUpdateWithoutExpenseInput>
+  create: Prisma.XOR<Prisma.BagWriteoffCreateWithoutExpenseInput, Prisma.BagWriteoffUncheckedCreateWithoutExpenseInput>
+  where?: Prisma.BagWriteoffWhereInput
+}
+
+export type BagWriteoffUpdateToOneWithWhereWithoutExpenseInput = {
+  where?: Prisma.BagWriteoffWhereInput
+  data: Prisma.XOR<Prisma.BagWriteoffUpdateWithoutExpenseInput, Prisma.BagWriteoffUncheckedUpdateWithoutExpenseInput>
+}
+
+export type BagWriteoffUpdateWithoutExpenseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  initialQuantityKg?: Prisma.FloatFieldUpdateOperationsInput | number
+  remainingQuantityKg?: Prisma.FloatFieldUpdateOperationsInput | number
+  connectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bag?: Prisma.RawMaterialBagUpdateOneRequiredWithoutWriteoffsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutBagWriteoffsNestedInput
+}
+
+export type BagWriteoffUncheckedUpdateWithoutExpenseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bagId?: Prisma.StringFieldUpdateOperationsInput | string
+  initialQuantityKg?: Prisma.FloatFieldUpdateOperationsInput | number
+  remainingQuantityKg?: Prisma.FloatFieldUpdateOperationsInput | number
+  connectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 export type BagWriteoffCreateManyCreatedByInput = {
   id?: string
   bagId: string
@@ -689,6 +823,7 @@ export type BagWriteoffCreateManyCreatedByInput = {
   reason?: string | null
   writtenOffAt?: Date | string
   createdAt?: Date | string
+  expenseId?: string | null
 }
 
 export type BagWriteoffUpdateWithoutCreatedByInput = {
@@ -701,6 +836,7 @@ export type BagWriteoffUpdateWithoutCreatedByInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bag?: Prisma.RawMaterialBagUpdateOneRequiredWithoutWriteoffsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBagWriteoffNestedInput
 }
 
 export type BagWriteoffUncheckedUpdateWithoutCreatedByInput = {
@@ -713,6 +849,7 @@ export type BagWriteoffUncheckedUpdateWithoutCreatedByInput = {
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type BagWriteoffUncheckedUpdateManyWithoutCreatedByInput = {
@@ -725,6 +862,7 @@ export type BagWriteoffUncheckedUpdateManyWithoutCreatedByInput = {
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type BagWriteoffCreateManyBagInput = {
@@ -737,6 +875,7 @@ export type BagWriteoffCreateManyBagInput = {
   writtenOffAt?: Date | string
   createdAt?: Date | string
   createdById?: string | null
+  expenseId?: string | null
 }
 
 export type BagWriteoffUpdateWithoutBagInput = {
@@ -749,6 +888,7 @@ export type BagWriteoffUpdateWithoutBagInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutBagWriteoffsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBagWriteoffNestedInput
 }
 
 export type BagWriteoffUncheckedUpdateWithoutBagInput = {
@@ -761,6 +901,7 @@ export type BagWriteoffUncheckedUpdateWithoutBagInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type BagWriteoffUncheckedUpdateManyWithoutBagInput = {
@@ -773,6 +914,7 @@ export type BagWriteoffUncheckedUpdateManyWithoutBagInput = {
   writtenOffAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -788,8 +930,10 @@ export type BagWriteoffSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   writtenOffAt?: boolean
   createdAt?: boolean
   createdById?: boolean
+  expenseId?: boolean
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }, ExtArgs["result"]["bagWriteoff"]>
 
 export type BagWriteoffSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -803,8 +947,10 @@ export type BagWriteoffSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   writtenOffAt?: boolean
   createdAt?: boolean
   createdById?: boolean
+  expenseId?: boolean
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }, ExtArgs["result"]["bagWriteoff"]>
 
 export type BagWriteoffSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -818,8 +964,10 @@ export type BagWriteoffSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   writtenOffAt?: boolean
   createdAt?: boolean
   createdById?: boolean
+  expenseId?: boolean
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }, ExtArgs["result"]["bagWriteoff"]>
 
 export type BagWriteoffSelectScalar = {
@@ -833,20 +981,24 @@ export type BagWriteoffSelectScalar = {
   writtenOffAt?: boolean
   createdAt?: boolean
   createdById?: boolean
+  expenseId?: boolean
 }
 
-export type BagWriteoffOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bagId" | "initialQuantityKg" | "remainingQuantityKg" | "connectedAt" | "disconnectedAt" | "reason" | "writtenOffAt" | "createdAt" | "createdById", ExtArgs["result"]["bagWriteoff"]>
+export type BagWriteoffOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bagId" | "initialQuantityKg" | "remainingQuantityKg" | "connectedAt" | "disconnectedAt" | "reason" | "writtenOffAt" | "createdAt" | "createdById" | "expenseId", ExtArgs["result"]["bagWriteoff"]>
 export type BagWriteoffInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }
 export type BagWriteoffIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }
 export type BagWriteoffIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bag?: boolean | Prisma.RawMaterialBagDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.BagWriteoff$createdByArgs<ExtArgs>
+  expense?: boolean | Prisma.BagWriteoff$expenseArgs<ExtArgs>
 }
 
 export type $BagWriteoffPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -854,6 +1006,7 @@ export type $BagWriteoffPayload<ExtArgs extends runtime.Types.Extensions.Interna
   objects: {
     bag: Prisma.$RawMaterialBagPayload<ExtArgs>
     createdBy: Prisma.$UserPayload<ExtArgs> | null
+    expense: Prisma.$ExpensePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -866,6 +1019,10 @@ export type $BagWriteoffPayload<ExtArgs extends runtime.Types.Extensions.Interna
     writtenOffAt: Date
     createdAt: Date
     createdById: string | null
+    /**
+     * Qop chiqimi bo‘yicha `Expense` (xarajatlar sahifasi)
+     */
+    expenseId: string | null
   }, ExtArgs["result"]["bagWriteoff"]>
   composites: {}
 }
@@ -1262,6 +1419,7 @@ export interface Prisma__BagWriteoffClient<T, Null = never, ExtArgs extends runt
   readonly [Symbol.toStringTag]: "PrismaPromise"
   bag<T extends Prisma.RawMaterialBagDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RawMaterialBagDefaultArgs<ExtArgs>>): Prisma.Prisma__RawMaterialBagClient<runtime.Types.Result.GetResult<Prisma.$RawMaterialBagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.BagWriteoff$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BagWriteoff$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  expense<T extends Prisma.BagWriteoff$expenseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BagWriteoff$expenseArgs<ExtArgs>>): Prisma.Prisma__ExpenseClient<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1301,6 +1459,7 @@ export interface BagWriteoffFieldRefs {
   readonly writtenOffAt: Prisma.FieldRef<"BagWriteoff", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"BagWriteoff", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"BagWriteoff", 'String'>
+  readonly expenseId: Prisma.FieldRef<"BagWriteoff", 'String'>
 }
     
 
@@ -1718,6 +1877,25 @@ export type BagWriteoff$createdByArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * BagWriteoff.expense
+ */
+export type BagWriteoff$expenseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseInclude<ExtArgs> | null
+  where?: Prisma.ExpenseWhereInput
 }
 
 /**

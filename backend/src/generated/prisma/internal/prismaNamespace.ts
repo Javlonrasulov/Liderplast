@@ -3221,7 +3221,8 @@ export const BagWriteoffScalarFieldEnum = {
   reason: 'reason',
   writtenOffAt: 'writtenOffAt',
   createdAt: 'createdAt',
-  createdById: 'createdById'
+  createdById: 'createdById',
+  expenseId: 'expenseId'
 } as const
 
 export type BagWriteoffScalarFieldEnum = (typeof BagWriteoffScalarFieldEnum)[keyof typeof BagWriteoffScalarFieldEnum]
