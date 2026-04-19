@@ -11,11 +11,9 @@ import {
   BankVedomostStatus,
   EmployeeRateType,
   EntityStatus,
-  ExpenseType,
   Role,
   SalaryType,
 } from '../../generated/prisma/enums.js';
-import { CreateEmployeeProductionDto } from './dto/create-employee-production.dto.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
@@ -320,41 +318,6 @@ export class FinanceService {
   }
 
   /**
-   * Smena-elektr xarajati kategoriyasi bo‘lmasa, avtomatik yaratiladi; aks holda hech
-   * qanday `Expense` yozilmay, xarajatlar ro‘yxatida smena yansunmay qoladi.
-   */
-  private async ensureElectricityExpenseCategory() {
-    const found = await this.prisma.expenseCategory.findFirst({
-      where: {
-        deletedAt: null,
-        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
-      },
-      orderBy: { createdAt: 'asc' },
-    });
-    if (found) {
-      return found;
-    }
-    this.logger.warn(
-      'No electricity ExpenseCategory — creating default (Elektr energiya). Resyncing shift kWh…',
-    );
-    const created = await this.prisma.expenseCategory.create({
-      data: {
-        name: 'Elektr energiya',
-        legacyExpenseType: ExpenseType.ELECTRICITY,
-        electricityCalc: true,
-      },
-    });
-    void this.resyncAllShiftElectricityExpenses().catch((err) =>
-      this.logger.warn(
-        `resync after default electricity category: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      ),
-    );
-    return created;
-  }
-
-  /**
    * Smena yozuvidagi kVt·soat × bazadagi narx bo‘yicha elektr kategoriyasiga xarajat
    * (bir smenaga bitta bog‘langan Expense, `sourceShiftId`).
    */
@@ -370,10 +333,19 @@ export class FinanceService {
     const settings = await this.prisma.salarySetting.findFirst();
     const pricePerKwh = settings?.electricityPricePerKwh ?? 800;
 
-    const category = await this.ensureElectricityExpenseCategory();
+    const category = await this.prisma.expenseCategory.findFirst({
+      where: {
+        deletedAt: null,
+        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (!category) {
+      return;
+    }
 
     const kwh = shift.electricityKwh ?? 0;
-    const existing = await this.prisma.expense.findUnique({
+    const existing = await this.prisma.expense.findFirst({
       where: { sourceShiftId: shiftId },
     });
 
@@ -388,18 +360,8 @@ export class FinanceService {
     const workerName = shift.worker?.fullName?.trim() || '—';
     const machineName = shift.machine?.name ?? '—';
     const dateStr = shift.date.toISOString().slice(0, 10);
-    /** Mijoz tilida: frontend `exShiftExpenseNote` — JSON (v1) tafsilotlari */
-    const descPayload = {
-      v: 1 as const,
-      d: dateStr,
-      n: shift.shiftNumber,
-      w: workerName,
-      m: machineName,
-      k: kwh,
-      p: pricePerKwh,
-    };
-    const description = JSON.stringify(descPayload);
-    const title = `Smena·elektr ${dateStr} · ${workerName}`.slice(0, 160);
+    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwh} kVt·soat × ${pricePerKwh} so'm`;
+    const title = description.length >= 2 ? description.slice(0, 160) : 'Smena elektr';
 
     const common = {
       title,
@@ -434,19 +396,6 @@ export class FinanceService {
     for (const row of shifts) {
       await this.syncShiftElectricityExpense(row.id);
     }
-  }
-
-  createEmployeeProduction(dto: CreateEmployeeProductionDto) {
-    return this.prisma.employeeProduction.create({
-      data: {
-        workerId: dto.workerId,
-        productLabel: dto.productLabel,
-        quantity: dto.quantity,
-        rate: dto.rate,
-        totalAmount: dto.quantity * dto.rate,
-        producedAt: new Date(dto.producedAt),
-      },
-    });
   }
 
   getEmployeeProductRates() {
@@ -504,37 +453,6 @@ export class FinanceService {
     return { success: true };
   }
 
-  async deleteEmployeeProduction(id: string) {
-    const item = await this.prisma.employeeProduction.findUnique({
-      where: { id },
-    });
-
-    if (!item) {
-      throw new NotFoundException('Employee production not found');
-    }
-
-    await this.prisma.employeeProduction.delete({
-      where: { id },
-    });
-
-    return { success: true };
-  }
-
-  getEmployeeProductions(currentUserId?: string, currentUserRole?: Role) {
-    return this.prisma.employeeProduction.findMany({
-      where:
-        currentUserRole === Role.WORKER
-          ? { workerId: currentUserId }
-          : undefined,
-      include: {
-        worker: {
-          omit: { passwordHash: true },
-        },
-      },
-      orderBy: { producedAt: 'desc' },
-    });
-  }
-
   async updateSalarySettings(dto: UpdateSalarySettingsDto) {
     const existing = await this.prisma.salarySetting.findFirst();
 
@@ -557,20 +475,31 @@ export class FinanceService {
       });
     }
 
-    return this.prisma.salarySetting.update({
+    const updated = await this.prisma.salarySetting.update({
       where: { id: existing.id },
       data,
     });
+
+    if (dto.electricityPricePerKwh !== undefined) {
+      try {
+        await this.resyncAllShiftElectricityExpenses();
+      } catch (err) {
+        this.logger.warn(
+          `resyncAllShiftElectricityExpenses after salary settings: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+
+    return updated;
   }
 
   /**
    * Xarajatlar sahifasidan: faqat kVt·soat narxi yangilanadi (soliq foizlari DBdagi qiymatda qoladi).
-   * Eski smenaga bog‘langan summalar o‘zgarmaydi; keyingi saqlangan smenalar yangi narxda hisoblanadi.
    */
   async patchElectricityPricePerKwh(electricityPricePerKwh: number) {
     const existing = await this.prisma.salarySetting.findFirst();
     if (!existing) {
-      return this.prisma.salarySetting.create({
+      const created = await this.prisma.salarySetting.create({
         data: {
           incomeTaxPercent: 12,
           otherDeductionPercent: 0,
@@ -579,12 +508,30 @@ export class FinanceService {
           electricityPricePerKwh,
         },
       });
+      try {
+        await this.resyncAllShiftElectricityExpenses();
+      } catch (err) {
+        this.logger.warn(
+          `resyncAllShiftElectricityExpenses after create salary settings: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+      return created;
     }
 
-    return this.prisma.salarySetting.update({
+    const updated = await this.prisma.salarySetting.update({
       where: { id: existing.id },
       data: { electricityPricePerKwh },
     });
+
+    try {
+      await this.resyncAllShiftElectricityExpenses();
+    } catch (err) {
+      this.logger.warn(
+        `resyncAllShiftElectricityExpenses after electricity price patch: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    return updated;
   }
 
   getSalarySettings() {
@@ -997,24 +944,15 @@ export class FinanceService {
     });
 
     for (const worker of workers) {
-      const productions = await this.prisma.employeeProduction.findMany({
+      const shiftsInMonth = await this.prisma.shiftRecord.findMany({
         where: {
           workerId: worker.id,
-          producedAt: {
-            gte: start,
-            lt: end,
-          },
-        },
-      });
-      const shiftRecords = await this.prisma.shiftRecord.findMany({
-        where: {
-          workerId: worker.id,
+          status: EntityStatus.COMPLETED,
           date: {
             gte: start,
             lt: end,
           },
         },
-        select: { producedQty: true, productLabel: true },
       });
       const configuredRates = await this.prisma.employeeProductRate.findMany({
         where: { workerId: worker.id },
@@ -1023,45 +961,27 @@ export class FinanceService {
         configuredRates.map((item) => [item.productLabel, item]),
       );
 
-      const computedProductionAmount = productions.reduce((sum, item) => {
-        const rateConfig = rateMap.get(item.productLabel);
+      const computedProductionAmount = shiftsInMonth.reduce((sum, shift) => {
+        const label = shift.productLabel ?? '';
+        const rateConfig = rateMap.get(label);
+        const qty = shift.producedQty;
         if (!rateConfig) {
-          return sum + item.totalAmount;
+          return sum;
         }
 
         if (rateConfig.rateType === EmployeeRateType.PERCENT) {
           const baseAmount = rateConfig.baseAmount ?? 0;
-          return sum + ((baseAmount * rateConfig.rateValue) / 100) * item.quantity;
+          return sum + ((baseAmount * rateConfig.rateValue) / 100) * qty;
         }
 
-        return sum + rateConfig.rateValue * item.quantity;
+        return sum + rateConfig.rateValue * qty;
       }, 0);
 
-      const shiftProductionAmount = shiftRecords.reduce((sum, rec) => {
-        if (!rec.productLabel) {
-          return sum;
-        }
-        const rateConfig = rateMap.get(rec.productLabel);
-        if (!rateConfig) {
-          return sum;
-        }
-        if (rateConfig.rateType === EmployeeRateType.PERCENT) {
-          const baseAmount = rateConfig.baseAmount ?? 0;
-          return sum + ((baseAmount * rateConfig.rateValue) / 100) * rec.producedQty;
-        }
-        return sum + rateConfig.rateValue * rec.producedQty;
-      }, 0);
-
-      const productionAmount = computedProductionAmount + shiftProductionAmount;
-      const producedFromEmployeeProd = productions.reduce(
-        (sum, item) => sum + item.quantity,
+      const producedQuantity = shiftsInMonth.reduce(
+        (sum, shift) => sum + shift.producedQty,
         0,
       );
-      const producedFromShifts = shiftRecords.reduce(
-        (sum, rec) => sum + rec.producedQty,
-        0,
-      );
-      const producedQuantity = producedFromEmployeeProd + producedFromShifts;
+      const productionAmount = computedProductionAmount;
 
       const brutto =
         worker.salaryType === SalaryType.FIXED

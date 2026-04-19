@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router';
 import {
   LayoutDashboard, Droplets, Boxes,
@@ -34,116 +33,53 @@ const FONT_SIZES: { value: FontSize; label: string; style: string }[] = [
 function LanguageDropdown() {
   const { lang, setLang } = useApp();
   const [open, setOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState<{ top: number; right: number; width: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
-  /** Portal menyusi body da — `ref` ichida emas; yopish tekshiruvi shuni hisobga olishi shart, aks holda mousedown avval, click esa yo‘qoladi */
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const updateMenuPos = useCallback(() => {
-    if (!open || !btnRef.current) return;
-    const r = btnRef.current.getBoundingClientRect();
-    setMenuPos({
-      top: r.bottom + 8,
-      right: window.innerWidth - r.right,
-      width: Math.min(13 * 16, window.innerWidth - 16),
-    });
-  }, [open]);
-
-  useLayoutEffect(() => {
-    updateMenuPos();
-  }, [open, updateMenuPos]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onRe = () => updateMenuPos();
-    window.addEventListener('scroll', onRe, true);
-    window.addEventListener('resize', onRe);
-    return () => {
-      window.removeEventListener('scroll', onRe, true);
-      window.removeEventListener('resize', onRe);
-    };
-  }, [open, updateMenuPos]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const t = e.target as Node;
-      const inTrigger = Boolean(ref.current?.contains(t) || btnRef.current?.contains(t));
-      const inMenu = Boolean(menuRef.current?.contains(t));
-      if (inTrigger || inMenu) return;
-      setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    if (open) {
-      setTimeout(() => document.addEventListener('mousedown', handler, true), 0);
-    }
-    return () => document.removeEventListener('mousedown', handler, true);
-  }, [open]);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const current = LANG_OPTIONS.find(o => o.value === lang)!;
-
-  const menu = open && menuPos && (
-    <div
-      ref={menuRef}
-      className="fixed z-[200] w-[min(13rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/40 overflow-hidden"
-      style={{ top: menuPos.top, right: menuPos.right, width: menuPos.width, maxWidth: 'calc(100vw - 1rem)' }}
-      role="listbox"
-    >
-      {LANG_OPTIONS.map((opt) => (
-        <button
-          type="button"
-          key={opt.value}
-          onClick={() => {
-            setLang(opt.value);
-            setOpen(false);
-          }}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-            lang === opt.value
-              ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-          }`}
-        >
-          <span className="text-base">{opt.flag}</span>
-          <div className="flex-1 text-left">
-            <p className="font-medium leading-tight">{opt.label}</p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{opt.short}</p>
-          </div>
-          {lang === opt.value && <Check size={14} className="text-indigo-500 flex-shrink-0" />}
-        </button>
-      ))}
-    </div>
-  );
+  const current = LANG_OPTIONS.find(o => o.value === lang) ?? LANG_OPTIONS[0];
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative z-[80]" ref={ref}>
       <button
-        ref={btnRef}
         type="button"
-        onClick={() => {
-          setOpen((o) => {
-            if (!o) {
-              setTimeout(() => {
-                if (btnRef.current) {
-                  const r = btnRef.current.getBoundingClientRect();
-                  setMenuPos({
-                    top: r.bottom + 8,
-                    right: window.innerWidth - r.right,
-                    width: Math.min(13 * 16, window.innerWidth - 16),
-                  });
-                }
-              }, 0);
-            }
-            return !o;
-          });
-        }}
+        onClick={() => setOpen(o => !o)}
         className="flex h-9 shrink-0 items-center gap-1 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold text-slate-600 transition-all hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 sm:gap-1.5 sm:px-3"
-        aria-haspopup="listbox"
-        aria-expanded={open}
       >
         <Globe size={14} className="text-slate-400" />
         <span>{current.short}</span>
         <ChevronDown size={12} className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {typeof document !== 'undefined' && open && createPortal(menu, document.body)}
+
+      {open && (
+        <div className="absolute right-0 top-full z-[90] mt-2 w-[min(13rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/40 overflow-hidden">
+          {LANG_OPTIONS.map(opt => (
+            <button
+              type="button"
+              key={opt.value}
+              onClick={() => { setLang(opt.value); setOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                lang === opt.value
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span className="text-base">{opt.flag}</span>
+              <div className="flex-1 text-left">
+                <p className="font-medium leading-tight">{opt.label}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{opt.short}</p>
+              </div>
+              {lang === opt.value && <Check size={14} className="text-indigo-500 flex-shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -370,67 +306,62 @@ export function Layout() {
           </div>
 
           <div className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
-            {/* Date outside overflow-x (no clip). Inner row must not use flex-1 or the group splits: date by title, icons on the right */}
-            <div className="flex min-w-0 max-w-full items-center justify-end gap-1 sm:gap-2">
-            <div className="shrink-0 overflow-visible">
-              <DateFilterPicker />
-            </div>
-
-            {/** overflow-x kichik ekranlarda pastga tushadigan pastki menyularni kesib qo‘yadi — til/profil shu qatordan tashqari */}
-            <div className="flex min-w-0 min-h-0 items-center justify-end gap-1 overflow-x-auto hide-scrollbar sm:gap-2">
             {lowStock && (
-              <div className="hidden items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 dark:border-amber-700 dark:bg-amber-900/20 md:flex">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">{t.layoutMaterialLow}</span>
+              <div className="hidden min-w-0 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 dark:border-amber-700 dark:bg-amber-900/20 md:flex md:max-w-[min(40%,14rem)] md:shrink">
+                <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-amber-500" />
+                <span className="truncate text-xs font-medium text-amber-700 dark:text-amber-400">{t.layoutMaterialLow}</span>
               </div>
             )}
 
-            <button
-              type="button"
-              className="relative shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              <Bell size={16} />
-              {lowStock && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
-            <div className="hidden shrink-0 min-[380px]:block">
-              <FontSizeControl />
-            </div>
-            </div>
-
-            <div className="shrink-0 z-20 overflow-visible">
-              <LanguageDropdown />
-            </div>
-
-            <div className="flex shrink-0 items-center gap-1 border-l border-slate-200 pl-2 dark:border-slate-700 sm:gap-2 sm:pl-3">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600">
-                <User size={12} className="text-white" />
+            {/* Sana + qo'ng'iroqcha yonida; overflow-x-auto yo'q — til/kalendar pastga ochiladigan menyular kesilmasin */}
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
+              <div className="relative z-[70] shrink-0">
+                <DateFilterPicker />
               </div>
-              <div className="hidden min-w-0 max-w-[120px] md:block lg:max-w-[140px]">
-                <p className="truncate text-xs font-medium text-slate-700 dark:text-slate-200" title={user?.fullName}>
-                  {user?.fullName ?? '—'}
-                </p>
-                <p className="truncate text-[10px] text-slate-400">
-                  {user?.role ? `${t.suRole}: ${user.role}` : ''}
-                </p>
-              </div>
+
               <button
                 type="button"
-                onClick={() => void logout()}
-                className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-                title={t.layoutLogout}
+                className="relative shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <LogOut size={16} />
+                <Bell size={16} />
+                {lowStock && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
               </button>
-            </div>
+
+              <button
+                type="button"
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
+              <div className="hidden shrink-0 min-[380px]:block">
+                <FontSizeControl />
+              </div>
+
+              <LanguageDropdown />
+
+              <div className="flex shrink-0 items-center gap-1 border-l border-slate-200 pl-2 dark:border-slate-700 sm:gap-2 sm:pl-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600">
+                  <User size={12} className="text-white" />
+                </div>
+                <div className="hidden min-w-0 max-w-[120px] md:block lg:max-w-[140px]">
+                  <p className="truncate text-xs font-medium text-slate-700 dark:text-slate-200" title={user?.fullName}>
+                    {user?.fullName ?? '—'}
+                  </p>
+                  <p className="truncate text-[10px] text-slate-400">
+                    {user?.role ? `${t.suRole}: ${user.role}` : ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void logout()}
+                  className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                  title={t.layoutLogout}
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             </div>
           </div>
         </header>

@@ -323,7 +323,6 @@ export type UserWhereInput = {
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
-  employeeProductions?: Prisma.EmployeeProductionListRelationFilter
   employeeProductRates?: Prisma.EmployeeProductRateListRelationFilter
   salaryRecords?: Prisma.SalaryRecordListRelationFilter
   createdOrders?: Prisma.OrderListRelationFilter
@@ -359,7 +358,6 @@ export type UserOrderByWithRelationInput = {
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
   productions?: Prisma.ProductionRecordOrderByRelationAggregateInput
   shiftRecords?: Prisma.ShiftRecordOrderByRelationAggregateInput
-  employeeProductions?: Prisma.EmployeeProductionOrderByRelationAggregateInput
   employeeProductRates?: Prisma.EmployeeProductRateOrderByRelationAggregateInput
   salaryRecords?: Prisma.SalaryRecordOrderByRelationAggregateInput
   createdOrders?: Prisma.OrderOrderByRelationAggregateInput
@@ -398,7 +396,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   productions?: Prisma.ProductionRecordListRelationFilter
   shiftRecords?: Prisma.ShiftRecordListRelationFilter
-  employeeProductions?: Prisma.EmployeeProductionListRelationFilter
   employeeProductRates?: Prisma.EmployeeProductRateListRelationFilter
   salaryRecords?: Prisma.SalaryRecordListRelationFilter
   createdOrders?: Prisma.OrderListRelationFilter
@@ -484,7 +481,6 @@ export type UserCreateInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -520,7 +516,6 @@ export type UserUncheckedCreateInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -556,7 +551,6 @@ export type UserUpdateInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -592,7 +586,6 @@ export type UserUncheckedUpdateInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -945,20 +938,6 @@ export type UserUpdateOneWithoutCreatedExpensesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedExpensesInput, Prisma.UserUpdateWithoutCreatedExpensesInput>, Prisma.UserUncheckedUpdateWithoutCreatedExpensesInput>
 }
 
-export type UserCreateNestedOneWithoutEmployeeProductionsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductionsInput, Prisma.UserUncheckedCreateWithoutEmployeeProductionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmployeeProductionsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutEmployeeProductionsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductionsInput, Prisma.UserUncheckedCreateWithoutEmployeeProductionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmployeeProductionsInput
-  upsert?: Prisma.UserUpsertWithoutEmployeeProductionsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmployeeProductionsInput, Prisma.UserUpdateWithoutEmployeeProductionsInput>, Prisma.UserUncheckedUpdateWithoutEmployeeProductionsInput>
-}
-
 export type UserCreateNestedOneWithoutEmployeeProductRatesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductRatesInput, Prisma.UserUncheckedCreateWithoutEmployeeProductRatesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmployeeProductRatesInput
@@ -1056,7 +1035,6 @@ export type UserCreateWithoutRefreshTokensInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1091,7 +1069,6 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1142,7 +1119,6 @@ export type UserUpdateWithoutRefreshTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1177,7 +1153,6 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1213,7 +1188,6 @@ export type UserCreateWithoutInventoryMovementsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1248,7 +1222,6 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1299,7 +1272,6 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1334,7 +1306,6 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1369,7 +1340,6 @@ export type UserCreateWithoutProductAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1404,7 +1374,6 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1455,7 +1424,6 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1490,7 +1458,6 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1525,7 +1492,6 @@ export type UserCreateWithoutBagWriteoffsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1560,7 +1526,6 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1611,7 +1576,6 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1646,7 +1610,6 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1681,7 +1644,6 @@ export type UserCreateWithoutBagAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1716,7 +1678,6 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1767,7 +1728,6 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1802,7 +1762,6 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1836,7 +1795,6 @@ export type UserCreateWithoutProductionsInput = {
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -1871,7 +1829,6 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1922,7 +1879,6 @@ export type UserUpdateWithoutProductionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -1957,7 +1913,6 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1992,7 +1947,6 @@ export type UserCreateWithoutShiftRecordsInput = {
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -2027,7 +1981,6 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2078,7 +2031,6 @@ export type UserUpdateWithoutShiftRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -2113,7 +2065,6 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2149,7 +2100,6 @@ export type UserCreateWithoutCreatedOrdersInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -2184,7 +2134,6 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2235,7 +2184,6 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -2270,7 +2218,6 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2305,7 +2252,6 @@ export type UserCreateWithoutCreatedExpensesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -2340,7 +2286,6 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2391,7 +2336,6 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -2426,166 +2370,9 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
-  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
-  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
-  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
-  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
-  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
-  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
-  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
-}
-
-export type UserCreateWithoutEmployeeProductionsInput = {
-  id?: string
-  fullName: string
-  phone: string
-  login?: string | null
-  customRoleLabel?: string | null
-  permissions?: Prisma.UserCreatepermissionsInput | string[]
-  canLogin?: boolean
-  passwordHash: string
-  position?: string | null
-  cardNumber?: string | null
-  stir?: string | null
-  role?: $Enums.Role
-  salaryType?: $Enums.SalaryType
-  salaryRate?: number
-  preferredShiftNumber?: number | null
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
-  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
-  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
-  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
-  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
-  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
-  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
-  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
-  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
-  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
-  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
-  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
-  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
-}
-
-export type UserUncheckedCreateWithoutEmployeeProductionsInput = {
-  id?: string
-  fullName: string
-  phone: string
-  login?: string | null
-  customRoleLabel?: string | null
-  permissions?: Prisma.UserCreatepermissionsInput | string[]
-  canLogin?: boolean
-  passwordHash: string
-  position?: string | null
-  cardNumber?: string | null
-  stir?: string | null
-  role?: $Enums.Role
-  salaryType?: $Enums.SalaryType
-  salaryRate?: number
-  preferredShiftNumber?: number | null
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
-  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
-  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
-  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
-  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
-  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
-  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
-  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
-  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
-  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
-  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
-  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
-  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
-}
-
-export type UserCreateOrConnectWithoutEmployeeProductionsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductionsInput, Prisma.UserUncheckedCreateWithoutEmployeeProductionsInput>
-}
-
-export type UserUpsertWithoutEmployeeProductionsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutEmployeeProductionsInput, Prisma.UserUncheckedUpdateWithoutEmployeeProductionsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutEmployeeProductionsInput, Prisma.UserUncheckedCreateWithoutEmployeeProductionsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutEmployeeProductionsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutEmployeeProductionsInput, Prisma.UserUncheckedUpdateWithoutEmployeeProductionsInput>
-}
-
-export type UserUpdateWithoutEmployeeProductionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
-  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  permissions?: Prisma.UserUpdatepermissionsInput | string[]
-  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
-  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
-  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
-  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
-  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
-  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
-  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
-  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
-  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
-  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
-  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
-  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
-  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
-  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
-  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutEmployeeProductionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
-  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  permissions?: Prisma.UserUpdatepermissionsInput | string[]
-  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
-  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
-  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
-  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
-  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
-  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
   uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
   inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
   bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2617,7 +2404,6 @@ export type UserCreateWithoutEmployeeProductRatesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -2652,7 +2438,6 @@ export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2703,7 +2488,6 @@ export type UserUpdateWithoutEmployeeProductRatesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -2738,7 +2522,6 @@ export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2773,7 +2556,6 @@ export type UserCreateWithoutSalaryRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
@@ -2808,7 +2590,6 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
   createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2859,7 +2640,6 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -2894,7 +2674,6 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
   createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2929,7 +2708,6 @@ export type UserCreateWithoutUploadedBankVedomostsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -2964,7 +2742,6 @@ export type UserUncheckedCreateWithoutUploadedBankVedomostsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3015,7 +2792,6 @@ export type UserUpdateWithoutUploadedBankVedomostsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -3050,7 +2826,6 @@ export type UserUncheckedUpdateWithoutUploadedBankVedomostsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3085,7 +2860,6 @@ export type UserCreateWithoutBankTransactionsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -3120,7 +2894,6 @@ export type UserUncheckedCreateWithoutBankTransactionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3171,7 +2944,6 @@ export type UserUpdateWithoutBankTransactionsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -3206,7 +2978,6 @@ export type UserUncheckedUpdateWithoutBankTransactionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3241,7 +3012,6 @@ export type UserCreateWithoutUploadedFilesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
@@ -3276,7 +3046,6 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
   shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedCreateNestedManyWithoutWorkerInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
   salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
   createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3327,7 +3096,6 @@ export type UserUpdateWithoutUploadedFilesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
@@ -3362,7 +3130,6 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
   shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
-  employeeProductions?: Prisma.EmployeeProductionUncheckedUpdateManyWithoutWorkerNestedInput
   employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
   salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
   createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3384,7 +3151,6 @@ export type UserCountOutputType = {
   refreshTokens: number
   productions: number
   shiftRecords: number
-  employeeProductions: number
   employeeProductRates: number
   salaryRecords: number
   createdOrders: number
@@ -3402,7 +3168,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
   productions?: boolean | UserCountOutputTypeCountProductionsArgs
   shiftRecords?: boolean | UserCountOutputTypeCountShiftRecordsArgs
-  employeeProductions?: boolean | UserCountOutputTypeCountEmployeeProductionsArgs
   employeeProductRates?: boolean | UserCountOutputTypeCountEmployeeProductRatesArgs
   salaryRecords?: boolean | UserCountOutputTypeCountSalaryRecordsArgs
   createdOrders?: boolean | UserCountOutputTypeCountCreatedOrdersArgs
@@ -3445,13 +3210,6 @@ export type UserCountOutputTypeCountProductionsArgs<ExtArgs extends runtime.Type
  */
 export type UserCountOutputTypeCountShiftRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ShiftRecordWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountEmployeeProductionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.EmployeeProductionWhereInput
 }
 
 /**
@@ -3554,7 +3312,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   productions?: boolean | Prisma.User$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.User$shiftRecordsArgs<ExtArgs>
-  employeeProductions?: boolean | Prisma.User$employeeProductionsArgs<ExtArgs>
   employeeProductRates?: boolean | Prisma.User$employeeProductRatesArgs<ExtArgs>
   salaryRecords?: boolean | Prisma.User$salaryRecordsArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
@@ -3637,7 +3394,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   productions?: boolean | Prisma.User$productionsArgs<ExtArgs>
   shiftRecords?: boolean | Prisma.User$shiftRecordsArgs<ExtArgs>
-  employeeProductions?: boolean | Prisma.User$employeeProductionsArgs<ExtArgs>
   employeeProductRates?: boolean | Prisma.User$employeeProductRatesArgs<ExtArgs>
   salaryRecords?: boolean | Prisma.User$salaryRecordsArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
@@ -3660,7 +3416,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
     productions: Prisma.$ProductionRecordPayload<ExtArgs>[]
     shiftRecords: Prisma.$ShiftRecordPayload<ExtArgs>[]
-    employeeProductions: Prisma.$EmployeeProductionPayload<ExtArgs>[]
     employeeProductRates: Prisma.$EmployeeProductRatePayload<ExtArgs>[]
     salaryRecords: Prisma.$SalaryRecordPayload<ExtArgs>[]
     createdOrders: Prisma.$OrderPayload<ExtArgs>[]
@@ -4092,7 +3847,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   refreshTokens<T extends Prisma.User$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productions<T extends Prisma.User$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shiftRecords<T extends Prisma.User$shiftRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shiftRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  employeeProductions<T extends Prisma.User$employeeProductionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$employeeProductionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   employeeProductRates<T extends Prisma.User$employeeProductRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$employeeProductRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeProductRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   salaryRecords<T extends Prisma.User$salaryRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$salaryRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdOrders<T extends Prisma.User$createdOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4613,30 +4367,6 @@ export type User$shiftRecordsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ShiftRecordScalarFieldEnum | Prisma.ShiftRecordScalarFieldEnum[]
-}
-
-/**
- * User.employeeProductions
- */
-export type User$employeeProductionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the EmployeeProduction
-   */
-  select?: Prisma.EmployeeProductionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the EmployeeProduction
-   */
-  omit?: Prisma.EmployeeProductionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.EmployeeProductionInclude<ExtArgs> | null
-  where?: Prisma.EmployeeProductionWhereInput
-  orderBy?: Prisma.EmployeeProductionOrderByWithRelationInput | Prisma.EmployeeProductionOrderByWithRelationInput[]
-  cursor?: Prisma.EmployeeProductionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.EmployeeProductionScalarFieldEnum | Prisma.EmployeeProductionScalarFieldEnum[]
 }
 
 /**

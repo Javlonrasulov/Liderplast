@@ -15,7 +15,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
-import { CreateEmployeeProductionDto } from './dto/create-employee-production.dto.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
@@ -99,27 +98,6 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   deleteExpenseCategoryLegacy(@Param('id') id: string) {
     return this.financeService.deleteExpenseCategory(id);
-  }
-
-  @Post('employee-productions')
-  @Roles(Role.DIRECTOR, Role.MANAGER, Role.WORKER)
-  createEmployeeProduction(@Body() dto: CreateEmployeeProductionDto) {
-    return this.financeService.createEmployeeProduction(dto);
-  }
-
-  @Get('employee-productions')
-  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER, Role.WORKER)
-  getEmployeeProductions(
-    @CurrentUser('sub') userId?: string,
-    @CurrentUser('role') role?: Role,
-  ) {
-    return this.financeService.getEmployeeProductions(userId, role);
-  }
-
-  @Delete('employee-productions/:id')
-  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
-  deleteEmployeeProduction(@Param('id') id: string) {
-    return this.financeService.deleteEmployeeProduction(id);
   }
 
   @Get('employee-product-rates')

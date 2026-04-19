@@ -78,7 +78,6 @@ export const ModelName = {
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
   SalarySetting: 'SalarySetting',
-  EmployeeProduction: 'EmployeeProduction',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
   BankVedomost: 'BankVedomost',
@@ -144,7 +143,6 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
-  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -174,7 +172,6 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
-  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -399,9 +396,6 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
-  paintUsed: 'paintUsed',
-  paintRawMaterialId: 'paintRawMaterialId',
-  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -509,21 +503,6 @@ export const SalarySettingScalarFieldEnum = {
 } as const
 
 export type SalarySettingScalarFieldEnum = (typeof SalarySettingScalarFieldEnum)[keyof typeof SalarySettingScalarFieldEnum]
-
-
-export const EmployeeProductionScalarFieldEnum = {
-  id: 'id',
-  workerId: 'workerId',
-  productLabel: 'productLabel',
-  quantity: 'quantity',
-  rate: 'rate',
-  totalAmount: 'totalAmount',
-  producedAt: 'producedAt',
-  status: 'status',
-  createdAt: 'createdAt'
-} as const
-
-export type EmployeeProductionScalarFieldEnum = (typeof EmployeeProductionScalarFieldEnum)[keyof typeof EmployeeProductionScalarFieldEnum]
 
 
 export const EmployeeProductRateScalarFieldEnum = {

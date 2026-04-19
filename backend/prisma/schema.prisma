@@ -90,6 +90,18 @@ enum ExpenseType {
   OTHER
 }
 
+enum RawMaterialOrderStatus {
+  PENDING
+  FULFILLED
+}
+
+/// Xom ashyo tashqi buyurtma valyutasi (CBU kursi bilan so‘mga o‘tkaziladi)
+enum PurchaseOrderCurrency {
+  UZS
+  USD
+  EUR
+}
+
 enum BagStatus {
   IN_STORAGE
   CONNECTED
@@ -119,18 +131,6 @@ enum ProductAuditEntityType {
   FINISHED_PRODUCT
 }
 
-enum RawMaterialKind {
-  SIRO
-  PAINT
-}
-
-enum FinishedProductSpecUnit {
-  LITER
-  KILOGRAM
-  PIECE
-  OTHER
-}
-
 model User {
   id                  String              @id @default(cuid())
   fullName            String
@@ -154,7 +154,6 @@ model User {
   refreshTokens       RefreshToken[]
   productions         ProductionRecord[]  @relation("WorkerProductions")
   shiftRecords        ShiftRecord[]
-  employeeProductions EmployeeProduction[]
   employeeProductRates EmployeeProductRate[]
   salaryRecords       SalaryRecord[]
   createdOrders       Order[]             @relation("OrderCreator")
@@ -166,6 +165,7 @@ model User {
   productAuditLogs    ProductAuditLog[]   @relation("ProductAuditActor")
   bankTransactions    BankTransaction[]
   uploadedBankVedomosts BankVedomost[]
+  rawMaterialPurchaseOrdersCreated RawMaterialPurchaseOrder[] @relation("RawMaterialOrderCreator")
 
   @@index([stir])
 }
@@ -185,7 +185,6 @@ model RawMaterial {
   id           String                  @id @default(cuid())
   name         String                  @unique
   unit         String                  @default("kg")
-  kind         RawMaterialKind         @default(SIRO)
   defaultBagWeightKg Float?
   description  String?
   isDeleted    Boolean                 @default(false)
@@ -199,7 +198,7 @@ model RawMaterial {
   bagAuditLogs BagAuditLog[]
   semiProductLinks SemiProductRawMaterial[]
   productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
-  paintShiftRecords ShiftRecord[]      @relation("PaintRawMaterial")
+  purchaseOrders   RawMaterialPurchaseOrder[]
 }
 
 model SemiProduct {
@@ -226,7 +225,6 @@ model FinishedProduct {
   id            String               @id @default(cuid())
   name          String               @unique
   volumeLiter   Float
-  specUnit      FinishedProductSpecUnit @default(LITER)
   description   String?
   isDeleted     Boolean              @default(false)
   status        EntityStatus         @default(COMPLETED)
@@ -486,10 +484,6 @@ model ShiftRecord {
   defectCount   Int           @default(0)
   electricityKwh Float        @default(0)
   notes         String?
-  paintUsed            Boolean       @default(false)
-  paintRawMaterialId   String?
-  paintQuantityKg      Float?
-  paintRawMaterial     RawMaterial?  @relation("PaintRawMaterial", fields: [paintRawMaterialId], references: [id], onDelete: SetNull)
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
   shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
@@ -578,6 +572,34 @@ model Expense {
   category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   sourceShiftId String?        @unique
   sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
+  rawMaterialPurchaseOrder RawMaterialPurchaseOrder?
+}
+
+/// Buxgalteriyada berilgan xom ashyo tashqi buyurtmasi (ombor kirimi alohida)
+model RawMaterialPurchaseOrder {
+  id             String                  @id @default(cuid())
+  rawMaterialId  String
+  rawMaterial    RawMaterial             @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  /// Har doim kg (tonna kiritilsa frontend 1000 ga ko‘paytiradi)
+  quantityKg     Float
+  currency       PurchaseOrderCurrency
+  /// 1 valyuta birligi = necha so‘m (Markaziy bank kursi, buyurtma paytida saqlanadi). UZS uchun 1
+  fxRateToUzs    Float
+  /// Tanlangan valyutadagi jami summa
+  amountOriginal Float
+  /// Xarajatlar / foyda hisobi uchun so‘mdagi qiymat
+  amountUzs      Float
+  expenseId      String                  @unique
+  expense        Expense                 @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+  status         RawMaterialOrderStatus  @default(PENDING)
+  orderedAt      DateTime                @default(now())
+  fulfilledAt    DateTime?
+  notes          String?
+  createdById    String?
+  createdBy      User?                   @relation("RawMaterialOrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status, orderedAt])
+  @@index([rawMaterialId])
 }
 
 model SalarySetting {
@@ -591,19 +613,6 @@ model SalarySetting {
   status                EntityStatus @default(COMPLETED)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
-}
-
-model EmployeeProduction {
-  id          String       @id @default(cuid())
-  workerId    String
-  worker      User         @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  productLabel String
-  quantity    Int
-  rate        Float
-  totalAmount Float
-  producedAt  DateTime
-  status      EntityStatus @default(COMPLETED)
-  createdAt   DateTime     @default(now())
 }
 
 model EmployeeProductRate {

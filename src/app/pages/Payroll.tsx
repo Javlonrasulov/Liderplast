@@ -1461,7 +1461,7 @@ function EmployeesTab() {
       <div className="lg:col-span-3 space-y-4">
         <div className="flex items-start gap-2 rounded-2xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 text-xs text-indigo-900/90 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-200/90">
           <Calendar size={16} className="mt-0.5 shrink-0 opacity-80" />
-          <p>{t.prShiftLogFilterHint.replace(/\{label\}/g, filterLabel)}</p>
+          <p>{(t.prShiftLogFilterHint ?? '').replace(/\{label\}/g, filterLabel ?? '')}</p>
         </div>
 
         {state.employees.length === 0 ? (
@@ -1641,169 +1641,6 @@ function EmployeesTab() {
   );
 }
 
-// ======================== PRODUCTION TAB ========================
-
-function ProductionTab() {
-  const { state, dispatch } = useERP();
-  const { t } = useApp();
-  const [month, setMonth] = useState(currentMonth());
-  const [form, setForm] = useState({ employeeId: '', date: TODAY, productType: '18g Қолип', quantity: 0, pricePerUnit: 20 });
-
-  const filtered = useMemo(() =>
-    state.employeeProductions.filter(p => p.date.startsWith(month)).sort((a, b) => b.date.localeCompare(a.date)),
-    [state.employeeProductions, month]
-  );
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.employeeId || form.quantity <= 0) return;
-    dispatch({ type: 'ADD_EMPLOYEE_PRODUCTION', payload: form });
-    setForm(p => ({ ...p, quantity: 0 }));
-  };
-
-  const PRODUCT_TYPES = ['18g Қолип', '20g Қолип', '0.5L Бакалашка', '1L Бакалашка', '5L Бакалашка'];
-  const configuredRate = useMemo(
-    () =>
-      state.employeeProductRates.find(
-        (item) => item.employeeId === form.employeeId && item.productType === form.productType,
-      ) ?? null,
-    [form.employeeId, form.productType, state.employeeProductRates],
-  );
-
-  useEffect(() => {
-    if (!configuredRate) return;
-    const nextPrice =
-      configuredRate.rateType === 'percent'
-        ? ((configuredRate.baseAmount ?? 0) * configuredRate.rateValue) / 100
-        : configuredRate.rateValue;
-    setForm((prev) => ({ ...prev, pricePerUnit: Number(nextPrice.toFixed(2)) }));
-  }, [configuredRate]);
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-      {/* Form */}
-      <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <Factory size={16} className="text-purple-600 dark:text-purple-400" />
-          </div>
-          <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prAddProduction}</h3>
-        </div>
-        <form onSubmit={handleAdd} className="space-y-3">
-          <div>
-            <Label>{t.prEmployee}</Label>
-            <StyledSelect
-              value={form.employeeId}
-              onValueChange={(value) => setForm(p => ({ ...p, employeeId: value }))}
-              options={state.employees.map((employee) => ({ value: employee.id, label: employee.fullName }))}
-              placeholder="— Tanlang —"
-            />
-          </div>
-          <div>
-            <Label>{t.labelDate}</Label>
-            <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
-          </div>
-          <div>
-            <Label>{t.prProductType}</Label>
-            <StyledSelect
-              value={form.productType}
-              onValueChange={(value) => setForm(p => ({ ...p, productType: value }))}
-              options={PRODUCT_TYPES.map((pt) => ({ value: pt, label: pt }))}
-            />
-          </div>
-          <div>
-            <Label>{t.labelAmount} (dona)</Label>
-            <Input type="number" value={form.quantity || ''} onChange={e => setForm(p => ({ ...p, quantity: +e.target.value }))} placeholder="10000" min={1} required />
-          </div>
-          <div>
-            <Label>{t.prPricePerUnit} (so'm)</Label>
-            <Input
-              type="number"
-              value={form.pricePerUnit || ''}
-              onChange={e => setForm(p => ({ ...p, pricePerUnit: +e.target.value }))}
-              placeholder="20"
-              min={0}
-              readOnly={Boolean(configuredRate)}
-            />
-          </div>
-          {configuredRate && (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
-              <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                {t.prRateConfiguredHint}:
-                {' '}
-                {configuredRate.rateType === 'percent'
-                  ? `${configuredRate.rateValue}%${configuredRate.baseAmount ? ` · baza ${formatCurrency(configuredRate.baseAmount)}` : ''}`
-                  : `${formatCurrency(configuredRate.rateValue)} / dona`}
-              </p>
-            </div>
-          )}
-          {form.quantity > 0 && form.pricePerUnit > 0 && (
-            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-700">
-              <p className="text-xs text-indigo-600 dark:text-indigo-400">Jami summa: <strong>{formatCurrency(form.quantity * form.pricePerUnit)}</strong></p>
-            </div>
-          )}
-          <button type="submit" className="w-full h-9 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-            <Plus size={15} /> {t.prAddProduction}
-          </button>
-        </form>
-      </div>
-
-      {/* Table */}
-      <div className="lg:col-span-3">
-        <div className="flex items-center gap-3 mb-3">
-          <input type="month" value={month} onChange={e => setMonth(e.target.value)} className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
-          <span className="text-xs text-slate-400">{filtered.length} {t.totalRecords}</span>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-          {filtered.length === 0 ? (
-            <div className="p-10 text-center">
-              <Factory size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-              <p className="text-slate-500 text-sm">{t.noData}</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
-                    {[t.prEmployee, t.labelDate, t.prProductType, t.labelAmount, t.prPricePerUnit, t.labelTotal, ''].map((h, i) => (
-                      <th key={i} className="text-left px-4 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((prod, idx) => {
-                    const emp = state.employees.find(e => e.id === prod.employeeId);
-                    return (
-                      <tr key={prod.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''}`}>
-                        <td className="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{emp?.fullName ?? '—'}</td>
-                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">{prod.date}</td>
-                        <td className="px-4 py-2.5">
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-md text-xs font-medium">{prod.productType}</span>
-                        </td>
-                        <td className="px-4 py-2.5 text-slate-700 dark:text-slate-300">{formatNumber(prod.quantity)}</td>
-                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{formatNumber(prod.pricePerUnit)}</td>
-                        <td className="px-4 py-2.5 font-semibold text-indigo-600 dark:text-indigo-400">{formatCurrency(prod.totalAmount)}</td>
-                        <td className="px-4 py-2.5">
-                          <button
-                            onClick={() => dispatch({ type: 'DELETE_EMPLOYEE_PRODUCTION', payload: prod.id })}
-                            className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ======================== SETTINGS TAB ========================
 
 function SettingsTab() {
@@ -1889,13 +1726,12 @@ function SettingsTab() {
 
 export function Payroll() {
   const { t } = useApp();
-  const [activeTab, setActiveTab] = useState<'vedomost' | 'bank' | 'employees' | 'production' | 'settings'>('vedomost');
+  const [activeTab, setActiveTab] = useState<'vedomost' | 'bank' | 'employees' | 'settings'>('vedomost');
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
     { key: 'bank', label: t.prTabBank, icon: Landmark },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
-    { key: 'production', label: t.prTabProduction, icon: Factory },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
   ] as const;
 
@@ -1929,7 +1765,6 @@ export function Payroll() {
       {activeTab === 'vedomost' && <VedomostTab />}
       {activeTab === 'bank' && <BankTab />}
       {activeTab === 'employees' && <EmployeesTab />}
-      {activeTab === 'production' && <ProductionTab />}
       {activeTab === 'settings' && <SettingsTab />}
     </div>
   );

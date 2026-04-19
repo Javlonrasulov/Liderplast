@@ -163,21 +163,6 @@ function requiredPermissionGroups(
       anyOf: ['view_expenses'],
     },
     {
-      test: /^\/finance\/employee-productions$/,
-      method: 'GET',
-      anyOf: ['view_payroll'],
-    },
-    {
-      test: /^\/finance\/employee-productions$/,
-      method: 'POST',
-      anyOf: ['view_payroll'],
-    },
-    {
-      test: /^\/finance\/employee-productions\/[^/]+$/,
-      method: 'DELETE',
-      anyOf: ['view_payroll'],
-    },
-    {
       test: /^\/finance\/salary-settings$/,
       method: 'GET',
       anyOf: ['view_vedemost', 'create_vedemost'],

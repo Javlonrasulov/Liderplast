@@ -29,6 +29,21 @@ function fmtKwh(n: number): string {
   return r % 1 === 0 ? String(r) : r.toFixed(1);
 }
 
+function applyShiftExpenseTemplate(
+  template: string,
+  t: T,
+  row: { d: string; n: number; w: string; m: string; k: number; p: number },
+): string {
+  return template
+    .replace('{date}', displayYmd(row.d))
+    .replace('{n}', String(row.n))
+    .replace('{worker}', (row.w || '—').trim())
+    .replace('{machine}', (row.m || '—').trim())
+    .replace('{kwh}', fmtKwh(row.k))
+    .replace('{price}', formatNumber(row.p))
+    .replace('{unit}', t.unitSum);
+}
+
 /**
  * Smena-elektr xarajati: DB dan kelgan tavsifni joriy til shabloni bo‘yicha.
  * (Yangi: JSON v1. Eski: "Smena → elektr: ..." yoki noma’lum matn o‘zicha.)
@@ -40,18 +55,21 @@ export function formatShiftExpenseTableNote(
   const raw = (description ?? '').trim();
   if (!raw) return '';
 
+  const tpl = (t.exShiftExpenseNote ?? '').trim();
+
   if (raw.startsWith('{')) {
     try {
       const j = JSON.parse(raw) as unknown;
       if (isV1(j)) {
-        return t.exShiftExpenseNote
-          .replace('{date}', displayYmd(j.d))
-          .replace('{n}', String(j.n))
-          .replace('{worker}', (j.w || '—').trim())
-          .replace('{machine}', (j.m || '—').trim())
-          .replace('{kwh}', fmtKwh(j.k))
-          .replace('{price}', formatNumber(j.p))
-          .replace('{unit}', t.unitSum);
+        if (!tpl) return raw;
+        return applyShiftExpenseTemplate(tpl, t, {
+          d: j.d,
+          n: j.n,
+          w: j.w,
+          m: j.m,
+          k: j.k,
+          p: j.p,
+        });
       }
     } catch {
       // ignore
@@ -64,14 +82,15 @@ export function formatShiftExpenseTableNote(
   );
   if (legacy) {
     const [, d, n, w, m, k, p] = legacy;
-    return t.exShiftExpenseNote
-      .replace('{date}', displayYmd(d!))
-      .replace('{n}', n!)
-      .replace('{worker}', w!.trim())
-      .replace('{machine}', m!.trim())
-      .replace('{kwh}', fmtKwh(parseFloat(k!)))
-      .replace('{price}', formatNumber(parseFloat(p!)))
-      .replace('{unit}', t.unitSum);
+    if (!tpl) return raw;
+    return applyShiftExpenseTemplate(tpl, t, {
+      d: d!,
+      n: Number(n),
+      w: w!,
+      m: m!,
+      k: parseFloat(k!),
+      p: parseFloat(p!),
+    });
   }
 
   return raw;

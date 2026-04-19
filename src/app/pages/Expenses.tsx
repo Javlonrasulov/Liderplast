@@ -11,6 +11,16 @@ import {
   TODAY,
 } from '../utils/format';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 
 const CHART_BAR = [
   'bg-yellow-500',
@@ -62,6 +72,7 @@ export function Expenses() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
 
   const categories = state.expenseCategories;
 
@@ -199,9 +210,14 @@ export function Expenses() {
     setEditingId(null);
   };
 
-  const removeCategory = (id: string) => {
-    if (!window.confirm(t.exCategoryDeleteHint)) return;
-    void dispatch({ type: 'DELETE_EXPENSE_CATEGORY', payload: id });
+  const requestDeleteCategory = (id: string) => {
+    setCategoryDeleteId(id);
+  };
+
+  const confirmDeleteCategory = () => {
+    if (!categoryDeleteId) return;
+    void dispatch({ type: 'DELETE_EXPENSE_CATEGORY', payload: categoryDeleteId });
+    setCategoryDeleteId(null);
   };
 
   return (
@@ -551,7 +567,7 @@ export function Expenses() {
                         {!isElectricityCategory(c) && (
                           <button
                             type="button"
-                            onClick={() => removeCategory(c.id)}
+                            onClick={() => requestDeleteCategory(c.id)}
                             className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
                             aria-label={t.exCategoryDelete}
                           >
@@ -646,6 +662,33 @@ export function Expenses() {
           )}
         </div>
       </div>
+
+      <AlertDialog
+        open={Boolean(categoryDeleteId)}
+        onOpenChange={(open) => {
+          if (!open) setCategoryDeleteId(null);
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">{t.exCategoryDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+              {t.exCategoryDeleteHint}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
+              {t.btnCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCategory}
+              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500/30"
+            >
+              {t.exCategoryDelete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

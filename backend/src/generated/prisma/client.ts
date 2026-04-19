@@ -177,11 +177,6 @@ export type Expense = Prisma.ExpenseModel
  */
 export type SalarySetting = Prisma.SalarySettingModel
 /**
- * Model EmployeeProduction
- * 
- */
-export type EmployeeProduction = Prisma.EmployeeProductionModel
-/**
  * Model EmployeeProductRate
  * 
  */

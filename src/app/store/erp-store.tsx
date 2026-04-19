@@ -290,8 +290,6 @@ export interface ShiftRecord {
   id: string;
   date: string;
   shift: number;
-  /** `User.id` (ishchi) — ro‘yxat / filtrlash uchun */
-  employeeId: string;
   workerName: string;
   machineId: string;
   hoursWorked: number;
@@ -342,16 +340,6 @@ export interface EmployeeProductRate {
   baseAmount?: number;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface EmployeeProduction {
-  id: string;
-  employeeId: string;
-  date: string;
-  productType: string;
-  quantity: number;
-  pricePerUnit: number;
-  totalAmount: number;
 }
 
 export interface SalaryRow {
@@ -470,7 +458,6 @@ export interface ERPState {
   workers: string[];
   employees: Employee[];
   employeeProductRates: EmployeeProductRate[];
-  employeeProductions: EmployeeProduction[];
   salaryVedomost: SalaryRow[];
   salaryPaymentSummaries: SalaryPaymentSummary[];
   bankVedomosts: BankVedomost[];
@@ -648,8 +635,6 @@ type ERPAction =
   | { type: 'DELETE_EMPLOYEE'; payload: string }
   | { type: 'UPSERT_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string; rateType: EmployeeProductRate['rateType']; rateValue: number; baseAmount?: number } }
   | { type: 'DELETE_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string } }
-  | { type: 'ADD_EMPLOYEE_PRODUCTION'; payload: Omit<EmployeeProduction, 'id'> }
-  | { type: 'DELETE_EMPLOYEE_PRODUCTION'; payload: string }
   | { type: 'GENERATE_VEDOMOST'; payload: { month: string } }
   | { type: 'UPDATE_SALARY_ROW'; payload: { id: string; bonus?: number; workedDays?: number } }
   | { type: 'SET_SALARY_STATUS'; payload: { id: string; status: 'paid' | 'unpaid' } }
@@ -700,7 +685,6 @@ const emptyState: ERPState = {
   workers: [],
   employees: [],
   employeeProductRates: [],
-  employeeProductions: [],
   salaryVedomost: [],
   salaryPaymentSummaries: [],
   bankVedomosts: [],
@@ -855,8 +839,8 @@ type BackendShiftRecord = {
   paintRawMaterialId?: string | null;
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
-  worker: { id: string; fullName: string };
-  machine?: { id: string; name?: string } | null;
+  worker: { fullName: string };
+  machine?: { id: string } | null;
 };
 
 type BackendProductionRecord = {
@@ -1104,16 +1088,6 @@ type BackendUser = {
   salaryRate: number;
   preferredShiftNumber?: number | null;
   createdAt: string;
-};
-
-type BackendEmployeeProduction = {
-  id: string;
-  workerId: string;
-  productLabel: string;
-  quantity: number;
-  rate: number;
-  totalAmount: number;
-  producedAt: string;
 };
 
 type BackendEmployeeProductRate = {
@@ -1596,7 +1570,6 @@ async function loadStateFromApi() {
     expenses,
     users,
     employeeProductRates,
-    employeeProductions,
     salarySettings,
     salaryRows,
     bankVedomosts,
@@ -1617,7 +1590,6 @@ async function loadStateFromApi() {
     apiRequest<BackendExpense[]>('/finance/expenses'),
     apiRequest<BackendUser[]>('/users'),
     apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
-    apiRequest<BackendEmployeeProduction[]>('/finance/employee-productions'),
     apiRequest<BackendSalarySettings>('/finance/salary-settings'),
     apiRequest<BackendSalaryRow[]>('/finance/salary'),
     apiRequest<BackendBankVedomost[]>('/finance/vedomosts'),
@@ -1798,7 +1770,7 @@ async function loadStateFromApi() {
 
   const mappedExpenses: Expense[] = expenses.map((expense) => ({
     id: expense.id,
-    date: toLocalDateString(expense.incurredAt),
+    date: expense.incurredAt.slice(0, 10),
     type: expense.type.toLowerCase() as Expense['type'],
     categoryId: expense.categoryId ?? '',
     categoryName: expense.category?.name ?? legacyExpenseLabel[expense.type],
@@ -1823,7 +1795,6 @@ async function loadStateFromApi() {
     id: shift.id,
     date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
-    employeeId: shift.worker.id,
     workerName: shift.worker.fullName,
     machineId: shift.machine?.id ?? '',
     hoursWorked: shift.hoursWorked,
@@ -1853,16 +1824,6 @@ async function loadStateFromApi() {
     salaryType: normalizeSalaryType(user.salaryType),
     salaryAmount: user.salaryRate,
     createdAt: user.createdAt,
-  }));
-
-  const employeeProductionsState: EmployeeProduction[] = employeeProductions.map((item) => ({
-    id: item.id,
-    employeeId: item.workerId,
-    date: item.producedAt.slice(0, 10),
-    productType: item.productLabel,
-    quantity: item.quantity,
-    pricePerUnit: item.rate,
-    totalAmount: item.totalAmount,
   }));
 
   const employeeProductRatesState: EmployeeProductRate[] = employeeProductRates.map((item) => ({
@@ -1935,7 +1896,6 @@ async function loadStateFromApi() {
     ),
     employees,
     employeeProductRates: employeeProductRatesState,
-    employeeProductions: employeeProductionsState,
     salaryVedomost,
     salaryPaymentSummaries: salaryPaymentSummaries,
     bankVedomosts: mappedBankVedomosts,
@@ -2229,18 +2189,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               method: 'DELETE',
             },
           );
-          break;
-        case 'ADD_EMPLOYEE_PRODUCTION':
-          await apiRequest('/finance/employee-productions', {
-            method: 'POST',
-            body: JSON.stringify({
-              workerId: action.payload.employeeId,
-              productLabel: action.payload.productType,
-              quantity: action.payload.quantity,
-              rate: action.payload.pricePerUnit,
-              producedAt: action.payload.date,
-            }),
-          });
           break;
         case 'GENERATE_VEDOMOST':
           await apiRequest('/finance/salary/generate', {
@@ -2558,11 +2506,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
-        case 'DELETE_EMPLOYEE_PRODUCTION':
-          await apiRequest(`/finance/employee-productions/${action.payload}`, {
-            method: 'DELETE',
-          });
-          break;
         default:
           break;
       }

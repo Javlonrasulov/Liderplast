@@ -97,8 +97,6 @@ export interface T {
   apiShiftFinishedNoSemiRecipe: string;
   apiShiftInsufficientSemiStock: string;
   apiShiftFinishedBalanceMissing: string;
-  /** raw-material-bags: consumFromActiveBag — faol qopdagi qoldiq sarfga yetmasа */
-  apiShiftActiveBagInsufficient: string;
 
   // Common
   btnAdd: string;
@@ -495,6 +493,8 @@ export interface T {
   exCategoryAdd: string;
   exCategoryName: string;
   exCategoryDelete: string;
+  /** Категорияни рўйхатдан олиш (модал сарлавҳаси) */
+  exCategoryDeleteTitle: string;
   exCategoryDeleteHint: string;
   exStatsByCategory: string;
   exStatsRank: string;
@@ -504,10 +504,8 @@ export interface T {
   exNoMachinesElectric: string;
   exGlobalElectricityPriceTitle: string;
   exShiftElectricityExplain: string;
-  /** Narx o'zgarganda avvalgi smena xarajatlari qayta hisoblanmaydi */
-  exElectricityPriceAffectsNewOnly: string;
   exFromShiftBadge: string;
-  /** Smena-elektr xarajati tavsifi: {date} {n} {worker} {machine} {kwh} {price} {unit} */
+  /** Смена-электр: тарих қатори; {date} {n} {worker} {machine} {kwh} {price} {unit} */
   exShiftExpenseNote: string;
   /** Xarajatlar: kam ishlatiladigan kVt·soat narxi — modal tugmasi */
   exElectricityPriceButton: string;
@@ -611,7 +609,6 @@ export interface T {
   prTabVedomost: string;
   prTabBank: string;
   prTabEmployees: string;
-  prTabProduction: string;
   prTabSettings: string;
   prGenerate: string;
   prMonth: string;
@@ -659,19 +656,8 @@ export interface T {
   prWorkedDays: string;
   prPricePerUnit: string;
   prProductType: string;
-  prAddProduction: string;
   prEmployee: string;
   prNoEmployees: string;
-  /** «Ишчилар» таб: танланган сана (header) — факат шу оралиқдагӣ смена жадвали */
-  prShiftLogTitle: string;
-  prShiftLogFilterHint: string;
-  prShiftLogEmpty: string;
-  prShiftLogTotals: string;
-  prColShift: string;
-  prColDefect: string;
-  prColKwh: string;
-  prColPaint: string;
-  prColCounter: string;
   prNoVedomost: string;
   prTotalBrutto: string;
   prTotalNet: string;
@@ -688,14 +674,6 @@ export interface T {
   prIncomeTaxOnly: string;
   prNpsNote: string;
   prSocialNote: string;
-  /** Vedomost jadvali: daromad soliqi ostidagi qisqa eslatma */
-  prVedColHintDeduct: string;
-  /** NPS / ijt. soliq («чегирмайди») */
-  prVedColHintExempt: string;
-  /** NET ustuni: B − S / Б − Н */
-  prVedColNetShort: string;
-  /** KPI: ijtimoiy soliq qisqartmasi (NPS: … · …: …) */
-  prKpiLabelSocial: string;
   prBankUploadTitle: string;
   prBankUploadHint: string;
   prBankUploadAction: string;
@@ -739,6 +717,24 @@ export interface T {
   prBankCreateEmployeeTitle: string;
   prBankCreateEmployeeDesc: string;
   prBankCreateWarning: string;
+  prBankRejectedTitle: string;
+  prBankRejectedExplain: string;
+  prBankTechnicalDetails: string;
+  prBankRejectedEmptyTx: string;
+  prShiftLogTitle: string;
+  /** `{label}` — filterLabel */
+  prShiftLogFilterHint: string;
+  prShiftLogEmpty: string;
+  prShiftLogTotals: string;
+  prColShift: string;
+  prColDefect: string;
+  prColKwh: string;
+  prColPaint: string;
+  prColCounter: string;
+  prVedColHintDeduct: string;
+  prVedColHintExempt: string;
+  prVedColNetShort: string;
+  prKpiLabelSocial: string;
 }
 
 // ======================== UZBEK CYRILLIC ========================
@@ -834,8 +830,6 @@ const uz_cyrillic: T = {
   apiShiftFinishedNoSemiRecipe: 'Тайёр маҳсулот учун ярим тайёр ретсепти йўқ',
   apiShiftInsufficientSemiStock: 'Ярим тайёр омборда етарли эмас: {name}',
   apiShiftFinishedBalanceMissing: 'Тайёр маҳсулот учун омбор қолдиғи топилмади',
-  apiShiftActiveBagInsufficient:
-    'Уланган хом ашё қопида (фаол) сарф учун етарли миқдор йўқ — қопдаги қолдиқ камроқ ё сарф катта.',
 
   btnAdd: 'Қўшиш',
   btnSave: 'Сақлаш',
@@ -1216,6 +1210,7 @@ const uz_cyrillic: T = {
   exCategoryAdd: 'Янги категория',
   exCategoryName: 'Номи',
   exCategoryDelete: 'Ўчириш',
+  exCategoryDeleteTitle: 'Категорияни рўйхатдан оламизми?',
   exCategoryDeleteHint: 'Категория рўйхатдан олинади; тарихдаги ёзувлар сақланади.',
   exStatsByCategory: 'Категория бўйича статистика',
   exStatsRank: '#',
@@ -1227,11 +1222,9 @@ const uz_cyrillic: T = {
   exGlobalElectricityPriceTitle: 'kVt·soat narxi (барча электр учун)',
   exShiftElectricityExplain:
     'Бу нарх «Смена тарихи»даги kVt·soat × сум ҳисоби билан автоматик электр харажатларига қўлланилади; смена сақланса ёки ўзгарса, харажат ҳам янгиланади.',
-  exElectricityPriceAffectsNewOnly:
-    'Нархни ўзгартирганда, аввалги сменаларга богланган харажат суммаси қайта ҳисобланмайди; фақат шундан кейин сақланадиган ёки янгиланадиган сменалар жорий нарх бўйича.',
   exFromShiftBadge: 'Смена',
   exShiftExpenseNote:
-    'Смена — электр: {date}, {n}-смена — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}',
+    '{date}, {n}-смена — {worker}; {machine} — {kwh} кВт·соат × {price} {unit}',
   exElectricityPriceButton: 'Электр нархи (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
   exElectricityPriceSaved: 'kVt·soat нархи янгиланди',
@@ -1329,7 +1322,6 @@ const uz_cyrillic: T = {
   prTabVedomost: 'Ведомост',
   prTabBank: 'Банк',
   prTabEmployees: 'Ишчилар',
-  prTabProduction: 'Иш ҳажми',
   prTabSettings: 'Солиқ созламалари',
   prGenerate: 'Ведомост яратиш',
   prMonth: 'Ой',
@@ -1377,18 +1369,8 @@ const uz_cyrillic: T = {
   prWorkedDays: 'Иш кунлари',
   prPricePerUnit: 'Нарх (дона)',
   prProductType: 'Маҳсулот тури',
-  prAddProduction: 'Иш ҳажми қўшиш',
   prEmployee: 'Ишчи',
   prNoEmployees: 'Ишчилар рўйхати бўш',
-  prShiftLogTitle: 'Смена бўйича батафсил (танланган сана оралиғи)',
-  prShiftLogFilterHint: 'Пастдаги ёзувлар фақат танланган сана оралиғида: {label}',
-  prShiftLogEmpty: 'Бу ишчи учун танланган оралиқда смена ёзуви йўқ',
-  prShiftLogTotals: 'Оралиқ бўйича жамӣ',
-  prColShift: '№',
-  prColDefect: 'Брак',
-  prColKwh: 'кВт·соат',
-  prColPaint: 'Краска',
-  prColCounter: 'Ўткич',
   prNoVedomost: 'Ведомост яратилмаган. "Ведомост яратиш" тугмасини босинг.',
   prTotalBrutto: 'Жами брутто',
   prTotalNet: 'Жами нет',
@@ -1405,10 +1387,6 @@ const uz_cyrillic: T = {
   prIncomeTaxOnly: 'Фақат даромад солиғи чегирилади',
   prNpsNote: 'НПС — чегирилмайди',
   prSocialNote: 'Ижт. солиқ — чегирилмайди',
-  prVedColHintDeduct: 'NETдан чегирлади',
-  prVedColHintExempt: 'чегирмайди',
-  prVedColNetShort: 'B − S',
-  prKpiLabelSocial: 'Ижт.',
   prBankUploadTitle: 'Обортка юклаш',
   prBankUploadHint: 'Биринчи sheet автоматик ўқилади',
   prBankUploadAction: '.xlsx файл танлаш',
@@ -1452,6 +1430,24 @@ const uz_cyrillic: T = {
   prBankCreateEmployeeTitle: 'Ходимни тизимга қўшиш',
   prBankCreateEmployeeDesc: 'Ушбу олувчини ходим сифатида қўшасизми?',
   prBankCreateWarning: 'Рад этсангиз, ушбу ўтказма тизимда клиент/ходимга боғланмайди ва кейинги ҳисоботлар ҳамда солиштиришларда номувофиқлик қолиши мумкин.',
+  prBankRejectedTitle: 'Файл импорти якунланмади',
+  prBankRejectedExplain:
+    'Банк обороткаси талаб қилинган форматда ўқилмади ёки сақлашда хатолик бўлди. Транзакциялар базага ёзилмади — шу сабабли рўйхат бўш.',
+  prBankTechnicalDetails: 'Техник тафсилотлар (ихтиёрий)',
+  prBankRejectedEmptyTx: 'Рад этилган ведомостда транзакциялар йўқ.',
+  prShiftLogTitle: 'Смена бўйича батафсил (танланган сана оралиғи)',
+  prShiftLogFilterHint: 'Пастдаги ёзувлар фақат танланган сана оралиғида: {label}',
+  prShiftLogEmpty: 'Бу ишчи учун танланган оралиқда смена ёзуви йўқ',
+  prShiftLogTotals: 'Оралиқ бўйича жамӣ',
+  prColShift: '№',
+  prColDefect: 'Брак',
+  prColKwh: 'кВт·соат',
+  prColPaint: 'Краска',
+  prColCounter: 'Ўткич',
+  prVedColHintDeduct: 'NETдан чегирлади',
+  prVedColHintExempt: 'чегирмайди',
+  prVedColNetShort: 'B − S',
+  prKpiLabelSocial: 'Ижт.',
 };
 
 // ======================== UZBEK LATIN ========================
@@ -1547,8 +1543,6 @@ const uz_latin: T = {
   apiShiftFinishedNoSemiRecipe: 'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
   apiShiftInsufficientSemiStock: 'Yarim tayyor omborda yetarli emas: {name}',
   apiShiftFinishedBalanceMissing: 'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
-  apiShiftActiveBagInsufficient:
-    "Ulangan xomashyo qopida (faol) sarf uchun yetarli miqdor yo'q — qopdagi qoldiq kichikroq yoki sarf katta.",
 
   btnAdd: "Qo'shish",
   btnSave: 'Saqlash',
@@ -1929,6 +1923,7 @@ const uz_latin: T = {
   exCategoryAdd: 'Yangi kategoriya',
   exCategoryName: 'Nomi',
   exCategoryDelete: "O'chirish",
+  exCategoryDeleteTitle: "Kategoriyani ro'yxatdan olamizmi?",
   exCategoryDeleteHint: "Kategoriya ro'yxatdan olinadi; tarixdagi yozuvlar saqlanadi.",
   exStatsByCategory: "Kategoriya bo'yicha statistika",
   exStatsRank: '#',
@@ -1940,11 +1935,9 @@ const uz_latin: T = {
   exGlobalElectricityPriceTitle: "kVt·soat narxi (barcha elektr uchun)",
   exShiftElectricityExplain:
     "Bu narx «Smena tarixi»dagi kVt·soat × so'm hisobi bilan avtomatik elektr xarajatlariga qo'llaniladi; smena saqlansa yoki o'zgarsa, xarajat ham yangilanadi.",
-  exElectricityPriceAffectsNewOnly:
-    "Narx o'zgartirilganda avvalgi smenalarga bog'langan xarajat summasi qayta hisoblanmaydi; faqat keyin saqlangan yoki yangilangan smenalar joriy narx bo'yicha hisoblanadi.",
   exFromShiftBadge: 'Smena',
   exShiftExpenseNote:
-    "Smena — elektr: {date}, {n}-smena — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}",
+    "{date}, {n}-smena — {worker}; {machine} — {kwh} kVt·soat × {price} {unit}",
   exElectricityPriceButton: 'Elektr narxi (kVt·soat)',
   exElectricityPriceNavShort: 'kVt·soat',
   exElectricityPriceSaved: "kVt·soat narxi yangilandi",
@@ -2042,7 +2035,6 @@ const uz_latin: T = {
   prTabVedomost: 'Vedomost',
   prTabBank: 'Bank',
   prTabEmployees: 'Ishchilar',
-  prTabProduction: 'Ish hajmi',
   prTabSettings: 'Soliq sozlamalari',
   prGenerate: 'Vedomost yaratish',
   prMonth: 'Oy',
@@ -2090,18 +2082,8 @@ const uz_latin: T = {
   prWorkedDays: 'Ish kunlari',
   prPricePerUnit: 'Narx (dona)',
   prProductType: 'Mahsulot turi',
-  prAddProduction: 'Ish hajmi kiritish',
   prEmployee: 'Ishchi',
   prNoEmployees: "Ishchilar ro'yxati bo'sh",
-  prShiftLogTitle: 'Smena bo‘yicha batafsil (tanlangan sana oralig‘i)',
-  prShiftLogFilterHint: "Quyidagi yozuvlar faqat tanlangan sana oralig'ida: {label}",
-  prShiftLogEmpty: "Bu ishchi uchun tanlangan oraliqda smena yozuvi yo'q",
-  prShiftLogTotals: 'Oraliq bo‘yicha jami',
-  prColShift: '№',
-  prColDefect: 'Brak',
-  prColKwh: 'kVt·soat',
-  prColPaint: 'Kraska',
-  prColCounter: "O'tkich",
   prNoVedomost: "Vedomost yaratilmagan. \"Vedomost yaratish\" tugmasini bosing.",
   prTotalBrutto: 'Jami brutto',
   prTotalNet: 'Jami net',
@@ -2118,10 +2100,6 @@ const uz_latin: T = {
   prIncomeTaxOnly: "Faqat daromad solig'i chegiriladi",
   prNpsNote: "NPS — chegirilamaydi",
   prSocialNote: "Ijt. soliq — chegirilamaydi",
-  prVedColHintDeduct: 'NETdan chegirildi',
-  prVedColHintExempt: 'chegirilmaydi',
-  prVedColNetShort: 'B − S',
-  prKpiLabelSocial: 'Ijt.',
   prBankUploadTitle: 'Oborotka yuklash',
   prBankUploadHint: 'Birinchi sheet avtomatik o‘qiladi',
   prBankUploadAction: '.xlsx fayl tanlash',
@@ -2165,6 +2143,24 @@ const uz_latin: T = {
   prBankCreateEmployeeTitle: 'Xodimni tizimga qo‘shish',
   prBankCreateEmployeeDesc: 'Ushbu oluvchini xodim sifatida qo‘shasizmi?',
   prBankCreateWarning: 'Yo‘q desangiz, ushbu o‘tkazma tizimda klient/xodimga bog‘lanmaydi va keyingi hisobotlar hamda solishtirishlarda xatolik xavfi saqlanib qoladi.',
+  prBankRejectedTitle: 'Fayl importi yakunlanmadi',
+  prBankRejectedExplain:
+    'Bank oborotkasi talab qilingan formatda o‘qilmadi yoki saqlashda xatolik bo‘ldi. Tranzaksiyalar bazaga yozilmadi — shu sababli ro‘yxat bo‘sh.',
+  prBankTechnicalDetails: 'Texnik tafsilotlar (ixtiyoriy)',
+  prBankRejectedEmptyTx: 'Rad etilgan vedemostda tranzaksiyalar yo‘q.',
+  prShiftLogTitle: 'Smena bo‘yicha batafsil (tanlangan sana oralig‘i)',
+  prShiftLogFilterHint: 'Pastdagi yozuvlar faqat tanlangan sana oralig‘ida: {label}',
+  prShiftLogEmpty: 'Bu ishchi uchun tanlangan oralikda smena yozuvi yo‘q',
+  prShiftLogTotals: 'Oraliq bo‘yicha jami',
+  prColShift: '№',
+  prColDefect: 'Brak',
+  prColKwh: 'kVt·soat',
+  prColPaint: 'Kraska',
+  prColCounter: "O'tkich",
+  prVedColHintDeduct: 'NETdan chegirildi',
+  prVedColHintExempt: 'chegirilmaydi',
+  prVedColNetShort: 'B − S',
+  prKpiLabelSocial: 'Ijt.',
 };
 
 // ======================== RUSSIAN ========================
@@ -2260,8 +2256,6 @@ const ru: T = {
   apiShiftFinishedNoSemiRecipe: 'Для готовой продукции нет рецепта полуфабрикатов',
   apiShiftInsufficientSemiStock: 'Недостаточно полуфабриката на складе: {name}',
   apiShiftFinishedBalanceMissing: 'Не найден складской остаток для готовой продукции',
-  apiShiftActiveBagInsufficient:
-    'В привязанной сумке (сырьё) недостаточно остатка для списания: в сумке меньше, чем запрашиваемый расход.',
 
   btnAdd: 'Добавить',
   btnSave: 'Сохранить',
@@ -2642,6 +2636,7 @@ const ru: T = {
   exCategoryAdd: 'Новая категория',
   exCategoryName: 'Название',
   exCategoryDelete: 'Удалить',
+  exCategoryDeleteTitle: 'Убрать категорию из списка?',
   exCategoryDeleteHint: 'Категория скрывается из списка; записи в истории сохраняются.',
   exStatsByCategory: 'Статистика по категориям',
   exStatsRank: '#',
@@ -2653,11 +2648,9 @@ const ru: T = {
   exGlobalElectricityPriceTitle: 'Цена за кВт·ч (вся электроэнергия)',
   exShiftElectricityExplain:
     'Эта цена применяется к автоматическим расходам: кВт·ч из «Истории смен» × сум; при сохранении или изменении смены расход пересчитывается.',
-  exElectricityPriceAffectsNewOnly:
-    'При смене тарифа суммы, уже привязанные к прошлым сменам, не пересчитываются; с новой ценой считаются только смены, сохранённые или изменённые после этого.',
   exFromShiftBadge: 'Смена',
   exShiftExpenseNote:
-    'Смена — электроэнергия: {date}, смена {n} — {worker}; {machine} — {kwh} кВт·ч × {price} {unit}',
+    '{date}, смена {n} — {worker}; {machine} — {kwh} кВт·ч × {price} {unit}',
   exElectricityPriceButton: 'Тариф электроэнергии (кВт·ч)',
   exElectricityPriceNavShort: 'кВт·ч',
   exElectricityPriceSaved: 'Цена за кВт·ч обновлена',
@@ -2755,7 +2748,6 @@ const ru: T = {
   prTabVedomost: 'Ведомость',
   prTabBank: 'Банк',
   prTabEmployees: 'Сотрудники',
-  prTabProduction: 'Выработка',
   prTabSettings: 'Налоговые ставки',
   prGenerate: 'Сформировать ведомость',
   prMonth: 'Месяц',
@@ -2803,18 +2795,8 @@ const ru: T = {
   prWorkedDays: 'Рабочих дней',
   prPricePerUnit: 'Цена (шт)',
   prProductType: 'Тип продукта',
-  prAddProduction: 'Добавить выработку',
   prEmployee: 'Сотрудник',
   prNoEmployees: 'Список сотрудников пуст',
-  prShiftLogTitle: 'Смена — детализация (по датам в шапке)',
-  prShiftLogFilterHint: 'Ниже только записи в выбранном диапазоне: {label}',
-  prShiftLogEmpty: 'У сотрудника нет смен в выбранном диапазоне',
-  prShiftLogTotals: 'Итого за период',
-  prColShift: '№',
-  prColDefect: 'Брак',
-  prColKwh: 'кВт·ч',
-  prColPaint: 'Краска',
-  prColCounter: 'Счётчик',
   prNoVedomost: 'Ведомость не сформирована. Нажмите "Сформировать ведомость".',
   prTotalBrutto: 'Итого брутто',
   prTotalNet: 'Итого нет',
@@ -2831,10 +2813,6 @@ const ru: T = {
   prIncomeTaxOnly: 'Только подоходный налог вычитается',
   prNpsNote: 'НПС — не вычитается',
   prSocialNote: 'Соц. налог — не вычитается',
-  prVedColHintDeduct: 'Удерж. из НЕТ',
-  prVedColHintExempt: 'не удерж.',
-  prVedColNetShort: 'Б − Н',
-  prKpiLabelSocial: 'Соц.',
   prBankUploadTitle: 'Загрузка оборотки',
   prBankUploadHint: 'Автоматически читается первый лист',
   prBankUploadAction: 'Выбрать .xlsx файл',
@@ -2878,6 +2856,24 @@ const ru: T = {
   prBankCreateEmployeeTitle: 'Добавить сотрудника в систему',
   prBankCreateEmployeeDesc: 'Добавить этого получателя как сотрудника?',
   prBankCreateWarning: 'Если отказаться, перевод останется не связанным с клиентом/сотрудником и это может вызвать ошибки или расхождения в отчётах и сверке.',
+  prBankRejectedTitle: 'Импорт файла не выполнен',
+  prBankRejectedExplain:
+    'Выписка не была разобрана в ожидаемом формате или при сохранении произошла ошибка. Транзакции в базу не записаны — поэтому список пуст.',
+  prBankTechnicalDetails: 'Технические подробности (по желанию)',
+  prBankRejectedEmptyTx: 'У отклонённой ведомости нет транзакций.',
+  prShiftLogTitle: 'Детали по сменам (выбранный период дат)',
+  prShiftLogFilterHint: 'Ниже только записи за выбранный период: {label}',
+  prShiftLogEmpty: 'У этого сотрудника нет записей смен за выбранный период',
+  prShiftLogTotals: 'Итого за период',
+  prColShift: '№',
+  prColDefect: 'Брак',
+  prColKwh: 'кВт·ч',
+  prColPaint: 'Краска',
+  prColCounter: 'Счётчик',
+  prVedColHintDeduct: 'Удерж. из НЕТ',
+  prVedColHintExempt: 'не удерж.',
+  prVedColNetShort: 'Б − Н',
+  prKpiLabelSocial: 'Соц.',
 };
 
 export const translations: Record<Language, T> = {

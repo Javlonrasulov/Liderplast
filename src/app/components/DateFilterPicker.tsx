@@ -201,7 +201,7 @@ export function DateFilterPicker() {
 
       {/* ── Dropdown ── */}
       {open && (
-        <div className="absolute top-full right-0 z-50 mt-2 w-[min(20rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/40 overflow-hidden">
+        <div className="absolute top-full right-0 z-[80] mt-2 w-[min(20rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/40 overflow-hidden">
 
           {/* Preset section */}
           <div className="p-3 pb-2">

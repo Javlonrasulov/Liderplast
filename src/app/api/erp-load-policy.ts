@@ -22,7 +22,6 @@ export type ErpApiLoadPlan = {
   payments: boolean;
   expenses: boolean;
   users: boolean;
-  employeeProductions: boolean;
   salarySettings: boolean;
   salaryRows: boolean;
 };
@@ -51,8 +50,6 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     users:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('manage_users') || has('view_payroll')),
-    employeeProductions:
-      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_payroll'),
     salarySettings:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('view_vedemost') || has('create_vedemost')),

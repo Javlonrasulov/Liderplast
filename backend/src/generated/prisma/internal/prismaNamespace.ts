@@ -411,7 +411,6 @@ export const ModelName = {
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
   SalarySetting: 'SalarySetting',
-  EmployeeProduction: 'EmployeeProduction',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
   BankVedomost: 'BankVedomost',
@@ -433,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "salarySetting" | "employeeProduction" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2435,80 +2434,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    EmployeeProduction: {
-      payload: Prisma.$EmployeeProductionPayload<ExtArgs>
-      fields: Prisma.EmployeeProductionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.EmployeeProductionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.EmployeeProductionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        findFirst: {
-          args: Prisma.EmployeeProductionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.EmployeeProductionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        findMany: {
-          args: Prisma.EmployeeProductionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>[]
-        }
-        create: {
-          args: Prisma.EmployeeProductionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        createMany: {
-          args: Prisma.EmployeeProductionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.EmployeeProductionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>[]
-        }
-        delete: {
-          args: Prisma.EmployeeProductionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        update: {
-          args: Prisma.EmployeeProductionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        deleteMany: {
-          args: Prisma.EmployeeProductionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.EmployeeProductionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.EmployeeProductionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>[]
-        }
-        upsert: {
-          args: Prisma.EmployeeProductionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeProductionPayload>
-        }
-        aggregate: {
-          args: Prisma.EmployeeProductionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeProduction>
-        }
-        groupBy: {
-          args: Prisma.EmployeeProductionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EmployeeProductionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.EmployeeProductionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EmployeeProductionCountAggregateOutputType> | number
-        }
-      }
-    }
     EmployeeProductRate: {
       payload: Prisma.$EmployeeProductRatePayload<ExtArgs>
       fields: Prisma.EmployeeProductRateFieldRefs
@@ -3033,7 +2958,6 @@ export const RawMaterialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   unit: 'unit',
-  kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
   isDeleted: 'isDeleted',
@@ -3063,7 +2987,6 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
-  specUnit: 'specUnit',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',
@@ -3288,9 +3211,6 @@ export const ShiftRecordScalarFieldEnum = {
   defectCount: 'defectCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
-  paintUsed: 'paintUsed',
-  paintRawMaterialId: 'paintRawMaterialId',
-  paintQuantityKg: 'paintQuantityKg',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -3398,21 +3318,6 @@ export const SalarySettingScalarFieldEnum = {
 } as const
 
 export type SalarySettingScalarFieldEnum = (typeof SalarySettingScalarFieldEnum)[keyof typeof SalarySettingScalarFieldEnum]
-
-
-export const EmployeeProductionScalarFieldEnum = {
-  id: 'id',
-  workerId: 'workerId',
-  productLabel: 'productLabel',
-  quantity: 'quantity',
-  rate: 'rate',
-  totalAmount: 'totalAmount',
-  producedAt: 'producedAt',
-  status: 'status',
-  createdAt: 'createdAt'
-} as const
-
-export type EmployeeProductionScalarFieldEnum = (typeof EmployeeProductionScalarFieldEnum)[keyof typeof EmployeeProductionScalarFieldEnum]
 
 
 export const EmployeeProductRateScalarFieldEnum = {
@@ -3674,20 +3579,6 @@ export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
- * Reference to a field of type 'RawMaterialKind'
- */
-export type EnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind'>
-    
-
-
-/**
- * Reference to a field of type 'RawMaterialKind[]'
- */
-export type ListEnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialKind[]'>
-    
-
-
-/**
  * Reference to a field of type 'EntityStatus'
  */
 export type EnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntityStatus'>
@@ -3698,20 +3589,6 @@ export type EnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'EntityStatus[]'
  */
 export type ListEnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntityStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'FinishedProductSpecUnit'
- */
-export type EnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit'>
-    
-
-
-/**
- * Reference to a field of type 'FinishedProductSpecUnit[]'
- */
-export type ListEnumFinishedProductSpecUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinishedProductSpecUnit[]'>
     
 
 
@@ -4046,7 +3923,6 @@ export type GlobalOmitConfig = {
   expenseCategory?: Prisma.ExpenseCategoryOmit
   expense?: Prisma.ExpenseOmit
   salarySetting?: Prisma.SalarySettingOmit
-  employeeProduction?: Prisma.EmployeeProductionOmit
   employeeProductRate?: Prisma.EmployeeProductRateOmit
   salaryRecord?: Prisma.SalaryRecordOmit
   bankVedomost?: Prisma.BankVedomostOmit
