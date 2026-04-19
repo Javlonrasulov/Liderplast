@@ -70,7 +70,12 @@ const FONT_SIZE_MAP: Record<FontSize, string> = {
 /** Eski bundle yoki qisman deployda kalitlar bo‘lmasa, tugmalar bo‘sh qolmasin */
 const RAW_MATERIAL_FALLBACK: Pick<
   T,
-  'rmKindLabel' | 'rmKindSiro' | 'rmKindPaint' | 'rmPaintHint' | 'rmCreatePaintButton'
+  | 'rmKindLabel'
+  | 'rmKindSiro'
+  | 'rmKindPaint'
+  | 'rmPaintHint'
+  | 'rmCreatePaintButton'
+  | 'rmPendingExternalOrdersTitle'
 > = {
   rmKindLabel: 'Хомашё тури',
   rmKindSiro: 'PET сиро / оддий хомашё',
@@ -78,6 +83,8 @@ const RAW_MATERIAL_FALLBACK: Pick<
   rmPaintHint:
     'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
   rmCreatePaintButton: 'Краскани сақлаш',
+  rmPendingExternalOrdersTitle:
+    'Хомашё — ташқи буюртма (бухгалтерия); омбор киримини белгиланг',
 };
 
 function withRawMaterialFallbacks(base: T): T {
@@ -88,6 +95,8 @@ function withRawMaterialFallbacks(base: T): T {
     rmKindPaint: base.rmKindPaint || RAW_MATERIAL_FALLBACK.rmKindPaint,
     rmPaintHint: base.rmPaintHint || RAW_MATERIAL_FALLBACK.rmPaintHint,
     rmCreatePaintButton: base.rmCreatePaintButton || RAW_MATERIAL_FALLBACK.rmCreatePaintButton,
+    rmPendingExternalOrdersTitle:
+      base.rmPendingExternalOrdersTitle || RAW_MATERIAL_FALLBACK.rmPendingExternalOrdersTitle,
   };
 }
 

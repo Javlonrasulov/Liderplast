@@ -134,6 +134,14 @@ export const ExpenseType = {
 export type ExpenseType = (typeof ExpenseType)[keyof typeof ExpenseType]
 
 
+export const RawMaterialKind = {
+  SIRO: 'SIRO',
+  PAINT: 'PAINT'
+} as const
+
+export type RawMaterialKind = (typeof RawMaterialKind)[keyof typeof RawMaterialKind]
+
+
 export const RawMaterialOrderStatus = {
   PENDING: 'PENDING',
   FULFILLED: 'FULFILLED'

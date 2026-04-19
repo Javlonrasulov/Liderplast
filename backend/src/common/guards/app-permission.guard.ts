@@ -54,6 +54,21 @@ function requiredPermissionGroups(
       method: 'DELETE',
       anyOf: ['view_warehouse'],
     },
+    {
+      test: /^\/warehouse\/raw-material-purchase-orders$/,
+      method: 'GET',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
+      test: /^\/warehouse\/raw-material-purchase-orders$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/warehouse\/raw-material-purchase-orders\/[^/]+\/fulfill$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
 
     {
       test: /^\/raw-material-bags$/,

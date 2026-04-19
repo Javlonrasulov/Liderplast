@@ -19,10 +19,15 @@ import { CreateProductDto } from './dto/create-product.dto.js';
 import { InventoryMovementDto } from './dto/inventory-movement.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { WarehouseService } from './warehouse.service.js';
+import { CreateRawMaterialPurchaseOrderDto } from '../finance/dto/create-raw-material-purchase-order.dto.js';
+import { FinanceService } from '../finance/finance.service.js';
 
 @Controller('warehouse')
 export class WarehouseController {
-  constructor(private readonly warehouseService: WarehouseService) {}
+  constructor(
+    private readonly warehouseService: WarehouseService,
+    private readonly financeService: FinanceService,
+  ) {}
 
   @Post('products')
   @Roles(Role.ADMIN, Role.DIRECTOR)
@@ -117,5 +122,27 @@ export class WarehouseController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   getHistory() {
     return this.warehouseService.getHistory();
+  }
+
+  /** Xom ashyo tashqi buyurtma — `FinanceController` bilan bir xil mantiq (marshrut ikkilanadi) */
+  @Post('raw-material-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createRawMaterialPurchaseOrder(
+    @Body() dto: CreateRawMaterialPurchaseOrderDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.createRawMaterialPurchaseOrder(dto, userId);
+  }
+
+  @Get('raw-material-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  getRawMaterialPurchaseOrders() {
+    return this.financeService.getRawMaterialPurchaseOrders();
+  }
+
+  @Patch('raw-material-purchase-orders/:id/fulfill')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  fulfillRawMaterialPurchaseOrder(@Param('id') id: string) {
+    return this.financeService.fulfillRawMaterialPurchaseOrder(id);
   }
 }

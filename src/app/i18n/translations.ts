@@ -841,7 +841,7 @@ const uz_cyrillic: T = {
   dfTitle: 'Сана оралиғи',
   dfToday: 'Бугун',
   dfWeek: 'Бу ҳафта',
-  dfMonth: 'Б ой',
+  dfMonth: 'Бу ой',
   dfAll: 'Барчаси',
   dfFrom: 'Дан',
   dfTo: 'Гача',
@@ -1425,7 +1425,8 @@ const uz_cyrillic: T = {
   prRmStatusPending: 'Кутилмоқда',
   prRmStatusFulfilled: 'Етиб келган',
   prRmNoOrders: 'Буюртмалар йўқ',
-  rmPendingExternalOrdersTitle: 'Бухгалтериядан ташқи буюртма (омбор киримини белгиланг)',
+  rmPendingExternalOrdersTitle:
+    'Хомашё — ташқи буюртма (бухгалтерия); омбор киримини белгиланг',
   rmOrderMarkArrived: 'Етиб келди',
   rmOrderArrivedToast: 'Буюртма ёпилди',
   rmIncomingQtyMismatchTitle: 'Миқдор бўйича огоҳлантириш',
@@ -2170,7 +2171,8 @@ const uz_latin: T = {
   prRmStatusPending: 'Kutilmoqda',
   prRmStatusFulfilled: 'Yetib kelgan',
   prRmNoOrders: 'Buyurtmalar yo\'q',
-  rmPendingExternalOrdersTitle: 'Buxgalteriyadan tashqi buyurtma (ombor kirimini belgilang)',
+  rmPendingExternalOrdersTitle:
+    'Xom ashyo — tashqi buyurtma (buxgalteriya); ombor kirimini belgilang',
   rmOrderMarkArrived: 'Yetib keldi',
   rmOrderArrivedToast: 'Buyurtma yopildi',
   rmIncomingQtyMismatchTitle: 'Miqdor bo\'yicha ogohlantirish',
@@ -2915,7 +2917,8 @@ const ru: T = {
   prRmStatusPending: 'Ожидает',
   prRmStatusFulfilled: 'Поступило',
   prRmNoOrders: 'Нет заказов',
-  rmPendingExternalOrdersTitle: 'Внешний заказ из бухгалтерии (отметьте поступление)',
+  rmPendingExternalOrdersTitle:
+    'Сырьё — внешний заказ (бухгалтерия); отметьте поступление на склад',
   rmOrderMarkArrived: 'Поступило',
   rmOrderArrivedToast: 'Заказ закрыт',
   rmIncomingQtyMismatchTitle: 'Предупреждение по количеству',

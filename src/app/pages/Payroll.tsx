@@ -1216,13 +1216,18 @@ function EmployeesTab() {
 
   const selectedShiftLog = useMemo((): ShiftRecord[] => {
     if (!selectedEmployeeId) return [];
-    const forEmp = state.shiftRecords.filter((s) => s.employeeId === selectedEmployeeId);
+    const emp = state.employees.find((e) => e.id === selectedEmployeeId);
+    const forEmp = state.shiftRecords.filter((s) => {
+      if (s.employeeId) return s.employeeId === selectedEmployeeId;
+      if (!emp) return false;
+      return emp.fullName.trim().toLowerCase() === s.workerName.trim().toLowerCase();
+    });
     return filterData(forEmp).sort((a, b) => {
       const byDate = a.date.localeCompare(b.date);
       if (byDate !== 0) return byDate;
       return a.shift - b.shift;
     });
-  }, [state.shiftRecords, selectedEmployeeId, filterData, dateFilter]);
+  }, [state.shiftRecords, state.employees, selectedEmployeeId, filterData, dateFilter]);
 
   const selectedShiftTotals = useMemo(() => {
     let hours = 0;

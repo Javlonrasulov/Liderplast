@@ -304,6 +304,8 @@ export interface OperationLog {
 
 export interface ShiftRecord {
   id: string;
+  /** User.id — backenddan; yangi yozuv POSTдан кейин refresh билан тўлади */
+  employeeId?: string;
   date: string;
   shift: number;
   workerName: string;
@@ -855,6 +857,7 @@ function mapBackendMachineStage(stage: BackendMachine['stage']): 'semi' | 'final
 
 type BackendShiftRecord = {
   id: string;
+  workerId: string;
   date: string;
   shiftNumber: number;
   producedQty: number;
@@ -869,7 +872,7 @@ type BackendShiftRecord = {
   paintRawMaterialId?: string | null;
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
-  worker: { fullName: string };
+  worker: { id: string; fullName: string };
   machine?: { id: string } | null;
 };
 
@@ -1558,6 +1561,17 @@ type LookupMap = {
   usersByName: Map<string, string>;
 };
 
+/** Avval ombor marshruti (yangi), keyin buxgalteriya (eski mijozlar) */
+const RAW_MATERIAL_PURCHASE_ORDER_PATHS = [
+  '/warehouse/raw-material-purchase-orders',
+  '/finance/raw-material-purchase-orders',
+] as const;
+
+function isNotFoundApiError(e: unknown): boolean {
+  const m = e instanceof Error ? e.message : String(e);
+  return m.includes('404') || m.includes('Not Found');
+}
+
 /** Eski backendda faqat `/finance/expense-categories` bo‘lishi mumkin — 404 bo‘lsa shu yerga tushamiz */
 async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
   try {
@@ -1572,13 +1586,17 @@ async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
 }
 
 async function fetchRawMaterialPurchaseOrdersSafe(): Promise<BackendRawMaterialPurchaseOrder[]> {
-  try {
-    return await apiRequest<BackendRawMaterialPurchaseOrder[]>(
-      '/finance/raw-material-purchase-orders',
-    );
-  } catch {
-    return [];
+  for (const path of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
+    try {
+      return await apiRequest<BackendRawMaterialPurchaseOrder[]>(path);
+    } catch (e) {
+      if (isNotFoundApiError(e)) {
+        continue;
+      }
+      return [];
+    }
   }
+  return [];
 }
 
 function mapRawMaterialPurchaseOrders(
@@ -1873,6 +1891,7 @@ async function loadStateFromApi() {
 
   const mappedShifts: ShiftRecord[] = shifts.map((shift) => ({
     id: shift.id,
+    employeeId: shift.workerId ?? shift.worker.id,
     date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
     workerName: shift.worker.fullName,
@@ -2149,25 +2168,55 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
-        case 'CREATE_RAW_MATERIAL_PURCHASE_ORDER':
-          await apiRequest('/finance/raw-material-purchase-orders', {
-            method: 'POST',
-            body: JSON.stringify({
-              rawMaterialId: action.payload.rawMaterialId,
-              quantityKg: action.payload.quantityKg,
-              currency: action.payload.currency,
-              fxRateToUzs: action.payload.fxRateToUzs,
-              amountOriginal: action.payload.amountOriginal,
-              notes: action.payload.notes,
-            }),
+        case 'CREATE_RAW_MATERIAL_PURCHASE_ORDER': {
+          const body = JSON.stringify({
+            rawMaterialId: action.payload.rawMaterialId,
+            quantityKg: action.payload.quantityKg,
+            currency: action.payload.currency,
+            fxRateToUzs: action.payload.fxRateToUzs,
+            amountOriginal: action.payload.amountOriginal,
+            notes: action.payload.notes,
           });
+          let lastErr: unknown;
+          for (const base of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
+            try {
+              await apiRequest(base, { method: 'POST', body });
+              lastErr = undefined;
+              break;
+            } catch (e) {
+              lastErr = e;
+              if (isNotFoundApiError(e)) {
+                continue;
+              }
+              throw e;
+            }
+          }
+          if (lastErr) {
+            throw lastErr;
+          }
           break;
-        case 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER':
-          await apiRequest(
-            `/finance/raw-material-purchase-orders/${action.payload}/fulfill`,
-            { method: 'PATCH' },
-          );
+        }
+        case 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER': {
+          const id = action.payload;
+          let lastFulfillErr: unknown;
+          for (const base of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
+            try {
+              await apiRequest(`${base}/${id}/fulfill`, { method: 'PATCH' });
+              lastFulfillErr = undefined;
+              break;
+            } catch (e) {
+              lastFulfillErr = e;
+              if (isNotFoundApiError(e)) {
+                continue;
+              }
+              throw e;
+            }
+          }
+          if (lastFulfillErr) {
+            throw lastFulfillErr;
+          }
           break;
+        }
         case 'ADD_EXPENSE_CATEGORY':
           await mutateExpenseCategoryApi('POST', undefined, {
             name: action.payload.name,

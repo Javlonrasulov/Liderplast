@@ -90,6 +90,11 @@ enum ExpenseType {
   OTHER
 }
 
+enum RawMaterialKind {
+  SIRO
+  PAINT
+}
+
 enum RawMaterialOrderStatus {
   PENDING
   FULFILLED
@@ -185,6 +190,7 @@ model RawMaterial {
   id           String                  @id @default(cuid())
   name         String                  @unique
   unit         String                  @default("kg")
+  kind         RawMaterialKind         @default(SIRO)
   defaultBagWeightKg Float?
   description  String?
   isDeleted    Boolean                 @default(false)
@@ -199,6 +205,7 @@ model RawMaterial {
   semiProductLinks SemiProductRawMaterial[]
   productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
   purchaseOrders   RawMaterialPurchaseOrder[]
+  paintShiftRecords ShiftRecord[]      @relation("ShiftPaintRawMaterial")
 }
 
 model SemiProduct {
@@ -484,6 +491,10 @@ model ShiftRecord {
   defectCount   Int           @default(0)
   electricityKwh Float        @default(0)
   notes         String?
+  paintUsed           Boolean       @default(false)
+  paintRawMaterialId  String?
+  paintRawMaterial    RawMaterial?  @relation("ShiftPaintRawMaterial", fields: [paintRawMaterialId], references: [id], onDelete: SetNull)
+  paintQuantityKg     Float?
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
   shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
