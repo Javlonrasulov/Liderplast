@@ -32,6 +32,11 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<void>;
+  updateCredentials: (payload: {
+    currentPassword: string;
+    login?: string;
+    newPassword?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (key: AppPermissionKey) => boolean;
 }
@@ -78,6 +83,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(payload.user);
   }, []);
 
+  const updateCredentials = useCallback(
+    async (payload: { currentPassword: string; login?: string; newPassword?: string }) => {
+      const res = await apiRequest<{
+        user: SessionUser;
+        accessToken: string;
+        refreshToken: string;
+      }>('/auth/credentials', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      setTokens(res.accessToken, res.refreshToken);
+      setUser(res.user);
+    },
+    [],
+  );
+
   const logout = useCallback(async () => {
     try {
       const refreshToken = localStorage.getItem('liderplast_refresh_token');
@@ -110,10 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: Boolean(user),
       loading,
       login,
+      updateCredentials,
       logout,
       hasPermission,
     }),
-    [user, loading, login, logout, hasPermission],
+    [user, loading, login, updateCredentials, logout, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

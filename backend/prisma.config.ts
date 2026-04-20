@@ -5,7 +5,9 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
-    seed: 'npm run build && node dist/prisma/seed.js',
+    // Nest `nest build` only emits `src/` → `dist/src/`, so `dist/prisma/seed.js` never exists.
+    // Run the TypeScript seed directly (tsx handles ESM + path aliases).
+    seed: 'npx tsx prisma/seed.ts',
   },
   datasource: {
     url: env('DATABASE_URL'),

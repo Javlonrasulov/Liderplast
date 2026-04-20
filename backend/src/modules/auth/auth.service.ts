@@ -15,6 +15,7 @@ import { TokenType } from '../../generated/prisma/enums.js';
 import { JwtUserPayload } from '../../common/interfaces/authenticated-request.interface.js';
 import { effectivePermissionsForUser } from '../../common/constants/permissions.js';
 import type { User } from '../../generated/prisma/client.js';
+import { UpdateCredentialsDto } from './dto/update-credentials.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -123,6 +124,60 @@ export class AuthService {
       ...user,
       permissions,
     };
+  }
+
+  async updateCredentials(userId: string, dto: UpdateCredentialsDto) {
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existing || !existing.isActive || !existing.canLogin) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const currentOk = await bcrypt.compare(
+      dto.currentPassword,
+      existing.passwordHash,
+    );
+    if (!currentOk) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const nextLogin = dto.login?.trim() || undefined;
+    if (nextLogin) {
+      const taken = await this.prisma.user.findFirst({
+        where: {
+          login: { equals: nextLogin, mode: 'insensitive' },
+          NOT: { id: userId },
+        },
+      });
+      if (taken) {
+        throw new ConflictException('Login already exists');
+      }
+    }
+
+    const data: Record<string, unknown> = {};
+    if (nextLogin !== undefined) data.login = nextLogin || null;
+    if (dto.newPassword) {
+      data.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    }
+
+    // Nothing to change: still rotate tokens if password verified (safe).
+    await this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+
+    // Revoke existing refresh tokens and issue new ones.
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null, tokenType: TokenType.REFRESH },
+      data: { revokedAt: new Date() },
+    });
+
+    const updated = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
+
+    return this.buildAuthResponse(updated);
   }
 
   private async buildAuthResponse(user: User) {
