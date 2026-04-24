@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Lock, LogIn, User } from 'lucide-react';
+import { Factory, Lock, LogIn, User } from 'lucide-react';
 import { useAuth } from './auth-context';
 import { useApp } from '../i18n/app-context';
+
+const MASHINALAR_CRM_URL = 'https://mashina.liderplast.uz';
 
 export function LoginScreen() {
   const { login, loading } = useAuth();
@@ -82,6 +84,16 @@ export function LoginScreen() {
             {submitting ? t.authLoading : t.authSubmit}
           </button>
         </form>
+
+        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <a
+            href={MASHINALAR_CRM_URL}
+            className="w-full h-11 rounded-xl border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Factory size={18} className="shrink-0" aria-hidden />
+            {t.authMachines}
+          </a>
+        </div>
       </div>
     </div>
   );
