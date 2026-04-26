@@ -646,7 +646,6 @@ type ERPAction =
   | { type: 'DELETE_WORKER'; payload: string }
   | { type: 'ADD_MACHINE'; payload: { name: string; description: string; powerKw: number; maxCapacityPerHour: number; type: 'semi' | 'final' } }
   | { type: 'DELETE_MACHINE'; payload: string }
-  | { type: 'TOGGLE_MACHINE'; payload: string }
   | { type: 'ADD_EMPLOYEE'; payload: Omit<Employee, 'id' | 'createdAt'> }
   | { type: 'UPDATE_EMPLOYEE'; payload: { id: string; fullName: string; position: string; cardNumber: string; stir: string; salaryType: Employee['salaryType']; salaryAmount: number } }
   | { type: 'DELETE_EMPLOYEE'; payload: string }
@@ -2257,11 +2256,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
         case 'DELETE_MACHINE':
           await apiRequest(`/production/machines/${action.payload}`, {
             method: 'DELETE',
-          });
-          break;
-        case 'TOGGLE_MACHINE':
-          await apiRequest(`/production/machines/${action.payload}/toggle`, {
-            method: 'PATCH',
           });
           break;
         case 'ADD_EMPLOYEE': {

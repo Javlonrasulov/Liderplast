@@ -32,6 +32,72 @@ const SALARY_PURPOSE_KEYWORDS = ['oylik', 'ish haqi', 'zarplata', 'salary'];
 const RAW_MATERIAL_ORDER_CATEGORY_ID = 'expseed_raw_material_orders';
 const ELECTRICITY_EXPENSE_CATEGORY_SEED_ID = 'expseed_electricity';
 
+type ProductRateRow = {
+  rateType: EmployeeRateType;
+  rateValue: number;
+  baseAmount: number | null;
+};
+
+/** Сменадаги `productLabel` («18g») ва ставка калити («18g Қолип») мослаштирилади */
+function resolveProductRateForShiftLabel(
+  rateMap: Map<string, ProductRateRow>,
+  shiftLabel: string | null | undefined,
+): ProductRateRow | undefined {
+  const trimmed = (shiftLabel ?? '').trim();
+  if (!trimmed) return undefined;
+  const direct = rateMap.get(trimmed);
+  if (direct) return direct;
+  const lower = trimmed.toLowerCase();
+  for (const [key, rate] of rateMap) {
+    if (key.trim().toLowerCase() === lower) return rate;
+  }
+  for (const [key, rate] of rateMap) {
+    const kl = key.trim().toLowerCase();
+    if (kl.startsWith(lower + ' ') || kl === lower) return rate;
+  }
+  const shiftFirst = (trimmed.split(/\s+/)[0] ?? trimmed).toLowerCase();
+  for (const [key, rate] of rateMap) {
+    const k0 = (key.trim().split(/\s+/)[0] ?? '').toLowerCase();
+    if (k0 && k0 === shiftFirst) return rate;
+  }
+  const shiftNorm = normalizeText(trimmed);
+  if (shiftNorm.length > 0) {
+    for (const [key, rate] of rateMap) {
+      if (normalizeText(key) === shiftNorm) return rate;
+    }
+  }
+  return undefined;
+}
+
+type ConfiguredProductRate = {
+  productLabel: string;
+  rateType: EmployeeRateType;
+  rateValue: number;
+  baseAmount: number | null;
+};
+
+function toProductRateRow(item: ConfiguredProductRate): ProductRateRow {
+  return {
+    rateType: item.rateType,
+    rateValue: item.rateValue,
+    baseAmount: item.baseAmount,
+  };
+}
+
+/** Мос ставка йўқ бўлса ва ходимда фақат бита ставка бор — барча сменалар учун шу */
+function resolveRateForShift(
+  rateMap: Map<string, ProductRateRow>,
+  configuredRates: ConfiguredProductRate[],
+  shiftLabel: string | null | undefined,
+): ProductRateRow | undefined {
+  const fromLabel = resolveProductRateForShiftLabel(rateMap, shiftLabel);
+  if (fromLabel) return fromLabel;
+  if (configuredRates.length === 1) {
+    return toProductRateRow(configuredRates[0]);
+  }
+  return undefined;
+}
+
 type ParsedBankRow = {
   documentDate: Date | null;
   documentNumber: string | null;
@@ -1178,13 +1244,23 @@ export class FinanceService {
       const configuredRates = await this.prisma.employeeProductRate.findMany({
         where: { workerId: worker.id },
       });
-      const rateMap = new Map(
-        configuredRates.map((item) => [item.productLabel, item]),
+      const rateMap = new Map<string, ProductRateRow>(
+        configuredRates.map((item) => [
+          item.productLabel,
+          {
+            rateType: item.rateType,
+            rateValue: item.rateValue,
+            baseAmount: item.baseAmount,
+          },
+        ]),
       );
 
       const computedProductionAmount = shiftsInMonth.reduce((sum, shift) => {
-        const label = shift.productLabel ?? '';
-        const rateConfig = rateMap.get(label);
+        const rateConfig = resolveRateForShift(
+          rateMap,
+          configuredRates,
+          shift.productLabel,
+        );
         const qty = shift.producedQty;
         if (!rateConfig) {
           return sum;
@@ -1204,14 +1280,12 @@ export class FinanceService {
       );
       const productionAmount = computedProductionAmount;
 
+      const baseSalary = Number(worker.salaryRate) || 0;
       const brutto =
         worker.salaryType === SalaryType.FIXED
-          ? worker.salaryRate
-          : worker.salaryType === SalaryType.PER_PRODUCT
-            ? productionAmount
-            : worker.salaryRate + productionAmount;
-      const aklad =
-        worker.salaryType === SalaryType.PER_PRODUCT ? 0 : worker.salaryRate;
+          ? baseSalary
+          : baseSalary + productionAmount;
+      const aklad = baseSalary;
       const bonus = 0;
 
       const incomeTax = (brutto * settings.incomeTaxPercent) / 100;

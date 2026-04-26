@@ -25,6 +25,8 @@ export interface T {
   authLoading: string;
   authMachines: string;
   authMachinesDisabledHint: string;
+  authShowPassword: string;
+  authHidePassword: string;
 
   // System users (RBAC)
   suTitle: string;
@@ -746,6 +748,16 @@ export interface T {
   prTotalNet: string;
   prTotalTax: string;
   prSaveSettings: string;
+  /** Buxgalteriya — ишчи формаси сақлангандан кейин toast */
+  prEmployeeSavedToast: string;
+  /** Маҳсулот бўйича ставка сақлангандан кейин */
+  prEmployeeRateSavedToast: string;
+  /** Ставка картасидаги қалам (aria) */
+  prEditEmployeeRate: string;
+  /** Таҳрир режими — `{product}` ўрнида маҳсулот номи */
+  prEmployeeRateEditingNotice: string;
+  /** Сақлаш API хатоси */
+  prEmployeeSaveError: string;
   prSettingsTitle: string;
 
   // Payroll – new keys (NET formula, file upload)
@@ -844,6 +856,8 @@ const uz_cyrillic: T = {
   authLoading: 'Юкланмоқда…',
   authMachines: 'Машиналар',
   authMachinesDisabledHint: 'CRM манзили ҳозирча ўрнатилмаган (VITE_MACHINES_CRM_URL)',
+  authShowPassword: 'Паролни кўрсатиш',
+  authHidePassword: 'Паролни яшириш',
   suTitle: 'Тизим фойдаланувчилари',
   suSubtitle: 'Логин қиладиган ходимлар ва уларнинг ҳуқуқлари',
   suAddTitle: 'Янги фойдаланувчи',
@@ -1539,6 +1553,12 @@ const uz_cyrillic: T = {
   prTotalNet: 'Жами нет',
   prTotalTax: 'Жами солиқ',
   prSaveSettings: 'Сақлаш',
+  prEmployeeSavedToast: 'Ишчи маълумотлари сақланди',
+  prEmployeeRateSavedToast: 'Маҳсулот бўйича ставка сақланди',
+  prEditEmployeeRate: 'Таҳрирлаш',
+  prEmployeeRateEditingNotice:
+    'Ставкани янгилаш: «{product}». Ўзгартириб, «Сақлаш» ни босинг.',
+  prEmployeeSaveError: 'Сақлашда хатолик. Қайта урининг.',
   prSettingsTitle: 'Солиқ ставкалари',
 
   // Payroll – new keys (NET formula, file upload)
@@ -1637,6 +1657,8 @@ const uz_latin: T = {
   authLoading: 'Yuklanmoqda…',
   authMachines: 'Mashinalar',
   authMachinesDisabledHint: 'CRM manzili hozircha o‘rnatilmagan (VITE_MACHINES_CRM_URL)',
+  authShowPassword: 'Parolni ko‘rsatish',
+  authHidePassword: 'Parolni yashirish',
   suTitle: 'Tizim foydalanuvchilari',
   suSubtitle: 'Login qiladigan xodimlar va ularning huquqlari',
   suAddTitle: 'Yangi foydalanuvchi',
@@ -2332,6 +2354,12 @@ const uz_latin: T = {
   prTotalNet: 'Jami net',
   prTotalTax: 'Jami soliq',
   prSaveSettings: 'Saqlash',
+  prEmployeeSavedToast: 'Ishchi maʼlumotlari saqlandi',
+  prEmployeeRateSavedToast: 'Mahsulot bo‘yicha stavka saqlandi',
+  prEditEmployeeRate: 'Tahrirlash',
+  prEmployeeRateEditingNotice:
+    'Stavkani yangilash: «{product}». O‘zgartirib, «Saqlash»ni bosing.',
+  prEmployeeSaveError: 'Saqlashda xatolik. Qayta urinib ko‘ring.',
   prSettingsTitle: 'Soliq stavkalari',
 
   // Payroll – new keys (NET formula, file upload)
@@ -2430,6 +2458,8 @@ const ru: T = {
   authLoading: 'Загрузка…',
   authMachines: 'Машины',
   authMachinesDisabledHint: 'Адрес CRM не задан (VITE_MACHINES_CRM_URL)',
+  authShowPassword: 'Показать пароль',
+  authHidePassword: 'Скрыть пароль',
   suTitle: 'Пользователи системы',
   suSubtitle: 'Сотрудники с доступом и правами',
   suAddTitle: 'Новый пользователь',
@@ -3125,6 +3155,12 @@ const ru: T = {
   prTotalNet: 'Итого нет',
   prTotalTax: 'Итого налоги',
   prSaveSettings: 'Сохранить',
+  prEmployeeSavedToast: 'Данные сотрудника сохранены',
+  prEmployeeRateSavedToast: 'Тарифная ставка по продукту сохранена',
+  prEditEmployeeRate: 'Изменить',
+  prEmployeeRateEditingNotice:
+    'Редактирование ставки: «{product}». Внесите изменения и нажмите «Сохранить».',
+  prEmployeeSaveError: 'Ошибка сохранения. Попробуйте снова.',
   prSettingsTitle: 'Налоговые ставки',
 
   // Payroll – new keys (NET formula, file upload)

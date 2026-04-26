@@ -1,15 +1,24 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
-  Trash2, CheckCircle, XCircle, Edit3, Save, X, ChevronDown,
+  Trash2, CheckCircle, XCircle, Edit3, Pencil, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
   UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar,
   ShoppingCart, RefreshCw, Package,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCbuRates, parseCbuRate } from '../hooks/use-cbu-rates';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatCurrency, formatDateTime, formatNumber, formatKgAmount, TODAY } from '../utils/format';
+import {
+  formatCurrency,
+  formatDateTime,
+  formatNumber,
+  formatKgAmount,
+  TODAY,
+  displayGroupedIntInput,
+  parseDigitsFromAmountInput,
+} from '../utils/format';
 import type { Employee, EmployeeProductRate, ShiftRecord, RawMaterialProduct } from '../store/erp-store';
 import {
   AlertDialog,
@@ -1164,23 +1173,81 @@ function BankTab() {
 function EmployeesTab() {
   const { state, dispatch } = useERP();
   const { t, filterData, filterLabel, dateFilter } = useApp();
-  const PRODUCT_TYPES = ['18g Қолип', '20g Қолип', '0.5L Бакалашка', '1L Бакалашка', '5L Бакалашка'];
-  const [form, setForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+
+  const workerRateProductLabels = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          state.employeeProductRates
+            .filter((r) => r.employeeId === selectedEmployeeId)
+            .map((r) => r.productType.trim())
+            .filter(Boolean),
+        ),
+      ),
+    [state.employeeProductRates, selectedEmployeeId],
+  );
+
+  const employeeRateProductOptions = useMemo(() => {
+    const semi = state.warehouseProducts
+      .filter((p) => p.itemType === 'SEMI_PRODUCT')
+      .map((p) => (p.name ?? '').trim())
+      .filter(Boolean);
+    const fin = state.warehouseProducts
+      .filter((p) => p.itemType === 'FINISHED_PRODUCT')
+      .map((p) => (p.name ?? '').trim())
+      .filter(Boolean);
+    const fromCatalog = Array.from(new Set([...semi, ...fin]));
+    const merged = Array.from(new Set([...fromCatalog, ...workerRateProductLabels]));
+    if (merged.length === 0) {
+      return [
+        '18g Қолип',
+        '20g Қолип',
+        '0.5L Бакалашка',
+        '1L Бакалашка',
+        '5L Бакалашка',
+      ];
+    }
+    return merged.sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
+    );
+  }, [state.warehouseProducts, workerRateProductLabels]);
+
+  const [form, setForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
   const [employeeForm, setEmployeeForm] = useState({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed' as Employee['salaryType'], salaryAmount: 0 });
   const [deleteEmployeeTarget, setDeleteEmployeeTarget] = useState<Employee | null>(null);
   const [rateForm, setRateForm] = useState({
-    productType: PRODUCT_TYPES[0],
+    productType: '',
     rateType: 'fixed' as EmployeeProductRate['rateType'],
     rateValue: 0,
     baseAmount: 0,
   });
+  const [editingRateProductType, setEditingRateProductType] = useState<string | null>(null);
 
-  const handleAdd = (e: React.FormEvent) => {
+  useEffect(() => {
+    setEditingRateProductType(null);
+  }, [selectedEmployeeId]);
+
+  useEffect(() => {
+    if (employeeRateProductOptions.length === 0) return;
+    setRateForm((prev) => {
+      if (prev.productType && employeeRateProductOptions.includes(prev.productType)) {
+        return prev;
+      }
+      return { ...prev, productType: employeeRateProductOptions[0] };
+    });
+  }, [employeeRateProductOptions]);
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.fullName.trim()) return;
-    dispatch({ type: 'ADD_EMPLOYEE', payload: form });
-    setForm({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed', salaryAmount: 0 });
+    try {
+      await dispatch({ type: 'ADD_EMPLOYEE', payload: form });
+      toast.success(t.successAdded);
+      setForm({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed', salaryAmount: 0 });
+    } catch {
+      toast.error(t.prEmployeeSaveError);
+    }
   };
 
   useEffect(() => {
@@ -1246,32 +1313,64 @@ function EmployeesTab() {
   const fmtQty = (n: number) => formatNumber(Math.round(n));
   const fmtDec = (n: number) => formatKgAmount(n);
 
-  const handleEmployeeUpdate = (e: React.FormEvent) => {
+  const handleEmployeeUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEmployee) return;
-    dispatch({
-      type: 'UPDATE_EMPLOYEE',
-      payload: {
-        id: selectedEmployee.id,
-        ...employeeForm,
-      },
+    try {
+      await dispatch({
+        type: 'UPDATE_EMPLOYEE',
+        payload: {
+          id: selectedEmployee.id,
+          ...employeeForm,
+        },
+      });
+      toast.success(t.prEmployeeSavedToast);
+    } catch {
+      toast.error(t.prEmployeeSaveError);
+    }
+  };
+
+  const loadEmployeeRateIntoForm = (rate: EmployeeProductRate) => {
+    setEditingRateProductType(rate.productType);
+    setRateForm({
+      productType: rate.productType,
+      rateType: rate.rateType,
+      rateValue: rate.rateValue,
+      baseAmount: rate.baseAmount ?? 0,
     });
   };
 
-  const handleUpsertRate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedEmployee) return;
-    dispatch({
-      type: 'UPSERT_EMPLOYEE_PRODUCT_RATE',
-      payload: {
-        employeeId: selectedEmployee.id,
-        productType: rateForm.productType,
-        rateType: rateForm.rateType,
-        rateValue: rateForm.rateValue,
-        baseAmount: rateForm.rateType === 'percent' ? rateForm.baseAmount : undefined,
-      },
+  const cancelEmployeeRateEdit = () => {
+    setEditingRateProductType(null);
+    const first = employeeRateProductOptions[0] ?? '';
+    setRateForm({
+      productType: first,
+      rateType: 'fixed',
+      rateValue: 0,
+      baseAmount: 0,
     });
-    setRateForm((prev) => ({ ...prev, rateValue: 0, baseAmount: 0 }));
+  };
+
+  const handleUpsertRate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmployee || !rateForm.productType?.trim()) return;
+    try {
+      await dispatch({
+        type: 'UPSERT_EMPLOYEE_PRODUCT_RATE',
+        payload: {
+          employeeId: selectedEmployee.id,
+          productType: rateForm.productType,
+          rateType: rateForm.rateType,
+          rateValue: rateForm.rateValue,
+          baseAmount: rateForm.rateType === 'percent' ? rateForm.baseAmount : undefined,
+        },
+      });
+      toast.success(t.prEmployeeRateSavedToast);
+      setEditingRateProductType(null);
+      setRateForm((prev) => ({ ...prev, rateValue: 0, baseAmount: 0 }));
+    } catch {
+      toast.error(t.prEmployeeSaveError);
+    }
   };
 
   const SALARY_TYPE_COLORS: Record<string, string> = {
@@ -1318,12 +1417,20 @@ function EmployeesTab() {
               ]}
             />
           </div>
-          {form.salaryType !== 'per_piece' && (
-            <div>
-              <Label>{t.prSalaryAmount} (so'm)</Label>
-              <Input type="number" value={form.salaryAmount || ''} onChange={e => setForm(p => ({ ...p, salaryAmount: +e.target.value }))} placeholder="2000000" min={0} step={50000} />
-            </div>
-          )}
+          <div>
+            <Label>{t.prSalaryAmount} (so'm)</Label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={form.salaryAmount > 0 ? displayGroupedIntInput(String(Math.round(form.salaryAmount))) : ''}
+              onChange={(e) => {
+                const d = parseDigitsFromAmountInput(e.target.value);
+                setForm((p) => ({ ...p, salaryAmount: d === '' ? 0 : Number(d) }));
+              }}
+              placeholder="2 000 000"
+            />
+          </div>
           <button type="submit" className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
             <Plus size={15} /> {t.prAddEmployee}
           </button>
@@ -1380,7 +1487,24 @@ function EmployeesTab() {
                   </div>
                   <div>
                     <Label>{t.prSalaryAmount} (so'm)</Label>
-                    <Input type="number" value={employeeForm.salaryAmount || ''} onChange={e => setEmployeeForm(p => ({ ...p, salaryAmount: Number(e.target.value) }))} min={0} step={50000} />
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={
+                        employeeForm.salaryAmount > 0
+                          ? displayGroupedIntInput(String(Math.round(employeeForm.salaryAmount)))
+                          : ''
+                      }
+                      onChange={(e) => {
+                        const d = parseDigitsFromAmountInput(e.target.value);
+                        setEmployeeForm((p) => ({
+                          ...p,
+                          salaryAmount: d === '' ? 0 : Number(d),
+                        }));
+                      }}
+                      placeholder="1 000 000"
+                    />
                   </div>
                 </div>
                 <button type="submit" className="w-full h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
@@ -1396,13 +1520,35 @@ function EmployeesTab() {
                 </div>
                 <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prEmployeeRates}</h3>
               </div>
+              {editingRateProductType && (
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100/90">
+                  <span>
+                    {t.prEmployeeRateEditingNotice.replace(
+                      '{product}',
+                      editingRateProductType,
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => cancelEmployeeRateEdit()}
+                    className="shrink-0 rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-medium text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-100 dark:hover:bg-slate-700"
+                  >
+                    {t.btnCancel}
+                  </button>
+                </div>
+              )}
               <form onSubmit={handleUpsertRate} className="space-y-3">
                 <div>
                   <Label>{t.prProductType}</Label>
                   <StyledSelect
-                    value={rateForm.productType}
+                    value={
+                      rateForm.productType &&
+                      employeeRateProductOptions.includes(rateForm.productType)
+                        ? rateForm.productType
+                        : (employeeRateProductOptions[0] ?? '')
+                    }
                     onValueChange={(value) => setRateForm(p => ({ ...p, productType: value }))}
-                    options={PRODUCT_TYPES.map((pt) => ({ value: pt, label: pt }))}
+                    options={employeeRateProductOptions.map((pt) => ({ value: pt, label: pt }))}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1419,13 +1565,58 @@ function EmployeesTab() {
                   </div>
                   <div>
                     <Label>{rateForm.rateType === 'percent' ? `${t.prRatePercent} (%)` : `${t.prRateFixed} / dona`}</Label>
-                    <Input type="number" value={rateForm.rateValue || ''} onChange={e => setRateForm(p => ({ ...p, rateValue: Number(e.target.value) }))} min={0} step={rateForm.rateType === 'percent' ? 0.1 : 1} />
+                    <Input
+                      type="text"
+                      inputMode={rateForm.rateType === 'percent' ? 'decimal' : 'numeric'}
+                      autoComplete="off"
+                      value={
+                        rateForm.rateType === 'percent'
+                          ? Number.isFinite(rateForm.rateValue) && rateForm.rateValue !== 0
+                            ? String(rateForm.rateValue)
+                            : ''
+                          : rateForm.rateValue > 0
+                            ? displayGroupedIntInput(String(Math.round(rateForm.rateValue)))
+                            : ''
+                      }
+                      onChange={(e) => {
+                        if (rateForm.rateType === 'percent') {
+                          const raw = e.target.value.replace(',', '.').replace(/[^\d.]/g, '');
+                          const n = parseFloat(raw);
+                          setRateForm((p) => ({
+                            ...p,
+                            rateValue: Number.isFinite(n) ? n : 0,
+                          }));
+                        } else {
+                          const d = parseDigitsFromAmountInput(e.target.value);
+                          setRateForm((p) => ({
+                            ...p,
+                            rateValue: d === '' ? 0 : Number(d),
+                          }));
+                        }
+                      }}
+                    />
                   </div>
                 </div>
                 {rateForm.rateType === 'percent' && (
                   <div>
                     <Label>{t.prRateBaseAmount} (so'm)</Label>
-                    <Input type="number" value={rateForm.baseAmount || ''} onChange={e => setRateForm(p => ({ ...p, baseAmount: Number(e.target.value) }))} min={0} step={1} />
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={
+                        rateForm.baseAmount > 0
+                          ? displayGroupedIntInput(String(Math.round(rateForm.baseAmount)))
+                          : ''
+                      }
+                      onChange={(e) => {
+                        const d = parseDigitsFromAmountInput(e.target.value);
+                        setRateForm((p) => ({
+                          ...p,
+                          baseAmount: d === '' ? 0 : Number(d),
+                        }));
+                      }}
+                    />
                   </div>
                 )}
                 <button type="submit" className="w-full h-9 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
@@ -1440,7 +1631,14 @@ function EmployeesTab() {
                   </div>
                 ) : (
                   selectedEmployeeRates.map((rate) => (
-                    <div key={rate.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2">
+                    <div
+                      key={rate.id}
+                      className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
+                        editingRateProductType === rate.productType
+                          ? 'border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/25'
+                          : 'border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
                       <div>
                         <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{rate.productType}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1449,13 +1647,32 @@ function EmployeesTab() {
                             : `${formatCurrency(rate.rateValue)} / dona`}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => dispatch({ type: 'DELETE_EMPLOYEE_PRODUCT_RATE', payload: { employeeId: rate.employeeId, productType: rate.productType } })}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex shrink-0 items-center gap-0.5">
+                        <button
+                          type="button"
+                          title={t.prEditEmployeeRate}
+                          aria-label={t.prEditEmployeeRate}
+                          onClick={() => loadEmployeeRateIntoForm(rate)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/40 transition-colors"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (editingRateProductType === rate.productType) {
+                              cancelEmployeeRateEdit();
+                            }
+                            void dispatch({
+                              type: 'DELETE_EMPLOYEE_PRODUCT_RATE',
+                              payload: { employeeId: rate.employeeId, productType: rate.productType },
+                            });
+                          }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

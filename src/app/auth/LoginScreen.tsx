@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Factory, Lock, LogIn, User } from 'lucide-react';
+import { Eye, EyeOff, Factory, Lock, LogIn, User } from 'lucide-react';
 import { useAuth } from './auth-context';
 import { useApp } from '../i18n/app-context';
 
@@ -12,6 +12,7 @@ export function LoginScreen() {
   const [password, setPassword] = useState('Director123');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,14 +59,23 @@ export function LoginScreen() {
               {t.authPassword}
             </label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-3 text-slate-400" />
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full h-11 pl-10 pr-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white"
+                className="w-full h-11 pl-10 pr-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 inline-flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/80 transition-colors"
+                aria-label={showPassword ? t.authHidePassword : t.authShowPassword}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 

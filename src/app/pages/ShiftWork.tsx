@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   Users, Plus, Trash2, CheckCircle2, Clock, Zap,
-  AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu, Power, PowerOff,
+  AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu,
   Pencil, Layers, X, Maximize2, Minimize2,
 } from 'lucide-react';
 import {
@@ -128,8 +128,6 @@ const TR = {
     machineTypeFinal: 'Баклашка (Тайёр)',
     machineAddBtn: 'Апарат қўшиш',
     machineList: 'Мавжуд Апаратлар',
-    machineActive: 'Фаол',
-    machineInactive: 'Ночор',
     machineUsedInShift: 'смена ёзуви',
     machineKwPerHour: 'кВт/соат',
     machinePlaceholderName: 'м: Қолип Масхинаси #1',
@@ -260,8 +258,6 @@ const TR = {
     machineTypeFinal: 'Baklashka (Tayyor)',
     machineAddBtn: "Aparat qo'shish",
     machineList: "Mavjud Aparatlar",
-    machineActive: 'Faol',
-    machineInactive: 'Nofaol',
     machineUsedInShift: 'smena yozuvi',
     machineKwPerHour: 'kVt/soat',
     machinePlaceholderName: 'm: Qolip Mashinasi #1',
@@ -392,8 +388,6 @@ const TR = {
     machineTypeFinal: 'Бутылка (готовое)',
     machineAddBtn: 'Добавить аппарат',
     machineList: 'Существующее оборудование',
-    machineActive: 'Активен',
-    machineInactive: 'Неактивен',
     machineUsedInShift: 'записей смены',
     machineKwPerHour: 'кВт/час',
     machinePlaceholderName: 'пр: Машина для преформ #1',
@@ -2593,10 +2587,6 @@ export function ShiftWork() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <p className="text-slate-800 dark:text-white font-semibold text-sm">{machine.name}</p>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${machine.isActive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${machine.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                            {machine.isActive ? t.machineActive : t.machineInactive}
-                          </span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${machine.type === 'semi' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'}`}>
                             {machine.type === 'semi' ? t.machineTypeSemi : t.machineTypeFinal}
                           </span>
@@ -2613,12 +2603,6 @@ export function ShiftWork() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <button
-                          onClick={() => dispatch({ type: 'TOGGLE_MACHINE', payload: machine.id })}
-                          title={machine.isActive ? t.machineInactive : t.machineActive}
-                          className={`p-2 rounded-lg transition-colors ${machine.isActive ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
-                          {machine.isActive ? <Power size={15} /> : <PowerOff size={15} />}
-                        </button>
                         {!isDeleting ? (
                           <button onClick={() => setDeleteMachineConfirm(machine.id)}
                             className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">

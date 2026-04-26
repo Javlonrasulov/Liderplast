@@ -5,6 +5,7 @@ import { router } from './routes';
 import { AppProvider, useApp } from './i18n/app-context';
 import { AuthProvider, useAuth } from './auth/auth-context';
 import { LoginScreen } from './auth/LoginScreen';
+import { Toaster } from './components/ui/sonner';
 
 function AppShell() {
   const { isAuthenticated, loading } = useAuth();
@@ -31,6 +32,7 @@ export default function App() {
       <AuthProvider>
         <AppProvider>
           <AppShell />
+          <Toaster richColors position="top-center" closeButton />
         </AppProvider>
       </AuthProvider>
     </ThemeProvider>
