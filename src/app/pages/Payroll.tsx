@@ -111,7 +111,7 @@ function VedomostTab() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [editId, setEditId] = useState<string | null>(null);
   const [editBonus, setEditBonus] = useState(0);
-  const [editDays, setEditDays] = useState(26);
+  const [editDays, setEditDays] = useState(0);
   const [generated, setGenerated] = useState(false);
 
   const rows = useMemo(() =>

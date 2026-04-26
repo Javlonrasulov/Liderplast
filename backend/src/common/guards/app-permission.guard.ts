@@ -135,7 +135,11 @@ function requiredPermissionGroups(
       anyOf: ['view_sales'],
     },
 
-    { test: /^\/finance\/expenses$/, method: 'GET', anyOf: ['view_expenses'] },
+    {
+      test: /^\/finance\/expenses$/,
+      method: 'GET',
+      anyOf: ['view_expenses', 'view_reports'],
+    },
     { test: /^\/finance\/expenses$/, method: 'POST', anyOf: ['view_expenses'] },
     {
       test: /^\/finance\/raw-material-purchase-orders$/,

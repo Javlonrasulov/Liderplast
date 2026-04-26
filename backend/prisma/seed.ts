@@ -2,12 +2,7 @@ import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
-import {
-  InventoryItemType,
-  ProductionStage,
-  Role,
-  SalaryType,
-} from '../src/generated/prisma/enums.js';
+import { Role, SalaryType } from '../src/generated/prisma/enums.js';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
@@ -58,73 +53,7 @@ async function main() {
     },
   });
 
-  const raw = await prisma.rawMaterial.upsert({
-    where: { name: 'PET Granula' },
-    update: {},
-    create: {
-      name: 'PET Granula',
-      unit: 'kg',
-    },
-  });
-
-  const semi = await prisma.semiProduct.upsert({
-    where: { name: '18g Preform' },
-    update: {},
-    create: {
-      name: '18g Preform',
-      weightGram: 18,
-    },
-  });
-
-  const finished = await prisma.finishedProduct.upsert({
-    where: { name: '0.5L Bottle' },
-    update: {},
-    create: {
-      name: '0.5L Bottle',
-      volumeLiter: 0.5,
-    },
-  });
-
-  await prisma.inventoryBalance.upsert({
-    where: { rawMaterialId: raw.id },
-    update: { itemType: InventoryItemType.RAW_MATERIAL, quantity: 1000 },
-    create: {
-      itemType: InventoryItemType.RAW_MATERIAL,
-      rawMaterialId: raw.id,
-      quantity: 1000,
-    },
-  });
-
-  await prisma.inventoryBalance.upsert({
-    where: { semiProductId: semi.id },
-    update: { itemType: InventoryItemType.SEMI_PRODUCT, quantity: 5000 },
-    create: {
-      itemType: InventoryItemType.SEMI_PRODUCT,
-      semiProductId: semi.id,
-      quantity: 5000,
-    },
-  });
-
-  await prisma.inventoryBalance.upsert({
-    where: { finishedProductId: finished.id },
-    update: { itemType: InventoryItemType.FINISHED_PRODUCT, quantity: 2000 },
-    create: {
-      itemType: InventoryItemType.FINISHED_PRODUCT,
-      finishedProductId: finished.id,
-      quantity: 2000,
-    },
-  });
-
-  await prisma.machine.upsert({
-    where: { name: 'Preform Line #1' },
-    update: {},
-    create: {
-      name: 'Preform Line #1',
-      stage: ProductionStage.SEMI,
-      powerKw: 35,
-      maxCapacityPerHour: 5000,
-    },
-  });
+  // Demo inventory / machines removed — local DB starts empty for manual entry.
 }
 
 main()

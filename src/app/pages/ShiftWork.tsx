@@ -12,7 +12,8 @@ import {
 } from '../store/erp-store';
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatDate, TODAY } from '../utils/format';
+import { formatNumber, formatDate, formatKgAmount, TODAY } from '../utils/format';
+import { Link } from 'react-router';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 
@@ -41,6 +42,9 @@ function loadShiftDefinitions(): ShiftDefinition[] {
 
 /** Bugungi smena kartochkalarida dastlab ko‘rinadigan yozuvlar soni */
 const TIMELINE_CARD_VISIBLE = 3;
+
+/** Фаол қопда сиро «йўқ» деб ҳисоблаш чегараси (кг) */
+const SIRO_BAG_KG_EPS = 1e-5;
 
 const SHIFT_STYLE_PRESETS = [
   { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700', dot: 'bg-amber-500' },
@@ -146,6 +150,8 @@ const TR = {
     shiftNoDefsGoToTab: '«Сменалар»га ўтиш',
     productTypesEmptyHint:
       'Маҳсулот турлари ҳали йўқ. «Омбор»да ярим тайёр ёки тайёр маҳсулот номларини қўшинг (ёки кутинг — каталог юклансин).',
+    machinePowerKwZeroHint:
+      'Танланган аппаратда қувват (кВт) 0 — ток ва «Харажатлар»даги электр харажати ҳисобланмайди. «Апаратлар» ёндаги қувватни тўғри киритинг.',
     shiftDefInUseRecords: 'Ёзувларда қўлланилган',
     shiftGenericName: '{n}-смена',
     kpiUnitPieces: 'дона',
@@ -186,6 +192,15 @@ const TR = {
     shiftPaintError: 'Краска белгиланса — тур ва миқдор тўғри киритилсин',
     shiftPaintNoMaterials:
       'Краска тури мавжуд эмас. «Хомашё (сиро)» саҳифасида янги хомашёни «краска» тури билан қўшинг.',
+    shiftSemiNeedActiveBagBanner:
+      'Қолип (ярим тайёр) учун сменада фаол сиро қопи аппаратга уланган бўлиши керак. «Хомашё (сиро / краска)» саҳифасида қопни уланг.',
+    shiftSemiNeedActiveBagSubmit:
+      'Қолип аппарати учун сиро қопи уланмаган ёки сиро йўқ — смена сақланмайди.',
+    shiftSemiAddLineBlocked:
+      'Фақат қолип аппаратлари қолганда сиро қописиз янги қатор қўшиб бўлмайди.',
+    shiftSiroGoRawMaterial: '«Хомашё»га ўтиш',
+    shiftSiroBagLow: 'Фаол қопда сиро оз қолди: {kg} кг · {name}',
+    shiftSiroBagEmpty: 'Фаол қопда сиро тугади — янги қопни уланг · {name}',
   },
   uz_latin: {
     title: 'Smena Hisobi',
@@ -267,6 +282,8 @@ const TR = {
     shiftNoDefsGoToTab: '«Smenalar»ga o‘tish',
     productTypesEmptyHint:
       "Mahsulot turlari hali yo'q. «Ombor»da yarim tayyor yoki tayyor mahsulot nomlarini qo'shing (yoki kuting — katalog yuklansin).",
+    machinePowerKwZeroHint:
+      "Tanlangan apparatda quvvat (kVt) 0 — tok va «Xarajatlar»dagi elektr xarajati hisoblanmaydi. «Aparatlar» yorlig'ida quvvatni kiriting.",
     shiftDefInUseRecords: 'Yozuvlarda qo\'llanilgan',
     shiftGenericName: '{n}-smena',
     kpiUnitPieces: 'dona',
@@ -307,6 +324,15 @@ const TR = {
     shiftPaintError: 'Kraska belgilansa — tur va miqdor to\'g\'ri kirilsin',
     shiftPaintNoMaterials:
       'Kraska turi yo\'q. «Xomashyo (siro)» sahifasida yangi xomashyoni «kraska» turi bilan qo\'shing.',
+    shiftSemiNeedActiveBagBanner:
+      'Qolip (yarim tayyor) uchun smenada faol siro qopi apparatga ulangan bo\'lishi kerak. «Xomashyo (siro / kraska)» sahifasida qopni ulang.',
+    shiftSemiNeedActiveBagSubmit:
+      'Qolip apparati uchun siro qopi ulanmagan yoki siro yo\'q — smena saqlanmaydi.',
+    shiftSemiAddLineBlocked:
+      'Faqat qolip apparatlari qolganda siro qopsisiz yangi qator qo\'shib bo\'lmaydi.',
+    shiftSiroGoRawMaterial: '«Xomashyo»ga o\'tish',
+    shiftSiroBagLow: 'Faol qopda siro oz qoldi: {kg} kg · {name}',
+    shiftSiroBagEmpty: 'Faol qopda siro tugadi — yangi qopni ulang · {name}',
   },
   ru: {
     title: 'Учёт смен',
@@ -388,6 +414,8 @@ const TR = {
     shiftNoDefsGoToTab: 'Перейти к «Смены»',
     productTypesEmptyHint:
       'Типы продукции ещё не заданы. Добавьте полуфабрикаты или готовую продукцию на складе (или дождитесь загрузки каталога).',
+    machinePowerKwZeroHint:
+      'У аппарата мощность (кВт) = 0 — не считается электроэнергия и расход в «Расходах». Укажите мощность во вкладке «Аппараты».',
     shiftDefInUseRecords: 'Используется в записях',
     shiftGenericName: 'Смена {n}',
     kpiUnitPieces: 'шт',
@@ -428,6 +456,15 @@ const TR = {
     shiftPaintError: 'Если краска — укажите тип и количество',
     shiftPaintNoMaterials:
       'Нет позиций типа «краска». Добавьте сырьё на странице сырья с типом «краска».',
+    shiftSemiNeedActiveBagBanner:
+      'Для полуфабрикатов в смене должен быть подключён активный мешок сиропа. Подключите мешок на странице сырья.',
+    shiftSemiNeedActiveBagSubmit:
+      'Для аппарата преформ не подключён мешок или сироп израсходован — запись не сохранится.',
+    shiftSemiAddLineBlocked:
+      'Нельзя добавить строку: в списке только преформы, а мешок с сиропом не готов.',
+    shiftSiroGoRawMaterial: 'К сырью',
+    shiftSiroBagLow: 'В активном мешке мало сиропа: {kg} кг · {name}',
+    shiftSiroBagEmpty: 'В активном мешке сироп закончился — подключите новый · {name}',
   },
 };
 
@@ -797,8 +834,53 @@ export function ShiftWork() {
     paintUnit: 'kg' | 'g';
   };
 
+  const hasSemiMachines = useMemo(
+    () => state.machines.some((m) => m.type === 'semi'),
+    [state.machines],
+  );
+  const hasFinalMachines = useMemo(
+    () => state.machines.some((m) => m.type === 'final'),
+    [state.machines],
+  );
+
+  const siroBagReady = useMemo(() => {
+    const b = state.activeRawMaterialBag;
+    if (!b || b.status !== 'CONNECTED') return false;
+    if (!Number.isFinite(b.currentQuantityKg) || b.currentQuantityKg <= SIRO_BAG_KG_EPS) {
+      return false;
+    }
+    return true;
+  }, [state.activeRawMaterialBag]);
+
+  const semiShiftBlocked = hasSemiMachines && !siroBagReady;
+
+  const shiftFormMachineOptions = useMemo(() => {
+    if (!semiShiftBlocked) return state.machines;
+    return state.machines.filter((m) => m.type !== 'semi');
+  }, [state.machines, semiShiftBlocked]);
+
+  const addLineBlockedBySiro = semiShiftBlocked && !hasFinalMachines;
+
+  const siroBagActive = state.activeRawMaterialBag;
+  const siroConnectedButEmpty = Boolean(
+    siroBagActive &&
+      siroBagActive.status === 'CONNECTED' &&
+      Number.isFinite(siroBagActive.currentQuantityKg) &&
+      siroBagActive.currentQuantityKg <= SIRO_BAG_KG_EPS,
+  );
+
+  const siroLowWarning = useMemo(() => {
+    const b = state.activeRawMaterialBag;
+    if (!b || b.status !== 'CONNECTED') return null;
+    if (!Number.isFinite(b.currentQuantityKg) || b.currentQuantityKg <= SIRO_BAG_KG_EPS) return null;
+    if (!Number.isFinite(b.initialQuantityKg) || b.initialQuantityKg <= SIRO_BAG_KG_EPS) return null;
+    if (b.currentQuantityKg / b.initialQuantityKg > 0.12) return null;
+    const name = [b.rawMaterialName, b.name].filter(Boolean).join(' · ') || b.name || b.rawMaterialName || '—';
+    return { kgLabel: formatKgAmount(b.currentQuantityKg), name };
+  }, [state.activeRawMaterialBag]);
+
   const createEmptyLine = useCallback((): ShiftLine => {
-    const defaultMachineId = state.machines[0]?.id || '';
+    const defaultMachineId = shiftFormMachineOptions[0]?.id || '';
     const defaultProductType = shiftLineProductOptions[0] || '';
     return {
       id: `line-${Math.random().toString(16).slice(2)}`,
@@ -814,7 +896,7 @@ export function ShiftWork() {
       paintQuantity: '',
       paintUnit: 'kg',
     };
-  }, [state.machines, shiftLineProductOptions]);
+  }, [shiftFormMachineOptions, shiftLineProductOptions]);
 
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
 
@@ -860,7 +942,7 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   useEffect(() => {
-    const defaultId = state.machines[0]?.id;
+    const defaultId = shiftFormMachineOptions[0]?.id;
     if (!defaultId) return;
     setLines((prev) => {
       let changed = false;
@@ -871,7 +953,32 @@ export function ShiftWork() {
       });
       return changed ? next : prev;
     });
-  }, [state.machines]);
+  }, [shiftFormMachineOptions]);
+
+  useEffect(() => {
+    if (!semiShiftBlocked) return;
+    const allowed = shiftFormMachineOptions;
+    const fallback = allowed[0]?.id;
+    if (!fallback) return;
+    const allowedIds = new Set(allowed.map((m) => m.id));
+    setLines((prev) => {
+      let changed = false;
+      const next = prev.map((ln) => {
+        if (allowedIds.has(ln.machineId)) return ln;
+        changed = true;
+        const prevMachine = state.machines.find((x) => x.id === ln.machineId);
+        const nextLine: ShiftLine = { ...ln, machineId: fallback };
+        if (prevMachine?.type === 'semi') {
+          nextLine.paintUsed = false;
+          nextLine.paintRawMaterialId = '';
+          nextLine.paintQuantity = '';
+          nextLine.paintUnit = 'kg';
+        }
+        return nextLine;
+      });
+      return changed ? next : prev;
+    });
+  }, [semiShiftBlocked, shiftFormMachineOptions, state.machines]);
 
   useEffect(() => {
     if (sortedShiftDefs.length === 0) return;
@@ -884,11 +991,19 @@ export function ShiftWork() {
     (r: ShiftRecord) => {
       setRecordEditId(r.id);
       setRecordEditError('');
+      const allowedMachines = semiShiftBlocked
+        ? state.machines.filter((m) => m.type !== 'semi')
+        : state.machines;
+      const fallbackMid = allowedMachines[0]?.id || state.machines[0]?.id || '';
+      const mid =
+        r.machineId && allowedMachines.some((m) => m.id === r.machineId)
+          ? r.machineId
+          : fallbackMid;
       setRecordEditForm({
         date: r.date,
         shift: r.shift,
         workerName: r.workerName,
-        machineId: r.machineId || state.machines[0]?.id || '',
+        machineId: mid,
         hoursWorked: String(r.hoursWorked),
         productType: r.productType || '',
         machineReading: r.machineReading,
@@ -897,7 +1012,7 @@ export function ShiftWork() {
         notes: r.notes,
       });
     },
-    [state.machines],
+    [state.machines, semiShiftBlocked],
   );
 
   const closeRecordEditor = useCallback(() => {
@@ -924,6 +1039,14 @@ export function ShiftWork() {
       return;
     }
     const sel = state.machines.find((m) => m.id === recordEditForm.machineId);
+    if (sel?.type === 'semi' && !siroBagReady) {
+      setRecordEditError(t.shiftSemiNeedActiveBagSubmit);
+      return;
+    }
+    if (sel && (!Number.isFinite(sel.powerKw) || sel.powerKw <= 0)) {
+      setRecordEditError(t.machinePowerKwZeroHint);
+      return;
+    }
     const kwhEdit = hours * (sel?.powerKw || 0);
     try {
       await dispatch({
@@ -979,8 +1102,9 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   const addLine = useCallback(() => {
+    if (addLineBlockedBySiro) return;
     setLines((prev) => [...prev, createEmptyLine()]);
-  }, [createEmptyLine]);
+  }, [createEmptyLine, addLineBlockedBySiro]);
 
   const removeLine = useCallback((id: string) => {
     setLines((prev) => {
@@ -1025,6 +1149,10 @@ export function ShiftWork() {
       if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
       if (!ln.productType) { setError(t.labelProduct + '!'); return; }
       const machine = state.machines.find((m) => m.id === ln.machineId);
+      if (machine?.type === 'semi' && !siroBagReady) {
+        setError(t.shiftSemiNeedActiveBagSubmit);
+        return;
+      }
       if (machine?.type === 'semi' && ln.paintUsed) {
         if (!ln.paintRawMaterialId) {
           setError(t.shiftPaintError);
@@ -1035,6 +1163,15 @@ export function ShiftWork() {
           setError(t.shiftPaintError);
           return;
         }
+      }
+    }
+
+    for (const ln of meaningfulLines) {
+      const hours = parseDecimalInput(ln.hoursWorked);
+      const sel = state.machines.find((m) => m.id === ln.machineId);
+      if (hours > 0 && sel && (!Number.isFinite(sel.powerKw) || sel.powerKw <= 0)) {
+        setError(t.machinePowerKwZeroHint);
+        return;
       }
     }
 
@@ -1428,6 +1565,45 @@ export function ShiftWork() {
               </div>
             )}
 
+            {semiShiftBlocked && (
+              <div
+                className={`mb-4 p-3 rounded-xl border space-y-2 text-sm ${
+                  siroConnectedButEmpty && siroBagActive
+                    ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-100'
+                    : 'bg-amber-50/90 dark:bg-amber-950/35 border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-100/90'
+                }`}
+              >
+                <p className="font-semibold leading-snug">
+                  {siroConnectedButEmpty && siroBagActive
+                    ? t.shiftSiroBagEmpty.replace(
+                        '{name}',
+                        [siroBagActive.rawMaterialName, siroBagActive.name].filter(Boolean).join(' · ') ||
+                          siroBagActive.name ||
+                          siroBagActive.rawMaterialName ||
+                          '—',
+                      )
+                    : t.shiftSemiNeedActiveBagBanner}
+                </p>
+                <Link
+                  to="/raw-material"
+                  className="inline-flex w-fit items-center rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                >
+                  {t.shiftSiroGoRawMaterial}
+                </Link>
+              </div>
+            )}
+
+            {!semiShiftBlocked && siroLowWarning && (
+              <div className="mb-4 p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 text-amber-950 dark:text-amber-100/90 text-sm font-medium leading-snug flex gap-2">
+                <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <p>
+                  {t.shiftSiroBagLow
+                    .replace('{kg}', siroLowWarning.kgLabel)
+                    .replace('{name}', siroLowWarning.name)}
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {/* Date + Shift */}
               <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
@@ -1523,7 +1699,13 @@ export function ShiftWork() {
                 <button
                   type="button"
                   onClick={addLine}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                  disabled={addLineBlockedBySiro}
+                  title={addLineBlockedBySiro ? t.shiftSemiAddLineBlocked : undefined}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 transition-colors ${
+                    addLineBlockedBySiro
+                      ? 'cursor-not-allowed opacity-45 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
+                      : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'
+                  }`}
                 >
                   <Plus size={14} /> {t.formAddRow}
                 </button>
@@ -1560,7 +1742,7 @@ export function ShiftWork() {
                           <UiDropdown
                             value={ln.machineId}
                             onChange={(machineId) => updateLine(ln.id, { machineId })}
-                            options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
+                            options={shiftFormMachineOptions.map((m) => ({ value: m.id, label: m.name }))}
                             placeholder={t.labelMachine}
                           />
                         </div>
@@ -2572,7 +2754,7 @@ export function ShiftWork() {
                   <UiDropdown
                     value={recordEditForm.machineId}
                     onChange={(machineId) => setRecordEditForm({ ...recordEditForm, machineId })}
-                    options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
+                    options={shiftFormMachineOptions.map((m) => ({ value: m.id, label: m.name }))}
                     placeholder={t.labelMachine}
                   />
                 </div>

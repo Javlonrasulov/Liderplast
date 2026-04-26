@@ -11,6 +11,7 @@ import {
   BankVedomostStatus,
   EmployeeRateType,
   EntityStatus,
+  ExpenseType,
   PurchaseOrderCurrency,
   RawMaterialOrderStatus,
   Role,
@@ -29,6 +30,7 @@ import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 const SALARY_PURPOSE_KEYWORDS = ['oylik', 'ish haqi', 'zarplata', 'salary'];
 
 const RAW_MATERIAL_ORDER_CATEGORY_ID = 'expseed_raw_material_orders';
+const ELECTRICITY_EXPENSE_CATEGORY_SEED_ID = 'expseed_electricity';
 
 type ParsedBankRow = {
   documentDate: Date | null;
@@ -188,6 +190,82 @@ export class FinanceService {
   private readonly logger = new Logger(FinanceService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Smena elektr xarajati uchun kategoriya. Bazada yo‘q yoki barchasi soft-delete
+   * bo‘lsa, migratsiyadagi seed id bilan yaratiladi yoki tiklanadi (aks holda sync jim chiqib ketardi).
+   */
+  private async getElectricityExpenseCategoryForSync() {
+    let category = await this.prisma.expenseCategory.findFirst({
+      where: {
+        deletedAt: null,
+        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (category) return category;
+
+    const seed = await this.prisma.expenseCategory.findUnique({
+      where: { id: ELECTRICITY_EXPENSE_CATEGORY_SEED_ID },
+    });
+    if (seed?.deletedAt != null) {
+      category = await this.prisma.expenseCategory.update({
+        where: { id: ELECTRICITY_EXPENSE_CATEGORY_SEED_ID },
+        data: {
+          deletedAt: null,
+          electricityCalc: true,
+          legacyExpenseType: ExpenseType.ELECTRICITY,
+        },
+      });
+      this.logger.warn(
+        `Restored soft-deleted electricity expense category ${ELECTRICITY_EXPENSE_CATEGORY_SEED_ID}`,
+      );
+      return category;
+    }
+    if (seed) {
+      if (!seed.electricityCalc || seed.legacyExpenseType !== ExpenseType.ELECTRICITY) {
+        category = await this.prisma.expenseCategory.update({
+          where: { id: ELECTRICITY_EXPENSE_CATEGORY_SEED_ID },
+          data: { electricityCalc: true, legacyExpenseType: ExpenseType.ELECTRICITY },
+        });
+        this.logger.warn(
+          `Repaired electricity flags on category ${ELECTRICITY_EXPENSE_CATEGORY_SEED_ID}`,
+        );
+        return category;
+      }
+      return seed;
+    }
+
+    try {
+      category = await this.prisma.expenseCategory.create({
+        data: {
+          id: ELECTRICITY_EXPENSE_CATEGORY_SEED_ID,
+          name: 'Elektr energiya',
+          legacyExpenseType: ExpenseType.ELECTRICITY,
+          electricityCalc: true,
+        },
+      });
+      this.logger.warn(
+        `Created missing electricity expense category ${ELECTRICITY_EXPENSE_CATEGORY_SEED_ID}`,
+      );
+      return category;
+    } catch (err) {
+      category = await this.prisma.expenseCategory.findFirst({
+        where: {
+          deletedAt: null,
+          OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (category) return category;
+      this.logger.error(
+        `Electricity expense category missing and create failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return null;
+    }
+  }
 
   private async syncClientBankInfo(
     client: LightweightClient | null,
@@ -442,6 +520,9 @@ export class FinanceService {
   /**
    * Smena yozuvidagi kVt·soat × bazadagi narx bo‘yicha elektr kategoriyasiga xarajat
    * (bir smenaga bitta bog‘langan Expense, `sourceShiftId`).
+   *
+   * Agar smenada kVt·soat kiritilmagan bo‘lsa, lekin `hoursWorked` va apparat `powerKw`
+   * bo‘lsa, taxminiy sarfiyat: soat × kVt (ish vaqtida nominal quvvat ishlatilgan deb).
    */
   async syncShiftElectricityExpense(shiftId: string) {
     const shift = await this.prisma.shiftRecord.findUnique({
@@ -455,18 +536,17 @@ export class FinanceService {
     const settings = await this.prisma.salarySetting.findFirst();
     const pricePerKwh = settings?.electricityPricePerKwh ?? 800;
 
-    const category = await this.prisma.expenseCategory.findFirst({
-      where: {
-        deletedAt: null,
-        OR: [{ electricityCalc: true }, { legacyExpenseType: 'ELECTRICITY' }],
-      },
-      orderBy: { createdAt: 'asc' },
-    });
+    const category = await this.getElectricityExpenseCategoryForSync();
     if (!category) {
       return;
     }
 
-    const kwh = shift.electricityKwh ?? 0;
+    const enteredKwh = Number(shift.electricityKwh) || 0;
+    const hours = Number(shift.hoursWorked) || 0;
+    const powerKw = Number(shift.machine?.powerKw) || 0;
+    const impliedKwh = Math.max(0, hours * powerKw);
+    const kwh = enteredKwh > 1e-6 ? enteredKwh : impliedKwh;
+
     const existing = await this.prisma.expense.findFirst({
       where: { sourceShiftId: shiftId },
     });
@@ -482,7 +562,11 @@ export class FinanceService {
     const workerName = shift.worker?.fullName?.trim() || '—';
     const machineName = shift.machine?.name ?? '—';
     const dateStr = shift.date.toISOString().slice(0, 10);
-    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwh} kVt·soat × ${pricePerKwh} so'm`;
+    const kwhSource =
+      enteredKwh > 1e-6
+        ? `${kwh} kVt·soat`
+        : `${kwh.toFixed(2)} kVt·soat (${hours} soat × ${powerKw} kVt)`;
+    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwhSource} × ${pricePerKwh} so'm`;
     const title = description.length >= 2 ? description.slice(0, 160) : 'Smena elektr';
 
     const common = {
@@ -512,7 +596,15 @@ export class FinanceService {
 
   async resyncAllShiftElectricityExpenses() {
     const shifts = await this.prisma.shiftRecord.findMany({
-      where: { electricityKwh: { gt: 0 } },
+      where: {
+        OR: [
+          { electricityKwh: { gt: 0 } },
+          {
+            hoursWorked: { gt: 0 },
+            machine: { powerKw: { gt: 0 } },
+          },
+        ],
+      },
       select: { id: true },
     });
     for (const row of shifts) {
@@ -1076,6 +1168,13 @@ export class FinanceService {
           },
         },
       });
+      const distinctShiftDates = new Set(
+        shiftsInMonth.map((s) => {
+          const d = new Date(s.date);
+          return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+        }),
+      );
+      const workedDays = distinctShiftDates.size;
       const configuredRates = await this.prisma.employeeProductRate.findMany({
         where: { workerId: worker.id },
       });
@@ -1129,7 +1228,7 @@ export class FinanceService {
           },
         },
         update: {
-          workedDays: 26,
+          workedDays,
           producedQuantity,
           productionAmount,
           aklad,
@@ -1145,7 +1244,7 @@ export class FinanceService {
         create: {
           workerId: worker.id,
           month: dto.month,
-          workedDays: 26,
+          workedDays,
           producedQuantity,
           productionAmount,
           aklad,

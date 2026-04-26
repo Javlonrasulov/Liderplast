@@ -68,7 +68,7 @@ export class FinanceController {
   }
 
   @Get('expenses')
-  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   getExpenses() {
     return this.financeService.getExpenses();
   }
