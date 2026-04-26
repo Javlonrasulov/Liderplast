@@ -1441,6 +1441,14 @@ function EmployeesTab() {
     hybrid: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   };
 
+  /** Ishdan chiqish: aniq `employmentEndedAt`, bo‘lmasa (eski yozuvlar) `updatedAt` taxmini */
+  const formatEmploymentLeaveDisplay = (emp: Employee) => {
+    if (emp.isActive !== false) return '—';
+    if (emp.employmentEndedAt) return formatDate(emp.employmentEndedAt);
+    if (emp.updatedAt) return formatDate(emp.updatedAt);
+    return '—';
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit space-y-6">
@@ -1833,7 +1841,7 @@ function EmployeesTab() {
                   <span className="whitespace-nowrap">
                     {' · '}
                     {t.prLeaveDateLabel}:{' '}
-                    {emp.employmentEndedAt ? formatDate(emp.employmentEndedAt) : '—'}
+                    {formatEmploymentLeaveDisplay(emp)}
                   </span>
                 </p>
                 {shiftRange ? (
@@ -1880,9 +1888,7 @@ function EmployeesTab() {
               <span className="whitespace-nowrap">
                 {' · '}
                 {t.prLeaveDateLabel}:{' '}
-                {selectedEmployee.employmentEndedAt
-                  ? formatDate(selectedEmployee.employmentEndedAt)
-                  : '—'}
+                {formatEmploymentLeaveDisplay(selectedEmployee)}
               </span>
             </p>
             {(() => {

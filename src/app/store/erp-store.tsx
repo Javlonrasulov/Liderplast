@@ -349,6 +349,8 @@ export interface Employee {
   createdAt: string;
   /** Backend User.employmentEndedAt (ixtiyoriy) */
   employmentEndedAt?: string | null;
+  /** Profil oxirgi o‘zgarishi — chiqish sanasi bo‘lmasa taxminiy ko‘rinish uchun */
+  updatedAt?: string;
   /** Backend User.isActive — false: «ишдан чиққан», tarix saqlanadi */
   isActive?: boolean;
 }
@@ -1144,6 +1146,7 @@ type BackendUser = {
   salaryRate: number;
   preferredShiftNumber?: number | null;
   createdAt: string;
+  updatedAt: string;
   employmentEndedAt?: string | null;
 };
 
@@ -1930,6 +1933,7 @@ async function loadStateFromApi() {
     salaryType: normalizeSalaryType(user.salaryType),
     salaryAmount: user.salaryRate,
     createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
     employmentEndedAt: user.employmentEndedAt ?? undefined,
     isActive: user.isActive !== false,
   }));

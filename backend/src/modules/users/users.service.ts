@@ -157,7 +157,7 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    await this.ensureExists(id);
+    const current = await this.ensureExists(id);
 
     if (dto.login?.trim()) {
       const existingLogin = await this.prisma.user.findFirst({
@@ -190,6 +190,14 @@ export class UsersService {
       delete updateData.password;
     }
 
+    if (dto.isActive !== undefined) {
+      if (dto.isActive === true) {
+        updateData.employmentEndedAt = null;
+      } else if (dto.isActive === false && current.isActive) {
+        updateData.employmentEndedAt = new Date();
+      }
+    }
+
     return this.prisma.user.update({
       where: { id },
       data: updateData,
@@ -211,6 +219,7 @@ export class UsersService {
           canLogin: false,
           permissions: [],
           login: null,
+          ...(user.isActive ? { employmentEndedAt: new Date() } : {}),
         },
       });
       return { success: true, archived: true };

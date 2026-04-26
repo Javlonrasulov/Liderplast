@@ -2484,7 +2484,13 @@ export function ShiftWork() {
                         <span className="whitespace-nowrap">
                           {' · '}
                           {appT.prLeaveDateLabel}:{' '}
-                          {emp.employmentEndedAt ? formatDate(emp.employmentEndedAt) : '—'}
+                          {emp.isActive === false
+                            ? emp.employmentEndedAt
+                              ? formatDate(emp.employmentEndedAt)
+                              : emp.updatedAt
+                                ? formatDate(emp.updatedAt)
+                                : '—'
+                            : '—'}
                         </span>
                       </p>
                       <p className="text-slate-400 text-xs mt-0.5">
