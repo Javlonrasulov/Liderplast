@@ -787,11 +787,42 @@ export function ShiftWork() {
     [shiftDefinitions],
   );
 
+  /** Базадаги смена ёзувларида ишлатилган рақамлар (localStorage бўш бўлса ҳам) */
+  const shiftNumbersOnlyInRecords = useMemo(() => {
+    const set = new Set<number>();
+    for (const r of state.shiftRecords) {
+      if (typeof r.shift === 'number' && Number.isFinite(r.shift) && r.shift > 0) {
+        set.add(r.shift);
+      }
+    }
+    return [...set].sort((a, b) => a - b);
+  }, [state.shiftRecords]);
+
+  /** Форма / ишчи танлови: белгиланган сменалар + ёзувлардаги рақамлар */
+  const shiftPickerDefs = useMemo((): ShiftDefinition[] => {
+    const byNum = new Map<number, ShiftDefinition>();
+    for (const d of shiftDefinitions) {
+      byNum.set(d.number, d);
+    }
+    for (const n of shiftNumbersOnlyInRecords) {
+      if (!byNum.has(n)) {
+        byNum.set(n, {
+          id: `from-records-${n}`,
+          number: n,
+          name: '',
+          timeFrom: '',
+          timeTo: '',
+        });
+      }
+    }
+    return [...byNum.values()].sort((a, b) => a.number - b.number);
+  }, [shiftDefinitions, shiftNumbersOnlyInRecords]);
+
   const timelineShiftNumbers = useMemo(() => {
-    const set = new Set(sortedShiftDefs.map((d) => d.number));
+    const set = new Set(shiftPickerDefs.map((d) => d.number));
     state.shiftRecords.filter((r) => r.date === TODAY).forEach((r) => set.add(r.shift));
     return [...set].sort((a, b) => a - b);
-  }, [sortedShiftDefs, state.shiftRecords]);
+  }, [shiftPickerDefs, state.shiftRecords]);
 
   const sortedEmployees = useMemo(
     () => [...state.employees].sort((a, b) => a.fullName.localeCompare(b.fullName, undefined, { sensitivity: 'base' })),
@@ -807,11 +838,11 @@ export function ShiftWork() {
   );
 
   useEffect(() => {
-    if (sortedShiftDefs.length === 0) return;
-    if (!sortedShiftDefs.some((d) => d.number === newWorkerShift)) {
-      setNewWorkerShift(sortedShiftDefs[0].number);
+    if (shiftPickerDefs.length === 0) return;
+    if (!shiftPickerDefs.some((d) => d.number === newWorkerShift)) {
+      setNewWorkerShift(shiftPickerDefs[0].number);
     }
-  }, [sortedShiftDefs, newWorkerShift]);
+  }, [shiftPickerDefs, newWorkerShift]);
 
   const [form, setForm] = useState({
     date: TODAY,
@@ -981,11 +1012,11 @@ export function ShiftWork() {
   }, [semiShiftBlocked, shiftFormMachineOptions, state.machines]);
 
   useEffect(() => {
-    if (sortedShiftDefs.length === 0) return;
-    if (!sortedShiftDefs.some((d) => d.number === form.shift)) {
-      setForm((prev) => ({ ...prev, shift: sortedShiftDefs[0].number }));
+    if (shiftPickerDefs.length === 0) return;
+    if (!shiftPickerDefs.some((d) => d.number === form.shift)) {
+      setForm((prev) => ({ ...prev, shift: shiftPickerDefs[0].number }));
     }
-  }, [sortedShiftDefs, form.shift]);
+  }, [shiftPickerDefs, form.shift]);
 
   const openRecordEditor = useCallback(
     (r: ShiftRecord) => {
@@ -1116,7 +1147,7 @@ export function ShiftWork() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (sortedShiftDefs.length === 0 || !sortedShiftDefs.some((d) => d.number === form.shift)) {
+    if (shiftPickerDefs.length === 0 || !shiftPickerDefs.some((d) => d.number === form.shift)) {
       setError(t.shiftNoDefsHint);
       return;
     }
@@ -1249,7 +1280,7 @@ export function ShiftWork() {
         type: 'ADD_WORKER',
         payload: {
           fullName: name,
-          preferredShiftNumber: sortedShiftDefs.some((d) => d.number === newWorkerShift)
+          preferredShiftNumber: shiftPickerDefs.some((d) => d.number === newWorkerShift)
             ? newWorkerShift
             : undefined,
           phone: newWorkerPhone.trim().length > 4 ? newWorkerPhone.trim() : undefined,
@@ -1319,7 +1350,7 @@ export function ShiftWork() {
   const recordEditShiftOptions = useMemo((): UiDropdownOption[] => {
     if (!recordEditId) return [];
     const n = recordEditForm.shift;
-    const fromDefs = sortedShiftDefs.map((d) => ({
+    const fromDefs = shiftPickerDefs.map((d) => ({
       value: String(d.number),
       label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
     }));
@@ -1331,7 +1362,7 @@ export function ShiftWork() {
         label: `${n} — ${getShiftLabel(shiftDefinitions, n, t)}`,
       },
     ];
-  }, [recordEditId, recordEditForm.shift, sortedShiftDefs, shiftDefinitions, t]);
+  }, [recordEditId, recordEditForm.shift, shiftPickerDefs, shiftDefinitions, t]);
 
   // Today's stats (always from full state)
   const todayRecords = state.shiftRecords.filter(r => r.date === TODAY);
@@ -1393,7 +1424,8 @@ export function ShiftWork() {
       );
       setEditingShiftDefId(null);
     } else {
-      const nextNum = Math.max(0, ...shiftDefinitions.map((d) => d.number)) + 1;
+      const nextNum =
+        Math.max(0, ...shiftDefinitions.map((d) => d.number), ...shiftNumbersOnlyInRecords) + 1;
       setShiftDefinitions((prev) => [
         ...prev,
         {
@@ -1616,7 +1648,7 @@ export function ShiftWork() {
                 </div>
                 <div className="min-w-0">
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelShift}</label>
-                  {sortedShiftDefs.length === 0 ? (
+                  {shiftPickerDefs.length === 0 ? (
                     <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-3 py-3 text-xs text-amber-950 dark:border-amber-800/70 dark:bg-amber-950/35 dark:text-amber-100/90 space-y-2">
                       <p>{t.shiftNoDefsHint}</p>
                       <button
@@ -1629,7 +1661,7 @@ export function ShiftWork() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                      {sortedShiftDefs.map((def) => (
+                      {shiftPickerDefs.map((def) => (
                         <button
                           key={def.id}
                           type="button"
@@ -1964,7 +1996,7 @@ export function ShiftWork() {
 
               <button
                 type="submit"
-                disabled={sortedShiftDefs.length === 0}
+                disabled={shiftPickerDefs.length === 0}
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
               >
                 <CheckCircle2 size={16} /> {t.btn}
@@ -2229,7 +2261,12 @@ export function ShiftWork() {
                   type="text"
                   value={shiftDefForm.name}
                   onChange={(e) => setShiftDefForm({ ...shiftDefForm, name: e.target.value })}
-                  placeholder={t.shiftGenericName.replace('{n}', String(sortedShiftDefs.length ? Math.max(...sortedShiftDefs.map((d) => d.number)) + 1 : 1))}
+                  placeholder={t.shiftGenericName.replace(
+                    '{n}',
+                    String(
+                      Math.max(0, ...shiftDefinitions.map((d) => d.number), ...shiftNumbersOnlyInRecords) + 1,
+                    ),
+                  )}
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
               </div>
@@ -2328,7 +2365,7 @@ export function ShiftWork() {
               </div>
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPreferredShift}</label>
-                {sortedShiftDefs.length === 0 ? (
+                {shiftPickerDefs.length === 0 ? (
                   <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-900/40 dark:text-slate-400">
                     {t.shiftNoDefsHint}
                   </p>
@@ -2336,7 +2373,7 @@ export function ShiftWork() {
                   <UiDropdown
                     value={String(newWorkerShift)}
                     onChange={(v) => setNewWorkerShift(Number(v))}
-                    options={sortedShiftDefs.map((d) => ({
+                    options={shiftPickerDefs.map((d) => ({
                       value: String(d.number),
                       label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
                     }))}
@@ -2648,7 +2685,7 @@ export function ShiftWork() {
                   }
                   options={[
                     { value: '', label: t.workerShiftUnset },
-                    ...sortedShiftDefs.map((d) => ({
+                    ...shiftPickerDefs.map((d) => ({
                       value: String(d.number),
                       label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
                     })),

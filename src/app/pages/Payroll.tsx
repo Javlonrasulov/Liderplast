@@ -1429,7 +1429,7 @@ function EmployeesTab() {
                   </div>
                 )}
                 <button type="submit" className="w-full h-9 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                  <Save size={15} /> Saqlash
+                  <Save size={15} /> {t.btnSave}
                 </button>
               </form>
 
