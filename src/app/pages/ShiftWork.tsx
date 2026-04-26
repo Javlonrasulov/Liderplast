@@ -16,8 +16,6 @@ import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 
-const FALLBACK_PRODUCT_TYPES = ['18g', '20g', '0.5L', '1L', '5L'];
-
 const SHIFT_DEFS_KEY = 'liderplast_shift_definitions_v1';
 
 export type ShiftDefinition = {
@@ -28,20 +26,16 @@ export type ShiftDefinition = {
   timeTo: string;
 };
 
-const DEFAULT_SHIFT_DEFINITIONS: ShiftDefinition[] = [
-  { id: 'def-default-1', number: 1, name: '', timeFrom: '06:00', timeTo: '18:00' },
-  { id: 'def-default-2', number: 2, name: '', timeFrom: '18:00', timeTo: '06:00' },
-];
-
+/** Тоза тизим: сменалар фақат «Сменалар» вкладкасида қўшилгандан кейин мавжуд */
 function loadShiftDefinitions(): ShiftDefinition[] {
   try {
     const raw = localStorage.getItem(SHIFT_DEFS_KEY);
-    if (!raw) return [...DEFAULT_SHIFT_DEFINITIONS];
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as ShiftDefinition[];
-    if (!Array.isArray(parsed) || parsed.length === 0) return [...DEFAULT_SHIFT_DEFINITIONS];
+    if (!Array.isArray(parsed) || parsed.length === 0) return [];
     return parsed;
   } catch {
-    return [...DEFAULT_SHIFT_DEFINITIONS];
+    return [];
   }
 }
 
@@ -148,7 +142,10 @@ const TR = {
     shiftDefDelete: 'Ўчириш',
     shiftDefEdit: 'Таҳрир',
     shiftDefDeleteBlocked: 'Бу рақамда смена ёзувлари бор — аввал ўчириш ёки ёзувларни бошқа сменага ўтказинг',
-    shiftDefMinOne: 'Камида битта смена қолсин',
+    shiftNoDefsHint: 'Сменалар ҳали белгиланмаган. Аввал «Сменалар» бўлимида камида битта смена қўшинг.',
+    shiftNoDefsGoToTab: '«Сменалар»га ўтиш',
+    productTypesEmptyHint:
+      'Маҳсулот турлари ҳали йўқ. «Омбор»да ярим тайёр ёки тайёр маҳсулот номларини қўшинг (ёки кутинг — каталог юклансин).',
     shiftDefInUseRecords: 'Ёзувларда қўлланилган',
     shiftGenericName: '{n}-смена',
     kpiUnitPieces: 'дона',
@@ -266,7 +263,10 @@ const TR = {
     shiftDefDelete: 'O\'chirish',
     shiftDefEdit: 'Tahrir',
     shiftDefDeleteBlocked: 'Bu raqamda smena yozuvlari bor — avval o\'chiring yoki yozuvlarni boshqa smenaga o\'tkazing',
-    shiftDefMinOne: 'Kamida bitta smena qolsin',
+    shiftNoDefsHint: 'Smenalar hali belgilanmagan. Avval «Smenalar» bo‘limida kamida bitta smena qo‘shing.',
+    shiftNoDefsGoToTab: '«Smenalar»ga o‘tish',
+    productTypesEmptyHint:
+      "Mahsulot turlari hali yo'q. «Ombor»da yarim tayyor yoki tayyor mahsulot nomlarini qo'shing (yoki kuting — katalog yuklansin).",
     shiftDefInUseRecords: 'Yozuvlarda qo\'llanilgan',
     shiftGenericName: '{n}-smena',
     kpiUnitPieces: 'dona',
@@ -384,7 +384,10 @@ const TR = {
     shiftDefDelete: 'Удалить',
     shiftDefEdit: 'Изменить',
     shiftDefDeleteBlocked: 'Есть записи смены с этим номером — удалите записи или перенесите их',
-    shiftDefMinOne: 'Должна остаться хотя бы одна смена',
+    shiftNoDefsHint: 'Смены ещё не настроены. Сначала добавьте хотя бы одну смену во вкладке «Смены».',
+    shiftNoDefsGoToTab: 'Перейти к «Смены»',
+    productTypesEmptyHint:
+      'Типы продукции ещё не заданы. Добавьте полуфабрикаты или готовую продукцию на складе (или дождитесь загрузки каталога).',
     shiftDefInUseRecords: 'Используется в записях',
     shiftGenericName: 'Смена {n}',
     kpiUnitPieces: 'шт',
@@ -562,7 +565,8 @@ export function ShiftWork() {
   const historyPanelRef = useRef<HTMLDivElement>(null);
   const [historyFullscreen, setHistoryFullscreen] = useState(false);
 
-  const [catalogProductTypes, setCatalogProductTypes] = useState<string[]>([]);
+  const [catalogSemiNames, setCatalogSemiNames] = useState<string[]>([]);
+  const [catalogFinishedNames, setCatalogFinishedNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (state.warehouseProducts.length > 0) return;
@@ -573,14 +577,17 @@ export function ShiftWork() {
     }>('/warehouse/catalog')
       .then((catalog) => {
         if (!isMounted) return;
-        const names = [
-          ...catalog.semiProducts.map((p) => p.name?.trim?.() ?? '').filter(Boolean),
-          ...catalog.finishedProducts.map((p) => p.name?.trim?.() ?? '').filter(Boolean),
-        ];
-        setCatalogProductTypes(Array.from(new Set(names)));
+        const semis = catalog.semiProducts
+          .map((p) => p.name?.trim?.() ?? '')
+          .filter(Boolean);
+        const fins = catalog.finishedProducts
+          .map((p) => p.name?.trim?.() ?? '')
+          .filter(Boolean);
+        setCatalogSemiNames(Array.from(new Set(semis)));
+        setCatalogFinishedNames(Array.from(new Set(fins)));
       })
       .catch(() => {
-        // ignore (permissions/offline) — fallback will be used
+        // ignore (permissions/offline)
       });
     return () => {
       isMounted = false;
@@ -652,67 +659,33 @@ export function ShiftWork() {
     }
   }, []);
 
-  const productTypes = useMemo(() => {
-    const fromStore = state.warehouseProducts
-      .filter((p) => p.itemType !== 'RAW_MATERIAL')
-      .map((p) => p.name?.trim?.() ?? '')
-      .filter(Boolean);
-    const fromApi = fromStore.length > 0 ? fromStore : catalogProductTypes;
-
-    const uniq = Array.from(new Set(fromApi));
-    if (uniq.length === 0) return [...FALLBACK_PRODUCT_TYPES];
-    return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-  }, [state.warehouseProducts, catalogProductTypes]);
-
   const semiProductTypes = useMemo(() => {
     const fromStore = state.warehouseProducts
       .filter((p) => p.itemType === 'SEMI_PRODUCT')
       .map((p) => p.name?.trim?.() ?? '')
       .filter(Boolean);
-    const base = fromStore.length > 0 ? fromStore : productTypes.filter((p) => /g\b/i.test(p));
-    const uniq = Array.from(new Set(base));
+    const uniq = Array.from(new Set([...fromStore, ...catalogSemiNames]));
     return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-  }, [state.warehouseProducts, productTypes]);
+  }, [state.warehouseProducts, catalogSemiNames]);
 
   const finishedProductTypes = useMemo(() => {
     const fromStore = state.warehouseProducts
       .filter((p) => p.itemType === 'FINISHED_PRODUCT')
       .map((p) => p.name?.trim?.() ?? '')
       .filter(Boolean);
-    const base = fromStore.length > 0 ? fromStore : productTypes.filter((p) => /l\b/i.test(p));
-    const uniq = Array.from(new Set(base));
+    const uniq = Array.from(new Set([...fromStore, ...catalogFinishedNames]));
     return uniq.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-  }, [state.warehouseProducts, productTypes]);
+  }, [state.warehouseProducts, catalogFinishedNames]);
 
-  const fallbackSemiTypes = useMemo(
-    () => FALLBACK_PRODUCT_TYPES.filter((p) => /g\b/i.test(p)),
-    [],
-  );
-  const fallbackFinishedTypes = useMemo(
-    () => FALLBACK_PRODUCT_TYPES.filter((p) => /l\b/i.test(p)),
-    [],
-  );
-
-  const allowedSemiTypes = useMemo(() => {
-    if (semiProductTypes.length > 0) return semiProductTypes;
-    if (fallbackSemiTypes.length > 0) return fallbackSemiTypes;
-    return productTypes;
-  }, [semiProductTypes, fallbackSemiTypes, productTypes]);
-
-  const allowedFinishedTypes = useMemo(() => {
-    if (finishedProductTypes.length > 0) return finishedProductTypes;
-    if (fallbackFinishedTypes.length > 0) return fallbackFinishedTypes;
-    return productTypes;
-  }, [finishedProductTypes, fallbackFinishedTypes, productTypes]);
-
-  /** Aparat tanlanganda: yarim tayyor + tayyor mahsulotlar bitta ro‘yxatda */
+  /** Ombor / katalog: ярим тайёр + тайёр номлари (қатъий fallback йўқ) */
   const shiftLineProductOptions = useMemo(() => {
-    const merged = [...allowedSemiTypes, ...allowedFinishedTypes];
-    const uniq = Array.from(new Set(merged));
+    const uniq = Array.from(new Set([...semiProductTypes, ...finishedProductTypes]));
     return uniq.sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
     );
-  }, [allowedSemiTypes, allowedFinishedTypes]);
+  }, [semiProductTypes, finishedProductTypes]);
+
+  const productTypes = shiftLineProductOptions;
 
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'workers' | 'machines' | 'shiftDefs'>('form');
   const [success, setSuccess] = useState('');
@@ -826,8 +799,7 @@ export function ShiftWork() {
 
   const createEmptyLine = useCallback((): ShiftLine => {
     const defaultMachineId = state.machines[0]?.id || '';
-    const defaultProductType =
-      shiftLineProductOptions[0] || productTypes[0] || '18g';
+    const defaultProductType = shiftLineProductOptions[0] || '';
     return {
       id: `line-${Math.random().toString(16).slice(2)}`,
       machineId: defaultMachineId,
@@ -842,7 +814,7 @@ export function ShiftWork() {
       paintQuantity: '',
       paintUnit: 'kg',
     };
-  }, [state.machines, productTypes, shiftLineProductOptions]);
+  }, [state.machines, shiftLineProductOptions]);
 
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
 
@@ -867,25 +839,25 @@ export function ShiftWork() {
   }, [state.warehouseProducts]);
 
   useEffect(() => {
-    if (!productTypes.length) return;
     setLines((prev) => {
       let changed = false;
       const next = prev.map((ln) => {
-        const machine = state.machines.find((m) => m.id === ln.machineId);
-        const allowed = machine
-          ? shiftLineProductOptions.length > 0
-            ? shiftLineProductOptions
-            : productTypes
-          : productTypes;
-        const fallback = allowed[0] || productTypes[0];
-        if (!fallback) return ln;
+        const allowed = shiftLineProductOptions;
+        if (allowed.length === 0) {
+          if (ln.productType) {
+            changed = true;
+            return { ...ln, productType: '' };
+          }
+          return ln;
+        }
+        const fallback = allowed[0];
         if (allowed.includes(ln.productType)) return ln;
         changed = true;
         return { ...ln, productType: fallback };
       });
       return changed ? next : prev;
     });
-  }, [productTypes, state.machines, shiftLineProductOptions]);
+  }, [state.machines, shiftLineProductOptions]);
 
   useEffect(() => {
     const defaultId = state.machines[0]?.id;
@@ -918,7 +890,7 @@ export function ShiftWork() {
         workerName: r.workerName,
         machineId: r.machineId || state.machines[0]?.id || '',
         hoursWorked: String(r.hoursWorked),
-        productType: r.productType || '18g',
+        productType: r.productType || '',
         machineReading: r.machineReading,
         producedQty: String(r.producedQty),
         defectCount: String(r.defectCount),
@@ -945,6 +917,10 @@ export function ShiftWork() {
     const produced = parseNonNegativeInt(recordEditForm.producedQty);
     if (Number.isNaN(produced) || produced < 0) {
       setRecordEditError(t.labelProduced + '!');
+      return;
+    }
+    if (!recordEditForm.productType.trim()) {
+      setRecordEditError(t.labelProduct + '!');
       return;
     }
     const sel = state.machines.find((m) => m.id === recordEditForm.machineId);
@@ -980,14 +956,13 @@ export function ShiftWork() {
         const next = { ...ln, ...patch };
         if (patch.machineId !== undefined) {
           const machine = state.machines.find((m) => m.id === next.machineId);
-          const allowed = machine
-            ? shiftLineProductOptions.length > 0
-              ? shiftLineProductOptions
-              : productTypes
-            : productTypes;
+          const allowed = shiftLineProductOptions;
           const fallback = allowed[0];
           if (fallback && !allowed.includes(next.productType)) {
             next.productType = fallback;
+          }
+          if (!fallback && next.productType) {
+            next.productType = '';
           }
           if (machine?.type !== 'semi') {
             next.paintUsed = false;
@@ -999,7 +974,7 @@ export function ShiftWork() {
         return next;
       }),
     );
-  }, [state.machines, shiftLineProductOptions, productTypes]);
+  }, [state.machines, shiftLineProductOptions]);
 
   const addLine = useCallback(() => {
     setLines((prev) => [...prev, createEmptyLine()]);
@@ -1015,6 +990,14 @@ export function ShiftWork() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (sortedShiftDefs.length === 0 || !sortedShiftDefs.some((d) => d.number === form.shift)) {
+      setError(t.shiftNoDefsHint);
+      return;
+    }
+    if (shiftLineProductOptions.length === 0) {
+      setError(t.productTypesEmptyHint);
+      return;
+    }
     if (!form.workerName.trim()) { setError(t.labelWorker + '!'); return; }
 
     const meaningfulLines = lines.filter((ln) => {
@@ -1125,7 +1108,9 @@ export function ShiftWork() {
         type: 'ADD_WORKER',
         payload: {
           fullName: name,
-          preferredShiftNumber: newWorkerShift,
+          preferredShiftNumber: sortedShiftDefs.some((d) => d.number === newWorkerShift)
+            ? newWorkerShift
+            : undefined,
           phone: newWorkerPhone.trim().length > 4 ? newWorkerPhone.trim() : undefined,
         },
       });
@@ -1189,6 +1174,23 @@ export function ShiftWork() {
     const arr = filterData([...state.shiftRecords]);
     return arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [state.shiftRecords, filterData]);
+
+  const recordEditShiftOptions = useMemo((): UiDropdownOption[] => {
+    if (!recordEditId) return [];
+    const n = recordEditForm.shift;
+    const fromDefs = sortedShiftDefs.map((d) => ({
+      value: String(d.number),
+      label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
+    }));
+    if (fromDefs.some((o) => Number(o.value) === n)) return fromDefs;
+    return [
+      ...fromDefs,
+      {
+        value: String(n),
+        label: `${n} — ${getShiftLabel(shiftDefinitions, n, t)}`,
+      },
+    ];
+  }, [recordEditId, recordEditForm.shift, sortedShiftDefs, shiftDefinitions, t]);
 
   // Today's stats (always from full state)
   const todayRecords = state.shiftRecords.filter(r => r.date === TODAY);
@@ -1268,11 +1270,6 @@ export function ShiftWork() {
   const deleteShiftDef = (id: string) => {
     const d = shiftDefinitions.find((x) => x.id === id);
     if (!d) return;
-    if (shiftDefinitions.length <= 1) {
-      setShiftDefError(t.shiftDefMinOne);
-      setTimeout(() => setShiftDefError(''), 4000);
-      return;
-    }
     if (state.shiftRecords.some((r) => r.shift === d.number)) {
       setShiftDefError(t.shiftDefDeleteBlocked);
       setTimeout(() => setShiftDefError(''), 5000);
@@ -1439,19 +1436,32 @@ export function ShiftWork() {
                 </div>
                 <div className="min-w-0">
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelShift}</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                    {sortedShiftDefs.map((def) => (
+                  {sortedShiftDefs.length === 0 ? (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-3 py-3 text-xs text-amber-950 dark:border-amber-800/70 dark:bg-amber-950/35 dark:text-amber-100/90 space-y-2">
+                      <p>{t.shiftNoDefsHint}</p>
                       <button
-                        key={def.id}
                         type="button"
-                        title={getShiftLabel(shiftDefinitions, def.number, t)}
-                        onClick={() => setForm({ ...form, shift: def.number })}
-                        className={`py-2 min-[400px]:py-2.5 rounded-xl text-xs min-[400px]:text-sm font-bold transition-all border truncate px-1 ${form.shift === def.number ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`}
+                        onClick={() => setActiveTab('shiftDefs')}
+                        className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                       >
-                        {def.number}
+                        {t.shiftNoDefsGoToTab}
                       </button>
-                    ))}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {sortedShiftDefs.map((def) => (
+                        <button
+                          key={def.id}
+                          type="button"
+                          title={getShiftLabel(shiftDefinitions, def.number, t)}
+                          onClick={() => setForm({ ...form, shift: def.number })}
+                          className={`py-2 min-[400px]:py-2.5 rounded-xl text-xs min-[400px]:text-sm font-bold transition-all border truncate px-1 ${form.shift === def.number ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`}
+                        >
+                          {def.number}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1583,23 +1593,28 @@ export function ShiftWork() {
                       {/* Product type */}
                       <div>
                         <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelProduct}</label>
-                        <div className="flex flex-wrap gap-2">
-                          {(selectedMachine
-                            ? shiftLineProductOptions.length > 0
-                              ? shiftLineProductOptions
-                              : productTypes
-                            : productTypes
-                          ).map((pt) => (
-                            <button
-                              key={pt}
-                              type="button"
-                              onClick={() => updateLine(ln.id, { productType: pt })}
-                              className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${ln.productType === pt ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`}
-                            >
-                              {pt}
-                            </button>
-                          ))}
-                        </div>
+                        {shiftLineProductOptions.length === 0 ? (
+                          <p className="rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2.5 text-xs text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100/90">
+                            {t.productTypesEmptyHint}
+                          </p>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {shiftLineProductOptions.map((pt) => (
+                              <button
+                                key={pt}
+                                type="button"
+                                onClick={() => updateLine(ln.id, { productType: pt })}
+                                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                                  ln.productType === pt
+                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                                    : `${PRODUCT_COLORS[pt] ?? 'bg-white/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'}`
+                                }`}
+                              >
+                                {pt}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {selectedMachine?.type === 'semi' && (
@@ -1761,8 +1776,11 @@ export function ShiftWork() {
                 </div>
               )}
 
-              <button type="submit"
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/30">
+              <button
+                type="submit"
+                disabled={sortedShiftDefs.length === 0}
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
+              >
                 <CheckCircle2 size={16} /> {t.btn}
               </button>
             </form>
@@ -2122,17 +2140,23 @@ export function ShiftWork() {
                 <input type="text" value={newWorker} onChange={e => setNewWorker(e.target.value)} placeholder={t.workerName}
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
               </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPreferredShift}</label>
-                <UiDropdown
-                  value={String(newWorkerShift)}
-                  onChange={(v) => setNewWorkerShift(Number(v))}
-                  options={sortedShiftDefs.map((d) => ({
-                    value: String(d.number),
-                    label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
-                  }))}
-                  placeholder={t.workerPreferredShift}
-                />
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPreferredShift}</label>
+                {sortedShiftDefs.length === 0 ? (
+                  <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-900/40 dark:text-slate-400">
+                    {t.shiftNoDefsHint}
+                  </p>
+                ) : (
+                  <UiDropdown
+                    value={String(newWorkerShift)}
+                    onChange={(v) => setNewWorkerShift(Number(v))}
+                    options={sortedShiftDefs.map((d) => ({
+                      value: String(d.number),
+                      label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
+                    }))}
+                    placeholder={t.workerPreferredShift}
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.workerPhone} ({t.workerOptional})</label>
@@ -2525,10 +2549,7 @@ export function ShiftWork() {
                   <UiDropdown
                     value={String(recordEditForm.shift)}
                     onChange={(v) => setRecordEditForm({ ...recordEditForm, shift: Number(v) })}
-                    options={sortedShiftDefs.map((d) => ({
-                      value: String(d.number),
-                      label: `${d.number} — ${getShiftLabel(shiftDefinitions, d.number, t)}`,
-                    }))}
+                    options={recordEditShiftOptions}
                     placeholder={t.labelShift}
                   />
                 </div>
@@ -2570,27 +2591,39 @@ export function ShiftWork() {
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelProduct}</label>
-                <div className="flex flex-wrap gap-2">
-                  {Array.from(
+                {(() => {
+                  const merged = Array.from(
                     new Set([
-                      recordEditForm.productType,
-                      ...(state.machines.some((m) => m.id === recordEditForm.machineId)
-                        ? shiftLineProductOptions.length > 0
-                          ? shiftLineProductOptions
-                          : productTypes
-                        : productTypes),
+                      ...(recordEditForm.productType ? [recordEditForm.productType] : []),
+                      ...shiftLineProductOptions,
                     ]),
-                  ).map((pt) => (
-                    <button
-                      key={pt}
-                      type="button"
-                      onClick={() => setRecordEditForm({ ...recordEditForm, productType: pt })}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${recordEditForm.productType === pt ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'}`}
-                    >
-                      {pt}
-                    </button>
-                  ))}
-                </div>
+                  ).filter(Boolean);
+                  if (merged.length === 0) {
+                    return (
+                      <p className="rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2.5 text-xs text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100/90">
+                        {t.productTypesEmptyHint}
+                      </p>
+                    );
+                  }
+                  return (
+                    <div className="flex flex-wrap gap-2">
+                      {merged.map((pt) => (
+                        <button
+                          key={pt}
+                          type="button"
+                          onClick={() => setRecordEditForm({ ...recordEditForm, productType: pt })}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
+                            recordEditForm.productType === pt
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : `${PRODUCT_COLORS[pt] ?? 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'}`
+                          }`}
+                        >
+                          {pt}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelReading}</label>

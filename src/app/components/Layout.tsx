@@ -3,7 +3,7 @@ import { Outlet, NavLink, useLocation } from 'react-router';
 import {
   LayoutDashboard, Droplets, Boxes,
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
-  Bell, Sun, Moon, User, Menu, Globe, Check, ChevronDown,
+  Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -321,14 +321,6 @@ export function Layout() {
             <div className="flex shrink-0 items-center justify-end gap-1 sm:hidden">
               <button
                 type="button"
-                className="relative shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                <Bell size={16} />
-                {lowStock && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                 className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
@@ -399,14 +391,6 @@ export function Layout() {
               <div className="relative z-[70] shrink-0">
                 <DateFilterPicker />
               </div>
-
-              <button
-                type="button"
-                className="relative shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                <Bell size={16} />
-                {lowStock && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
-              </button>
 
               <button
                 type="button"
