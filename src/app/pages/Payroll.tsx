@@ -168,7 +168,9 @@ function VedomostTab() {
   const exportCSV = () => {
     const headers = [t.prFullName, t.prPosition, t.prCardNumber, t.prWorkedDays, t.prProducedQty, t.prProductionAmt, t.prAklad, t.prBonus, t.prBrutto, t.prIncomeTax, t.prNps, t.prSocialTax, t.prNet, t.prStatusLabel];
     const csvRows = allRows.map(r => {
-      const emp = state.employees.find(e => e.id === r.employeeId);
+      const emp =
+        state.employees.find((e) => e.id === r.employeeId) ??
+        state.formerEmployees.find((e) => e.id === r.employeeId);
       return [
         emp?.fullName ?? '', emp?.position ?? '', emp?.cardNumber ?? '',
         r.workedDays, r.producedQuantity, r.productionAmount,
@@ -377,7 +379,9 @@ function VedomostTab() {
               </thead>
               <tbody>
                 {rows.map((row, idx) => {
-                  const emp = state.employees.find(e => e.id === row.employeeId);
+                  const emp =
+                    state.employees.find((e) => e.id === row.employeeId) ??
+                    state.formerEmployees.find((e) => e.id === row.employeeId);
                   const isEditing = editId === row.id;
                   const isGiven = row.status === 'paid';
                   return (
@@ -1174,6 +1178,41 @@ function EmployeesTab() {
   const { state, dispatch } = useERP();
   const { t, filterData, filterLabel, dateFilter } = useApp();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [employeeRosterSub, setEmployeeRosterSub] = useState<'active' | 'former'>('active');
+
+  const sortedPayrollEmployees = useMemo(
+    () =>
+      [...state.employees].sort((a, b) =>
+        a.fullName.localeCompare(b.fullName, undefined, { sensitivity: 'base' }),
+      ),
+    [state.employees],
+  );
+
+  const sortedFormerEmployees = useMemo(
+    () =>
+      [...state.formerEmployees].sort((a, b) =>
+        a.fullName.localeCompare(b.fullName, undefined, { sensitivity: 'base' }),
+      ),
+    [state.formerEmployees],
+  );
+
+  const shiftEmploymentRangeById = useMemo(() => {
+    const m = new Map<string, { min: string; max: string }>();
+    for (const emp of [...state.employees, ...state.formerEmployees]) {
+      const dates = state.shiftRecords
+        .filter((s) => {
+          if (s.employeeId) return s.employeeId === emp.id;
+          return emp.fullName.trim().toLowerCase() === s.workerName.trim().toLowerCase();
+        })
+        .map((r) => r.date)
+        .filter(Boolean)
+        .sort();
+      if (dates.length > 0) {
+        m.set(emp.id, { min: dates[0]!, max: dates[dates.length - 1]! });
+      }
+    }
+    return m;
+  }, [state.employees, state.formerEmployees, state.shiftRecords]);
 
   const workerRateProductLabels = useMemo(
     () =>
@@ -1251,13 +1290,33 @@ function EmployeesTab() {
   };
 
   useEffect(() => {
-    if (!selectedEmployeeId && state.employees[0]?.id) {
-      setSelectedEmployeeId(state.employees[0].id);
+    if (employeeRosterSub === 'active') {
+      const list = state.employees;
+      if (list.length === 0) {
+        setSelectedEmployeeId('');
+        return;
+      }
+      if (selectedEmployeeId && list.some((e) => e.id === selectedEmployeeId)) return;
+      setSelectedEmployeeId(list[0]!.id);
+      return;
     }
-  }, [selectedEmployeeId, state.employees]);
+    const list = state.formerEmployees;
+    if (list.length === 0) {
+      setSelectedEmployeeId('');
+      return;
+    }
+    if (selectedEmployeeId && list.some((e) => e.id === selectedEmployeeId)) return;
+    setSelectedEmployeeId(list[0]!.id);
+  }, [employeeRosterSub, state.employees, state.formerEmployees, selectedEmployeeId]);
 
   const selectedEmployee =
-    state.employees.find((emp) => emp.id === selectedEmployeeId) ?? null;
+    state.employees.find((emp) => emp.id === selectedEmployeeId) ??
+    state.formerEmployees.find((emp) => emp.id === selectedEmployeeId) ??
+    null;
+
+  const selectedEmployeeIsActiveRoster = selectedEmployee
+    ? state.employees.some((e) => e.id === selectedEmployee.id)
+    : false;
 
   useEffect(() => {
     if (!selectedEmployee) return;
@@ -1283,10 +1342,12 @@ function EmployeesTab() {
 
   const selectedShiftLog = useMemo((): ShiftRecord[] => {
     if (!selectedEmployeeId) return [];
-    const emp = state.employees.find((e) => e.id === selectedEmployeeId);
+    const emp =
+      state.employees.find((e) => e.id === selectedEmployeeId) ??
+      state.formerEmployees.find((e) => e.id === selectedEmployeeId);
+    if (!emp) return [];
     const forEmp = state.shiftRecords.filter((s) => {
       if (s.employeeId) return s.employeeId === selectedEmployeeId;
-      if (!emp) return false;
       return emp.fullName.trim().toLowerCase() === s.workerName.trim().toLowerCase();
     });
     return filterData(forEmp).sort((a, b) => {
@@ -1294,7 +1355,7 @@ function EmployeesTab() {
       if (byDate !== 0) return byDate;
       return a.shift - b.shift;
     });
-  }, [state.shiftRecords, state.employees, selectedEmployeeId, filterData, dateFilter]);
+  }, [state.shiftRecords, state.employees, state.formerEmployees, selectedEmployeeId, filterData, dateFilter]);
 
   const selectedShiftTotals = useMemo(() => {
     let hours = 0;
@@ -1436,7 +1497,7 @@ function EmployeesTab() {
           </button>
         </form>
 
-        {selectedEmployee && (
+        {selectedEmployee && selectedEmployeeIsActiveRoster && (
           <>
             <div className="border-t border-slate-200 dark:border-slate-700 pt-5">
               <div className="flex items-center gap-2 mb-4">
@@ -1450,7 +1511,10 @@ function EmployeesTab() {
                 <StyledSelect
                   value={selectedEmployeeId}
                   onValueChange={setSelectedEmployeeId}
-                  options={state.employees.map((emp) => ({ value: emp.id, label: emp.fullName }))}
+                  options={sortedPayrollEmployees.map((emp) => ({
+                    value: emp.id,
+                    label: emp.fullName,
+                  }))}
                 />
               </div>
               <form onSubmit={handleEmployeeUpdate} className="space-y-3">
@@ -1683,19 +1747,50 @@ function EmployeesTab() {
       </div>
 
       <div className="lg:col-span-3 space-y-4">
+        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-slate-200 bg-white p-1.5 dark:border-slate-700 dark:bg-slate-800">
+          <button
+            type="button"
+            onClick={() => setEmployeeRosterSub('active')}
+            className={`flex-1 min-w-[8rem] rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
+              employeeRosterSub === 'active'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700/80'
+            }`}
+          >
+            {t.prEmployeesSubActive}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmployeeRosterSub('former')}
+            className={`flex-1 min-w-[8rem] rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
+              employeeRosterSub === 'former'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700/80'
+            }`}
+          >
+            {t.prEmployeesSubFormer}
+          </button>
+        </div>
+
         <div className="flex items-start gap-2 rounded-2xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 text-xs text-indigo-900/90 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-200/90">
           <Calendar size={16} className="mt-0.5 shrink-0 opacity-80" />
           <p>{(t.prShiftLogFilterHint ?? '').replace(/\{label\}/g, filterLabel ?? '')}</p>
         </div>
 
-        {state.employees.length === 0 ? (
+        {employeeRosterSub === 'active' && state.employees.length === 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-10 text-center">
             <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
             <p className="text-slate-500 text-sm">{t.prNoEmployees}</p>
           </div>
+        ) : employeeRosterSub === 'former' && state.formerEmployees.length === 0 ? (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-10 text-center">
+            <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+            <p className="text-slate-500 text-sm">{t.prNoFormerEmployees}</p>
+          </div>
         ) : (
-          state.employees.map((emp) => {
+          (employeeRosterSub === 'active' ? sortedPayrollEmployees : sortedFormerEmployees).map((emp) => {
             const selected = emp.id === selectedEmployeeId;
+            const shiftRange = shiftEmploymentRangeById.get(emp.id);
             return (
             <div
               key={emp.id}
@@ -1720,36 +1815,61 @@ function EmployeesTab() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">{emp.fullName}</p>
+                  {employeeRosterSub === 'former' ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-slate-200">
+                      {t.prEmployeeArchivedBadge}
+                    </span>
+                  ) : null}
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${SALARY_TYPE_COLORS[emp.salaryType]}`}>
                     {emp.salaryType === 'fixed' ? t.prFixed : emp.salaryType === 'per_piece' ? t.prPerPiece : t.prHybrid}
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs">{emp.position}</p>
+                {shiftRange ? (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    {t.prShiftEmploymentPeriod.replace('{from}', shiftRange.min).replace('{to}', shiftRange.max)}
+                  </p>
+                ) : null}
                 <div className="flex items-center gap-4 mt-1">
                   <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || '—'}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || '—'}</span>
                   {emp.salaryAmount > 0 && <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(emp.salaryAmount)}</span>}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteEmployeeTarget(emp);
-                }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-              >
-                <Trash2 size={14} />
-              </button>
+              {employeeRosterSub === 'active' ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteEmployeeTarget(emp);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              ) : (
+                <span className="w-8 shrink-0" aria-hidden />
+              )}
             </div>
             );
           })
         )}
 
-        {state.employees.length > 0 && selectedEmployee ? (
+        {((employeeRosterSub === 'active' && state.employees.length > 0) ||
+          (employeeRosterSub === 'former' && state.formerEmployees.length > 0)) &&
+        selectedEmployee ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.prShiftLogTitle}</h3>
             <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">{selectedEmployee.fullName}</p>
+            {(() => {
+              const r = shiftEmploymentRangeById.get(selectedEmployee.id);
+              if (!r) return null;
+              return (
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {t.prShiftEmploymentPeriod.replace('{from}', r.min).replace('{to}', r.max)}
+                </p>
+              );
+            })()}
             {selectedShiftLog.length === 0 ? (
               <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t.prShiftLogEmpty}</p>
             ) : (

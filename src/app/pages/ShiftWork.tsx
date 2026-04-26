@@ -27,6 +27,14 @@ export type ShiftDefinition = {
   timeTo: string;
 };
 
+/** «Сменалар» localStorage рўйхатида энг кичик бўш рақам (1, 2, …). Базадаги ёзувлар рақами янги смена № ни «ўтиб кетмасин». */
+function smallestMissingShiftDefNumber(definitions: ShiftDefinition[]): number {
+  const used = new Set(definitions.map((d) => d.number));
+  let n = 1;
+  while (used.has(n)) n += 1;
+  return n;
+}
+
 /** Тоза тизим: сменалар фақат «Сменалар» вкладкасида қўшилгандан кейин мавжуд */
 function loadShiftDefinitions(): ShiftDefinition[] {
   try {
@@ -180,6 +188,7 @@ const TR = {
     workerEditTitle: 'Ишчи маълумотларини таҳрирлаш',
     workerOrphansTitle: 'Фақат смена ёзувларида (базада алоҳида ёзув йўқ)',
     workerDuplicate: 'Бу исмда ишчи аллақачон мавжуд',
+    workerArchivedBadge: 'Ишдан чиққан',
     workerOptional: 'ихтиёрий',
     shiftPaintQuestion: 'Краска/бўёқ ишлатилдими? (қолип)',
     shiftPaintMaterial: 'Краска / хомашё',
@@ -310,6 +319,7 @@ const TR = {
     workerEditTitle: 'Ishchi ma\'lumotlarini tahrirlash',
     workerOrphansTitle: 'Faqat smena yozuvlarida (bazada alohida yozuv yo\'q)',
     workerDuplicate: 'Bu ismda ishchi allaqachon mavjud',
+    workerArchivedBadge: 'Ishdan chiqqan',
     workerOptional: 'ixtiyoriy',
     shiftPaintQuestion: 'Kraska/bo\'yoq ishlatildimi? (qolip)',
     shiftPaintMaterial: 'Kraska / xomashyo',
@@ -440,6 +450,7 @@ const TR = {
     workerEditTitle: 'Изменить данные сотрудника',
     workerOrphansTitle: 'Только в записях смены (нет записи в базе)',
     workerDuplicate: 'Сотрудник с таким именем уже есть',
+    workerArchivedBadge: 'Уволен',
     workerOptional: 'необязательно',
     shiftPaintQuestion: 'Использовалась краска/краситель? (преформа)',
     shiftPaintMaterial: 'Краска / сырьё',
@@ -792,7 +803,7 @@ export function ShiftWork() {
     return [...set].sort((a, b) => a - b);
   }, [state.shiftRecords]);
 
-  /** Форма / ишчи танлови: белгиланган сменалар + ёзувлардаги рақамлар */
+  /** Форма / ишчи танлови: белгиланган сменалар + ёзувлардаги рақамлар + 1…max орасидаги тешиклар */
   const shiftPickerDefs = useMemo((): ShiftDefinition[] => {
     const byNum = new Map<number, ShiftDefinition>();
     for (const d of shiftDefinitions) {
@@ -802,6 +813,19 @@ export function ShiftWork() {
       if (!byNum.has(n)) {
         byNum.set(n, {
           id: `from-records-${n}`,
+          number: n,
+          name: '',
+          timeFrom: '',
+          timeTo: '',
+        });
+      }
+    }
+    const keys = [...byNum.keys()];
+    const maxNum = keys.length > 0 ? Math.max(...keys) : 0;
+    for (let n = 1; n <= maxNum; n += 1) {
+      if (!byNum.has(n)) {
+        byNum.set(n, {
+          id: `gap-${n}`,
           number: n,
           name: '',
           timeFrom: '',
@@ -823,13 +847,38 @@ export function ShiftWork() {
     [state.employees],
   );
 
-  const orphanWorkerNames = useMemo(
-    () =>
-      state.workers.filter(
-        (w) => Boolean(w?.trim()) && !state.employees.some((e) => e.fullName === w),
-      ),
-    [state.workers, state.employees],
-  );
+  const shiftEmploymentRangeById = useMemo(() => {
+    const m = new Map<string, { min: string; max: string }>();
+    for (const emp of state.employees) {
+      const dates = state.shiftRecords
+        .filter((s) => {
+          if (s.employeeId) return s.employeeId === emp.id;
+          return emp.fullName.trim().toLowerCase() === s.workerName.trim().toLowerCase();
+        })
+        .map((r) => r.date)
+        .filter(Boolean)
+        .sort();
+      if (dates.length > 0) {
+        m.set(emp.id, { min: dates[0]!, max: dates[dates.length - 1]! });
+      }
+    }
+    return m;
+  }, [state.employees, state.shiftRecords]);
+
+  const orphanWorkerNames = useMemo(() => {
+    const activeLc = new Set(
+      state.employees.map((e) => e.fullName.trim().toLowerCase()).filter(Boolean),
+    );
+    const formerLc = new Set(
+      state.formerEmployees.map((e) => e.fullName.trim().toLowerCase()).filter(Boolean),
+    );
+    return state.workers.filter((w) => {
+      const q = w.trim().toLowerCase();
+      if (!q) return false;
+      if (activeLc.has(q) || formerLc.has(q)) return false;
+      return true;
+    });
+  }, [state.workers, state.employees, state.formerEmployees]);
 
   useEffect(() => {
     if (shiftPickerDefs.length === 0) return;
@@ -932,9 +981,7 @@ export function ShiftWork() {
 
   const workerSuggestions = useMemo(() => {
     const query = form.workerName.trim().toLowerCase();
-    return state.workers.filter((w) =>
-      !query ? true : w.toLowerCase().includes(query),
-    );
+    return state.workers.filter((w) => !query || w.toLowerCase().includes(query));
   }, [state.workers, form.workerName]);
 
   const rawMaterialOptions = useMemo(() => {
@@ -1265,7 +1312,11 @@ export function ShiftWork() {
     setWorkerFormError('');
     const name = newWorker.trim();
     if (!name) return;
-    if (state.employees.some((emp) => emp.fullName.toLowerCase() === name.toLowerCase())) {
+    const nameLc = name.toLowerCase();
+    if (
+      state.employees.some((emp) => emp.fullName.toLowerCase() === nameLc) ||
+      state.formerEmployees.some((emp) => emp.fullName.toLowerCase() === nameLc)
+    ) {
       setWorkerFormError(t.workerDuplicate);
       return;
     }
@@ -1418,8 +1469,7 @@ export function ShiftWork() {
       );
       setEditingShiftDefId(null);
     } else {
-      const nextNum =
-        Math.max(0, ...shiftDefinitions.map((d) => d.number), ...shiftNumbersOnlyInRecords) + 1;
+      const nextNum = smallestMissingShiftDefNumber(shiftDefinitions);
       setShiftDefinitions((prev) => [
         ...prev,
         {
@@ -2257,9 +2307,7 @@ export function ShiftWork() {
                   onChange={(e) => setShiftDefForm({ ...shiftDefForm, name: e.target.value })}
                   placeholder={t.shiftGenericName.replace(
                     '{n}',
-                    String(
-                      Math.max(0, ...shiftDefinitions.map((d) => d.number), ...shiftNumbersOnlyInRecords) + 1,
-                    ),
+                    String(smallestMissingShiftDefNumber(shiftDefinitions)),
                   )}
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
@@ -2432,6 +2480,15 @@ export function ShiftWork() {
                       <p className="text-slate-400 text-xs mt-0.5">
                         {t.workerStatLine.replace('{n}', String(workerRecs.length)).replace('{h}', String(totalHours))}
                       </p>
+                      {(() => {
+                        const r = shiftEmploymentRangeById.get(emp.id);
+                        if (!r) return null;
+                        return (
+                          <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-1">
+                            {appT.prShiftEmploymentPeriod.replace('{from}', r.min).replace('{to}', r.max)}
+                          </p>
+                        );
+                      })()}
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">
                         {st ? (
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold max-w-full ${st.badge}`}>

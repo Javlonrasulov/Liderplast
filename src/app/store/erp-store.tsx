@@ -307,6 +307,8 @@ export interface ShiftRecord {
   date: string;
   shift: number;
   workerName: string;
+  /** Backend worker.id — bugalteriya / tarix фильтри */
+  employeeId?: string;
   machineId: string;
   hoursWorked: number;
   productType: string;
@@ -345,6 +347,8 @@ export interface Employee {
   salaryType: 'fixed' | 'per_piece' | 'hybrid';
   salaryAmount: number;
   createdAt: string;
+  /** Backend User.isActive — false: «ишдан чиққан», tarix saqlanadi */
+  isActive?: boolean;
 }
 
 export interface EmployeeProductRate {
@@ -474,6 +478,8 @@ export interface ERPState {
   shiftRecords: ShiftRecord[];
   workers: string[];
   employees: Employee[];
+  /** `isActive === false` — faqat Buxgalteriya → ишчилар ичидаги «ишдан чиққанлар» */
+  formerEmployees: Employee[];
   employeeProductRates: EmployeeProductRate[];
   salaryVedomost: SalaryRow[];
   salaryPaymentSummaries: SalaryPaymentSummary[];
@@ -713,6 +719,7 @@ const emptyState: ERPState = {
   shiftRecords: [],
   workers: [],
   employees: [],
+  formerEmployees: [],
   employeeProductRates: [],
   salaryVedomost: [],
   salaryPaymentSummaries: [],
@@ -868,7 +875,7 @@ type BackendShiftRecord = {
   paintRawMaterialId?: string | null;
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
-  worker: { fullName: string };
+  worker: { id: string; fullName: string };
   machine?: { id: string } | null;
 };
 
@@ -1129,6 +1136,7 @@ type BackendUser = {
   customRoleLabel?: string | null;
   permissions?: string[];
   canLogin?: boolean;
+  isActive?: boolean;
   role: 'ADMIN' | 'DIRECTOR' | 'ACCOUNTANT' | 'MANAGER' | 'WORKER';
   salaryType: 'FIXED' | 'PER_PRODUCT' | 'HYBRID';
   salaryRate: number;
@@ -1890,6 +1898,7 @@ async function loadStateFromApi() {
     date: toLocalDateString(shift.date),
     shift: shift.shiftNumber,
     workerName: shift.worker.fullName,
+    employeeId: shift.worker.id,
     machineId: shift.machine?.id ?? '',
     hoursWorked: shift.hoursWorked,
     productType: shift.productLabel ?? '',
@@ -1907,7 +1916,7 @@ async function loadStateFromApi() {
 
   const payrollUsers = users.filter((user) => user.role === 'WORKER');
 
-  const employees: Employee[] = payrollUsers.map((user) => ({
+  const allPayrollEmployees: Employee[] = payrollUsers.map((user) => ({
     id: user.id,
     fullName: user.fullName,
     position: user.position ?? '',
@@ -1918,7 +1927,29 @@ async function loadStateFromApi() {
     salaryType: normalizeSalaryType(user.salaryType),
     salaryAmount: user.salaryRate,
     createdAt: user.createdAt,
+    isActive: user.isActive !== false,
   }));
+
+  const employees = allPayrollEmployees.filter((e) => e.isActive !== false);
+  const formerEmployees = allPayrollEmployees.filter((e) => e.isActive === false);
+
+  const activeEmployeeIds = new Set(employees.map((e) => e.id));
+  const formerNameLc = new Set(
+    formerEmployees.map((e) => e.fullName.trim().toLowerCase()).filter(Boolean),
+  );
+  const workerNamesFromShifts = mappedShifts
+    .filter((s) => {
+      if (s.employeeId) return activeEmployeeIds.has(s.employeeId);
+      const wn = s.workerName.trim().toLowerCase();
+      if (!wn) return false;
+      return !formerNameLc.has(wn);
+    })
+    .map((s) => s.workerName.trim())
+    .filter(Boolean);
+
+  const workers = Array.from(
+    new Set([...employees.map((e) => e.fullName.trim()).filter(Boolean), ...workerNamesFromShifts]),
+  ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
   const rawMaterialPurchaseOrdersState =
     mapRawMaterialPurchaseOrders(rawMaterialOrders);
@@ -1986,13 +2017,9 @@ async function loadStateFromApi() {
     logs,
     electricityPrice: salarySettings?.electricityPricePerKwh ?? 800,
     shiftRecords: mappedShifts,
-    workers: Array.from(
-      new Set([
-        ...mappedShifts.map((item) => item.workerName),
-        ...employees.map((e) => e.fullName),
-      ]),
-    ),
+    workers,
     employees,
+    formerEmployees,
     employeeProductRates: employeeProductRatesState,
     salaryVedomost,
     salaryPaymentSummaries: salaryPaymentSummaries,

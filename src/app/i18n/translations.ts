@@ -742,6 +742,11 @@ export interface T {
   rmIncomingQtyMismatchTitle: string;
   rmIncomingQtyMismatchBody: string;
   prEmployee: string;
+  /** Buxgalteriya → ишчилар — фаол рўйхат */
+  prEmployeesSubActive: string;
+  /** Buxgalteriya → ишчилар — ишдан чиққанлар */
+  prEmployeesSubFormer: string;
+  prNoFormerEmployees: string;
   prNoEmployees: string;
   prNoVedomost: string;
   prTotalBrutto: string;
@@ -817,6 +822,10 @@ export interface T {
   prBankTechnicalDetails: string;
   prBankRejectedEmptyTx: string;
   prShiftLogTitle: string;
+  /** Ишдан чиққан / архив ишчи белгиси */
+  prEmployeeArchivedBadge: string;
+  /** Смена бўйича энг қисқа — энг узоқ сана: `{from}`, `{to}` */
+  prShiftEmploymentPeriod: string;
   /** `{label}` — filterLabel */
   prShiftLogFilterHint: string;
   prShiftLogEmpty: string;
@@ -1547,6 +1556,9 @@ const uz_cyrillic: T = {
   rmIncomingQtyMismatchBody:
     'Бухгалтериядаги кутилувчи буюртма: {orderedKg} кг. Сиз киритган миқдор: {enteredKg} кг. Шу миқдорда омборга қўшасизми?',
   prEmployee: 'Ишчи',
+  prEmployeesSubActive: 'Фаол ишчилар',
+  prEmployeesSubFormer: 'Ишдан чиққанлар',
+  prNoFormerEmployees: 'Ишдан чиққан ишчилар йўқ',
   prNoEmployees: 'Ишчилар рўйхати бўш',
   prNoVedomost: 'Ведомост яратилмаган. "Ведомост яратиш" тугмасини босинг.',
   prTotalBrutto: 'Жами брутто',
@@ -1619,6 +1631,8 @@ const uz_cyrillic: T = {
   prBankTechnicalDetails: 'Техник тафсилотлар (ихтиёрий)',
   prBankRejectedEmptyTx: 'Рад этилган ведомостда транзакциялар йўқ.',
   prShiftLogTitle: 'Смена бўйича батафсил (танланган сана оралиғи)',
+  prEmployeeArchivedBadge: 'Ишдан чиққан',
+  prShiftEmploymentPeriod: 'Сменада ишлаган: {from} — {to}',
   prShiftLogFilterHint: 'Пастдаги ёзувлар фақат танланган сана оралиғида: {label}',
   prShiftLogEmpty: 'Бу ишчи учун танланган оралиқда смена ёзуви йўқ',
   prShiftLogTotals: 'Оралиқ бўйича жамӣ',
@@ -2348,6 +2362,9 @@ const uz_latin: T = {
   rmIncomingQtyMismatchBody:
     'Buxgalteriyadagi kutilayotchi buyurtma: {orderedKg} kg. Siz kiritgan miqdor: {enteredKg} kg. Shu miqdorda omborga qo\'shasizmi?',
   prEmployee: 'Ishchi',
+  prEmployeesSubActive: 'Faol ishchilar',
+  prEmployeesSubFormer: 'Ishdan chiqqanlar',
+  prNoFormerEmployees: 'Ishdan chiqqan ishchilar yo‘q',
   prNoEmployees: "Ishchilar ro'yxati bo'sh",
   prNoVedomost: "Vedomost yaratilmagan. \"Vedomost yaratish\" tugmasini bosing.",
   prTotalBrutto: 'Jami brutto',
@@ -2420,6 +2437,8 @@ const uz_latin: T = {
   prBankTechnicalDetails: 'Texnik tafsilotlar (ixtiyoriy)',
   prBankRejectedEmptyTx: 'Rad etilgan vedemostda tranzaksiyalar yo‘q.',
   prShiftLogTitle: 'Smena bo‘yicha batafsil (tanlangan sana oralig‘i)',
+  prEmployeeArchivedBadge: 'Ishdan chiqqan',
+  prShiftEmploymentPeriod: 'Smenada ishlagan: {from} — {to}',
   prShiftLogFilterHint: 'Pastdagi yozuvlar faqat tanlangan sana oralig‘ida: {label}',
   prShiftLogEmpty: 'Bu ishchi uchun tanlangan oralikda smena yozuvi yo‘q',
   prShiftLogTotals: 'Oraliq bo‘yicha jami',
@@ -3149,6 +3168,9 @@ const ru: T = {
   rmIncomingQtyMismatchBody:
     'Ожидается по заказу из бухгалтерии: {orderedKg} кг. Вы вводите: {enteredKg} кг. Оприходовать именно это количество?',
   prEmployee: 'Сотрудник',
+  prEmployeesSubActive: 'Действующие',
+  prEmployeesSubFormer: 'Уволенные',
+  prNoFormerEmployees: 'Нет уволенных сотрудников',
   prNoEmployees: 'Список сотрудников пуст',
   prNoVedomost: 'Ведомость не сформирована. Нажмите "Сформировать ведомость".',
   prTotalBrutto: 'Итого брутто',
@@ -3221,6 +3243,8 @@ const ru: T = {
   prBankTechnicalDetails: 'Технические подробности (по желанию)',
   prBankRejectedEmptyTx: 'У отклонённой ведомости нет транзакций.',
   prShiftLogTitle: 'Детали по сменам (выбранный период дат)',
+  prEmployeeArchivedBadge: 'Уволен',
+  prShiftEmploymentPeriod: 'Смены: {from} — {to}',
   prShiftLogFilterHint: 'Ниже только записи за выбранный период: {label}',
   prShiftLogEmpty: 'У этого сотрудника нет записей смен за выбранный период',
   prShiftLogTotals: 'Итого за период',

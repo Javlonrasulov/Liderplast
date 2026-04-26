@@ -197,8 +197,24 @@ export class UsersService {
     });
   }
 
+  /**
+   * WORKER: smena / maosh / tarix saqlansin — qatorni бошқа жадваллар билан CASCADE ўчирмаймиз.
+   * Бошқа роллар: қатъан ўчирилади.
+   */
   async remove(id: string) {
-    await this.ensureExists(id);
+    const user = await this.ensureExists(id);
+    if (user.role === Role.WORKER) {
+      await this.prisma.user.update({
+        where: { id },
+        data: {
+          isActive: false,
+          canLogin: false,
+          permissions: [],
+          login: null,
+        },
+      });
+      return { success: true, archived: true };
+    }
     await this.prisma.user.delete({ where: { id } });
     return { success: true };
   }

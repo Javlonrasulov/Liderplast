@@ -10,6 +10,7 @@ import {
   MovementType,
   ProductionStage,
   RawMaterialKind,
+  Role,
 } from '../../generated/prisma/enums.js';
 import { Prisma } from '../../generated/prisma/client.js';
 
@@ -38,6 +39,22 @@ export class ProductionService {
     private readonly rawMaterialBagsService: RawMaterialBagsService,
     private readonly financeService: FinanceService,
   ) {}
+
+  /** Yangi ёзув / ишчини алмаштириш — фақат фаол WORKER */
+  private async assertActiveWorkerForShiftAssignment(workerId: string) {
+    const worker = await this.prisma.user.findUnique({ where: { id: workerId } });
+    if (!worker) {
+      throw new NotFoundException('Worker not found');
+    }
+    if (worker.role !== Role.WORKER) {
+      throw new BadRequestException('Smena uchun ishchi (WORKER) tanlanishi kerak');
+    }
+    if (!worker.isActive) {
+      throw new BadRequestException(
+        'Bu ishchi ro‘yxatdan chiqarilgan — yangi smena yozuvi uchun faol ishchi tanlang',
+      );
+    }
+  }
 
   createMachine(dto: CreateMachineDto) {
     return this.prisma.machine.create({
@@ -684,6 +701,8 @@ export class ProductionService {
       }
     }
 
+    await this.assertActiveWorkerForShiftAssignment(dto.workerId);
+
     const created = await this.prisma.$transaction(async (tx) => {
       const shift = await tx.shiftRecord.create({
         data: {
@@ -805,6 +824,13 @@ export class ProductionService {
           'Kraska uchun «kraska» turidagi xomashyo (siro sahifasida yaratilgan) tanlanishi kerak',
         );
       }
+    }
+
+    if (
+      dto.workerId !== undefined &&
+      dto.workerId !== existing.workerId
+    ) {
+      await this.assertActiveWorkerForShiftAssignment(dto.workerId);
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
