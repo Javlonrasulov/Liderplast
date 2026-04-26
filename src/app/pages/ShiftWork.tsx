@@ -942,6 +942,8 @@ export function ShiftWork() {
           notes: recordEditForm.notes,
         },
       });
+      // Elektr xarajati (Expense) backendda sync qilinadi; ro‘yxatni yangilab olamiz.
+      await refresh();
       closeRecordEditor();
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Error';
@@ -1079,6 +1081,8 @@ export function ShiftWork() {
           }
         });
       }
+      // Elektr xarajati (Expense) backendda sync qilinadi; sahifalarda ko‘rish uchun yangilash kerak.
+      await refresh();
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Error';
       setError(translateShiftInventoryApiError(raw, appT));
