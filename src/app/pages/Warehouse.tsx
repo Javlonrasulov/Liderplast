@@ -1087,7 +1087,7 @@ export function Warehouse() {
                   </SelectTrigger>
                   <SelectContent
                     position="popper"
-                    className="z-[120] max-h-60 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                    className="z-[2000] max-h-60 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
                   >
                     <SelectItem
                       value="__none__"
