@@ -52,6 +52,7 @@ export type UserMinAggregateOutputType = {
   salaryRate: number | null
   preferredShiftNumber: number | null
   isActive: boolean | null
+  employmentEndedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +73,7 @@ export type UserMaxAggregateOutputType = {
   salaryRate: number | null
   preferredShiftNumber: number | null
   isActive: boolean | null
+  employmentEndedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -93,6 +95,7 @@ export type UserCountAggregateOutputType = {
   salaryRate: number
   preferredShiftNumber: number
   isActive: number
+  employmentEndedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -125,6 +128,7 @@ export type UserMinAggregateInputType = {
   salaryRate?: true
   preferredShiftNumber?: true
   isActive?: true
+  employmentEndedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -145,6 +149,7 @@ export type UserMaxAggregateInputType = {
   salaryRate?: true
   preferredShiftNumber?: true
   isActive?: true
+  employmentEndedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -166,6 +171,7 @@ export type UserCountAggregateInputType = {
   salaryRate?: true
   preferredShiftNumber?: true
   isActive?: true
+  employmentEndedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -274,6 +280,7 @@ export type UserGroupByOutputType = {
   salaryRate: number
   preferredShiftNumber: number | null
   isActive: boolean
+  employmentEndedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -318,6 +325,7 @@ export type UserWhereInput = {
   salaryRate?: Prisma.FloatFilter<"User"> | number
   preferredShiftNumber?: Prisma.IntNullableFilter<"User"> | number | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  employmentEndedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
@@ -354,6 +362,7 @@ export type UserOrderByWithRelationInput = {
   salaryRate?: Prisma.SortOrder
   preferredShiftNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  employmentEndedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
@@ -393,6 +402,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   salaryRate?: Prisma.FloatFilter<"User"> | number
   preferredShiftNumber?: Prisma.IntNullableFilter<"User"> | number | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  employmentEndedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
@@ -429,6 +439,7 @@ export type UserOrderByWithAggregationInput = {
   salaryRate?: Prisma.SortOrder
   preferredShiftNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  employmentEndedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -458,6 +469,7 @@ export type UserScalarWhereWithAggregatesInput = {
   salaryRate?: Prisma.FloatWithAggregatesFilter<"User"> | number
   preferredShiftNumber?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  employmentEndedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -479,6 +491,7 @@ export type UserCreateInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -515,6 +528,7 @@ export type UserUncheckedCreateInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -551,6 +565,7 @@ export type UserUpdateInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -587,6 +602,7 @@ export type UserUncheckedUpdateInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -623,6 +639,7 @@ export type UserCreateManyInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -644,6 +661,7 @@ export type UserUpdateManyMutationInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -665,6 +683,7 @@ export type UserUncheckedUpdateManyInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -694,6 +713,7 @@ export type UserCountOrderByAggregateInput = {
   salaryRate?: Prisma.SortOrder
   preferredShiftNumber?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  employmentEndedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -719,6 +739,7 @@ export type UserMaxOrderByAggregateInput = {
   salaryRate?: Prisma.SortOrder
   preferredShiftNumber?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  employmentEndedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -739,6 +760,7 @@ export type UserMinOrderByAggregateInput = {
   salaryRate?: Prisma.SortOrder
   preferredShiftNumber?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  employmentEndedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -801,6 +823,10 @@ export type NullableIntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -1054,6 +1080,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
@@ -1089,6 +1116,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
@@ -1140,6 +1168,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
@@ -1175,6 +1204,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
@@ -1210,6 +1240,7 @@ export type UserCreateWithoutInventoryMovementsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -1245,6 +1276,7 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1296,6 +1328,7 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -1331,6 +1364,7 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1366,6 +1400,7 @@ export type UserCreateWithoutProductAuditLogsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -1401,6 +1436,7 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1452,6 +1488,7 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -1487,6 +1524,7 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1522,6 +1560,7 @@ export type UserCreateWithoutBagWriteoffsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -1557,6 +1596,7 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1608,6 +1648,7 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -1643,6 +1684,7 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1678,6 +1720,7 @@ export type UserCreateWithoutBagAuditLogsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -1713,6 +1756,7 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1764,6 +1808,7 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -1799,6 +1844,7 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1834,6 +1880,7 @@ export type UserCreateWithoutProductionsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -1869,6 +1916,7 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1920,6 +1968,7 @@ export type UserUpdateWithoutProductionsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -1955,6 +2004,7 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1990,6 +2040,7 @@ export type UserCreateWithoutShiftRecordsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2025,6 +2076,7 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2076,6 +2128,7 @@ export type UserUpdateWithoutShiftRecordsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2111,6 +2164,7 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2146,6 +2200,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2181,6 +2236,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2232,6 +2288,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2267,6 +2324,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2302,6 +2360,7 @@ export type UserCreateWithoutCreatedExpensesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2337,6 +2396,7 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2388,6 +2448,7 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2423,6 +2484,7 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2458,6 +2520,7 @@ export type UserCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2493,6 +2556,7 @@ export type UserUncheckedCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2544,6 +2608,7 @@ export type UserUpdateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2579,6 +2644,7 @@ export type UserUncheckedUpdateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2614,6 +2680,7 @@ export type UserCreateWithoutEmployeeProductRatesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2649,6 +2716,7 @@ export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2700,6 +2768,7 @@ export type UserUpdateWithoutEmployeeProductRatesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2735,6 +2804,7 @@ export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2770,6 +2840,7 @@ export type UserCreateWithoutSalaryRecordsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2805,6 +2876,7 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2856,6 +2928,7 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -2891,6 +2964,7 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2926,6 +3000,7 @@ export type UserCreateWithoutUploadedBankVedomostsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -2961,6 +3036,7 @@ export type UserUncheckedCreateWithoutUploadedBankVedomostsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3012,6 +3088,7 @@ export type UserUpdateWithoutUploadedBankVedomostsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -3047,6 +3124,7 @@ export type UserUncheckedUpdateWithoutUploadedBankVedomostsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3082,6 +3160,7 @@ export type UserCreateWithoutBankTransactionsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -3117,6 +3196,7 @@ export type UserUncheckedCreateWithoutBankTransactionsInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3168,6 +3248,7 @@ export type UserUpdateWithoutBankTransactionsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -3203,6 +3284,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3238,6 +3320,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -3273,6 +3356,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   salaryRate?: number
   preferredShiftNumber?: number | null
   isActive?: boolean
+  employmentEndedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3324,6 +3408,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -3359,6 +3444,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
   preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3551,6 +3637,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   salaryRate?: boolean
   preferredShiftNumber?: boolean
   isActive?: boolean
+  employmentEndedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
@@ -3588,6 +3675,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   salaryRate?: boolean
   preferredShiftNumber?: boolean
   isActive?: boolean
+  employmentEndedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3609,6 +3697,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   salaryRate?: boolean
   preferredShiftNumber?: boolean
   isActive?: boolean
+  employmentEndedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3630,11 +3719,12 @@ export type UserSelectScalar = {
   salaryRate?: boolean
   preferredShiftNumber?: boolean
   isActive?: boolean
+  employmentEndedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "phone" | "login" | "customRoleLabel" | "permissions" | "canLogin" | "passwordHash" | "position" | "cardNumber" | "stir" | "role" | "salaryType" | "salaryRate" | "preferredShiftNumber" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "phone" | "login" | "customRoleLabel" | "permissions" | "canLogin" | "passwordHash" | "position" | "cardNumber" | "stir" | "role" | "salaryType" | "salaryRate" | "preferredShiftNumber" | "isActive" | "employmentEndedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   productions?: boolean | Prisma.User$productionsArgs<ExtArgs>
@@ -3695,6 +3785,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      */
     preferredShiftNumber: number | null
     isActive: boolean
+    /**
+     * Ishdan chiqish sanasi (buxgalteriya / tarix ko‘rinishi)
+     */
+    employmentEndedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -4151,6 +4245,7 @@ export interface UserFieldRefs {
   readonly salaryRate: Prisma.FieldRef<"User", 'Float'>
   readonly preferredShiftNumber: Prisma.FieldRef<"User", 'Int'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly employmentEndedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

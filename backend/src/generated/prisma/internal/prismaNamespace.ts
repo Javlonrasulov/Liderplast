@@ -3009,6 +3009,7 @@ export const UserScalarFieldEnum = {
   salaryRate: 'salaryRate',
   preferredShiftNumber: 'preferredShiftNumber',
   isActive: 'isActive',
+  employmentEndedAt: 'employmentEndedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

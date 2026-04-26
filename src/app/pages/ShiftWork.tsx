@@ -2477,6 +2477,16 @@ export function ShiftWork() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-slate-800 dark:text-white font-semibold text-sm truncate">{emp.fullName}</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">
+                        <span className="whitespace-nowrap">
+                          {appT.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : '—'}
+                        </span>
+                        <span className="whitespace-nowrap">
+                          {' · '}
+                          {appT.prLeaveDateLabel}:{' '}
+                          {emp.employmentEndedAt ? formatDate(emp.employmentEndedAt) : '—'}
+                        </span>
+                      </p>
                       <p className="text-slate-400 text-xs mt-0.5">
                         {t.workerStatLine.replace('{n}', String(workerRecs.length)).replace('{h}', String(totalHours))}
                       </p>

@@ -347,6 +347,8 @@ export interface Employee {
   salaryType: 'fixed' | 'per_piece' | 'hybrid';
   salaryAmount: number;
   createdAt: string;
+  /** Backend User.employmentEndedAt (ixtiyoriy) */
+  employmentEndedAt?: string | null;
   /** Backend User.isActive — false: «ишдан чиққан», tarix saqlanadi */
   isActive?: boolean;
 }
@@ -1142,6 +1144,7 @@ type BackendUser = {
   salaryRate: number;
   preferredShiftNumber?: number | null;
   createdAt: string;
+  employmentEndedAt?: string | null;
 };
 
 type BackendEmployeeProductRate = {
@@ -1927,6 +1930,7 @@ async function loadStateFromApi() {
     salaryType: normalizeSalaryType(user.salaryType),
     salaryAmount: user.salaryRate,
     createdAt: user.createdAt,
+    employmentEndedAt: user.employmentEndedAt ?? undefined,
     isActive: user.isActive !== false,
   }));
 

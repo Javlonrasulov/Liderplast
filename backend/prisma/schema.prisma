@@ -154,6 +154,8 @@ model User {
   /// Smena hisobida: ishchining asosiy (belgilangan) smenasi, 1–20
   preferredShiftNumber Int?
   isActive            Boolean             @default(true)
+  /// Ishdan chiqish sanasi (buxgalteriya / tarix ko‘rinishi)
+  employmentEndedAt   DateTime?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   refreshTokens       RefreshToken[]

@@ -826,6 +826,8 @@ export interface T {
   prEmployeeArchivedBadge: string;
   /** Смена бўйича энг қисқа — энг узоқ сана: `{from}`, `{to}` */
   prShiftEmploymentPeriod: string;
+  prHireDateLabel: string;
+  prLeaveDateLabel: string;
   /** `{label}` — filterLabel */
   prShiftLogFilterHint: string;
   prShiftLogEmpty: string;
@@ -1633,6 +1635,8 @@ const uz_cyrillic: T = {
   prShiftLogTitle: 'Смена бўйича батафсил (танланган сана оралиғи)',
   prEmployeeArchivedBadge: 'Ишдан чиққан',
   prShiftEmploymentPeriod: 'Сменада ишлаган: {from} — {to}',
+  prHireDateLabel: 'Ишга қабул',
+  prLeaveDateLabel: 'Ишдан чиқиш',
   prShiftLogFilterHint: 'Пастдаги ёзувлар фақат танланган сана оралиғида: {label}',
   prShiftLogEmpty: 'Бу ишчи учун танланган оралиқда смена ёзуви йўқ',
   prShiftLogTotals: 'Оралиқ бўйича жамӣ',
@@ -2439,6 +2443,8 @@ const uz_latin: T = {
   prShiftLogTitle: 'Smena bo‘yicha batafsil (tanlangan sana oralig‘i)',
   prEmployeeArchivedBadge: 'Ishdan chiqqan',
   prShiftEmploymentPeriod: 'Smenada ishlagan: {from} — {to}',
+  prHireDateLabel: 'Ishga qabul',
+  prLeaveDateLabel: 'Ishdan chiqish',
   prShiftLogFilterHint: 'Pastdagi yozuvlar faqat tanlangan sana oralig‘ida: {label}',
   prShiftLogEmpty: 'Bu ishchi uchun tanlangan oralikda smena yozuvi yo‘q',
   prShiftLogTotals: 'Oraliq bo‘yicha jami',
@@ -3245,6 +3251,8 @@ const ru: T = {
   prShiftLogTitle: 'Детали по сменам (выбранный период дат)',
   prEmployeeArchivedBadge: 'Уволен',
   prShiftEmploymentPeriod: 'Смены: {from} — {to}',
+  prHireDateLabel: 'Приём',
+  prLeaveDateLabel: 'Увольнение',
   prShiftLogFilterHint: 'Ниже только записи за выбранный период: {label}',
   prShiftLogEmpty: 'У этого сотрудника нет записей смен за выбранный период',
   prShiftLogTotals: 'Итого за период',

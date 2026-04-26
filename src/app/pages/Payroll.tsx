@@ -12,6 +12,7 @@ import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import {
   formatCurrency,
+  formatDate,
   formatDateTime,
   formatNumber,
   formatKgAmount,
@@ -1825,6 +1826,16 @@ function EmployeesTab() {
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs">{emp.position}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <span className="whitespace-nowrap">
+                    {t.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : '—'}
+                  </span>
+                  <span className="whitespace-nowrap">
+                    {' · '}
+                    {t.prLeaveDateLabel}:{' '}
+                    {emp.employmentEndedAt ? formatDate(emp.employmentEndedAt) : '—'}
+                  </span>
+                </p>
                 {shiftRange ? (
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {t.prShiftEmploymentPeriod.replace('{from}', shiftRange.min).replace('{to}', shiftRange.max)}
@@ -1861,6 +1872,19 @@ function EmployeesTab() {
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.prShiftLogTitle}</h3>
             <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">{selectedEmployee.fullName}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <span className="whitespace-nowrap">
+                {t.prHireDateLabel}:{' '}
+                {selectedEmployee.createdAt ? formatDate(selectedEmployee.createdAt) : '—'}
+              </span>
+              <span className="whitespace-nowrap">
+                {' · '}
+                {t.prLeaveDateLabel}:{' '}
+                {selectedEmployee.employmentEndedAt
+                  ? formatDate(selectedEmployee.employmentEndedAt)
+                  : '—'}
+              </span>
+            </p>
             {(() => {
               const r = shiftEmploymentRangeById.get(selectedEmployee.id);
               if (!r) return null;

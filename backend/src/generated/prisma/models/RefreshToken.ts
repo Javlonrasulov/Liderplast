@@ -407,10 +407,6 @@ export type EnumTokenTypeFieldUpdateOperationsInput = {
   set?: $Enums.TokenType
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type RefreshTokenCreateWithoutUserInput = {
   id?: string
   tokenType?: $Enums.TokenType
