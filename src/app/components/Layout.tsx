@@ -5,6 +5,7 @@ import {
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
+  ClipboardList,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP } from '../store/erp-store';
@@ -155,6 +156,7 @@ export function Layout() {
     { path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
     { path: '/raw-material', icon: Droplets, label: t.navRawMaterial, perm: 'view_raw_material' },
     { path: '/warehouse', icon: Boxes, label: t.navWarehouse, perm: 'view_warehouse' },
+    { path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_warehouse' },
     { path: '/sales', icon: ShoppingCart, label: t.navSales, perm: 'view_sales' },
     { path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
     { path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
@@ -173,6 +175,7 @@ export function Layout() {
     '/': t.navDashboard,
     '/raw-material': t.navRawMaterial,
     '/warehouse': t.navWarehouse,
+    '/inventory': t.navInventory,
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
     '/shifts': t.navShifts,

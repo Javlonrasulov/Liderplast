@@ -11,6 +11,7 @@ import { Reports } from './pages/Reports';
 import { ShiftWork } from './pages/ShiftWork';
 import { Payroll } from './pages/Payroll';
 import { SystemUsers } from './pages/SystemUsers';
+import { Inventory } from './pages/Inventory';
 import { RouteGuard } from './components/RouteGuard';
 
 function Root() {
@@ -37,6 +38,15 @@ export const router = createBrowserRouter([
         ),
       },
       { path: 'sales', Component: Sales },
+      {
+        path: 'inventory',
+        element: (
+          <RouteGuard permission="view_warehouse">
+            <Inventory />
+          </RouteGuard>
+        ),
+      },
+      { path: 'inventarizatsiya', element: <Navigate to="/inventory" replace /> },
       { path: 'expenses', Component: Expenses },
       { path: 'employees', element: <Navigate to="/payroll" replace /> },
       { path: 'shifts', Component: ShiftWork },

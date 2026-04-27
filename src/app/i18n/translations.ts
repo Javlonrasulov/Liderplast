@@ -15,6 +15,7 @@ export interface T {
   navReports: string;
   navShifts: string;
   navSystemUsers: string;
+  navInventory: string;
 
   // Auth (login)
   authTitle: string;
@@ -847,6 +848,76 @@ export interface T {
   prVedColHintExempt: string;
   prVedColNetShort: string;
   prKpiLabelSocial: string;
+
+  // Inventory page
+  invTitle: string;
+  invSubtitle: string;
+  invStatusNotStarted: string;
+  invStatusInProgress: string;
+  invStatusCompleted: string;
+  invExportExcel: string;
+  invExportPdf: string;
+  invCreateNew: string;
+  invFilterTitle: string;
+  invFilterDateFrom: string;
+  invFilterDateTo: string;
+  invFilterWarehouse: string;
+  invFilterStatus: string;
+  invFilterStatusAll: string;
+  invFilterDocNumber: string;
+  invFilterApply: string;
+  invFilterReset: string;
+  invDocList: string;
+  invNoRecords: string;
+  invColIndex: string;
+  invColProduct: string;
+  invColPeriodStart: string;
+  invColPeriodTurnover: string;
+  invColPeriodEnd: string;
+  invColSystem: string;
+  invColReal: string;
+  invColIncoming: string;
+  invColOutgoing: string;
+  invColDifference: string;
+  invFooterTotal: string;
+  invSummaryTitle: string;
+  invSummaryOpening: string;
+  invSummaryTurnover: string;
+  invSummaryClosing: string;
+  invSummarySurplus: string;
+  invSummaryShortage: string;
+  invSummaryDiffTotal: string;
+  invActionStart: string;
+  invActionFinish: string;
+  invActionDelete: string;
+  invActionDeleteConfirm: string;
+  invActionDeleteDescription: string;
+  invConfirmFinishTitle: string;
+  invConfirmFinishDescription: string;
+  invStockUpdated: string;
+  invDocNumberPlaceholder: string;
+  invWarehouseDefault: string;
+  invCategoryRaw: string;
+  invCategorySemi: string;
+  invCategoryFinished: string;
+  invCardDocNumber: string;
+  invCardDate: string;
+  invCardWarehouse: string;
+  invCardItems: string;
+  invEmptyCatalog: string;
+  invSelectRecord: string;
+  invSelectHint: string;
+  invToastCreated: string;
+  invToastFinished: string;
+  invToastDeleted: string;
+  invUnitPiece: string;
+  invUnitKg: string;
+  invShowing: string;
+  invMobileSwipeHint: string;
+  invFilterRangeLabel: string;
+  invStartedAt: string;
+  invFinishedAt: string;
+  invBack: string;
 }
 
 // ======================== UZBEK CYRILLIC ========================
@@ -862,8 +933,9 @@ const uz_cyrillic: T = {
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
   navReports: 'Ҳисоботлар',
-  navShifts: 'Смена',
+  navShifts: 'Ишлаб чиқариш',
   navSystemUsers: 'Тизим фойдаланувчилари',
+  navInventory: 'Инвентаризация',
 
   authTitle: 'LiderPlast ERP',
   authSubtitle: 'Тизимга кириш',
@@ -1662,6 +1734,75 @@ const uz_cyrillic: T = {
   prVedColHintExempt: 'чегирмайди',
   prVedColNetShort: 'B − S',
   prKpiLabelSocial: 'Ижт.',
+
+  invTitle: 'Инвентаризация',
+  invSubtitle: 'Омборнинг тизим қолдиғи билан реал қолдиғини солиштириш',
+  invStatusNotStarted: 'Бошланмаган',
+  invStatusInProgress: 'Жараёнда',
+  invStatusCompleted: 'Тугалланган',
+  invExportExcel: 'Excel экспорт',
+  invExportPdf: 'PDF экспорт',
+  invCreateNew: 'Янги инвентаризация',
+  invFilterTitle: 'Фильтр',
+  invFilterDateFrom: 'Бошланиш санаси',
+  invFilterDateTo: 'Тугаш санаси',
+  invFilterWarehouse: 'Омбор',
+  invFilterStatus: 'Ҳолат',
+  invFilterStatusAll: 'Барчаси',
+  invFilterDocNumber: 'Ҳужжат рақами',
+  invFilterApply: 'Шакллантириш',
+  invFilterReset: 'Фильтрни тозалаш',
+  invDocList: 'Инвентаризация ҳужжатлари',
+  invNoRecords: 'Ҳужжатлар топилмади',
+  invColIndex: '№',
+  invColProduct: 'Кўрсаткич номи',
+  invColPeriodStart: 'Кун бошига',
+  invColPeriodTurnover: 'Давр айланиши',
+  invColPeriodEnd: 'Кун охирига',
+  invColSystem: 'Ҳисобда',
+  invColReal: 'Реал',
+  invColIncoming: 'Кирим',
+  invColOutgoing: 'Чиқим',
+  invColDifference: 'Фарқ',
+  invFooterTotal: 'Жами',
+  invSummaryTitle: 'Йиғма ҳисобот',
+  invSummaryOpening: 'Бошланғич қолдиқ',
+  invSummaryTurnover: 'Давр айланиши',
+  invSummaryClosing: 'Якуний қолдиқ',
+  invSummarySurplus: 'Ортиқча сумма',
+  invSummaryShortage: 'Камомад сумма',
+  invSummaryDiffTotal: 'Умумий фарқ',
+  invActionStart: 'Бошлаш',
+  invActionFinish: 'Тугаллаш',
+  invActionDelete: 'Ўчириш',
+  invActionDeleteConfirm: 'Ҳа, ўчириш',
+  invActionDeleteDescription: 'Танланган инвентаризация ҳужжати ўчирилади. Бу амални қайтариб бўлмайди.',
+  invConfirmFinishTitle: 'Инвентаризацияни тугаллаш',
+  invConfirmFinishDescription: 'Тугаллангандан кейин реал қолдиқлар тизим қолдиғи сифатида сақланади. Давом этасизми?',
+  invStockUpdated: 'Тизим қолдиғи реал қолдиқ бўйича янгиланди',
+  invDocNumberPlaceholder: 'Масалан INV-001',
+  invWarehouseDefault: 'Асосий омбор',
+  invCategoryRaw: 'Хомашё',
+  invCategorySemi: 'Қолип',
+  invCategoryFinished: 'Тайёр маҳсулот',
+  invCardDocNumber: 'Ҳужжат',
+  invCardDate: 'Сана',
+  invCardWarehouse: 'Омбор',
+  invCardItems: 'позиция',
+  invEmptyCatalog: 'Омборда позициялар топилмади. Аввал омборга маҳсулот қўшинг.',
+  invSelectRecord: 'Ҳужжатни танланг',
+  invSelectHint: 'Юқорида янги инвентаризация яратинг ёки рўйхатдан танланг.',
+  invToastCreated: 'Янги инвентаризация яратилди',
+  invToastFinished: 'Инвентаризация якунланди',
+  invToastDeleted: 'Инвентаризация ўчирилди',
+  invUnitPiece: 'дона',
+  invUnitKg: 'кг',
+  invShowing: 'Кўрсатилмоқда',
+  invMobileSwipeHint: 'Жадвални ўнгга суринг — қўшимча устунлар бор',
+  invFilterRangeLabel: 'Танланган давр',
+  invStartedAt: 'Яратилган',
+  invFinishedAt: 'Тугалланган',
+  invBack: 'Орқага',
 };
 
 // ======================== UZBEK LATIN ========================
@@ -1677,8 +1818,9 @@ const uz_latin: T = {
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
   navReports: 'Hisobotlar',
-  navShifts: 'Smena',
+  navShifts: 'Ishlab chiqarish',
   navSystemUsers: 'Tizim foydalanuvchilari',
+  navInventory: 'Inventarizatsiya',
 
   authTitle: 'LiderPlast ERP',
   authSubtitle: 'Tizimga kirish',
@@ -2477,6 +2619,75 @@ const uz_latin: T = {
   prVedColHintExempt: 'chegirilmaydi',
   prVedColNetShort: 'B − S',
   prKpiLabelSocial: 'Ijt.',
+
+  invTitle: 'Inventarizatsiya',
+  invSubtitle: 'Omborning tizim qoldig‘ini real qoldiq bilan solishtirish',
+  invStatusNotStarted: 'Boshlanmagan',
+  invStatusInProgress: 'Jarayonda',
+  invStatusCompleted: 'Tugallangan',
+  invExportExcel: 'Excel eksport',
+  invExportPdf: 'PDF eksport',
+  invCreateNew: 'Yangi inventarizatsiya',
+  invFilterTitle: 'Filtr',
+  invFilterDateFrom: 'Boshlanish sanasi',
+  invFilterDateTo: 'Tugash sanasi',
+  invFilterWarehouse: 'Ombor',
+  invFilterStatus: 'Holat',
+  invFilterStatusAll: 'Barchasi',
+  invFilterDocNumber: 'Hujjat raqami',
+  invFilterApply: 'Shakllantirish',
+  invFilterReset: 'Filtrni tozalash',
+  invDocList: 'Inventarizatsiya hujjatlari',
+  invNoRecords: 'Hujjatlar topilmadi',
+  invColIndex: '№',
+  invColProduct: 'Ko‘rsatkich nomi',
+  invColPeriodStart: 'Kun boshiga',
+  invColPeriodTurnover: 'Davr aylanishi',
+  invColPeriodEnd: 'Kun oxiriga',
+  invColSystem: 'Hisobda',
+  invColReal: 'Real',
+  invColIncoming: 'Kirim',
+  invColOutgoing: 'Chiqim',
+  invColDifference: 'Farq',
+  invFooterTotal: 'Jami',
+  invSummaryTitle: 'Yig‘ma hisobot',
+  invSummaryOpening: 'Boshlang‘ich qoldiq',
+  invSummaryTurnover: 'Davr aylanishi',
+  invSummaryClosing: 'Yakuniy qoldiq',
+  invSummarySurplus: 'Ortiqcha summa',
+  invSummaryShortage: 'Kamomad summa',
+  invSummaryDiffTotal: 'Umumiy farq',
+  invActionStart: 'Boshlash',
+  invActionFinish: 'Tugallash',
+  invActionDelete: 'O‘chirish',
+  invActionDeleteConfirm: 'Ha, o‘chirish',
+  invActionDeleteDescription: 'Tanlangan inventarizatsiya hujjati o‘chiriladi. Bu amalni qaytarib bo‘lmaydi.',
+  invConfirmFinishTitle: 'Inventarizatsiyani tugallash',
+  invConfirmFinishDescription: 'Tugallangandan so‘ng real qoldiqlar tizim qoldig‘i sifatida saqlanadi. Davom etasizmi?',
+  invStockUpdated: 'Tizim qoldig‘i real qoldiq bo‘yicha yangilandi',
+  invDocNumberPlaceholder: 'Masalan INV-001',
+  invWarehouseDefault: 'Asosiy ombor',
+  invCategoryRaw: 'Xomashyo',
+  invCategorySemi: 'Qolip',
+  invCategoryFinished: 'Tayyor mahsulot',
+  invCardDocNumber: 'Hujjat',
+  invCardDate: 'Sana',
+  invCardWarehouse: 'Ombor',
+  invCardItems: 'pozitsiya',
+  invEmptyCatalog: 'Omborda pozitsiyalar topilmadi. Avval omborga mahsulot qo‘shing.',
+  invSelectRecord: 'Hujjatni tanlang',
+  invSelectHint: 'Yuqorida yangi inventarizatsiya yarating yoki ro‘yxatdan tanlang.',
+  invToastCreated: 'Yangi inventarizatsiya yaratildi',
+  invToastFinished: 'Inventarizatsiya yakunlandi',
+  invToastDeleted: 'Inventarizatsiya o‘chirildi',
+  invUnitPiece: 'dona',
+  invUnitKg: 'kg',
+  invShowing: 'Ko‘rsatilmoqda',
+  invMobileSwipeHint: 'Jadvalni o‘ngga suring — qo‘shimcha ustunlar bor',
+  invFilterRangeLabel: 'Tanlangan davr',
+  invStartedAt: 'Yaratilgan',
+  invFinishedAt: 'Tugallangan',
+  invBack: 'Orqaga',
 };
 
 // ======================== RUSSIAN ========================
@@ -2492,8 +2703,9 @@ const ru: T = {
   navSales: 'Продажи',
   navExpenses: 'Расходы',
   navReports: 'Отчёты',
-  navShifts: 'Смены',
+  navShifts: 'Производство',
   navSystemUsers: 'Пользователи системы',
+  navInventory: 'Инвентаризация',
 
   authTitle: 'LiderPlast ERP',
   authSubtitle: 'Вход в систему',
@@ -3292,6 +3504,75 @@ const ru: T = {
   prVedColHintExempt: 'не удерж.',
   prVedColNetShort: 'Б − Н',
   prKpiLabelSocial: 'Соц.',
+
+  invTitle: 'Инвентаризация',
+  invSubtitle: 'Сверка системного остатка склада с фактическим',
+  invStatusNotStarted: 'Не начата',
+  invStatusInProgress: 'В процессе',
+  invStatusCompleted: 'Завершена',
+  invExportExcel: 'Экспорт Excel',
+  invExportPdf: 'Экспорт PDF',
+  invCreateNew: 'Новая инвентаризация',
+  invFilterTitle: 'Фильтр',
+  invFilterDateFrom: 'Дата начала',
+  invFilterDateTo: 'Дата окончания',
+  invFilterWarehouse: 'Склад',
+  invFilterStatus: 'Статус',
+  invFilterStatusAll: 'Все',
+  invFilterDocNumber: 'Номер документа',
+  invFilterApply: 'Сформировать',
+  invFilterReset: 'Сбросить фильтр',
+  invDocList: 'Документы инвентаризации',
+  invNoRecords: 'Документов не найдено',
+  invColIndex: '№',
+  invColProduct: 'Наименование',
+  invColPeriodStart: 'На начало',
+  invColPeriodTurnover: 'Оборот за период',
+  invColPeriodEnd: 'На конец',
+  invColSystem: 'Учётный',
+  invColReal: 'Фактический',
+  invColIncoming: 'Приход',
+  invColOutgoing: 'Расход',
+  invColDifference: 'Разница',
+  invFooterTotal: 'Итого',
+  invSummaryTitle: 'Сводный отчёт',
+  invSummaryOpening: 'Начальный остаток',
+  invSummaryTurnover: 'Оборот за период',
+  invSummaryClosing: 'Конечный остаток',
+  invSummarySurplus: 'Излишки',
+  invSummaryShortage: 'Недостача',
+  invSummaryDiffTotal: 'Общая разница',
+  invActionStart: 'Начать',
+  invActionFinish: 'Завершить',
+  invActionDelete: 'Удалить',
+  invActionDeleteConfirm: 'Да, удалить',
+  invActionDeleteDescription: 'Выбранный документ инвентаризации будет удалён. Действие необратимо.',
+  invConfirmFinishTitle: 'Завершить инвентаризацию',
+  invConfirmFinishDescription: 'После завершения фактические остатки будут сохранены как учётные. Продолжить?',
+  invStockUpdated: 'Учётный остаток обновлён по фактическим данным',
+  invDocNumberPlaceholder: 'Например INV-001',
+  invWarehouseDefault: 'Основной склад',
+  invCategoryRaw: 'Сырьё',
+  invCategorySemi: 'Заготовка',
+  invCategoryFinished: 'Готовая продукция',
+  invCardDocNumber: 'Документ',
+  invCardDate: 'Дата',
+  invCardWarehouse: 'Склад',
+  invCardItems: 'позиций',
+  invEmptyCatalog: 'На складе позиции отсутствуют. Сначала добавьте продукцию на склад.',
+  invSelectRecord: 'Выберите документ',
+  invSelectHint: 'Создайте новую инвентаризацию выше или выберите из списка.',
+  invToastCreated: 'Инвентаризация создана',
+  invToastFinished: 'Инвентаризация завершена',
+  invToastDeleted: 'Инвентаризация удалена',
+  invUnitPiece: 'шт',
+  invUnitKg: 'кг',
+  invShowing: 'Отображено',
+  invMobileSwipeHint: 'Прокрутите таблицу вправо — есть дополнительные колонки',
+  invFilterRangeLabel: 'Выбранный период',
+  invStartedAt: 'Создана',
+  invFinishedAt: 'Завершена',
+  invBack: 'Назад',
 };
 
 export const translations: Record<Language, T> = {
