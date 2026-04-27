@@ -5,9 +5,6 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   AlertTriangle,
-  Pencil,
-  Link2,
-  RefreshCw,
   Ban,
   Package,
   History,
@@ -23,7 +20,6 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import { translateBagLogNote } from '../utils/bag-log-notes';
 import { formatNumber, formatDate, TODAY } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -38,13 +34,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../components/ui/collapsible';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,21 +74,12 @@ export function RawMaterial() {
     defaultBagWeightKg: string;
     rawMaterialKind: RawMaterialKind;
   }>({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
-  const [selectedBagId, setSelectedBagId] = useState('');
-  const [connectPrevAction, setConnectPrevAction] = useState<'RETURN_TO_STORAGE' | 'WRITE_OFF'>(
-    'RETURN_TO_STORAGE',
-  );
-  const [connectPrevReason, setConnectPrevReason] = useState('');
-  const [editingBagId, setEditingBagId] = useState('');
-  const [editingBagName, setEditingBagName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
   const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [bagLogsOpen, setBagLogsOpen] = useState(false);
-  const [otherBagsOpen, setOtherBagsOpen] = useState(false);
-  const [rmTab, setRmTab] = useState<'bags' | 'catalog' | 'overview'>('bags');
+  const [rmTab, setRmTab] = useState<'catalog' | 'overview'>('catalog');
   const [incomingQtyMismatchPayload, setIncomingQtyMismatchPayload] = useState<
     | null
     | {
@@ -130,31 +110,6 @@ export function RawMaterial() {
 
   const lowStock = siroStockKg < 1000;
   const criticalStock = siroStockKg < 500;
-  const activeBag = state.activeRawMaterialBag;
-
-  const siroBags = useMemo(
-    () =>
-      state.rawMaterialBags.filter((b) => {
-        const p = state.warehouseProducts.find(
-          (x): x is RawMaterialProduct =>
-            x.itemType === 'RAW_MATERIAL' && x.id === b.rawMaterialId,
-        );
-        return p?.rawMaterialKind !== 'PAINT';
-      }),
-    [state.rawMaterialBags, state.warehouseProducts],
-  );
-
-  /** Рўйхатда фақат аппаратга уланган қоп */
-  const connectedSiroBagsForList = useMemo(
-    () => siroBags.filter((b) => b.status === 'CONNECTED'),
-    [siroBags],
-  );
-
-  /** Омбор / бошқа ҳолат — босилса очiladi */
-  const otherSiroBagsForList = useMemo(
-    () => siroBags.filter((b) => b.status !== 'CONNECTED'),
-    [siroBags],
-  );
 
   const handleCreateRawMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,9 +121,9 @@ export function RawMaterial() {
     }
     const isPaint = createForm.rawMaterialKind === 'PAINT';
     let defaultBagWeightKg: number | undefined;
-    if (!isPaint) {
+    if (!isPaint && createForm.defaultBagWeightKg.trim()) {
       const parsed = parseFloat(createForm.defaultBagWeightKg.replace(',', '.'));
-      if (!createForm.defaultBagWeightKg || !Number.isFinite(parsed) || parsed <= 0) {
+      if (!Number.isFinite(parsed) || parsed <= 0) {
         setError(t.rmDefaultBagWeightRequired);
         return;
       }
@@ -202,13 +157,6 @@ export function RawMaterial() {
   const filteredEntries = filterData([...state.rawMaterialEntries]).sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-
-  const filteredBagLogs = filterData(
-    state.bagLogs.map((item) => ({
-      ...item,
-      date: item.createdAt.slice(0, 10),
-    })),
-  ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const incomingCatalogItems = useMemo(() => {
     return state.warehouseProducts
@@ -344,30 +292,6 @@ export function RawMaterial() {
     runIncomingSubmit(rawMaterialId, amountKg, description, form.date);
   };
 
-  const bagStatusTone: Record<string, string> = {
-    IN_STORAGE: 'bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-200',
-    CONNECTED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    DEPLETED: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    WRITTEN_OFF: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  };
-
-  const bagStatusLabel: Record<string, string> = {
-    IN_STORAGE: t.rmBagStatusStorage,
-    CONNECTED: t.rmBagStatusConnected,
-    DEPLETED: t.rmBagStatusDepleted,
-    WRITTEN_OFF: t.rmBagStatusWrittenOff,
-  };
-
-  const actionLabel: Record<string, string> = {
-    CREATED: t.rmLogCreated,
-    CONNECTED: t.rmLogConnected,
-    DISCONNECTED: t.rmLogDisconnected,
-    RETURNED_TO_STORAGE: t.rmLogReturned,
-    CONSUMED: t.rmLogConsumed,
-    DEPLETED: t.rmLogDepleted,
-    WRITTEN_OFF: t.rmLogWrittenOff,
-  };
-
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
   const previewStockKg = incomingKind === 'PAINT' ? paintStockKg : siroStockKg;
   const createBagWeightKg = parseFloat((createForm.defaultBagWeightKg || '0').replace(',', '.'));
@@ -383,85 +307,10 @@ export function RawMaterial() {
       ? amountKg - (incomingAutoBagCount - 1) * (incomingRawMaterial.defaultBagWeightKg ?? 0)
       : 0;
 
-  const openEditBagName = (bagId: string, currentName: string) => {
-    setEditingBagId(bagId);
-    setEditingBagName(currentName);
-    setError('');
-  };
-
-  const closeEditBagName = () => {
-    setEditingBagId('');
-    setEditingBagName('');
-  };
-
-  const submitEditBagName = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const nextName = editingBagName.trim();
-    if (!editingBagId || !nextName) return;
-    setError('');
-    try {
-      await dispatch({
-        type: 'UPDATE_RAW_MATERIAL_BAG_NAME',
-        payload: { bagId: editingBagId, name: nextName },
-      });
-      setSuccess(t.btnSave);
-      setTimeout(() => setSuccess(''), 2000);
-      closeEditBagName();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? translateWarehouseApiError(err.message, t)
-          : t.whRequestError,
-      );
-    }
-  };
-
-  const handleConnectBag = async () => {
-    const bagId = selectedBagId || siroBags.find((item) => item.status === 'IN_STORAGE')?.id;
-    if (!bagId) {
-      setError(t.rmBagConnectError);
-      return;
-    }
-    setError('');
-    try {
-      const payload: {
-        bagId: string;
-        previousBagAction?: 'RETURN_TO_STORAGE' | 'WRITE_OFF';
-        reason?: string;
-      } = { bagId };
-      if (activeBag && activeBag.currentQuantityKg > 0.0001) {
-        payload.previousBagAction = connectPrevAction;
-        if (connectPrevReason.trim()) {
-          payload.reason = connectPrevReason.trim();
-        }
-      }
-      await dispatch({ type: 'CONNECT_RAW_MATERIAL_BAG', payload });
-      setConnectPrevReason('');
-      setSuccess(t.rmBagConnectedSuccess);
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? translateWarehouseApiError(err.message, t)
-          : t.whRequestError,
-      );
-    }
-  };
-
-  // NOTE: quick consume + manual bag creation removed (handled elsewhere)
-
   return (
     <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
       <div className="flex w-full min-w-0 flex-col gap-6">
         <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
-          <button
-            type="button"
-            onClick={() => setRmTab('bags')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'bags' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-          >
-            <Package size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionBags}</span>
-          </button>
           <button
             type="button"
             onClick={() => setRmTab('catalog')}
@@ -594,12 +443,181 @@ export function RawMaterial() {
           </div>
           </div>
         </div>
+
+        <Collapsible
+          open={historyOpen}
+          onOpenChange={setHistoryOpen}
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+        >
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2">
+                <History size={16} className="text-indigo-500" />
+                <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
+                <ChevronDown
+                  size={16}
+                  className={`text-slate-400 transition-transform ${historyOpen ? 'rotate-180' : ''}`}
+                />
+              </div>
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            {filteredEntries.length === 0 ? (
+              <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-700/50">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colDate}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colType}</th>
+                      <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colAmount}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 hidden md:table-cell">{t.colNote}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredEntries.map((entry, idx) => (
+                      <tr key={entry.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${idx % 2 !== 0 ? 'bg-slate-50/50 dark:bg-slate-800/50' : ''}`}>
+                        <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">{formatDate(entry.date)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${entry.type === 'incoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                            {entry.type === 'incoming' ? t.rmIncoming : t.rmOutgoing}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className={`text-sm font-semibold ${entry.type === 'incoming' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                            {entry.type === 'incoming' ? '+' : '-'}{formatNumber(entry.amount)} {t.unitKg}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs truncate">{entry.description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
+                      <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.rmBalance}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span
+                          className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
+                        >
+                          {formatNumber(siroStockKg + paintStockKg)} {t.unitKg}
+                        </span>
+                        <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                          {t.rmMetricsCaptionSiro}: {formatNumber(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
+                          {formatNumber(paintStockKg)}
+                        </span>
+                      </td>
+                      <td className="hidden md:table-cell" />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+
         </div>
         )}
 
         {rmTab === 'catalog' && (
         <div className="mt-0 space-y-4 focus-visible:outline-none">
           <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionCreateIncomingDesc}</p>
+
+          {(siroMaterialAlerts.length > 0 || paintMaterialAlerts.length > 0) && (
+            <div className="space-y-4">
+              {siroMaterialAlerts.length > 0 && (
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                      <AlertTriangle size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    {siroMaterialAlerts.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-xl border px-4 py-3 ${
+                          item.level === 'critical'
+                            ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                            : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {formatNumber(item.quantityKg)} {t.unitKg}
+                            </p>
+                          </div>
+                          <span
+                            className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                              item.level === 'critical'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            }`}
+                          >
+                            {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {paintMaterialAlerts.length > 0 && (
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+                      <AlertTriangle size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    {paintMaterialAlerts.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-xl border px-4 py-3 ${
+                          item.level === 'critical'
+                            ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
+                            : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {formatNumber(item.quantityKg)} {t.unitKg}
+                            </p>
+                          </div>
+                          <span
+                            className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
+                              item.level === 'critical'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            }`}
+                          >
+                            {item.level === 'critical' ? t.rmCritical : t.rmWarning}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
@@ -889,475 +907,6 @@ export function RawMaterial() {
         </div>
         )}
 
-        {rmTab === 'bags' && (
-        <div className="mt-0 space-y-6 focus-visible:outline-none">
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionBagsDesc}</p>
-
-      {(siroMaterialAlerts.length > 0 || paintMaterialAlerts.length > 0) && (
-        <div className="space-y-4">
-      {siroMaterialAlerts.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
-              <AlertTriangle size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {siroMaterialAlerts.map((item) => (
-              <div
-                key={item.id}
-                className={`rounded-xl border px-4 py-3 ${
-                  item.level === 'critical'
-                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
-                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {formatNumber(item.quantityKg)} {t.unitKg}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
-                      item.level === 'critical'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                    }`}
-                  >
-                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {paintMaterialAlerts.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
-              <AlertTriangle size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {paintMaterialAlerts.map((item) => (
-              <div
-                key={item.id}
-                className={`rounded-xl border px-4 py-3 ${
-                  item.level === 'critical'
-                    ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20'
-                    : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {formatNumber(item.quantityKg)} {t.unitKg}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-medium ${
-                      item.level === 'critical'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                    }`}
-                  >
-                    {item.level === 'critical' ? t.rmCritical : t.rmWarning}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 flex flex-col gap-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmActiveBagTitle}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">{t.rmActiveBagSubtitle}</p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center">
-                <Package size={18} className="text-white" />
-              </div>
-            </div>
-
-            {!activeBag ? (
-              <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-5 text-sm text-slate-500 dark:text-slate-400">
-                {t.rmNoActiveBag}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-semibold text-slate-900 dark:text-white">{activeBag.name}</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{activeBag.rawMaterialName}</p>
-                  </div>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium ${bagStatusTone[activeBag.status]}`}>
-                    {bagStatusLabel[activeBag.status]}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmBagInitial}</p>
-                    <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatNumber(activeBag.initialQuantityKg)} {t.unitKg}</p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmBagRemaining}</p>
-                    <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatNumber(activeBag.currentQuantityKg)} {t.unitKg}</p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmBagConnectedAt}</p>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">
-                      {activeBag.sessions[0]?.connectedAt ? formatDate(activeBag.sessions[0].connectedAt.slice(0, 10)) : '—'}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
-                    <span>{t.rmBagProgress}</span>
-                    <span>{Math.max(0, Math.min(100, (activeBag.currentQuantityKg / activeBag.initialQuantityKg) * 100)).toFixed(1)}%</span>
-                  </div>
-                  <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-indigo-500 transition-all duration-500"
-                      style={{ width: `${Math.max(0, Math.min(100, (activeBag.currentQuantityKg / activeBag.initialQuantityKg) * 100))}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* NOTE: manual bag creation + quick consume removed */}
-
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2">
-                <Link2 size={16} className="text-indigo-500" />
-                <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagActionsTitle}</h3>
-              </div>
-            </div>
-            <div className="max-w-xl">
-              <div className="space-y-3">
-                <label className="block text-slate-600 dark:text-slate-400 text-sm">{t.rmBagConnectTitle}</label>
-                <Select
-                  value={selectedBagId || NONE}
-                  onValueChange={(v) => setSelectedBagId(v === NONE ? '' : v)}
-                >
-                  <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                    <SelectValue placeholder={t.rmBagSelect} />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                    <SelectItem value={NONE} className={SELECT_ITEM_CLS}>
-                      —
-                    </SelectItem>
-                    {siroBags
-                      .filter((item) => item.status === 'IN_STORAGE')
-                      .map((bag) => (
-                        <SelectItem key={bag.id} value={bag.id} className={SELECT_ITEM_CLS}>
-                          {bag.name} — {formatNumber(bag.currentQuantityKg)} {t.unitKg}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                {activeBag && activeBag.currentQuantityKg > 0.0001 && (
-                  <div className="space-y-2 rounded-xl border border-amber-200/90 bg-amber-50/80 p-3 dark:border-amber-900/40 dark:bg-amber-950/25">
-                    <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
-                      {t.rmBagConnectPrevHint}{' '}
-                      <span className="font-semibold tabular-nums">
-                        {formatNumber(activeBag.currentQuantityKg)} {t.unitKg}
-                      </span>
-                    </p>
-                    <Select
-                      value={connectPrevAction}
-                      onValueChange={(v) =>
-                        setConnectPrevAction(v as 'RETURN_TO_STORAGE' | 'WRITE_OFF')
-                      }
-                    >
-                      <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                        <SelectItem value="RETURN_TO_STORAGE" className={SELECT_ITEM_CLS}>
-                          {t.rmBagSwitchReturn}
-                        </SelectItem>
-                        <SelectItem value="WRITE_OFF" className={SELECT_ITEM_CLS}>
-                          {t.rmBagSwitchWriteoff}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <input
-                      type="text"
-                      value={connectPrevReason}
-                      onChange={(e) => setConnectPrevReason(e.target.value)}
-                      placeholder={t.rmBagReasonPlaceholder}
-                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    />
-                  </div>
-                )}
-                <button type="button" onClick={() => void handleConnectBag()} className="w-full py-2.5 rounded-xl border border-indigo-200 text-indigo-700 dark:text-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm font-medium">
-                  {t.rmBagConnectButton}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <RefreshCw size={16} className="text-indigo-500" />
-              <h3 className="text-slate-900 dark:text-white font-semibold text-sm">{t.rmBagsTitle}</h3>
-            </div>
-            <div className="space-y-3">
-              {connectedSiroBagsForList.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.rmBagsListNoConnected}</p>
-              ) : (
-                connectedSiroBagsForList.map((bag) => (
-                  <div key={bag.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-medium text-slate-900 dark:text-white truncate">{bag.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{bag.rawMaterialName}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => openEditBagName(bag.id, bag.name)}
-                        className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                        title={t.whEdit}
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-medium ${bagStatusTone[bag.status]}`}>
-                        {bagStatusLabel[bag.status]}
-                      </span>
-                    </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <p className="text-slate-400">{t.rmBagInitial}</p>
-                        <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.initialQuantityKg)} {t.unitKg}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400">{t.rmBagRemaining}</p>
-                        <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.currentQuantityKg)} {t.unitKg}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {otherSiroBagsForList.length > 0 && (
-              <Collapsible
-                open={otherBagsOpen}
-                onOpenChange={setOtherBagsOpen}
-                className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
-              >
-                <CollapsibleTrigger className="w-full text-left">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Package size={16} className="text-slate-500 shrink-0" />
-                      <span className="text-slate-900 dark:text-white font-medium text-sm truncate">
-                        {t.rmBagsListOtherTitle}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-slate-400">
-                        {otherSiroBagsForList.length}
-                      </span>
-                      <ChevronDown
-                        size={16}
-                        className={`text-slate-400 transition-transform ${otherBagsOpen ? 'rotate-180' : ''}`}
-                      />
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-3 mt-3">
-                    {otherSiroBagsForList.map((bag) => (
-                      <div key={bag.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate">{bag.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{bag.rawMaterialName}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => openEditBagName(bag.id, bag.name)}
-                            className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                            title={t.whEdit}
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-medium ${bagStatusTone[bag.status]}`}>
-                            {bagStatusLabel[bag.status]}
-                          </span>
-                        </div>
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <p className="text-slate-400">{t.rmBagInitial}</p>
-                            <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.initialQuantityKg)} {t.unitKg}</p>
-                          </div>
-                          <div>
-                            <p className="text-slate-400">{t.rmBagRemaining}</p>
-                            <p className="text-slate-700 dark:text-slate-200 font-medium">{formatNumber(bag.currentQuantityKg)} {t.unitKg}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            )}
-          </div>
-
-          <Collapsible
-            open={bagLogsOpen}
-            onOpenChange={setBagLogsOpen}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
-          >
-            <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  <History size={16} className="text-indigo-500" />
-                  <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmBagLogsTitle}</h3>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400">
-                    {filteredBagLogs.length} {t.totalRecords}
-                  </span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-slate-400 transition-transform ${bagLogsOpen ? 'rotate-180' : ''}`}
-                  />
-                </div>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="space-y-3 p-5 pt-4">
-                {filteredBagLogs.length === 0 ? (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{t.noData}</p>
-                ) : (
-                  filteredBagLogs.map((log) => (
-                    <div key={log.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {actionLabel[log.actionType] ?? log.actionType}
-                        </p>
-                        <span className="text-[11px] text-slate-400">{formatDate(log.date)}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{log.bagName}</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">
-                        {translateBagLogNote(log.note, t) || t.rmNoLogNote}
-                      </p>
-                      {log.quantityKg !== undefined && (
-                        <p className="text-xs text-indigo-600 dark:text-indigo-300 mt-2">
-                          {formatNumber(log.quantityKg)} {t.unitKg}
-                        </p>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-      </div>
-
-      <Collapsible
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
-        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <History size={16} className="text-indigo-500" />
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmHistory}</h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400">{filteredEntries.length} {t.totalRecords}</span>
-              <ChevronDown
-                size={16}
-                className={`text-slate-400 transition-transform ${historyOpen ? 'rotate-180' : ''}`}
-              />
-            </div>
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          {filteredEntries.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colDate}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colType}</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{t.colAmount}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 hidden md:table-cell">{t.colNote}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEntries.map((entry, idx) => (
-                    <tr key={entry.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${idx % 2 !== 0 ? 'bg-slate-50/50 dark:bg-slate-800/50' : ''}`}>
-                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">{formatDate(entry.date)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium ${entry.type === 'incoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
-                          {entry.type === 'incoming' ? t.rmIncoming : t.rmOutgoing}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`text-sm font-semibold ${entry.type === 'incoming' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                          {entry.type === 'incoming' ? '+' : '-'}{formatNumber(entry.amount)} {t.unitKg}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 hidden md:table-cell max-w-xs truncate">{entry.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
-                    <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.rmBalance}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={`text-sm font-bold ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
-                      >
-                        {formatNumber(siroStockKg + paintStockKg)} {t.unitKg}
-                      </span>
-                      <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
-                        {t.rmMetricsCaptionSiro}: {formatNumber(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
-                        {formatNumber(paintStockKg)}
-                      </span>
-                    </td>
-                    <td className="hidden md:table-cell" />
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
-
-        </div>
-        )}
       </div>
 
       {(error || success) && (
@@ -1407,38 +956,6 @@ export function RawMaterial() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <Dialog open={Boolean(editingBagId)} onOpenChange={(open) => !open && closeEditBagName()}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t.whEdit}</DialogTitle>
-            <DialogDescription>{t.rmBagName}</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={submitEditBagName} className="space-y-4">
-            <input
-              value={editingBagName}
-              onChange={(e) => setEditingBagName(e.target.value)}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
-              placeholder={t.rmBagNamePlaceholder}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={closeEditBagName}
-                className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 text-sm font-medium"
-              >
-                {t.btnCancel}
-              </button>
-              <button
-                type="submit"
-                className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium"
-              >
-                {t.btnSave}
-              </button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -13,7 +13,6 @@ import {
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, formatKgAmount, TODAY } from '../utils/format';
-import { Link } from 'react-router';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { getPlannedSemiRawRows } from '../utils/shift-semi-raw-planned';
@@ -51,9 +50,6 @@ function loadShiftDefinitions(): ShiftDefinition[] {
 
 /** Bugungi smena kartochkalarida dastlab ko‘rinadigan yozuvlar soni */
 const TIMELINE_CARD_VISIBLE = 3;
-
-/** Фаол қопда сиро «йўқ» деб ҳисоблаш чегараси (кг) */
-const SIRO_BAG_KG_EPS = 1e-5;
 
 const SHIFT_STYLE_PRESETS = [
   { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700', dot: 'bg-amber-500' },
@@ -940,49 +936,8 @@ export function ShiftWork() {
     () => state.machines.some((m) => m.type === 'semi'),
     [state.machines],
   );
-  const hasFinalMachines = useMemo(
-    () => state.machines.some((m) => m.type === 'final'),
-    [state.machines],
-  );
-
-  const siroBagReady = useMemo(() => {
-    const b = state.activeRawMaterialBag;
-    if (!b || b.status !== 'CONNECTED') return false;
-    if (!Number.isFinite(b.currentQuantityKg) || b.currentQuantityKg <= SIRO_BAG_KG_EPS) {
-      return false;
-    }
-    return true;
-  }, [state.activeRawMaterialBag]);
-
-  const semiShiftBlocked = hasSemiMachines && !siroBagReady;
-
-  const shiftFormMachineOptions = useMemo(() => {
-    if (!semiShiftBlocked) return state.machines;
-    return state.machines.filter((m) => m.type !== 'semi');
-  }, [state.machines, semiShiftBlocked]);
-
-  const addLineBlockedBySiro = semiShiftBlocked && !hasFinalMachines;
-
-  const siroBagActive = state.activeRawMaterialBag;
-  const siroConnectedButEmpty = Boolean(
-    siroBagActive &&
-      siroBagActive.status === 'CONNECTED' &&
-      Number.isFinite(siroBagActive.currentQuantityKg) &&
-      siroBagActive.currentQuantityKg <= SIRO_BAG_KG_EPS,
-  );
-
-  const siroLowWarning = useMemo(() => {
-    const b = state.activeRawMaterialBag;
-    if (!b || b.status !== 'CONNECTED') return null;
-    if (!Number.isFinite(b.currentQuantityKg) || b.currentQuantityKg <= SIRO_BAG_KG_EPS) return null;
-    if (!Number.isFinite(b.initialQuantityKg) || b.initialQuantityKg <= SIRO_BAG_KG_EPS) return null;
-    if (b.currentQuantityKg / b.initialQuantityKg > 0.12) return null;
-    const name = [b.rawMaterialName, b.name].filter(Boolean).join(' · ') || b.name || b.rawMaterialName || '—';
-    return { kgLabel: formatKgAmount(b.currentQuantityKg), name };
-  }, [state.activeRawMaterialBag]);
-
   const createEmptyLine = useCallback((): ShiftLine => {
-    const defaultMachineId = shiftFormMachineOptions[0]?.id || '';
+    const defaultMachineId = state.machines[0]?.id || '';
     const defaultProductType = shiftLineProductOptions[0] || '';
     return {
       id: `line-${Math.random().toString(16).slice(2)}`,
@@ -999,7 +954,7 @@ export function ShiftWork() {
       paintUnit: 'kg',
       rawKgOverrides: {},
     };
-  }, [shiftFormMachineOptions, shiftLineProductOptions]);
+  }, [state.machines, shiftLineProductOptions]);
 
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
 
@@ -1043,7 +998,7 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   useEffect(() => {
-    const defaultId = shiftFormMachineOptions[0]?.id;
+    const defaultId = state.machines[0]?.id;
     if (!defaultId) return;
     setLines((prev) => {
       let changed = false;
@@ -1054,32 +1009,7 @@ export function ShiftWork() {
       });
       return changed ? next : prev;
     });
-  }, [shiftFormMachineOptions]);
-
-  useEffect(() => {
-    if (!semiShiftBlocked) return;
-    const allowed = shiftFormMachineOptions;
-    const fallback = allowed[0]?.id;
-    if (!fallback) return;
-    const allowedIds = new Set(allowed.map((m) => m.id));
-    setLines((prev) => {
-      let changed = false;
-      const next = prev.map((ln) => {
-        if (allowedIds.has(ln.machineId)) return ln;
-        changed = true;
-        const prevMachine = state.machines.find((x) => x.id === ln.machineId);
-        const nextLine: ShiftLine = { ...ln, machineId: fallback };
-        if (prevMachine?.type === 'semi') {
-          nextLine.paintUsed = false;
-          nextLine.paintRawMaterialId = '';
-          nextLine.paintQuantity = '';
-          nextLine.paintUnit = 'kg';
-        }
-        return nextLine;
-      });
-      return changed ? next : prev;
-    });
-  }, [semiShiftBlocked, shiftFormMachineOptions, state.machines]);
+  }, [state.machines]);
 
   useEffect(() => {
     if (shiftPickerDefs.length === 0) return;
@@ -1092,12 +1022,9 @@ export function ShiftWork() {
     (r: ShiftRecord) => {
       setRecordEditId(r.id);
       setRecordEditError('');
-      const allowedMachines = semiShiftBlocked
-        ? state.machines.filter((m) => m.type !== 'semi')
-        : state.machines;
-      const fallbackMid = allowedMachines[0]?.id || state.machines[0]?.id || '';
+      const fallbackMid = state.machines[0]?.id || '';
       const mid =
-        r.machineId && allowedMachines.some((m) => m.id === r.machineId)
+        r.machineId && state.machines.some((m) => m.id === r.machineId)
           ? r.machineId
           : fallbackMid;
       setRecordEditForm({
@@ -1116,7 +1043,7 @@ export function ShiftWork() {
         ),
       });
     },
-    [state.machines, semiShiftBlocked],
+    [state.machines],
   );
 
   const closeRecordEditor = useCallback(() => {
@@ -1143,10 +1070,6 @@ export function ShiftWork() {
       return;
     }
     const sel = state.machines.find((m) => m.id === recordEditForm.machineId);
-    if (sel?.type === 'semi' && !siroBagReady) {
-      setRecordEditError(t.shiftSemiNeedActiveBagSubmit);
-      return;
-    }
     if (sel && (!Number.isFinite(sel.powerKw) || sel.powerKw <= 0)) {
       setRecordEditError(t.machinePowerKwZeroHint);
       return;
@@ -1245,9 +1168,8 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   const addLine = useCallback(() => {
-    if (addLineBlockedBySiro) return;
     setLines((prev) => [...prev, createEmptyLine()]);
-  }, [createEmptyLine, addLineBlockedBySiro]);
+  }, [createEmptyLine]);
 
   const removeLine = useCallback((id: string) => {
     setLines((prev) => {
@@ -1292,10 +1214,6 @@ export function ShiftWork() {
       if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
       if (!ln.productType) { setError(t.labelProduct + '!'); return; }
       const machine = state.machines.find((m) => m.id === ln.machineId);
-      if (machine?.type === 'semi' && !siroBagReady) {
-        setError(t.shiftSemiNeedActiveBagSubmit);
-        return;
-      }
       if (machine?.type === 'semi' && ln.paintUsed) {
         if (!ln.paintRawMaterialId) {
           setError(t.shiftPaintError);
@@ -1750,45 +1668,6 @@ export function ShiftWork() {
               </div>
             )}
 
-            {semiShiftBlocked && (
-              <div
-                className={`mb-4 p-3 rounded-xl border space-y-2 text-sm ${
-                  siroConnectedButEmpty && siroBagActive
-                    ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-100'
-                    : 'bg-amber-50/90 dark:bg-amber-950/35 border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-100/90'
-                }`}
-              >
-                <p className="font-semibold leading-snug">
-                  {siroConnectedButEmpty && siroBagActive
-                    ? t.shiftSiroBagEmpty.replace(
-                        '{name}',
-                        [siroBagActive.rawMaterialName, siroBagActive.name].filter(Boolean).join(' · ') ||
-                          siroBagActive.name ||
-                          siroBagActive.rawMaterialName ||
-                          '—',
-                      )
-                    : t.shiftSemiNeedActiveBagBanner}
-                </p>
-                <Link
-                  to="/raw-material"
-                  className="inline-flex w-fit items-center rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
-                >
-                  {t.shiftSiroGoRawMaterial}
-                </Link>
-              </div>
-            )}
-
-            {!semiShiftBlocked && siroLowWarning && (
-              <div className="mb-4 p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 text-amber-950 dark:text-amber-100/90 text-sm font-medium leading-snug flex gap-2">
-                <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                <p>
-                  {t.shiftSiroBagLow
-                    .replace('{kg}', siroLowWarning.kgLabel)
-                    .replace('{name}', siroLowWarning.name)}
-                </p>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {/* Date + Shift */}
               <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
@@ -1884,13 +1763,7 @@ export function ShiftWork() {
                 <button
                   type="button"
                   onClick={addLine}
-                  disabled={addLineBlockedBySiro}
-                  title={addLineBlockedBySiro ? t.shiftSemiAddLineBlocked : undefined}
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 transition-colors ${
-                    addLineBlockedBySiro
-                      ? 'cursor-not-allowed opacity-45 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
-                      : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'
-                  }`}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 transition-colors bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600"
                 >
                   <Plus size={14} /> {t.formAddRow}
                 </button>
@@ -1927,7 +1800,7 @@ export function ShiftWork() {
                           <UiDropdown
                             value={ln.machineId}
                             onChange={(machineId) => updateLine(ln.id, { machineId })}
-                            options={shiftFormMachineOptions.map((m) => ({ value: m.id, label: m.name }))}
+                            options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
                             placeholder={t.labelMachine}
                           />
                         </div>
@@ -3089,7 +2962,7 @@ export function ShiftWork() {
                         rawKgOverrides: m?.type === 'semi' ? prev.rawKgOverrides : {},
                       }));
                     }}
-                    options={shiftFormMachineOptions.map((m) => ({ value: m.id, label: m.name }))}
+                    options={state.machines.map((m) => ({ value: m.id, label: m.name }))}
                     placeholder={t.labelMachine}
                   />
                 </div>
