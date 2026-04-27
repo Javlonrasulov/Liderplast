@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../i18n/app-context';
 import { formatNumber } from '../../utils/format';
 import type { InventoryRecord, InventoryRow } from './types';
@@ -23,6 +23,56 @@ function diffClass(diff: number): string {
   if (diff < 0) return 'text-red-600 dark:text-red-400 font-semibold';
   if (diff > 0) return 'text-emerald-600 dark:text-emerald-400 font-semibold';
   return 'text-slate-500 dark:text-slate-400';
+}
+
+/**
+ * `type="number"` + value 0: нолни ўчириб бўлмайди, «050» каби артефактлар.
+ * Фокусда 0 → бўш сатр; blur да рақамга яхлитлаймиз.
+ */
+function InventoryEditableQtyInput({
+  quantity,
+  onCommit,
+  className,
+}: {
+  quantity: number;
+  onCommit: (n: number) => void;
+  className?: string;
+}) {
+  const [focused, setFocused] = useState(false);
+  const [text, setText] = useState('');
+
+  const displayQty = Number.isFinite(quantity) ? quantity : 0;
+  const shownValue = focused ? text : String(displayQty);
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      autoComplete="off"
+      value={shownValue}
+      onFocus={() => {
+        setFocused(true);
+        setText(displayQty === 0 ? '' : String(displayQty));
+      }}
+      onBlur={() => {
+        const raw = text.trim().replace(/\s/g, '').replace(',', '.');
+        let n = 0;
+        if (raw !== '' && raw !== '.' && raw !== '-') {
+          const parsed = Number(raw);
+          if (Number.isFinite(parsed) && parsed >= 0) n = parsed;
+        }
+        onCommit(n);
+        setFocused(false);
+      }}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\s/g, '').replace(',', '.');
+        if (raw === '' || /^\d*\.?\d*$/.test(raw)) {
+          setText(raw);
+        }
+      }}
+      className={className}
+    />
+  );
 }
 
 function categoryBadge(
@@ -206,18 +256,11 @@ export function InventoryTable({
                   </td>
                   <td className="border-b border-r border-slate-200 px-2 py-2 text-right tabular-nums dark:border-slate-700">
                     {editable ? (
-                      <input
-                        type="number"
-                        step="any"
-                        inputMode="decimal"
-                        value={
-                          Number.isFinite(row.realQuantityStart)
-                            ? row.realQuantityStart
-                            : 0
-                        }
-                        onChange={(e) =>
+                      <InventoryEditableQtyInput
+                        quantity={row.realQuantityStart}
+                        onCommit={(n) =>
                           onChangeRow(row.productId, {
-                            realQuantityStart: Number(e.target.value) || 0,
+                            realQuantityStart: n,
                           })
                         }
                         className="h-8 w-24 rounded-md border border-slate-200 bg-white px-2 text-right tabular-nums text-slate-800 focus:border-indigo-400 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
@@ -230,15 +273,10 @@ export function InventoryTable({
                   </td>
                   <td className="border-b border-r border-slate-200 px-2 py-2 text-right tabular-nums dark:border-slate-700">
                     {editable ? (
-                      <input
-                        type="number"
-                        step="any"
-                        inputMode="decimal"
-                        value={Number.isFinite(row.income) ? row.income : 0}
-                        onChange={(e) =>
-                          onChangeRow(row.productId, {
-                            income: Number(e.target.value) || 0,
-                          })
+                      <InventoryEditableQtyInput
+                        quantity={row.income}
+                        onCommit={(n) =>
+                          onChangeRow(row.productId, { income: n })
                         }
                         className="h-8 w-20 rounded-md border border-emerald-200 bg-emerald-50/40 px-2 text-right tabular-nums text-emerald-700 focus:border-emerald-400 focus:outline-none dark:border-emerald-700 dark:bg-emerald-900/10 dark:text-emerald-300"
                       />
@@ -250,15 +288,10 @@ export function InventoryTable({
                   </td>
                   <td className="border-b border-r border-slate-200 px-2 py-2 text-right tabular-nums dark:border-slate-700">
                     {editable ? (
-                      <input
-                        type="number"
-                        step="any"
-                        inputMode="decimal"
-                        value={Number.isFinite(row.expense) ? row.expense : 0}
-                        onChange={(e) =>
-                          onChangeRow(row.productId, {
-                            expense: Number(e.target.value) || 0,
-                          })
+                      <InventoryEditableQtyInput
+                        quantity={row.expense}
+                        onCommit={(n) =>
+                          onChangeRow(row.productId, { expense: n })
                         }
                         className="h-8 w-20 rounded-md border border-rose-200 bg-rose-50/40 px-2 text-right tabular-nums text-rose-700 focus:border-rose-400 focus:outline-none dark:border-rose-700 dark:bg-rose-900/10 dark:text-rose-300"
                       />
@@ -273,18 +306,11 @@ export function InventoryTable({
                   </td>
                   <td className="border-b border-r border-slate-200 px-2 py-2 text-right tabular-nums dark:border-slate-700">
                     {editable ? (
-                      <input
-                        type="number"
-                        step="any"
-                        inputMode="decimal"
-                        value={
-                          Number.isFinite(row.realQuantityEnd)
-                            ? row.realQuantityEnd
-                            : 0
-                        }
-                        onChange={(e) =>
+                      <InventoryEditableQtyInput
+                        quantity={row.realQuantityEnd}
+                        onCommit={(n) =>
                           onChangeRow(row.productId, {
-                            realQuantityEnd: Number(e.target.value) || 0,
+                            realQuantityEnd: n,
                           })
                         }
                         className="h-8 w-24 rounded-md border border-slate-200 bg-white px-2 text-right tabular-nums text-slate-800 focus:border-indigo-400 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"

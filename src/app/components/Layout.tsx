@@ -425,6 +425,7 @@ export function Layout() {
                           <NavLink
                             key={child.path}
                             to={child.path}
+                            end={child.exact === true}
                             onClick={() => setMobileOpen(false)}
                             className={({ isActive }) =>
                               `group/child relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors duration-150 ${

@@ -18,6 +18,31 @@ export interface T {
   navExpenses: string;
   navReports: string;
   navShifts: string;
+  /** Smena: ortiqcha siro sub-sahifa */
+  navShiftOverConsumption: string;
+  poOverTitle: string;
+  poOverSubtitle: string;
+  poOverAggTitle: string;
+  poOverAggHint: string;
+  poOverDetailTitle: string;
+  poOverColProduct: string;
+  poOverColRaw: string;
+  poOverColCases: string;
+  poOverColSumExtra: string;
+  poOverColAvgOverPct: string;
+  poOverColMaxPct: string;
+  poOverColWhen: string;
+  poOverColWorker: string;
+  poOverColMachine: string;
+  poOverColGood: string;
+  poOverColDefect: string;
+  poOverColPlanned: string;
+  poOverColActual: string;
+  poOverColExtra: string;
+  poOverColOverPct: string;
+  poOverEmpty: string;
+  poOverLinkFromShift: string;
+  poOverBackToShift: string;
   navSystemUsers: string;
   navInventory: string;
 
@@ -947,6 +972,32 @@ const uz_cyrillic: T = {
   navExpenses: 'Харажатлар',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
+  navShiftOverConsumption: 'Ортиқча хомашё',
+  poOverTitle: 'Ишлаб чиқариш: ретсептдан ортиқча сиро',
+  poOverSubtitle:
+    'Қолип сменаларида ретсепт бўйича керак бўлганидан кўп сарфланган хомашё (масалан: 3,95 кг ўрнига 5 кг).',
+  poOverAggTitle: 'Қайси маҳсулот + қайси хомашё — жами ортиқча',
+  poOverAggHint:
+    'Бир хил ном ва хомашё бўйича гуруҳлаштирилган; «макс %» — битта ёзувдаги энг катта меъёордан ортиқча фоиз.',
+  poOverDetailTitle: 'Барча ортиқча ёзувлар (вақт, ишчи, дона, кг)',
+  poOverColProduct: 'Маҳсулот',
+  poOverColRaw: 'Хомашё',
+  poOverColCases: 'Ёзувлар',
+  poOverColSumExtra: 'Жами ортиқча, кг',
+  poOverColAvgOverPct: 'Ўртача % ортиқча',
+  poOverColMaxPct: 'Макс % ортиқча',
+  poOverColWhen: 'Сана / вақт',
+  poOverColWorker: 'Ишчи',
+  poOverColMachine: 'Аппарат',
+  poOverColGood: 'Тайёр (дона)',
+  poOverColDefect: 'Брак',
+  poOverColPlanned: 'Режа, кг',
+  poOverColActual: 'Ҳақиқий, кг',
+  poOverColExtra: 'Ортиқча, кг',
+  poOverColOverPct: '% ортиқча',
+  poOverEmpty: 'Ҳозирча ретсептдан ортиқча сиро ёзувлари йўқ (сменада «ҳақиқий кг» киритилмаган).',
+  poOverLinkFromShift: 'Ортиқча хомашё рўйхати →',
+  poOverBackToShift: 'Сменага қайтиш',
   navSystemUsers: 'Тизим фойдаланувчилари',
   navInventory: 'Инвентаризация',
 
@@ -1842,6 +1893,32 @@ const uz_latin: T = {
   navExpenses: 'Xarajatlar',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
+  navShiftOverConsumption: 'Ortiqcha xomashyo',
+  poOverTitle: 'Ishlab chiqarish: retseptdan ortiqcha siro',
+  poOverSubtitle:
+    'Qolip smenalarida retsept bo‘yicha kerak bo‘lganidan ko‘p sarflangan xomashyo (masalan: 3,95 kg o‘rniga 5 kg).',
+  poOverAggTitle: 'Qaysi mahsulot + qaysi xomashyo — jami ortiqcha',
+  poOverAggHint:
+    'Bir xil nom va xomashyo bo‘yicha guruhlangan; «maks %» — bitta yozuvdagi eng katta me‘yordan ortiqcha foiz.',
+  poOverDetailTitle: 'Barcha ortiqcha yozuvlar (vaqt, ishchi, dona, kg)',
+  poOverColProduct: 'Mahsulot',
+  poOverColRaw: 'Xomashyo',
+  poOverColCases: 'Yozuvlar',
+  poOverColSumExtra: 'Jami ortiqcha, kg',
+  poOverColAvgOverPct: 'O‘rtacha % ortiqcha',
+  poOverColMaxPct: 'Maks % ortiqcha',
+  poOverColWhen: 'Sana / vaqt',
+  poOverColWorker: 'Ishchi',
+  poOverColMachine: 'Apparat',
+  poOverColGood: 'Tayyor (dona)',
+  poOverColDefect: 'Brak',
+  poOverColPlanned: 'Reja, kg',
+  poOverColActual: 'Haqiqiy, kg',
+  poOverColExtra: 'Ortiqcha, kg',
+  poOverColOverPct: '% ortiqcha',
+  poOverEmpty: 'Hozircha retseptdan ortiqcha siro yozuvlari yo‘q (smenada «haqiqiy kg» kiritilmagan).',
+  poOverLinkFromShift: 'Ortiqcha xomashyo ro‘yxati →',
+  poOverBackToShift: 'Smenaga qaytish',
   navSystemUsers: 'Tizim foydalanuvchilari',
   navInventory: 'Inventarizatsiya',
 
@@ -2737,6 +2814,32 @@ const ru: T = {
   navExpenses: 'Расходы',
   navReports: 'Отчёты',
   navShifts: 'Производство',
+  navShiftOverConsumption: 'Перерасход сырья',
+  poOverTitle: 'Производство: перерасход по рецепту',
+  poOverSubtitle:
+    'Смены преформ: фактический расход сырья выше расчёта по рецепту (например: вместо 3,95 кг списано 5 кг).',
+  poOverAggTitle: 'Продукция + сырьё — суммарный перерасход',
+  poOverAggHint:
+    'Группировка по названию продукции и сырью; «макс %» — максимальный процент превышения в одной записи.',
+  poOverDetailTitle: 'Все записи с перерасходом (время, сотрудник, шт, кг)',
+  poOverColProduct: 'Продукция',
+  poOverColRaw: 'Сырьё',
+  poOverColCases: 'Записей',
+  poOverColSumExtra: 'Сумм. перерасход, кг',
+  poOverColAvgOverPct: 'Средн. % превыш.',
+  poOverColMaxPct: 'Макс % превыш.',
+  poOverColWhen: 'Дата / время',
+  poOverColWorker: 'Рабочий',
+  poOverColMachine: 'Аппарат',
+  poOverColGood: 'Готово (шт)',
+  poOverColDefect: 'Брак',
+  poOverColPlanned: 'План, кг',
+  poOverColActual: 'Факт, кг',
+  poOverColExtra: 'Перерасход, кг',
+  poOverColOverPct: '% превыш.',
+  poOverEmpty: 'Пока нет записей с перерасходом (в смене не введён «факт, кг»).',
+  poOverLinkFromShift: 'Список перерасхода →',
+  poOverBackToShift: 'К сменам',
   navSystemUsers: 'Пользователи системы',
   navInventory: 'Инвентаризация',
 

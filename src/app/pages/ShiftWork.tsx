@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import {
   Users, Plus, Trash2, CheckCircle2, Clock, Zap,
   AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu,
-  Pencil, Layers, X, Maximize2, Minimize2,
+  Pencil, Layers, X, Maximize2, Minimize2, TrendingUp,
 } from 'lucide-react';
+import { Link } from 'react-router';
 import {
   useERP,
   type Employee,
@@ -1542,9 +1543,18 @@ export function ShiftWork() {
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6 space-y-4 min-[400px]:space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-slate-900 dark:text-white text-lg min-[400px]:text-xl font-bold leading-tight">{t.title}</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-xs min-[400px]:text-sm mt-0.5">{t.subtitle}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-slate-900 dark:text-white text-lg min-[400px]:text-xl font-bold leading-tight">{t.title}</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-xs min-[400px]:text-sm mt-0.5">{t.subtitle}</p>
+        </div>
+        <Link
+          to="/shifts/over-consumption"
+          className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/90 dark:bg-teal-950/40 px-3 py-2 text-xs font-semibold text-teal-800 dark:text-teal-200 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
+        >
+          <TrendingUp size={16} className="shrink-0" />
+          {appT.poOverLinkFromShift}
+        </Link>
       </div>
 
       {/* KPI Cards */}

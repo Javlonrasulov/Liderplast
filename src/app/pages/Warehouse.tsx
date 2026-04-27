@@ -217,6 +217,21 @@ function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t'])
   return `${t.whCreatedAt}: ${createdAt}`;
 }
 
+/** Umumiy ko‘rsatkichlar: har bir yarim tayyor uchun alohida gradient kartochka */
+const SEMI_SUMMARY_GRADIENTS = [
+  { from: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-200 dark:shadow-purple-900/30' },
+  { from: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-200 dark:shadow-violet-900/30' },
+  { from: 'from-fuchsia-500 to-fuchsia-600', shadow: 'shadow-fuchsia-200 dark:shadow-fuchsia-900/30' },
+  { from: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-200 dark:shadow-indigo-900/30' },
+] as const;
+
+const FINAL_SUMMARY_GRADIENTS = [
+  { from: 'from-cyan-500 to-cyan-600', shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30' },
+  { from: 'from-teal-500 to-teal-600', shadow: 'shadow-teal-200 dark:shadow-teal-900/30' },
+  { from: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-200 dark:shadow-sky-900/30' },
+  { from: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-200 dark:shadow-blue-900/30' },
+] as const;
+
 const SEMI_DETAIL_CARD_STYLES = [
   {
     color: 'bg-purple-500',
@@ -343,12 +358,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       ),
     [state.warehouseProducts, mode],
   );
+  /** To‘liq katalog: `productCatalog` rejim bo‘yicha filtrlangan; tayyor mahsulot formasi uchun yarim tayyorlar har doim kerak */
   const semiProducts = useMemo(
     () =>
-      productCatalog.filter(
+      state.warehouseProducts.filter(
         (item): item is SemiProductCatalogItem => item.itemType === 'SEMI_PRODUCT',
       ),
-    [productCatalog],
+    [state.warehouseProducts],
   );
   const finishedProducts = useMemo(
     () =>
@@ -473,36 +489,32 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         icon: Palette,
       });
     }
-    if (hasCatalogSemi) {
-      const sub =
-        semiProducts.length <= 2
-          ? semiProducts.map((p) => p.name).join(' · ')
-          : `${semiProducts.length} ${t.whSemiShort}`;
+    semiProducts.forEach((p, i) => {
+      const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
+      const qty = semiStockByProductName[p.name] ?? 0;
       cards.push({
-        key: 'semi',
-        label: t.whSemi,
-        sub,
-        val: `${formatNumber(totalSemiInCatalogStock)} ${t.unitPiece}`,
-        from: 'from-purple-500 to-purple-600',
-        shadow: 'shadow-purple-200 dark:shadow-purple-900/30',
+        key: `semi-${p.id}`,
+        label: p.name,
+        sub: `${formatNumber(p.weightGram)} g · ${t.whInWarehouse}`,
+        val: `${formatNumber(qty)} ${t.unitPiece}`,
+        from: st.from,
+        shadow: st.shadow,
         icon: Factory,
       });
-    }
-    if (hasCatalogFinal) {
-      const sub =
-        finishedProducts.length <= 2
-          ? finishedProducts.map((p) => p.name).join(' · ')
-          : `${finishedProducts.length} ${t.whFinal}`;
+    });
+    finishedProducts.forEach((p, i) => {
+      const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
+      const qty = finalStockByProductName[p.name] ?? 0;
       cards.push({
-        key: 'final',
-        label: t.whFinal,
-        sub,
-        val: `${formatNumber(totalFinalInCatalogStock)} ${t.unitPiece}`,
-        from: 'from-cyan-500 to-cyan-600',
-        shadow: 'shadow-cyan-200 dark:shadow-cyan-900/30',
+        key: `final-${p.id}`,
+        label: p.name,
+        sub: `${p.volumeLiter} L · ${t.whInWarehouse}`,
+        val: `${formatNumber(qty)} ${t.unitPiece}`,
+        from: st.from,
+        shadow: st.shadow,
         icon: Package,
       });
-    }
+    });
     if (hasCatalogSemi || hasCatalogFinal) {
       cards.push({
         key: 'total-pieces',
@@ -525,8 +537,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     siroRawMaterialsSorted,
     paintRawMaterialsSorted,
     rawStockByName,
-    totalSemiInCatalogStock,
-    totalFinalInCatalogStock,
+    semiStockByProductName,
+    finalStockByProductName,
     totalPiecesInCatalogStock,
     t,
   ]);
