@@ -5,7 +5,7 @@ import {
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
-  ClipboardList, Factory, Package,
+  ClipboardList, Factory, Package, TrendingUp,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP } from '../store/erp-store';
@@ -170,7 +170,14 @@ export function Layout() {
   const navDefs: NavDef[] = [
     { kind: 'leaf', path: '/', icon: LayoutDashboard, label: t.navDashboard, exact: true, perm: 'view_dashboard' },
     /** Top-level «Ишлаб чиқариш» — Ombor ichida ham bola sifatida ko‘rinadi */
-    { kind: 'leaf', path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
+    {
+      kind: 'leaf',
+      path: '/shifts',
+      icon: CalendarClock,
+      label: t.navShifts,
+      perm: 'view_shift',
+      exact: true,
+    },
     {
       kind: 'group',
       id: 'ombor',
@@ -180,7 +187,21 @@ export function Layout() {
       pathPrefixes: ['/raw-material', '/shifts', '/warehouse'],
       children: [
         { kind: 'leaf', path: '/raw-material', icon: Droplets, label: t.whSidebarRaw, perm: 'view_raw_material' },
-        { kind: 'leaf', path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
+        {
+          kind: 'leaf',
+          path: '/shifts',
+          icon: CalendarClock,
+          label: t.navShifts,
+          perm: 'view_shift',
+          exact: true,
+        },
+        {
+          kind: 'leaf',
+          path: '/shifts/over-consumption',
+          icon: TrendingUp,
+          label: t.navShiftOverConsumption,
+          perm: 'view_shift',
+        },
         { kind: 'leaf', path: '/warehouse/semi', icon: Factory, label: t.whSidebarSemi, perm: 'view_warehouse' },
         { kind: 'leaf', path: '/warehouse/final', icon: Package, label: t.whSidebarFinal, perm: 'view_warehouse' },
       ],
@@ -245,6 +266,7 @@ export function Layout() {
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
     '/shifts': t.navShifts,
+    '/shifts/over-consumption': t.navShiftOverConsumption,
     '/payroll': t.navPayroll,
     '/reports': t.navReports,
     '/system-users': t.navSystemUsers,
@@ -313,7 +335,7 @@ export function Layout() {
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  end={item.path === '/'}
+                  end={item.path === '/' || item.exact === true}
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group relative border ${isActive ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white border-transparent'} ${collapsed ? 'justify-center' : ''}`}
                   title={collapsed ? item.label : undefined}
@@ -353,6 +375,7 @@ export function Layout() {
                         <NavLink
                           key={child.path}
                           to={child.path}
+                          end={child.exact === true}
                           onClick={() => setMobileOpen(false)}
                           className={({ isActive }) =>
                             `flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-200 hover:bg-slate-700 ${isActive ? 'bg-slate-700/70 text-white' : ''}`
@@ -444,7 +467,7 @@ export function Layout() {
           })}
         </nav>
 
-        {/* Siro status */}
+        {/* Raw material (PET) stock status */}
         {!collapsed && (
           <div className="mx-3 mb-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-2">

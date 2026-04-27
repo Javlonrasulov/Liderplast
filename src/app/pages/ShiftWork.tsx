@@ -195,16 +195,16 @@ const TR = {
     shiftPaintUnitLabel: 'Ўлчов',
     shiftPaintError: 'Краска белгиланса — тур ва миқдор тўғри киритилсин',
     shiftPaintNoMaterials:
-      'Краска тури мавжуд эмас. «Хомашё (сиро)» саҳифасида янги хомашёни «краска» тури билан қўшинг.',
+      'Краска тури мавжуд эмас. «Хомашё» саҳифасида янги хомашёни «краска» тури билан қўшинг.',
     shiftSemiNeedActiveBagBanner:
-      'Қолип (ярим тайёр) учун сменада фаол сиро қопи аппаратга уланган бўлиши керак. «Хомашё (сиро / краска)» саҳифасида қопни уланг.',
+      'Қолип (ярим тайёр) учун сменада фаол хомашё қопи аппаратга уланган бўлиши керак. «Хомашё» саҳифасида қопни уланг.',
     shiftSemiNeedActiveBagSubmit:
-      'Қолип аппарати учун сиро қопи уланмаган ёки сиро йўқ — смена сақланмайди.',
+      'Қолип аппарати учун хомашё қопи уланмаган ёки хомашё йўқ — смена сақланмайди.',
     shiftSemiAddLineBlocked:
-      'Фақат қолип аппаратлари қолганда сиро қописиз янги қатор қўшиб бўлмайди.',
+      'Фақат қолип аппаратлари қолганда хомашё қописиз янги қатор қўшиб бўлмайди.',
     shiftSiroGoRawMaterial: '«Хомашё»га ўтиш',
-    shiftSiroBagLow: 'Фаол қопда сиро оз қолди: {kg} кг · {name}',
-    shiftSiroBagEmpty: 'Фаол қопда сиро тугади — янги қопни уланг · {name}',
+    shiftSiroBagLow: 'Фаол қопда хомашё оз қолди: {kg} кг · {name}',
+    shiftSiroBagEmpty: 'Фаол қопда хомашё тугади — янги қопни уланг · {name}',
     shiftMaterialsPanelTitle: 'Танланган маҳсулотга кетган хомашё',
     shiftMaterialNameCol: 'Хомашё',
     shiftMaterialPlannedShort: 'Режа, кг',
@@ -334,16 +334,16 @@ const TR = {
     shiftPaintUnitLabel: 'O\'lchov',
     shiftPaintError: 'Kraska belgilansa — tur va miqdor to\'g\'ri kirilsin',
     shiftPaintNoMaterials:
-      'Kraska turi yo\'q. «Xomashyo (siro)» sahifasida yangi xomashyoni «kraska» turi bilan qo\'shing.',
+      'Kraska turi yo\'q. «Xomashyo» sahifasida yangi xomashyoni «kraska» turi bilan qo\'shing.',
     shiftSemiNeedActiveBagBanner:
-      'Qolip (yarim tayyor) uchun smenada faol siro qopi apparatga ulangan bo\'lishi kerak. «Xomashyo (siro / kraska)» sahifasida qopni ulang.',
+      'Qolip (yarim tayyor) uchun smenada faol xomashyo qopi apparatga ulangan bo\'lishi kerak. «Xomashyo» sahifasida qopni ulang.',
     shiftSemiNeedActiveBagSubmit:
-      'Qolip apparati uchun siro qopi ulanmagan yoki siro yo\'q — smena saqlanmaydi.',
+      'Qolip apparati uchun xomashyo qopi ulanmagan yoki xomashyo yo\'q — smena saqlanmaydi.',
     shiftSemiAddLineBlocked:
-      'Faqat qolip apparatlari qolganda siro qopsisiz yangi qator qo\'shib bo\'lmaydi.',
+      'Faqat qolip apparatlari qolganda xomashyo qopsisiz yangi qator qo\'shib bo\'lmaydi.',
     shiftSiroGoRawMaterial: '«Xomashyo»ga o\'tish',
-    shiftSiroBagLow: 'Faol qopda siro oz qoldi: {kg} kg · {name}',
-    shiftSiroBagEmpty: 'Faol qopda siro tugadi — yangi qopni ulang · {name}',
+    shiftSiroBagLow: 'Faol qopda xomashyo oz qoldi: {kg} kg · {name}',
+    shiftSiroBagEmpty: 'Faol qopda xomashyo tugadi — yangi qopni ulang · {name}',
     shiftMaterialsPanelTitle: 'Tanlangan mahsulotga ketgan xomashyo',
     shiftMaterialNameCol: 'Xomashyo',
     shiftMaterialPlannedShort: 'Reja, kg',
@@ -475,14 +475,14 @@ const TR = {
     shiftPaintNoMaterials:
       'Нет позиций типа «краска». Добавьте сырьё на странице сырья с типом «краска».',
     shiftSemiNeedActiveBagBanner:
-      'Для полуфабрикатов в смене должен быть подключён активный мешок сиропа. Подключите мешок на странице сырья.',
+      'Для полуфабрикатов в смене должен быть подключён активный мешок сырья. Подключите мешок на странице сырья.',
     shiftSemiNeedActiveBagSubmit:
-      'Для аппарата преформ не подключён мешок или сироп израсходован — запись не сохранится.',
+      'Для аппарата преформ не подключён мешок или сырьё израсходовано — запись не сохранится.',
     shiftSemiAddLineBlocked:
-      'Нельзя добавить строку: в списке только преформы, а мешок с сиропом не готов.',
+      'Нельзя добавить строку: в списке только преформы, а мешок со сырьём не готов.',
     shiftSiroGoRawMaterial: 'К сырью',
-    shiftSiroBagLow: 'В активном мешке мало сиропа: {kg} кг · {name}',
-    shiftSiroBagEmpty: 'В активном мешке сироп закончился — подключите новый · {name}',
+    shiftSiroBagLow: 'В активном мешке мало сырья: {kg} кг · {name}',
+    shiftSiroBagEmpty: 'В активном мешке сырьё закончилось — подключите новый · {name}',
     shiftMaterialsPanelTitle: 'Расход сырья по выбранной продукции',
     shiftMaterialNameCol: 'Сырьё',
     shiftMaterialPlannedShort: 'План, кг',

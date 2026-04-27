@@ -46,6 +46,8 @@ export function translateBagLogNote(note: string | null | undefined, t: T): stri
     'Material consumed from active bag': () => t.rmBagLogNoteMaterialConsumed,
     "Smena: retsept bo'yicha siro sarfi": () => t.rmBagLogNoteShiftRecipeSiro,
     "Smena: retsept bo'yicha siro sarfi (ulangan qop)": () => t.rmBagLogNoteShiftRecipeSiroBag,
+    "Smena: retsept bo'yicha xomashyo sarfi": () => t.rmBagLogNoteShiftRecipeSiro,
+    "Smena: retsept bo'yicha xomashyo sarfi (ulangan qop)": () => t.rmBagLogNoteShiftRecipeSiroBag,
     "Smena: ishlab chiqarish": () => t.rmBagLogNoteShiftProduction,
     "Smena: tayyor mahsulot uchun yarim tayyor sarfi": () => t.rmBagLogNoteShiftSemiForFinal,
     "Smena: kraska/bo'yoq sarfi": () => t.rmBagLogNoteShiftPaint,

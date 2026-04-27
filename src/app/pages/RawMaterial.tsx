@@ -71,9 +71,8 @@ export function RawMaterial() {
   const [createForm, setCreateForm] = useState<{
     name: string;
     description: string;
-    defaultBagWeightKg: string;
     rawMaterialKind: RawMaterialKind;
-  }>({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
+  }>({ name: '', description: '', rawMaterialKind: 'SIRO' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
@@ -119,17 +118,6 @@ export function RawMaterial() {
       setError(t.rmCreateNameRequired);
       return;
     }
-    const isPaint = createForm.rawMaterialKind === 'PAINT';
-    let defaultBagWeightKg: number | undefined;
-    if (!isPaint && createForm.defaultBagWeightKg.trim()) {
-      const parsed = parseFloat(createForm.defaultBagWeightKg.replace(',', '.'));
-      if (!Number.isFinite(parsed) || parsed <= 0) {
-        setError(t.rmDefaultBagWeightRequired);
-        return;
-      }
-      defaultBagWeightKg = parsed;
-    }
-
     try {
       await dispatch({
         type: 'ADD_WAREHOUSE_PRODUCT',
@@ -139,10 +127,9 @@ export function RawMaterial() {
           description: createForm.description.trim() || undefined,
           unit: 'kg',
           rawMaterialKind: createForm.rawMaterialKind,
-          ...(defaultBagWeightKg !== undefined ? { defaultBagWeightKg } : {}),
         },
       });
-      setCreateForm({ name: '', description: '', defaultBagWeightKg: '', rawMaterialKind: 'SIRO' });
+      setCreateForm({ name: '', description: '', rawMaterialKind: 'SIRO' });
       setSuccess(t.rmCreatedSuccess);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -294,7 +281,6 @@ export function RawMaterial() {
 
   const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
   const previewStockKg = incomingKind === 'PAINT' ? paintStockKg : siroStockKg;
-  const createBagWeightKg = parseFloat((createForm.defaultBagWeightKg || '0').replace(',', '.'));
   const incomingAutoBagCount =
     incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
     incomingRawMaterial.defaultBagWeightKg &&
@@ -676,28 +662,6 @@ export function RawMaterial() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
                 />
               </div>
-              {createForm.rawMaterialKind === 'SIRO' && (
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.rmDefaultBagWeight}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.0001"
-                    value={createForm.defaultBagWeightKg}
-                    onChange={e => setCreateForm({ ...createForm, defaultBagWeightKg: e.target.value })}
-                    placeholder={t.rmDefaultBagWeightPlaceholder}
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">{t.rmDefaultBagWeightHint}</p>
-                </div>
-              )}
-              {createForm.rawMaterialKind === 'SIRO' && createBagWeightKg > 0 && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-700 dark:bg-emerald-900/20">
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                    {t.rmDefaultBagWeightPreview.replace('{weight}', formatNumber(createBagWeightKg))}
-                  </p>
-                </div>
-              )}
               <button type="submit" className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
                 <Plus size={16} />
                 {createForm.rawMaterialKind === 'PAINT' ? t.rmCreatePaintButton : t.rmCreateTypeButton}

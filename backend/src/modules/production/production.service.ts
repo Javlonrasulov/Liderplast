@@ -501,8 +501,8 @@ export class ProductionService {
         const deltaKg = actualKg - expectedKg;
         const noteBase =
           Math.abs(deltaKg) < 1e-5
-            ? 'Smena: retsept bo‘yicha siro sarfi'
-            : `Smena: siro sarfi (reja ${expectedKg.toFixed(3)} kg, haqiqiy ${actualKg.toFixed(3)} kg)`;
+            ? 'Smena: retsept bo‘yicha xomashyo sarfi'
+            : `Smena: xomashyo sarfi (reja ${expectedKg.toFixed(3)} kg, haqiqiy ${actualKg.toFixed(3)} kg)`;
 
         await tx.inventoryMovement.create({
           data: {
@@ -528,8 +528,8 @@ export class ProductionService {
             createdById: params.workerId,
             note:
               Math.abs(deltaKg) < 1e-5
-                ? 'Smena: retsept bo‘yicha siro sarfi (ulangan qop)'
-                : `Smena: siro sarfi (ulangan qop, reja ${expectedKg.toFixed(3)} kg)`,
+                ? 'Smena: retsept bo‘yicha xomashyo sarfi (ulangan qop)'
+                : `Smena: xomashyo sarfi (ulangan qop, reja ${expectedKg.toFixed(3)} kg)`,
             referenceType: 'shift',
             referenceId: params.shiftId,
           },

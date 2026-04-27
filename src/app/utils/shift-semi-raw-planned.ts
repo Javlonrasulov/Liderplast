@@ -14,7 +14,7 @@ export type PlannedSemiRawRow = {
   plannedKg: number;
 };
 
-/** Qolip (SEMI) katalog retsepti: 1 dona + brak uchun rejadagi siro, kg */
+/** Qolip (SEMI) katalog retsepti: 1 dona + brak uchun rejadagi xomashyo, kg */
 export function getPlannedSemiRawRows(
   warehouseProducts: WarehouseProduct[],
   productLabel: string,

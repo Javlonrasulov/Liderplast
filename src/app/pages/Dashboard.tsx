@@ -343,7 +343,7 @@ export function Dashboard() {
     const rows: Row[] = [
       {
         key: 'siro',
-        label: 'PET Siro',
+        label: t.rmMetricsCaptionSiro,
         val: rawMaterialStock,
         max: 3500,
         unit: 'kg',
@@ -396,6 +396,7 @@ export function Dashboard() {
     semiStockByProductName,
     finalStockByProductName,
     t.unitPiece,
+    t.rmMetricsCaptionSiro,
   ]);
 
   const filteredLogs = useMemo(() => {

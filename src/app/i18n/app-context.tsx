@@ -78,7 +78,7 @@ const RAW_MATERIAL_FALLBACK: Pick<
   | 'rmPendingExternalOrdersTitle'
 > = {
   rmKindLabel: 'Хомашё тури',
-  rmKindSiro: 'PET сиро / оддий хомашё',
+  rmKindSiro: 'PET / оддий хомашё',
   rmKindPaint: 'Краска / бўёқ',
   rmPaintHint:
     'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
