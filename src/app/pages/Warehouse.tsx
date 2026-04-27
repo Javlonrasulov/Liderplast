@@ -263,7 +263,18 @@ const FINAL_DETAIL_CARD_STYLES = [
   },
 ] as const;
 
-export function Warehouse() {
+type WarehouseTabKey = 'overview' | 'catalog' | 'statistics' | 'history';
+type WarehouseFocusCategory = 'all' | 'semi' | 'final';
+
+export function Warehouse({
+  initialTab = 'overview',
+  hideTabs = false,
+  focusCategory = 'all',
+}: {
+  initialTab?: WarehouseTabKey;
+  hideTabs?: boolean;
+  focusCategory?: WarehouseFocusCategory;
+}) {
   const { state, semiStockByProductName, finalStockByProductName, dispatch } = useERP();
   const { user } = useAuth();
   const { t, filterData } = useApp();
@@ -290,9 +301,11 @@ export function Warehouse() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics' | 'history'>(
-    'overview',
-  );
+  const [whTab, setWhTab] = useState<WarehouseTabKey>(initialTab);
+
+  useEffect(() => {
+    setWhTab(initialTab);
+  }, [initialTab]);
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
   const rawMaterials = useMemo(
@@ -609,12 +622,19 @@ export function Warehouse() {
       date: item.createdAt?.slice(0, 10) ?? '1970-01-01',
     }));
 
-    return filterData(items).sort(
+    const filteredByCategory =
+      focusCategory === 'semi'
+        ? items.filter((x) => x.itemType === 'SEMI_PRODUCT')
+        : focusCategory === 'final'
+          ? items.filter((x) => x.itemType === 'FINISHED_PRODUCT')
+          : items;
+
+    return filterData(filteredByCategory).sort(
       (left, right) =>
         new Date(right.createdAt ?? 0).getTime() -
         new Date(left.createdAt ?? 0).getTime(),
     );
-  }, [filterData, productCatalog]);
+  }, [filterData, productCatalog, focusCategory]);
 
   const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> = [
     {
@@ -969,7 +989,7 @@ export function Warehouse() {
             </SelectTrigger>
             <SelectContent
               position="popper"
-              className="z-[120] max-h-72 rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+              className="z-[2000] max-h-72 rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
             >
               {typeOptions.map((option) => (
                 <SelectItem
@@ -1302,43 +1322,47 @@ export function Warehouse() {
     }
   };
 
+  const effectiveTab: WarehouseTabKey = hideTabs ? 'catalog' : whTab;
+
   return (
     <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
       <div className="flex w-full min-w-0 flex-col gap-6">
-        <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
-          <button
-            type="button"
-            onClick={() => setWhTab('overview')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-          >
-            <BarChart3 size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabOverview}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setWhTab('catalog')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-          >
-            <LayoutGrid size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabCatalog}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setWhTab('statistics')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'statistics' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-          >
-            <PieChart size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setWhTab('history')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'history' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-          >
-            <History size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabHistory}</span>
-          </button>
-        </div>
+        {!hideTabs && (
+          <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
+            <button
+              type="button"
+              onClick={() => setWhTab('overview')}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            >
+              <BarChart3 size={14} className="shrink-0" />
+              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabOverview}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setWhTab('catalog')}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            >
+              <LayoutGrid size={14} className="shrink-0" />
+              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabCatalog}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setWhTab('statistics')}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'statistics' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            >
+              <PieChart size={14} className="shrink-0" />
+              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setWhTab('history')}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'history' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            >
+              <History size={14} className="shrink-0" />
+              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabHistory}</span>
+            </button>
+          </div>
+        )}
 
         {(error || success) && (
           <div
@@ -1352,7 +1376,7 @@ export function Warehouse() {
           </div>
         )}
 
-        {whTab === 'overview' && (
+        {effectiveTab === 'overview' && (
           <>
             {warehouseSummaryCards.length > 0 ? (
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -1453,7 +1477,7 @@ export function Warehouse() {
           </>
         )}
 
-        {whTab === 'statistics' && (
+        {effectiveTab === 'statistics' && (
           <>
       {semiRecipePaintBreakdown.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-violet-50/90 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-violet-950/25 dark:via-slate-800 dark:to-slate-800">
@@ -1665,7 +1689,7 @@ export function Warehouse() {
           </>
         )}
 
-        {whTab === 'history' && (
+        {effectiveTab === 'history' && (
           <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800">
             <div className="border-b border-slate-200/80 bg-slate-50/90 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/80">
               <div className="flex flex-wrap items-center gap-3">
@@ -1784,9 +1808,10 @@ export function Warehouse() {
           </div>
         )}
 
-        {whTab === 'catalog' && (
+        {effectiveTab === 'catalog' && (
           <>
       <div className="flex flex-col-reverse gap-6">
+      {focusCategory === 'all' && (
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-sky-50/80 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
         <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
           <div className="flex flex-wrap items-center gap-3">
@@ -1971,6 +1996,7 @@ export function Warehouse() {
           </div>
         )}
       </div>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-indigo-50/70 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-indigo-950/20 dark:via-slate-800 dark:to-slate-800">
         <div className="flex flex-col gap-4 border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80 sm:flex-row sm:items-center sm:justify-between">
@@ -2017,6 +2043,41 @@ export function Warehouse() {
                       {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
                     </span>
                   </div>
+                  {(product.itemType === 'SEMI_PRODUCT' || product.itemType === 'FINISHED_PRODUCT') && (() => {
+                    const stockQty =
+                      product.itemType === 'SEMI_PRODUCT'
+                        ? semiStockByProductName[product.name] ?? 0
+                        : finalStockByProductName[product.name] ?? 0;
+                    const isLow = stockQty <= 0;
+                    return (
+                      <div
+                        className={`mt-3 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 ${
+                          isLow
+                            ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10'
+                            : 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/10'
+                        }`}
+                      >
+                        <span
+                          className={`text-[11px] font-medium ${
+                            isLow
+                              ? 'text-amber-700 dark:text-amber-300'
+                              : 'text-emerald-700 dark:text-emerald-300'
+                          }`}
+                        >
+                          {t.whInWarehouse}
+                        </span>
+                        <span
+                          className={`text-sm font-bold tabular-nums ${
+                            isLow
+                              ? 'text-amber-700 dark:text-amber-300'
+                              : 'text-emerald-700 dark:text-emerald-300'
+                          }`}
+                        >
+                          {formatNumber(stockQty)} {t.unitPiece}
+                        </span>
+                      </div>
+                    );
+                  })()}
                   <p className="mt-3 text-xs font-medium text-slate-600 dark:text-slate-300">
                     {productMetric(product, t)}
                   </p>

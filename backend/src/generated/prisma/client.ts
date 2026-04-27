@@ -142,6 +142,11 @@ export type ProductionConsumption = Prisma.ProductionConsumptionModel
  */
 export type ShiftRecord = Prisma.ShiftRecordModel
 /**
+ * Model ShiftMaterialUsage
+ * Smena davomida sarflangan xom ashyo (retsept va aslidagi farqi)
+ */
+export type ShiftMaterialUsage = Prisma.ShiftMaterialUsageModel
+/**
  * Model Client
  * 
  */

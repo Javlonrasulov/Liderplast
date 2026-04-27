@@ -336,6 +336,7 @@ export type ShiftRecordWhereInput = {
   machine?: Prisma.XOR<Prisma.MachineNullableScalarRelationFilter, Prisma.MachineWhereInput> | null
   paintRawMaterial?: Prisma.XOR<Prisma.RawMaterialNullableScalarRelationFilter, Prisma.RawMaterialWhereInput> | null
   shiftElectricityExpense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
+  materials?: Prisma.ShiftMaterialUsageListRelationFilter
 }
 
 export type ShiftRecordOrderByWithRelationInput = {
@@ -360,6 +361,7 @@ export type ShiftRecordOrderByWithRelationInput = {
   machine?: Prisma.MachineOrderByWithRelationInput
   paintRawMaterial?: Prisma.RawMaterialOrderByWithRelationInput
   shiftElectricityExpense?: Prisma.ExpenseOrderByWithRelationInput
+  materials?: Prisma.ShiftMaterialUsageOrderByRelationAggregateInput
 }
 
 export type ShiftRecordWhereUniqueInput = Prisma.AtLeast<{
@@ -387,6 +389,7 @@ export type ShiftRecordWhereUniqueInput = Prisma.AtLeast<{
   machine?: Prisma.XOR<Prisma.MachineNullableScalarRelationFilter, Prisma.MachineWhereInput> | null
   paintRawMaterial?: Prisma.XOR<Prisma.RawMaterialNullableScalarRelationFilter, Prisma.RawMaterialWhereInput> | null
   shiftElectricityExpense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
+  materials?: Prisma.ShiftMaterialUsageListRelationFilter
 }, "id">
 
 export type ShiftRecordOrderByWithAggregationInput = {
@@ -456,6 +459,7 @@ export type ShiftRecordCreateInput = {
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
   paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
   shiftElectricityExpense?: Prisma.ExpenseCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUncheckedCreateInput = {
@@ -477,6 +481,7 @@ export type ShiftRecordUncheckedCreateInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUpdateInput = {
@@ -498,6 +503,7 @@ export type ShiftRecordUpdateInput = {
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
   paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
   shiftElectricityExpense?: Prisma.ExpenseUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateInput = {
@@ -519,6 +525,7 @@ export type ShiftRecordUncheckedUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordCreateManyInput = {
@@ -666,6 +673,11 @@ export type ShiftRecordSumOrderByAggregateInput = {
   paintQuantityKg?: Prisma.SortOrder
 }
 
+export type ShiftRecordScalarRelationFilter = {
+  is?: Prisma.ShiftRecordWhereInput
+  isNot?: Prisma.ShiftRecordWhereInput
+}
+
 export type ShiftRecordNullableScalarRelationFilter = {
   is?: Prisma.ShiftRecordWhereInput | null
   isNot?: Prisma.ShiftRecordWhereInput | null
@@ -797,6 +809,20 @@ export type ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput = {
   deleteMany?: Prisma.ShiftRecordScalarWhereInput | Prisma.ShiftRecordScalarWhereInput[]
 }
 
+export type ShiftRecordCreateNestedOneWithoutMaterialsInput = {
+  create?: Prisma.XOR<Prisma.ShiftRecordCreateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedCreateWithoutMaterialsInput>
+  connectOrCreate?: Prisma.ShiftRecordCreateOrConnectWithoutMaterialsInput
+  connect?: Prisma.ShiftRecordWhereUniqueInput
+}
+
+export type ShiftRecordUpdateOneRequiredWithoutMaterialsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShiftRecordCreateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedCreateWithoutMaterialsInput>
+  connectOrCreate?: Prisma.ShiftRecordCreateOrConnectWithoutMaterialsInput
+  upsert?: Prisma.ShiftRecordUpsertWithoutMaterialsInput
+  connect?: Prisma.ShiftRecordWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShiftRecordUpdateToOneWithWhereWithoutMaterialsInput, Prisma.ShiftRecordUpdateWithoutMaterialsInput>, Prisma.ShiftRecordUncheckedUpdateWithoutMaterialsInput>
+}
+
 export type ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput = {
   create?: Prisma.XOR<Prisma.ShiftRecordCreateWithoutShiftElectricityExpenseInput, Prisma.ShiftRecordUncheckedCreateWithoutShiftElectricityExpenseInput>
   connectOrCreate?: Prisma.ShiftRecordCreateOrConnectWithoutShiftElectricityExpenseInput
@@ -831,6 +857,7 @@ export type ShiftRecordCreateWithoutWorkerInput = {
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
   paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
   shiftElectricityExpense?: Prisma.ExpenseCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutWorkerInput = {
@@ -851,6 +878,7 @@ export type ShiftRecordUncheckedCreateWithoutWorkerInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordCreateOrConnectWithoutWorkerInput = {
@@ -920,6 +948,7 @@ export type ShiftRecordCreateWithoutPaintRawMaterialInput = {
   worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
   shiftElectricityExpense?: Prisma.ExpenseCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutPaintRawMaterialInput = {
@@ -940,6 +969,7 @@ export type ShiftRecordUncheckedCreateWithoutPaintRawMaterialInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordCreateOrConnectWithoutPaintRawMaterialInput = {
@@ -986,6 +1016,7 @@ export type ShiftRecordCreateWithoutMachineInput = {
   worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
   paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
   shiftElectricityExpense?: Prisma.ExpenseCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutMachineInput = {
@@ -1006,6 +1037,7 @@ export type ShiftRecordUncheckedCreateWithoutMachineInput = {
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedCreateNestedOneWithoutSourceShiftInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordCreateOrConnectWithoutMachineInput = {
@@ -1034,6 +1066,106 @@ export type ShiftRecordUpdateManyWithWhereWithoutMachineInput = {
   data: Prisma.XOR<Prisma.ShiftRecordUpdateManyMutationInput, Prisma.ShiftRecordUncheckedUpdateManyWithoutMachineInput>
 }
 
+export type ShiftRecordCreateWithoutMaterialsInput = {
+  id?: string
+  shiftNumber: number
+  date: Date | string
+  hoursWorked: number
+  productLabel?: string | null
+  machineReading?: string | null
+  producedQty: number
+  defectCount?: number
+  electricityKwh?: number
+  notes?: string | null
+  paintUsed?: boolean
+  paintQuantityKg?: number | null
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
+  machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
+  paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
+  shiftElectricityExpense?: Prisma.ExpenseCreateNestedOneWithoutSourceShiftInput
+}
+
+export type ShiftRecordUncheckedCreateWithoutMaterialsInput = {
+  id?: string
+  workerId: string
+  machineId?: string | null
+  shiftNumber: number
+  date: Date | string
+  hoursWorked: number
+  productLabel?: string | null
+  machineReading?: string | null
+  producedQty: number
+  defectCount?: number
+  electricityKwh?: number
+  notes?: string | null
+  paintUsed?: boolean
+  paintRawMaterialId?: string | null
+  paintQuantityKg?: number | null
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  shiftElectricityExpense?: Prisma.ExpenseUncheckedCreateNestedOneWithoutSourceShiftInput
+}
+
+export type ShiftRecordCreateOrConnectWithoutMaterialsInput = {
+  where: Prisma.ShiftRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShiftRecordCreateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedCreateWithoutMaterialsInput>
+}
+
+export type ShiftRecordUpsertWithoutMaterialsInput = {
+  update: Prisma.XOR<Prisma.ShiftRecordUpdateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedUpdateWithoutMaterialsInput>
+  create: Prisma.XOR<Prisma.ShiftRecordCreateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedCreateWithoutMaterialsInput>
+  where?: Prisma.ShiftRecordWhereInput
+}
+
+export type ShiftRecordUpdateToOneWithWhereWithoutMaterialsInput = {
+  where?: Prisma.ShiftRecordWhereInput
+  data: Prisma.XOR<Prisma.ShiftRecordUpdateWithoutMaterialsInput, Prisma.ShiftRecordUncheckedUpdateWithoutMaterialsInput>
+}
+
+export type ShiftRecordUpdateWithoutMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  producedQty?: Prisma.IntFieldUpdateOperationsInput | number
+  defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paintQuantityKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
+  machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
+  paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
+  shiftElectricityExpense?: Prisma.ExpenseUpdateOneWithoutSourceShiftNestedInput
+}
+
+export type ShiftRecordUncheckedUpdateWithoutMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workerId?: Prisma.StringFieldUpdateOperationsInput | string
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  producedQty?: Prisma.IntFieldUpdateOperationsInput | number
+  defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paintRawMaterialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paintQuantityKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shiftElectricityExpense?: Prisma.ExpenseUncheckedUpdateOneWithoutSourceShiftNestedInput
+}
+
 export type ShiftRecordCreateWithoutShiftElectricityExpenseInput = {
   id?: string
   shiftNumber: number
@@ -1052,6 +1184,7 @@ export type ShiftRecordCreateWithoutShiftElectricityExpenseInput = {
   worker: Prisma.UserCreateNestedOneWithoutShiftRecordsInput
   machine?: Prisma.MachineCreateNestedOneWithoutShiftRecordsInput
   paintRawMaterial?: Prisma.RawMaterialCreateNestedOneWithoutPaintShiftRecordsInput
+  materials?: Prisma.ShiftMaterialUsageCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordUncheckedCreateWithoutShiftElectricityExpenseInput = {
@@ -1072,6 +1205,7 @@ export type ShiftRecordUncheckedCreateWithoutShiftElectricityExpenseInput = {
   paintQuantityKg?: number | null
   status?: $Enums.EntityStatus
   createdAt?: Date | string
+  materials?: Prisma.ShiftMaterialUsageUncheckedCreateNestedManyWithoutShiftInput
 }
 
 export type ShiftRecordCreateOrConnectWithoutShiftElectricityExpenseInput = {
@@ -1108,6 +1242,7 @@ export type ShiftRecordUpdateWithoutShiftElectricityExpenseInput = {
   worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
   paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
+  materials?: Prisma.ShiftMaterialUsageUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutShiftElectricityExpenseInput = {
@@ -1128,6 +1263,7 @@ export type ShiftRecordUncheckedUpdateWithoutShiftElectricityExpenseInput = {
   paintQuantityKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  materials?: Prisma.ShiftMaterialUsageUncheckedUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordCreateManyWorkerInput = {
@@ -1167,6 +1303,7 @@ export type ShiftRecordUpdateWithoutWorkerInput = {
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
   paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
   shiftElectricityExpense?: Prisma.ExpenseUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutWorkerInput = {
@@ -1187,6 +1324,7 @@ export type ShiftRecordUncheckedUpdateWithoutWorkerInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateManyWithoutWorkerInput = {
@@ -1245,6 +1383,7 @@ export type ShiftRecordUpdateWithoutPaintRawMaterialInput = {
   worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
   machine?: Prisma.MachineUpdateOneWithoutShiftRecordsNestedInput
   shiftElectricityExpense?: Prisma.ExpenseUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutPaintRawMaterialInput = {
@@ -1265,6 +1404,7 @@ export type ShiftRecordUncheckedUpdateWithoutPaintRawMaterialInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateManyWithoutPaintRawMaterialInput = {
@@ -1323,6 +1463,7 @@ export type ShiftRecordUpdateWithoutMachineInput = {
   worker?: Prisma.UserUpdateOneRequiredWithoutShiftRecordsNestedInput
   paintRawMaterial?: Prisma.RawMaterialUpdateOneWithoutPaintShiftRecordsNestedInput
   shiftElectricityExpense?: Prisma.ExpenseUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateWithoutMachineInput = {
@@ -1343,6 +1484,7 @@ export type ShiftRecordUncheckedUpdateWithoutMachineInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shiftElectricityExpense?: Prisma.ExpenseUncheckedUpdateOneWithoutSourceShiftNestedInput
+  materials?: Prisma.ShiftMaterialUsageUncheckedUpdateManyWithoutShiftNestedInput
 }
 
 export type ShiftRecordUncheckedUpdateManyWithoutMachineInput = {
@@ -1364,6 +1506,35 @@ export type ShiftRecordUncheckedUpdateManyWithoutMachineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type ShiftRecordCountOutputType
+ */
+
+export type ShiftRecordCountOutputType = {
+  materials: number
+}
+
+export type ShiftRecordCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  materials?: boolean | ShiftRecordCountOutputTypeCountMaterialsArgs
+}
+
+/**
+ * ShiftRecordCountOutputType without action
+ */
+export type ShiftRecordCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ShiftRecordCountOutputType
+   */
+  select?: Prisma.ShiftRecordCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ShiftRecordCountOutputType without action
+ */
+export type ShiftRecordCountOutputTypeCountMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ShiftMaterialUsageWhereInput
+}
 
 
 export type ShiftRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1388,6 +1559,8 @@ export type ShiftRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   machine?: boolean | Prisma.ShiftRecord$machineArgs<ExtArgs>
   paintRawMaterial?: boolean | Prisma.ShiftRecord$paintRawMaterialArgs<ExtArgs>
   shiftElectricityExpense?: boolean | Prisma.ShiftRecord$shiftElectricityExpenseArgs<ExtArgs>
+  materials?: boolean | Prisma.ShiftRecord$materialsArgs<ExtArgs>
+  _count?: boolean | Prisma.ShiftRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["shiftRecord"]>
 
 export type ShiftRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1462,6 +1635,8 @@ export type ShiftRecordInclude<ExtArgs extends runtime.Types.Extensions.Internal
   machine?: boolean | Prisma.ShiftRecord$machineArgs<ExtArgs>
   paintRawMaterial?: boolean | Prisma.ShiftRecord$paintRawMaterialArgs<ExtArgs>
   shiftElectricityExpense?: boolean | Prisma.ShiftRecord$shiftElectricityExpenseArgs<ExtArgs>
+  materials?: boolean | Prisma.ShiftRecord$materialsArgs<ExtArgs>
+  _count?: boolean | Prisma.ShiftRecordCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ShiftRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   worker?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1481,6 +1656,7 @@ export type $ShiftRecordPayload<ExtArgs extends runtime.Types.Extensions.Interna
     machine: Prisma.$MachinePayload<ExtArgs> | null
     paintRawMaterial: Prisma.$RawMaterialPayload<ExtArgs> | null
     shiftElectricityExpense: Prisma.$ExpensePayload<ExtArgs> | null
+    materials: Prisma.$ShiftMaterialUsagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1898,6 +2074,7 @@ export interface Prisma__ShiftRecordClient<T, Null = never, ExtArgs extends runt
   machine<T extends Prisma.ShiftRecord$machineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShiftRecord$machineArgs<ExtArgs>>): Prisma.Prisma__MachineClient<runtime.Types.Result.GetResult<Prisma.$MachinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   paintRawMaterial<T extends Prisma.ShiftRecord$paintRawMaterialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShiftRecord$paintRawMaterialArgs<ExtArgs>>): Prisma.Prisma__RawMaterialClient<runtime.Types.Result.GetResult<Prisma.$RawMaterialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   shiftElectricityExpense<T extends Prisma.ShiftRecord$shiftElectricityExpenseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShiftRecord$shiftElectricityExpenseArgs<ExtArgs>>): Prisma.Prisma__ExpenseClient<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  materials<T extends Prisma.ShiftRecord$materialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShiftRecord$materialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftMaterialUsagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2399,6 +2576,30 @@ export type ShiftRecord$shiftElectricityExpenseArgs<ExtArgs extends runtime.Type
    */
   include?: Prisma.ExpenseInclude<ExtArgs> | null
   where?: Prisma.ExpenseWhereInput
+}
+
+/**
+ * ShiftRecord.materials
+ */
+export type ShiftRecord$materialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ShiftMaterialUsage
+   */
+  select?: Prisma.ShiftMaterialUsageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ShiftMaterialUsage
+   */
+  omit?: Prisma.ShiftMaterialUsageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShiftMaterialUsageInclude<ExtArgs> | null
+  where?: Prisma.ShiftMaterialUsageWhereInput
+  orderBy?: Prisma.ShiftMaterialUsageOrderByWithRelationInput | Prisma.ShiftMaterialUsageOrderByWithRelationInput[]
+  cursor?: Prisma.ShiftMaterialUsageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ShiftMaterialUsageScalarFieldEnum | Prisma.ShiftMaterialUsageScalarFieldEnum[]
 }
 
 /**

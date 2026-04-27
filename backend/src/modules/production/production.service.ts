@@ -369,6 +369,7 @@ export class ProductionService {
       productLabel: string | null | undefined;
       producedQty: number;
       defectCount: number;
+      materials?: Array<{ rawMaterialId: string; actualKg: number }> | undefined;
     },
   ) {
     const materialUnits = params.producedQty + params.defectCount;
@@ -397,6 +398,11 @@ export class ProductionService {
     const machine = params.machine;
 
     if (machine.stage === ProductionStage.SEMI) {
+      const actualOverrideMap = new Map<string, number>(
+        (params.materials ?? [])
+          .filter((x) => Boolean(x?.rawMaterialId) && Number.isFinite(x.actualKg))
+          .map((x) => [x.rawMaterialId, x.actualKg]),
+      );
       const semi = await tx.semiProduct.findFirst({
         where: {
           name: { equals: label, mode: 'insensitive' },
@@ -422,31 +428,61 @@ export class ProductionService {
           continue;
         }
 
-        const qtyKg = (link.amountGram * materialUnits) / 1000;
-        if (qtyKg <= 0) {
+        const expectedKg = (link.amountGram * materialUnits) / 1000;
+        if (expectedKg <= 0) {
           continue;
         }
+
+        const overrideKg = actualOverrideMap.get(rm.id);
+        if (overrideKg != null && overrideKg + 0.0000001 < expectedKg) {
+          throw new BadRequestException(
+            `Actual xomashyo expected dan kam bo‘lishi mumkin emas: ${rm.name}`,
+          );
+        }
+        const actualKg = overrideKg != null ? overrideKg : expectedKg;
+        const deltaKg = actualKg - expectedKg;
 
         const balance = await tx.inventoryBalance.findFirst({
           where: { rawMaterialId: rm.id },
         });
-        if (!balance || balance.quantity + 0.0001 < qtyKg) {
+        if (!balance || balance.quantity + 0.0001 < actualKg) {
           throw new BadRequestException(
             shiftInventoryErr('RAW_INSUFFICIENT', rm.name),
           );
         }
 
-        const newQty = balance.quantity - qtyKg;
+        const newQty = balance.quantity - actualKg;
         await tx.inventoryBalance.update({
           where: { id: balance.id },
           data: { quantity: newQty },
+        });
+
+        await tx.shiftMaterialUsage.upsert({
+          where: {
+            shiftId_rawMaterialId: {
+              shiftId: params.shiftId,
+              rawMaterialId: rm.id,
+            },
+          },
+          create: {
+            shiftId: params.shiftId,
+            rawMaterialId: rm.id,
+            expectedKg,
+            actualKg,
+            deltaKg,
+          },
+          update: {
+            expectedKg,
+            actualKg,
+            deltaKg,
+          },
         });
 
         await tx.inventoryMovement.create({
           data: {
             itemType: InventoryItemType.RAW_MATERIAL,
             movementType: MovementType.CONSUMPTION,
-            quantity: qtyKg,
+            quantity: actualKg,
             previousQuantity: balance.quantity,
             newQuantity: newQty,
             rawMaterialId: rm.id,
@@ -462,7 +498,7 @@ export class ProductionService {
           tx,
           {
             rawMaterialId: rm.id,
-            quantityKg: qtyKg,
+            quantityKg: actualKg,
             createdById: params.workerId,
             note: 'Smena: retsept bo‘yicha siro sarfi (ulangan qop)',
             referenceType: 'shift',
@@ -505,6 +541,12 @@ export class ProductionService {
       }
 
       return;
+    }
+
+    if ((params.materials ?? []).length > 0) {
+      throw new BadRequestException(
+        'Xomashyo actual faqat qolip (yarim tayyor) apparatlari uchun qo‘llanadi',
+      );
     }
 
     const finished = await tx.finishedProduct.findFirst({
@@ -743,6 +785,7 @@ export class ProductionService {
         productLabel: dto.productLabel,
         producedQty: dto.producedQty,
         defectCount: dto.defectCount ?? 0,
+        materials: dto.materials,
       });
 
       return tx.shiftRecord.findUniqueOrThrow({
@@ -753,6 +796,9 @@ export class ProductionService {
           },
           machine: true,
           paintRawMaterial: { select: { id: true, name: true, unit: true } },
+          materials: {
+            include: { rawMaterial: { select: { id: true, name: true, unit: true } } },
+          },
         },
       });
     });
@@ -835,6 +881,7 @@ export class ProductionService {
 
     const updated = await this.prisma.$transaction(async (tx) => {
       await this.reverseShiftInventoryMovements(tx, id);
+      await tx.shiftMaterialUsage.deleteMany({ where: { shiftId: id } });
 
       const shift = await tx.shiftRecord.update({
         where: { id },
@@ -889,6 +936,7 @@ export class ProductionService {
         productLabel: nextProductLabel,
         producedQty: nextProducedQty,
         defectCount: nextDefectCount,
+        materials: dto.materials,
       });
 
       return tx.shiftRecord.findUniqueOrThrow({
@@ -899,6 +947,9 @@ export class ProductionService {
           },
           machine: true,
           paintRawMaterial: { select: { id: true, name: true, unit: true } },
+          materials: {
+            include: { rawMaterial: { select: { id: true, name: true, unit: true } } },
+          },
         },
       });
     });
@@ -960,6 +1011,9 @@ export class ProductionService {
         },
         machine: true,
         paintRawMaterial: { select: { id: true, name: true, unit: true } },
+        materials: {
+          include: { rawMaterial: { select: { id: true, name: true, unit: true } } },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });

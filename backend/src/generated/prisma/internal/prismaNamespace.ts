@@ -404,6 +404,7 @@ export const ModelName = {
   ProductionRecord: 'ProductionRecord',
   ProductionConsumption: 'ProductionConsumption',
   ShiftRecord: 'ShiftRecord',
+  ShiftMaterialUsage: 'ShiftMaterialUsage',
   Client: 'Client',
   Order: 'Order',
   OrderItem: 'OrderItem',
@@ -433,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1917,6 +1918,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ShiftMaterialUsage: {
+      payload: Prisma.$ShiftMaterialUsagePayload<ExtArgs>
+      fields: Prisma.ShiftMaterialUsageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ShiftMaterialUsageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ShiftMaterialUsageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        findFirst: {
+          args: Prisma.ShiftMaterialUsageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ShiftMaterialUsageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        findMany: {
+          args: Prisma.ShiftMaterialUsageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>[]
+        }
+        create: {
+          args: Prisma.ShiftMaterialUsageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        createMany: {
+          args: Prisma.ShiftMaterialUsageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ShiftMaterialUsageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>[]
+        }
+        delete: {
+          args: Prisma.ShiftMaterialUsageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        update: {
+          args: Prisma.ShiftMaterialUsageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ShiftMaterialUsageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ShiftMaterialUsageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ShiftMaterialUsageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ShiftMaterialUsageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShiftMaterialUsagePayload>
+        }
+        aggregate: {
+          args: Prisma.ShiftMaterialUsageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShiftMaterialUsage>
+        }
+        groupBy: {
+          args: Prisma.ShiftMaterialUsageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShiftMaterialUsageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ShiftMaterialUsageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShiftMaterialUsageCountAggregateOutputType> | number
+        }
+      }
+    }
     Client: {
       payload: Prisma.$ClientPayload<ExtArgs>
       fields: Prisma.ClientFieldRefs
@@ -3299,6 +3374,19 @@ export const ShiftRecordScalarFieldEnum = {
 export type ShiftRecordScalarFieldEnum = (typeof ShiftRecordScalarFieldEnum)[keyof typeof ShiftRecordScalarFieldEnum]
 
 
+export const ShiftMaterialUsageScalarFieldEnum = {
+  id: 'id',
+  shiftId: 'shiftId',
+  rawMaterialId: 'rawMaterialId',
+  expectedKg: 'expectedKg',
+  actualKg: 'actualKg',
+  deltaKg: 'deltaKg',
+  createdAt: 'createdAt'
+} as const
+
+export type ShiftMaterialUsageScalarFieldEnum = (typeof ShiftMaterialUsageScalarFieldEnum)[keyof typeof ShiftMaterialUsageScalarFieldEnum]
+
+
 export const ClientScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -4058,6 +4146,7 @@ export type GlobalOmitConfig = {
   productionRecord?: Prisma.ProductionRecordOmit
   productionConsumption?: Prisma.ProductionConsumptionOmit
   shiftRecord?: Prisma.ShiftRecordOmit
+  shiftMaterialUsage?: Prisma.ShiftMaterialUsageOmit
   client?: Prisma.ClientOmit
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit

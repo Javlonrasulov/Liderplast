@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsInt,
@@ -7,8 +8,19 @@ import {
   IsString,
   Max,
   Min,
+  ValidateNested,
   ValidateIf,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class ShiftMaterialActualDto {
+  @IsString()
+  rawMaterialId!: string;
+
+  @IsNumber()
+  @Min(0)
+  actualKg!: number;
+}
 
 export class UpdateShiftRecordDto {
   @IsOptional()
@@ -73,4 +85,11 @@ export class UpdateShiftRecordDto {
   @IsNumber()
   @Min(0.000001)
   paintQuantityKg?: number;
+
+  /** Retseptdagi xomashyo (kg) actual qiymatlari (expected dan kam bo‘lmasin) */
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ShiftMaterialActualDto)
+  materials?: ShiftMaterialActualDto[];
 }

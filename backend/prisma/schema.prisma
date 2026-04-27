@@ -208,6 +208,7 @@ model RawMaterial {
   productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
   purchaseOrders   RawMaterialPurchaseOrder[]
   paintShiftRecords ShiftRecord[]      @relation("ShiftPaintRawMaterial")
+  shiftMaterialUsages ShiftMaterialUsage[]
 }
 
 model SemiProduct {
@@ -503,6 +504,23 @@ model ShiftRecord {
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
   shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
+  materials      ShiftMaterialUsage[]
+}
+
+/// Smena davomida sarflangan xom ashyo (retsept va aslidagi farqi)
+model ShiftMaterialUsage {
+  id            String      @id @default(cuid())
+  shiftId       String
+  shift         ShiftRecord @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  rawMaterialId String
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  expectedKg    Float       @default(0)
+  actualKg      Float       @default(0)
+  deltaKg       Float       @default(0)
+  createdAt     DateTime    @default(now())
+
+  @@unique([shiftId, rawMaterialId])
+  @@index([rawMaterialId])
 }
 
 model Client {

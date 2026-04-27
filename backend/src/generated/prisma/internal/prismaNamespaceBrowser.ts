@@ -71,6 +71,7 @@ export const ModelName = {
   ProductionRecord: 'ProductionRecord',
   ProductionConsumption: 'ProductionConsumption',
   ShiftRecord: 'ShiftRecord',
+  ShiftMaterialUsage: 'ShiftMaterialUsage',
   Client: 'Client',
   Order: 'Order',
   OrderItem: 'OrderItem',
@@ -408,6 +409,19 @@ export const ShiftRecordScalarFieldEnum = {
 } as const
 
 export type ShiftRecordScalarFieldEnum = (typeof ShiftRecordScalarFieldEnum)[keyof typeof ShiftRecordScalarFieldEnum]
+
+
+export const ShiftMaterialUsageScalarFieldEnum = {
+  id: 'id',
+  shiftId: 'shiftId',
+  rawMaterialId: 'rawMaterialId',
+  expectedKg: 'expectedKg',
+  actualKg: 'actualKg',
+  deltaKg: 'deltaKg',
+  createdAt: 'createdAt'
+} as const
+
+export type ShiftMaterialUsageScalarFieldEnum = (typeof ShiftMaterialUsageScalarFieldEnum)[keyof typeof ShiftMaterialUsageScalarFieldEnum]
 
 
 export const ClientScalarFieldEnum = {
