@@ -358,13 +358,17 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       ),
     [state.warehouseProducts, mode],
   );
-  /** To‘liq katalog: `productCatalog` rejim bo‘yicha filtrlangan; tayyor mahsulot formasi uchun yarim tayyorlar har doim kerak */
+  /**
+   * `semiProducts` / `finishedProducts` — joriy `mode` ga mos katalog (ko‘rinish va statistika uchun).
+   * Tayyor mahsulot formasi uchun esa yarim tayyorlarning to‘liq ro‘yxati kerak; shuning uchun alohida
+   * `allSemiProducts` va `allFinishedProducts` ham saqlanadi.
+   */
   const semiProducts = useMemo(
     () =>
-      state.warehouseProducts.filter(
+      productCatalog.filter(
         (item): item is SemiProductCatalogItem => item.itemType === 'SEMI_PRODUCT',
       ),
-    [state.warehouseProducts],
+    [productCatalog],
   );
   const finishedProducts = useMemo(
     () =>
@@ -373,6 +377,20 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           item.itemType === 'FINISHED_PRODUCT',
       ),
     [productCatalog],
+  );
+  const allSemiProducts = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (item): item is SemiProductCatalogItem => item.itemType === 'SEMI_PRODUCT',
+      ),
+    [state.warehouseProducts],
+  );
+  const allFinishedProducts = useMemo(
+    () =>
+      state.warehouseProducts.filter(
+        (item): item is FinishedProductCatalogItem => item.itemType === 'FINISHED_PRODUCT',
+      ),
+    [state.warehouseProducts],
   );
 
   const warehouseHistoryRows = useMemo(() => {
@@ -584,13 +602,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       if (machineTypeById.get(r.machineId) !== 'final') continue;
       const label = r.productType?.trim() ?? '';
       if (!label) continue;
-      const fin = finishedProducts.find((f) => catalogNamesMatch(f.name, label));
+      const fin = allFinishedProducts.find((f) => catalogNamesMatch(f.name, label));
       if (!fin?.semiProducts?.length) continue;
       const materialUnits = r.producedQty + (r.defectCount ?? 0);
       fromShifts += materialUnits * fin.semiProducts.length;
     }
     return fromBatches + fromShifts;
-  }, [state.finalProductBatches, state.shiftRecords, machineTypeById, finishedProducts]);
+  }, [state.finalProductBatches, state.shiftRecords, machineTypeById, allFinishedProducts]);
   /** Бир нечта позицияли буюртмаларда категория бўйича тўғри йиғинди */
   const totalSemiSold = useMemo(() => {
     let sum = 0;
@@ -1219,7 +1237,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               {t.whSemiSelectionTitle}
             </p>
             <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
-              {semiProducts
+              {allSemiProducts
                 .filter((item) => item.id !== editingProduct?.id)
                 .map((item) => (
                   <label
@@ -1239,7 +1257,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     </span>
                   </label>
                 ))}
-              {semiProducts.filter((item) => item.id !== editingProduct?.id).length === 0 && (
+              {allSemiProducts.filter((item) => item.id !== editingProduct?.id).length === 0 && (
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {t.whNoSemiProducts}
                 </p>
@@ -1821,192 +1839,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
         {whTab === 'catalog' && (
           <>
-      <div className="flex flex-col-reverse gap-6">
-      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-sky-50/80 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
-        <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 shadow-inner dark:bg-sky-900/40">
-              <Droplets className="h-5 w-5 text-sky-600 dark:text-sky-300" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
-                {t.whRawMaterialListTitle}
-              </h3>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                {rawMaterials.length} {t.totalRecords}
-                {hasCatalogSiro && hasCatalogPaint
-                  ? ` · ${t.rmMetricsCaptionSiro}: ${siroRawMaterials.length} · ${t.rmMetricsCaptionPaint}: ${paintRawMaterials.length}`
-                  : ''}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {rawMaterials.length === 0 ? (
-          <div className="flex min-h-[7rem] items-center justify-center px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
-            {t.whNoRawMaterials}
-          </div>
-        ) : (
-          <div className="space-y-8 p-4 sm:p-5">
-            {siroRawMaterials.length > 0 && (
-              <div>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2.5 dark:border-blue-900/40 dark:bg-blue-950/30">
-                  <div className="flex items-center gap-2">
-                    <Droplets className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                      {t.rmMetricsCaptionSiro}
-                    </span>
-                  </div>
-                  <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-semibold text-blue-800 shadow-sm dark:bg-blue-900/50 dark:text-blue-200">
-                    {siroRawMaterials.length} {t.totalRecords}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {siroRawMaterials.map((rawMaterial) => (
-                    <div
-                      key={rawMaterial.id}
-                      className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-600 dark:bg-slate-900/40"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start gap-2">
-                          <p className="min-w-0 flex-1 font-semibold leading-snug text-slate-900 dark:text-white">
-                            {rawMaterial.name}
-                          </p>
-                          <span className="inline-flex shrink-0 items-center rounded-lg bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
-                            {t.rmKindSiro}
-                          </span>
-                        </div>
-                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                          {t.whUnit}: {rawMaterial.unit}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                          {rawMaterial.defaultBagWeightKg
-                            ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
-                            : t.rmDefaultBagWeightHint}
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-400">{auditLine(rawMaterial, t)}</p>
-                        {rawMaterial.description && (
-                          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                            {rawMaterial.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700">
-                        <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                          {t.whIncludedInWarehouse}
-                        </p>
-                        {canManage && (
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 sm:flex-none"
-                              onClick={() => openRawMaterialEdit(rawMaterial)}
-                            >
-                              <Pencil size={14} />
-                              {t.whEdit}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="flex-1 sm:flex-none"
-                              onClick={() => attemptDeleteRawMaterial(rawMaterial)}
-                            >
-                              <Trash2 size={14} />
-                              {t.suDelete}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {paintRawMaterials.length > 0 && (
-              <div>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200/80 bg-fuchsia-50/70 px-3 py-2.5 dark:border-fuchsia-900/40 dark:bg-fuchsia-950/25">
-                  <div className="flex items-center gap-2">
-                    <Palette className="h-4 w-4 text-fuchsia-600 dark:text-fuchsia-400" />
-                    <span className="text-sm font-semibold text-fuchsia-900 dark:text-fuchsia-100">
-                      {t.rmMetricsCaptionPaint}
-                    </span>
-                  </div>
-                  <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-semibold text-fuchsia-900 shadow-sm dark:bg-fuchsia-900/50 dark:text-fuchsia-100">
-                    {paintRawMaterials.length} {t.totalRecords}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {paintRawMaterials.map((rawMaterial) => (
-                    <div
-                      key={rawMaterial.id}
-                      className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-600 dark:bg-slate-900/40"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start gap-2">
-                          <p className="min-w-0 flex-1 font-semibold leading-snug text-slate-900 dark:text-white">
-                            {rawMaterial.name}
-                          </p>
-                          <span className="inline-flex shrink-0 items-center rounded-lg bg-fuchsia-100 px-2 py-0.5 text-[11px] font-medium text-fuchsia-900 dark:bg-fuchsia-900/40 dark:text-fuchsia-200">
-                            {t.rmKindPaint}
-                          </span>
-                        </div>
-                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                          {t.whUnit}: {rawMaterial.unit}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                          {rawMaterial.defaultBagWeightKg
-                            ? `${t.rmDefaultBagWeight}: ${formatNumber(rawMaterial.defaultBagWeightKg)} ${t.unitKg}`
-                            : t.rmDefaultBagWeightHint}
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-400">{auditLine(rawMaterial, t)}</p>
-                        {rawMaterial.description && (
-                          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                            {rawMaterial.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700">
-                        <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                          {t.whIncludedInWarehouse}
-                        </p>
-                        {canManage && (
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 sm:flex-none"
-                              onClick={() => openRawMaterialEdit(rawMaterial)}
-                            >
-                              <Pencil size={14} />
-                              {t.whEdit}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="flex-1 sm:flex-none"
-                              onClick={() => attemptDeleteRawMaterial(rawMaterial)}
-                            >
-                              <Trash2 size={14} />
-                              {t.suDelete}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-indigo-50/70 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-indigo-950/20 dark:via-slate-800 dark:to-slate-800">
         <div className="flex flex-col gap-4 border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -2090,7 +1922,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             ))}
           </div>
         )}
-      </div>
       </div>
           </>
         )}
