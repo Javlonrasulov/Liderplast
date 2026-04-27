@@ -501,6 +501,12 @@ export interface T {
   slOrderItems: string;
   slMixedProducts: string;
   slRemoveItem: string;
+  slDeleteClientTitle: string;
+  slDeleteClientHint: string;
+  slDeleteClientAction: string;
+  slCompanyName: string;
+  slDebtStatusYes: string;
+  slDebtStatusNo: string;
 
   // Expenses
   exTitle: string;
@@ -1325,6 +1331,13 @@ const uz_cyrillic: T = {
   slOrderItems: 'Буюртма маҳсулотлари',
   slMixedProducts: 'Микс маҳсулотлар',
   slRemoveItem: 'Маҳсулотни ўчириш',
+  slDeleteClientTitle: 'Клиентни рўйхатдан олиб ташлаймизми?',
+  slDeleteClientHint:
+    'Клиент рўйхатдан олинади; аввалги сотувлар ва тўловлар тарихи сақланади.',
+  slDeleteClientAction: 'Ҳа, рўйхатдан олиб ташлаш',
+  slCompanyName: 'LiderPlast',
+  slDebtStatusYes: 'Қарзи бор',
+  slDebtStatusNo: 'Қарзи йўқ',
 
   exTitle: 'Харажатлар',
   exElectricity: 'Электр Энергия',
@@ -2133,6 +2146,13 @@ const uz_latin: T = {
   slOrderItems: 'Buyurtma mahsulotlari',
   slMixedProducts: 'Miks mahsulotlar',
   slRemoveItem: 'Mahsulotni o\'chirish',
+  slDeleteClientTitle: "Klientni ro'yxatdan olib tashlaymizmi?",
+  slDeleteClientHint:
+    "Klient ro'yxatdan olinadi; avvalgi sotuvlar va to'lovlar tarixi saqlanadi.",
+  slDeleteClientAction: "Ha, ro'yxatdan olib tashlash",
+  slCompanyName: 'LiderPlast',
+  slDebtStatusYes: 'Qarzi bor',
+  slDebtStatusNo: "Qarzi yo'q",
 
   exTitle: 'Xarajatlar',
   exElectricity: 'Elektr Energiya',
@@ -2941,6 +2961,13 @@ const ru: T = {
   slOrderItems: 'Товары в заказе',
   slMixedProducts: 'Смешанные товары',
   slRemoveItem: 'Удалить товар',
+  slDeleteClientTitle: 'Удалить клиента из списка?',
+  slDeleteClientHint:
+    'Клиент исчезнет из списка; история продаж и платежей сохранится.',
+  slDeleteClientAction: 'Да, удалить',
+  slCompanyName: 'LiderPlast',
+  slDebtStatusYes: 'Есть долг',
+  slDebtStatusNo: 'Долга нет',
 
   exTitle: 'Расходы',
   exElectricity: 'Электроэнергия',

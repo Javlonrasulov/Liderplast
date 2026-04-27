@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink } from 'lucide-react';
+import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer } from 'lucide-react';
 import {
   useERP,
   type FinishedProductCatalogItem,
   type SaleOrderItem,
   type SemiProductCatalogItem,
+  type Sale,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
@@ -280,6 +281,107 @@ export function Sales() {
     } finally {
       setClientIdToDelete(null);
     }
+  };
+
+  const handlePrintSale = (sale: Sale) => {
+    const debtAmount = Math.max(0, (sale.total ?? 0) - (sale.paid ?? 0));
+    const hasDebt = debtAmount > 0.01;
+
+    const items = sale.items && sale.items.length > 0
+      ? sale.items
+      : [{
+          productCategory: sale.productCategory,
+          productType: sale.productType,
+          quantity: sale.quantity,
+          pricePerUnit: sale.pricePerUnit,
+          total: sale.total,
+        }];
+
+    const html = `
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${t.slTitle} — ${sale.clientName}</title>
+    <style>
+      :root { color-scheme: light; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #0f172a; }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      .muted { color: #64748b; font-size: 12px; }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+      .box { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; min-width: 220px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+      th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; font-size: 12px; text-align: left; }
+      th { background: #f8fafc; font-weight: 700; }
+      .sum { font-weight: 800; }
+      .badge { display:inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+      .bad { background:#fee2e2; color:#991b1b; }
+      .ok { background:#dcfce7; color:#166534; }
+      @media print { body { margin: 10mm; } }
+    </style>
+  </head>
+  <body>
+    <h1>${t.slCompanyName}</h1>
+    <div class="muted">${t.slTitle} • ${formatDate(sale.date)} • ID: ${sale.id}</div>
+
+    <div class="row">
+      <div class="box">
+        <div class="muted">${t.colClient}</div>
+        <div class="sum">${sale.clientName}</div>
+      </div>
+      <div class="box">
+        <div class="muted">${t.labelTotal}</div>
+        <div class="sum">${formatCurrency(sale.total)}</div>
+      </div>
+      <div class="box">
+        <div class="muted">${t.labelPaid}</div>
+        <div class="sum">${formatCurrency(sale.paid)}</div>
+      </div>
+      <div class="box">
+        <div class="muted">${t.labelDebt}</div>
+        <div class="sum">${formatCurrency(debtAmount)}</div>
+        <div style="margin-top:8px">
+          <span class="badge ${hasDebt ? 'bad' : 'ok'}">${hasDebt ? t.slDebtStatusYes : t.slDebtStatusNo}</span>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>${t.colProduct}</th>
+          <th>${t.colQty}</th>
+          <th>${t.labelPrice}</th>
+          <th>${t.colTotal}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map((it, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${it.productType}</td>
+            <td>${formatNumber(it.quantity)}</td>
+            <td>${formatNumber(it.pricePerUnit)}</td>
+            <td>${formatCurrency(it.total)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div style="margin-top:18px" class="muted">${t.slDebtPaid}: ${hasDebt ? '—' : '✓'}</div>
+    <script>
+      window.addEventListener('load', () => setTimeout(() => window.print(), 200));
+    </script>
+  </body>
+</html>`;
+
+    const w = window.open('', '_blank', 'width=900,height=720');
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
   };
 
   const handleCopyAccount = (accountNum: string, clientId: string) => {
@@ -808,12 +910,25 @@ export function Sales() {
                           <td className="px-4 py-3 text-sm text-emerald-600 font-medium whitespace-nowrap">{formatCurrency(sale.paid)}</td>
                           <td className="px-4 py-3">{sale.total - sale.paid > 0 ? <span className="text-xs font-semibold text-red-600">{formatCurrency(sale.total - sale.paid)}</span> : <span className="text-xs text-emerald-600">✓</span>}</td>
                           <td className="px-4 py-3">
-                            {isMulti && (
-                              <button onClick={() => setExpandedSale(isExpanded ? null : sale.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-                                {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handlePrintSale(sale)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
+                                title={t.prPrint}
+                              >
+                                <Printer size={14} />
                               </button>
-                            )}
+                              {isMulti && (
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedSale(isExpanded ? null : sale.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                >
+                                  {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                         {/* Expanded items */}
