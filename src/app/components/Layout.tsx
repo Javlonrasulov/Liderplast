@@ -186,7 +186,22 @@ export function Layout() {
       perms: ['view_raw_material', 'view_warehouse', 'view_shift'],
       pathPrefixes: ['/raw-material', '/shifts', '/warehouse'],
       children: [
-        { kind: 'leaf', path: '/raw-material', icon: Droplets, label: t.whSidebarRaw, perm: 'view_raw_material' },
+        {
+          kind: 'leaf',
+          path: '/raw-material/overview',
+          icon: Droplets,
+          label: t.rmSidebarCatalog,
+          perm: 'view_raw_material',
+          exact: true,
+        },
+        {
+          kind: 'leaf',
+          path: '/raw-material/stock',
+          icon: ClipboardList,
+          label: t.rmSidebarWarehouseStock,
+          perm: 'view_raw_material',
+          exact: true,
+        },
         {
           kind: 'leaf',
           path: '/shifts',
@@ -252,6 +267,8 @@ export function Layout() {
   const PAGE_TITLES: Record<string, string> = {
     '/': t.navDashboard,
     '/raw-material': t.navRawMaterial,
+    '/raw-material/overview': t.navRawMaterial,
+    '/raw-material/stock': t.rmSidebarWarehouseStock,
     '/warehouse': t.navWarehouse,
     '/warehouse/semi': t.whSemiStats,
     '/warehouse/final': t.whFinalStats,

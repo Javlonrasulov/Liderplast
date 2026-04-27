@@ -1658,9 +1658,10 @@ export function ShiftWork() {
 
       {/* ── TAB: Form ── */}
       {activeTab === 'form' && (
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 min-[400px]:gap-6 min-w-0">
+        <div className="space-y-4 min-[400px]:space-y-6 min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-[400px]:gap-6 min-w-0 items-start">
           {/* Form */}
-          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0">
+          <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
                 <Plus size={16} className="text-white" />
@@ -2037,7 +2038,7 @@ export function ShiftWork() {
             </form>
           </div>
 
-          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0 flex flex-col max-h-[min(80vh,52rem)] lg:max-h-none">
+          <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0 flex flex-col max-h-[min(80vh,52rem)] lg:max-h-none">
             <div className="flex items-center gap-2 mb-4 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
                 <Layers size={16} className="text-white" />
@@ -2161,11 +2162,12 @@ export function ShiftWork() {
               })}
             </div>
           </div>
+          </div>
 
           {/* Today's table preview */}
           <div
             ref={todayPreviewPanelRef}
-            className={`lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 flex flex-col min-h-0 ${
+            className={`bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 flex flex-col min-h-0 w-full ${
               todayPreviewFullscreen
                 ? '!rounded-none h-screen max-h-screen border-0 shadow-none'
                 : ''

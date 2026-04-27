@@ -14,6 +14,12 @@ export interface T {
   whSidebarRaw: string;
   whSidebarSemi: string;
   whSidebarFinal: string;
+  /** Xomashyo — ichki sahifa (sidebar Ombor) */
+  rmSidebarCatalog: string;
+  rmSidebarWarehouseStock: string;
+  rmWarehouseStockPageDesc: string;
+  rmWarehouseStockTotal: string;
+  rmWarehouseStockEmpty: string;
   navSales: string;
   navExpenses: string;
   navReports: string;
@@ -967,6 +973,12 @@ const uz_cyrillic: T = {
   whSidebarRaw: 'Хом ашё',
   whSidebarSemi: 'Ярим тайёр',
   whSidebarFinal: 'Тайёр',
+  rmSidebarCatalog: 'Каталог ва кирим',
+  rmSidebarWarehouseStock: 'Омборда тур бўйича',
+  rmWarehouseStockPageDesc:
+    'Каталогдаги ҳар бир хомашё тури учун омбордаги қолдиқ (килограмм).',
+  rmWarehouseStockTotal: 'Жами хомашё',
+  rmWarehouseStockEmpty: 'Хомашё каталоги бўш — аввал тур яратинг.',
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
   navReports: 'Ҳисоботлар',
@@ -1888,6 +1900,11 @@ const uz_latin: T = {
   whSidebarRaw: 'Xom ashyo',
   whSidebarSemi: 'Yarim tayyor',
   whSidebarFinal: 'Tayyor',
+  rmSidebarCatalog: 'Katalog va kirim',
+  rmSidebarWarehouseStock: 'Omborda tur bo‘yicha',
+  rmWarehouseStockPageDesc: 'Katalogdagi har bir xomashyo turi uchun ombordagi qoldiq (kg).',
+  rmWarehouseStockTotal: 'Jami xomashyo',
+  rmWarehouseStockEmpty: 'Xomashyo katalogi bo‘sh — avval tur yarating.',
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
   navReports: 'Hisobotlar',
@@ -2809,6 +2826,11 @@ const ru: T = {
   whSidebarRaw: 'Сырьё',
   whSidebarSemi: 'Полуфабрикаты',
   whSidebarFinal: 'Готовая продукция',
+  rmSidebarCatalog: 'Справочник и поступления',
+  rmSidebarWarehouseStock: 'Остатки по типам',
+  rmWarehouseStockPageDesc: 'Складской остаток (кг) по каждому типу сырья из каталога.',
+  rmWarehouseStockTotal: 'Всего сырья',
+  rmWarehouseStockEmpty: 'Каталог сырья пуст — сначала добавьте тип.',
   navSales: 'Продажи',
   navExpenses: 'Расходы',
   navReports: 'Отчёты',
