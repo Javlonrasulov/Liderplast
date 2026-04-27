@@ -504,20 +504,20 @@ model ShiftRecord {
   status        EntityStatus  @default(COMPLETED)
   createdAt     DateTime      @default(now())
   shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
-  materials      ShiftMaterialUsage[]
+  materialUsages ShiftMaterialUsage[]
 }
 
-/// Smena davomida sarflangan xom ashyo (retsept va aslidagi farqi)
+/// Smena (qolip) retsept bo‘yicha siro sarfi: reja vs haqiqiy (ortiqcha)
 model ShiftMaterialUsage {
-  id            String      @id @default(cuid())
-  shiftId       String
-  shift         ShiftRecord @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  rawMaterialId String
-  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
-  expectedKg    Float       @default(0)
-  actualKg      Float       @default(0)
-  deltaKg       Float       @default(0)
-  createdAt     DateTime    @default(now())
+  id             String       @id @default(cuid())
+  shiftId        String
+  shift          ShiftRecord  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  rawMaterialId  String
+  rawMaterial    RawMaterial  @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  expectedKg     Float        @default(0)
+  actualKg       Float        @default(0)
+  deltaKg        Float        @default(0)
+  createdAt      DateTime     @default(now())
 
   @@unique([shiftId, rawMaterialId])
   @@index([rawMaterialId])

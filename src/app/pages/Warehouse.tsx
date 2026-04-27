@@ -263,18 +263,9 @@ const FINAL_DETAIL_CARD_STYLES = [
   },
 ] as const;
 
-type WarehouseTabKey = 'overview' | 'catalog' | 'statistics' | 'history';
-type WarehouseFocusCategory = 'all' | 'semi' | 'final';
+export type WarehouseMode = 'semi' | 'final';
 
-export function Warehouse({
-  initialTab = 'overview',
-  hideTabs = false,
-  focusCategory = 'all',
-}: {
-  initialTab?: WarehouseTabKey;
-  hideTabs?: boolean;
-  focusCategory?: WarehouseFocusCategory;
-}) {
+export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const { state, semiStockByProductName, finalStockByProductName, dispatch } = useERP();
   const { user } = useAuth();
   const { t, filterData } = useApp();
@@ -301,30 +292,24 @@ export function Warehouse({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [whTab, setWhTab] = useState<WarehouseTabKey>(initialTab);
-
-  useEffect(() => {
-    setWhTab(initialTab);
-  }, [initialTab]);
+  const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics' | 'history'>(
+    'overview',
+  );
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
-  const rawMaterials = useMemo(
-    () =>
-      state.warehouseProducts.filter(
-        (item): item is Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> =>
-          item.itemType === 'RAW_MATERIAL',
-      ),
-    [state.warehouseProducts],
+  /**
+   * Bu sahifada (Yarim tayyor / Tayyor) xom ashyo ko‘rinmaydi — chunki
+   * xom ashyolar alohida `/raw-material` sahifasida boshqariladi.
+   * Lekin `attemptDeleteRawMaterial` mavjud xom ashyo ID bo‘yicha qoldiq
+   * tekshiradi, shuning uchun xaritani saqlaymiz.
+   */
+  const rawMaterials = useMemo<Array<Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }>>>(
+    () => [],
+    [],
   );
 
-  const siroRawMaterials = useMemo(
-    () => rawMaterials.filter((r) => r.rawMaterialKind !== 'PAINT'),
-    [rawMaterials],
-  );
-  const paintRawMaterials = useMemo(
-    () => rawMaterials.filter((r) => r.rawMaterialKind === 'PAINT'),
-    [rawMaterials],
-  );
+  const siroRawMaterials = useMemo<typeof rawMaterials>(() => [], []);
+  const paintRawMaterials = useMemo<typeof rawMaterials>(() => [], []);
 
   const rawStockByName = useMemo(() => {
     const map = new Map<string, number>();
@@ -344,15 +329,19 @@ export function Warehouse({
     () => [...paintRawMaterials].sort((a, b) => a.name.localeCompare(b.name)),
     [paintRawMaterials],
   );
+  /** `mode` bo‘yicha katalog faqat ko‘rinadigan turdagi mahsulotlarni o‘z ichiga oladi */
   const productCatalog = useMemo(
     () =>
       state.warehouseProducts.filter(
         (
           item,
-        ): item is SemiProductCatalogItem | FinishedProductCatalogItem =>
-          item.itemType === 'SEMI_PRODUCT' || item.itemType === 'FINISHED_PRODUCT',
+        ): item is SemiProductCatalogItem | FinishedProductCatalogItem => {
+          if (item.itemType === 'SEMI_PRODUCT') return mode === 'semi';
+          if (item.itemType === 'FINISHED_PRODUCT') return mode === 'final';
+          return false;
+        },
       ),
-    [state.warehouseProducts],
+    [state.warehouseProducts, mode],
   );
   const semiProducts = useMemo(
     () =>
@@ -370,23 +359,25 @@ export function Warehouse({
     [productCatalog],
   );
 
-  const warehouseHistoryRows = useMemo(
-    () =>
-      mergeWarehouseProductionHistory(
-        state.productionHistory,
-        buildShiftRecordsToProductionHistory(
-          state.shiftRecords,
-          state.machines,
-          state.warehouseProducts,
-        ),
-      ),
-    [
+  const warehouseHistoryRows = useMemo(() => {
+    const merged = mergeWarehouseProductionHistory(
       state.productionHistory,
-      state.shiftRecords,
-      state.machines,
-      state.warehouseProducts,
-    ],
-  );
+      buildShiftRecordsToProductionHistory(
+        state.shiftRecords,
+        state.machines,
+        state.warehouseProducts,
+      ),
+    );
+    return merged.filter((row) =>
+      mode === 'semi' ? row.stage === 'SEMI' : row.stage === 'FINISHED',
+    );
+  }, [
+    state.productionHistory,
+    state.shiftRecords,
+    state.machines,
+    state.warehouseProducts,
+    mode,
+  ]);
 
   const semiRecipePaintBreakdown = useMemo(() => {
     if (semiProducts.length === 0) return [];
@@ -622,34 +613,32 @@ export function Warehouse({
       date: item.createdAt?.slice(0, 10) ?? '1970-01-01',
     }));
 
-    const filteredByCategory =
-      focusCategory === 'semi'
-        ? items.filter((x) => x.itemType === 'SEMI_PRODUCT')
-        : focusCategory === 'final'
-          ? items.filter((x) => x.itemType === 'FINISHED_PRODUCT')
-          : items;
-
-    return filterData(filteredByCategory).sort(
+    return filterData(items).sort(
       (left, right) =>
         new Date(right.createdAt ?? 0).getTime() -
         new Date(left.createdAt ?? 0).getTime(),
     );
-  }, [filterData, productCatalog, focusCategory]);
+  }, [filterData, productCatalog]);
 
-  const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> = [
-    {
-      value: 'SEMI_PRODUCT',
-      label: t.whSemi,
-      count: semiProducts.length,
-    },
-    {
-      value: 'FINISHED_PRODUCT',
-      label: t.whFinal,
-      count: productCatalog.filter((item) => item.itemType === 'FINISHED_PRODUCT').length,
-    },
-  ];
+  const defaultFormType: ProductFormType = mode === 'final' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
+  const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> =
+    mode === 'semi'
+      ? [
+          {
+            value: 'SEMI_PRODUCT',
+            label: t.whSemi,
+            count: semiProducts.length,
+          },
+        ]
+      : [
+          {
+            value: 'FINISHED_PRODUCT',
+            label: t.whFinal,
+            count: finishedProducts.length,
+          },
+        ];
 
-  const resetForm = (itemType: ProductFormType = 'SEMI_PRODUCT') => {
+  const resetForm = (itemType: ProductFormType = defaultFormType) => {
     setForm({
       ...DEFAULT_FORM,
       itemType,
@@ -662,7 +651,7 @@ export function Warehouse({
   };
 
   const openCreate = () => {
-    resetForm('SEMI_PRODUCT');
+    resetForm(defaultFormType);
     setError('');
     setSuccess('');
     setIsEditorOpen(true);
@@ -699,7 +688,7 @@ export function Warehouse({
 
   const closeEditor = () => {
     setIsEditorOpen(false);
-    resetForm(editingProduct?.itemType === 'FINISHED_PRODUCT' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT');
+    resetForm(defaultFormType);
   };
 
   const setFormType = (itemType: ProductFormType) => {
@@ -1322,47 +1311,43 @@ export function Warehouse({
     }
   };
 
-  const effectiveTab: WarehouseTabKey = hideTabs ? 'catalog' : whTab;
-
   return (
     <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
       <div className="flex w-full min-w-0 flex-col gap-6">
-        {!hideTabs && (
-          <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
-            <button
-              type="button"
-              onClick={() => setWhTab('overview')}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-            >
-              <BarChart3 size={14} className="shrink-0" />
-              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabOverview}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setWhTab('catalog')}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-            >
-              <LayoutGrid size={14} className="shrink-0" />
-              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabCatalog}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setWhTab('statistics')}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'statistics' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-            >
-              <PieChart size={14} className="shrink-0" />
-              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setWhTab('history')}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'history' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-            >
-              <History size={14} className="shrink-0" />
-              <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabHistory}</span>
-            </button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
+          <button
+            type="button"
+            onClick={() => setWhTab('overview')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'overview' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <BarChart3 size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabOverview}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('catalog')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <LayoutGrid size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabCatalog}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('statistics')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'statistics' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <PieChart size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabStats}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWhTab('history')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${whTab === 'history' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <History size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.whTabHistory}</span>
+          </button>
+        </div>
 
         {(error || success) && (
           <div
@@ -1376,7 +1361,7 @@ export function Warehouse({
           </div>
         )}
 
-        {effectiveTab === 'overview' && (
+        {whTab === 'overview' && (
           <>
             {warehouseSummaryCards.length > 0 ? (
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -1477,7 +1462,7 @@ export function Warehouse({
           </>
         )}
 
-        {effectiveTab === 'statistics' && (
+        {whTab === 'statistics' && (
           <>
       {semiRecipePaintBreakdown.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-violet-50/90 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-violet-950/25 dark:via-slate-800 dark:to-slate-800">
@@ -1689,7 +1674,7 @@ export function Warehouse({
           </>
         )}
 
-        {effectiveTab === 'history' && (
+        {whTab === 'history' && (
           <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800">
             <div className="border-b border-slate-200/80 bg-slate-50/90 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/80">
               <div className="flex flex-wrap items-center gap-3">
@@ -1792,6 +1777,20 @@ export function Warehouse({
                                       {c.unitLabel === 'dona'
                                         ? `${formatNumber(c.quantity)} ${t.unitPiece}`
                                         : `${formatKgAmount(c.quantity)} ${c.unitLabel}`}
+                                      {c.kind === 'raw' &&
+                                      c.unitLabel === 'kg' &&
+                                      c.plannedQuantity != null &&
+                                      Math.abs(c.quantity - c.plannedQuantity) > 1e-4 ? (
+                                        <span className="ml-1 text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                                          ({t.whHistoryPlannedKg}{' '}
+                                          {formatKgAmount(c.plannedQuantity)}
+                                          {c.deltaQuantity != null &&
+                                          c.deltaQuantity > 1e-4
+                                            ? `, +${formatKgAmount(c.deltaQuantity)} ${t.whHistoryExtraKg}`
+                                            : ''}
+                                          )
+                                        </span>
+                                      ) : null}
                                     </span>
                                   </li>
                                 ))}
@@ -1808,10 +1807,9 @@ export function Warehouse({
           </div>
         )}
 
-        {effectiveTab === 'catalog' && (
+        {whTab === 'catalog' && (
           <>
       <div className="flex flex-col-reverse gap-6">
-      {focusCategory === 'all' && (
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-sky-50/80 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
         <div className="border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
           <div className="flex flex-wrap items-center gap-3">
@@ -1996,7 +1994,6 @@ export function Warehouse({
           </div>
         )}
       </div>
-      )}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-indigo-50/70 via-white to-white shadow-md ring-1 ring-slate-900/5 dark:border-slate-600 dark:from-indigo-950/20 dark:via-slate-800 dark:to-slate-800">
         <div className="flex flex-col gap-4 border-b border-slate-200/80 bg-white/70 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80 sm:flex-row sm:items-center sm:justify-between">
@@ -2043,41 +2040,6 @@ export function Warehouse({
                       {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
                     </span>
                   </div>
-                  {(product.itemType === 'SEMI_PRODUCT' || product.itemType === 'FINISHED_PRODUCT') && (() => {
-                    const stockQty =
-                      product.itemType === 'SEMI_PRODUCT'
-                        ? semiStockByProductName[product.name] ?? 0
-                        : finalStockByProductName[product.name] ?? 0;
-                    const isLow = stockQty <= 0;
-                    return (
-                      <div
-                        className={`mt-3 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 ${
-                          isLow
-                            ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10'
-                            : 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/10'
-                        }`}
-                      >
-                        <span
-                          className={`text-[11px] font-medium ${
-                            isLow
-                              ? 'text-amber-700 dark:text-amber-300'
-                              : 'text-emerald-700 dark:text-emerald-300'
-                          }`}
-                        >
-                          {t.whInWarehouse}
-                        </span>
-                        <span
-                          className={`text-sm font-bold tabular-nums ${
-                            isLow
-                              ? 'text-amber-700 dark:text-amber-300'
-                              : 'text-emerald-700 dark:text-emerald-300'
-                          }`}
-                        >
-                          {formatNumber(stockQty)} {t.unitPiece}
-                        </span>
-                      </div>
-                    );
-                  })()}
                   <p className="mt-3 text-xs font-medium text-slate-600 dark:text-slate-300">
                     {productMetric(product, t)}
                   </p>

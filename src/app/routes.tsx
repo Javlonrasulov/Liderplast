@@ -29,11 +29,20 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Dashboard },
       { path: 'raw-material', Component: RawMaterial },
+      { path: 'warehouse', element: <Navigate to="/warehouse/semi" replace /> },
       {
-        path: 'warehouse',
+        path: 'warehouse/semi',
         element: (
           <RouteGuard permission="view_warehouse">
-            <Warehouse />
+            <Warehouse mode="semi" />
+          </RouteGuard>
+        ),
+      },
+      {
+        path: 'warehouse/final',
+        element: (
+          <RouteGuard permission="view_warehouse">
+            <Warehouse mode="final" />
           </RouteGuard>
         ),
       },

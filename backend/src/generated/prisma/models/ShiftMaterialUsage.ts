@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model ShiftMaterialUsage
- * Smena davomida sarflangan xom ashyo (retsept va aslidagi farqi)
+ * Smena (qolip) retsept bo‘yicha siro sarfi: reja vs haqiqiy (ortiqcha)
  */
 export type ShiftMaterialUsageModel = runtime.Types.Result.DefaultSelection<Prisma.$ShiftMaterialUsagePayload>
 
@@ -306,7 +306,7 @@ export type ShiftMaterialUsageCreateInput = {
   actualKg?: number
   deltaKg?: number
   createdAt?: Date | string
-  shift: Prisma.ShiftRecordCreateNestedOneWithoutMaterialsInput
+  shift: Prisma.ShiftRecordCreateNestedOneWithoutMaterialUsagesInput
   rawMaterial: Prisma.RawMaterialCreateNestedOneWithoutShiftMaterialUsagesInput
 }
 
@@ -326,7 +326,7 @@ export type ShiftMaterialUsageUpdateInput = {
   actualKg?: Prisma.FloatFieldUpdateOperationsInput | number
   deltaKg?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  shift?: Prisma.ShiftRecordUpdateOneRequiredWithoutMaterialsNestedInput
+  shift?: Prisma.ShiftRecordUpdateOneRequiredWithoutMaterialUsagesNestedInput
   rawMaterial?: Prisma.RawMaterialUpdateOneRequiredWithoutShiftMaterialUsagesNestedInput
 }
 
@@ -515,7 +515,7 @@ export type ShiftMaterialUsageCreateWithoutRawMaterialInput = {
   actualKg?: number
   deltaKg?: number
   createdAt?: Date | string
-  shift: Prisma.ShiftRecordCreateNestedOneWithoutMaterialsInput
+  shift: Prisma.ShiftRecordCreateNestedOneWithoutMaterialUsagesInput
 }
 
 export type ShiftMaterialUsageUncheckedCreateWithoutRawMaterialInput = {
@@ -625,7 +625,7 @@ export type ShiftMaterialUsageUpdateWithoutRawMaterialInput = {
   actualKg?: Prisma.FloatFieldUpdateOperationsInput | number
   deltaKg?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  shift?: Prisma.ShiftRecordUpdateOneRequiredWithoutMaterialsNestedInput
+  shift?: Prisma.ShiftRecordUpdateOneRequiredWithoutMaterialUsagesNestedInput
 }
 
 export type ShiftMaterialUsageUncheckedUpdateWithoutRawMaterialInput = {

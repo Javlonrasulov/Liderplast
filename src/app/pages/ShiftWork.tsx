@@ -8,7 +8,6 @@ import {
   useERP,
   type Employee,
   type RawMaterialProduct,
-  type SemiProductCatalogItem,
   type ShiftRecord,
 } from '../store/erp-store';
 import { apiRequest } from '../api/http';
@@ -17,6 +16,7 @@ import { formatNumber, formatDate, formatKgAmount, TODAY } from '../utils/format
 import { Link } from 'react-router';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
+import { getPlannedSemiRawRows } from '../utils/shift-semi-raw-planned';
 
 const SHIFT_DEFS_KEY = 'liderplast_shift_definitions_v1';
 
@@ -54,8 +54,6 @@ const TIMELINE_CARD_VISIBLE = 3;
 
 /** Фаол қопда сиро «йўқ» деб ҳисоблаш чегараси (кг) */
 const SIRO_BAG_KG_EPS = 1e-5;
-
-const MATERIAL_KG_EPS = 1e-6;
 
 const SHIFT_STYLE_PRESETS = [
   { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700', dot: 'bg-amber-500' },
@@ -144,7 +142,6 @@ const TR = {
     machinePlaceholderName: 'м: Қолип Масхинаси #1',
     machinePlaceholderDesc: 'м: PET преформ (қолип) ишлаб чиқаради',
     tab5: 'Сменалар',
-    tab6: 'Хомашё тарихи',
     shiftDefsTitle: 'Сменалар рўйхати',
     shiftDefsSubtitle: 'Ном ва вақтни белгиланг; янги смена қўшиш, таҳрирлаш ёки ўчириш',
     shiftDefName: 'Смена номи',
@@ -200,13 +197,6 @@ const TR = {
     shiftPaintUnitKg: 'кг',
     shiftPaintUnitG: 'г',
     shiftPaintUnitLabel: 'Ўлчов',
-    materialsPanelTitle: 'Танланган маҳсулотга кетган хомашё',
-    materialsPanelSubtitle: 'Ретсепт бўйича ҳисобланади; агар кўп кетса — actual (кг) ни ўзгартиринг',
-    materialsPickLineHint: 'Ўнгда хомашё кўриниши учун қаторни танланг',
-    materialsNoRecipeHint: 'Бу маҳсулот учун ретсепт топилмади (Омбор → Ярим тайёрда ретсепт киритинг)',
-    materialsOnlySemiHint: 'Хомашё ҳисоб-китоби фақат «Қолип (ярим тайёр)» аппаратлари учун',
-    materialsExpected: 'Керак (kg)',
-    materialsActual: 'Аслида (kg)',
     shiftPaintError: 'Краска белгиланса — тур ва миқдор тўғри киритилсин',
     shiftPaintNoMaterials:
       'Краска тури мавжуд эмас. «Хомашё (сиро)» саҳифасида янги хомашёни «краска» тури билан қўшинг.',
@@ -219,6 +209,14 @@ const TR = {
     shiftSiroGoRawMaterial: '«Хомашё»га ўтиш',
     shiftSiroBagLow: 'Фаол қопда сиро оз қолди: {kg} кг · {name}',
     shiftSiroBagEmpty: 'Фаол қопда сиро тугади — янги қопни уланг · {name}',
+    shiftMaterialsPanelTitle: 'Танланган маҳсулотга кетган хомашё',
+    shiftMaterialNameCol: 'Хомашё',
+    shiftMaterialPlannedShort: 'Режа, кг',
+    shiftMaterialActualShort: 'Ҳақиқий, кг',
+    shiftMaterialHintEmpty: 'Бўш = ретсепт бўйича',
+    shiftMaterialInvalidKg: 'Хомашё (кг) нотўғри',
+    shiftMaterialsPickSemi: 'Қолип, маҳсулот ва дона/бракни танланг',
+    shiftMaterialDeltaShort: 'ортикча',
   },
   uz_latin: {
     title: 'Smena Hisobi',
@@ -283,7 +281,6 @@ const TR = {
     machinePlaceholderName: 'm: Qolip Mashinasi #1',
     machinePlaceholderDesc: 'm: PET preform (qolip) ishlab chiqaradi',
     tab5: 'Smenalar',
-    tab6: 'Xomashyo tarixi',
     shiftDefsTitle: 'Smenalar ro\'yxati',
     shiftDefsSubtitle: 'Nom va vaqtni belgilang; yangi smena qo\'shish, tahrirlash yoki o\'chirish',
     shiftDefName: 'Smena nomi',
@@ -339,13 +336,6 @@ const TR = {
     shiftPaintUnitKg: 'kg',
     shiftPaintUnitG: 'g',
     shiftPaintUnitLabel: 'O\'lchov',
-    materialsPanelTitle: 'Tanlangan mahsulotga ketgan xomashyo',
-    materialsPanelSubtitle: 'Retsept bo‘yicha hisoblanadi; ko‘p ketgan bo‘lsa — actual (kg) ni o‘zgartiring',
-    materialsPickLineHint: 'O‘ngda xomashyo ko‘rinishi uchun qatorni tanlang',
-    materialsNoRecipeHint: 'Bu mahsulot uchun retsept topilmadi (Ombor → Yarim tayyorda retsept kiriting)',
-    materialsOnlySemiHint: 'Xomashyo hisob-kitobi faqat «Qolip (yarim tayyor)» apparatlari uchun',
-    materialsExpected: 'Kerak (kg)',
-    materialsActual: 'Aslida (kg)',
     shiftPaintError: 'Kraska belgilansa — tur va miqdor to\'g\'ri kirilsin',
     shiftPaintNoMaterials:
       'Kraska turi yo\'q. «Xomashyo (siro)» sahifasida yangi xomashyoni «kraska» turi bilan qo\'shing.',
@@ -358,6 +348,14 @@ const TR = {
     shiftSiroGoRawMaterial: '«Xomashyo»ga o\'tish',
     shiftSiroBagLow: 'Faol qopda siro oz qoldi: {kg} kg · {name}',
     shiftSiroBagEmpty: 'Faol qopda siro tugadi — yangi qopni ulang · {name}',
+    shiftMaterialsPanelTitle: 'Tanlangan mahsulotga ketgan xomashyo',
+    shiftMaterialNameCol: 'Xomashyo',
+    shiftMaterialPlannedShort: 'Reja, kg',
+    shiftMaterialActualShort: 'Haqiqiy, kg',
+    shiftMaterialHintEmpty: 'Bo‘sh = retsept bo‘yicha',
+    shiftMaterialInvalidKg: 'Xomashyo (kg) noto‘g‘ri',
+    shiftMaterialsPickSemi: 'Qolip, mahsulot va dona/brakni tanlang',
+    shiftMaterialDeltaShort: 'ortiqcha',
   },
   ru: {
     title: 'Учёт смен',
@@ -422,7 +420,6 @@ const TR = {
     machinePlaceholderName: 'пр: Машина для преформ #1',
     machinePlaceholderDesc: 'пр: Производит PET преформы (заготовки)',
     tab5: 'Смены',
-    tab6: 'История сырья',
     shiftDefsTitle: 'Настройка смен',
     shiftDefsSubtitle: 'Задайте название и время; добавление, редактирование или удаление смены',
     shiftDefName: 'Название смены',
@@ -478,13 +475,6 @@ const TR = {
     shiftPaintUnitKg: 'кг',
     shiftPaintUnitG: 'г',
     shiftPaintUnitLabel: 'Единица',
-    materialsPanelTitle: 'Сырьё на выбранный продукт',
-    materialsPanelSubtitle: 'Считается по рецепту; если ушло больше — измените actual (кг)',
-    materialsPickLineHint: 'Выберите строку, чтобы справа увидеть сырьё',
-    materialsNoRecipeHint: 'Рецепт для продукта не найден (Склад → полуфабрикат: задайте рецепт)',
-    materialsOnlySemiHint: 'Расчёт сырья только для машин «полуфабрикат (заготовка)»',
-    materialsExpected: 'Нужно (кг)',
-    materialsActual: 'Факт (кг)',
     shiftPaintError: 'Если краска — укажите тип и количество',
     shiftPaintNoMaterials:
       'Нет позиций типа «краска». Добавьте сырьё на странице сырья с типом «краска».',
@@ -497,6 +487,14 @@ const TR = {
     shiftSiroGoRawMaterial: 'К сырью',
     shiftSiroBagLow: 'В активном мешке мало сиропа: {kg} кг · {name}',
     shiftSiroBagEmpty: 'В активном мешке сироп закончился — подключите новый · {name}',
+    shiftMaterialsPanelTitle: 'Расход сырья по выбранной продукции',
+    shiftMaterialNameCol: 'Сырьё',
+    shiftMaterialPlannedShort: 'План, кг',
+    shiftMaterialActualShort: 'Факт, кг',
+    shiftMaterialHintEmpty: 'Пусто = по рецепту',
+    shiftMaterialInvalidKg: 'Некорректный расход сырья (кг)',
+    shiftMaterialsPickSemi: 'Выберите преформы, продукт и количество',
+    shiftMaterialDeltaShort: 'перерасход',
   },
 };
 
@@ -756,7 +754,7 @@ export function ShiftWork() {
 
   const productTypes = shiftLineProductOptions;
 
-  const [activeTab, setActiveTab] = useState<'form' | 'history' | 'materialsHistory' | 'workers' | 'machines' | 'shiftDefs'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'history' | 'workers' | 'machines' | 'shiftDefs'>('form');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [newWorker, setNewWorker] = useState('');
@@ -799,6 +797,7 @@ export function ShiftWork() {
     producedQty: '',
     defectCount: '0',
     notes: '',
+    rawKgOverrides: {} as Record<string, string>,
   });
   const [recordEditError, setRecordEditError] = useState('');
 
@@ -920,12 +919,6 @@ export function ShiftWork() {
     workerName: '',
   });
 
-  const [activeLineId, setActiveLineId] = useState<string>('');
-  /** lineId -> rawMaterialId -> actualKg (string) */
-  const [materialsActualByLine, setMaterialsActualByLine] = useState<
-    Record<string, Record<string, string>>
-  >({});
-
   type ShiftLine = {
     id: string;
     machineId: string;
@@ -939,6 +932,8 @@ export function ShiftWork() {
     paintRawMaterialId: string;
     paintQuantity: string;
     paintUnit: 'kg' | 'g';
+    /** rawMaterialId → haqiqiy kg (matn), bo‘sh = retsept */
+    rawKgOverrides: Record<string, string>;
   };
 
   const hasSemiMachines = useMemo(
@@ -1002,6 +997,7 @@ export function ShiftWork() {
       paintRawMaterialId: '',
       paintQuantity: '',
       paintUnit: 'kg',
+      rawKgOverrides: {},
     };
   }, [shiftFormMachineOptions, shiftLineProductOptions]);
 
@@ -1011,52 +1007,6 @@ export function ShiftWork() {
     if (lines.length > 0) return;
     setLines([createEmptyLine()]);
   }, [lines.length, createEmptyLine]);
-
-  useEffect(() => {
-    if (activeLineId && lines.some((x) => x.id === activeLineId)) return;
-    setActiveLineId(lines[0]?.id ?? '');
-  }, [activeLineId, lines]);
-
-  const expectedMaterialsForLine = useCallback((ln: ShiftLine) => {
-    const machine = state.machines.find((m) => m.id === ln.machineId);
-    if (!machine || machine.type !== 'semi') {
-      return { kind: 'not-semi' as const, items: [] as Array<{ rawMaterialId: string; name: string; unit: string; expectedKg: number }> };
-    }
-    const label = ln.productType?.trim();
-    if (!label) {
-      return { kind: 'no-product' as const, items: [] as Array<{ rawMaterialId: string; name: string; unit: string; expectedKg: number }> };
-    }
-    const materialUnits =
-      Math.max(0, parseNonNegativeInt(ln.producedQty) || 0) +
-      Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
-    const semi = state.warehouseProducts.find(
-      (p): p is SemiProductCatalogItem =>
-        p.itemType === 'SEMI_PRODUCT' &&
-        p.name?.trim?.().toLowerCase() === label.toLowerCase(),
-    );
-    if (!semi || !Array.isArray(semi.rawMaterials) || semi.rawMaterials.length === 0) {
-      return { kind: 'no-recipe' as const, items: [] as Array<{ rawMaterialId: string; name: string; unit: string; expectedKg: number }> };
-    }
-    const items = semi.rawMaterials
-      .map((rm) => ({
-        rawMaterialId: rm.rawMaterialId,
-        name: rm.name,
-        unit: rm.unit || 'kg',
-        expectedKg: (rm.amountGram * materialUnits) / 1000,
-      }))
-      .filter((x) => Number.isFinite(x.expectedKg) && x.expectedKg > MATERIAL_KG_EPS);
-    return { kind: 'ok' as const, items };
-  }, [state.machines, state.warehouseProducts]);
-
-  const activeLine = useMemo(
-    () => lines.find((x) => x.id === activeLineId) ?? null,
-    [lines, activeLineId],
-  );
-
-  const activeLineExpectedMaterials = useMemo(() => {
-    if (!activeLine) return { kind: 'no-line' as const, items: [] as Array<{ rawMaterialId: string; name: string; unit: string; expectedKg: number }> };
-    return expectedMaterialsForLine(activeLine);
-  }, [activeLine, expectedMaterialsForLine]);
 
   const workerSuggestions = useMemo(() => {
     const query = form.workerName.trim().toLowerCase();
@@ -1161,6 +1111,9 @@ export function ShiftWork() {
         producedQty: String(r.producedQty),
         defectCount: String(r.defectCount),
         notes: r.notes,
+        rawKgOverrides: Object.fromEntries(
+          (r.materialUsages ?? []).map((u) => [u.rawMaterialId, String(u.actualKg)]),
+        ),
       });
     },
     [state.machines, semiShiftBlocked],
@@ -1199,6 +1152,36 @@ export function ShiftWork() {
       return;
     }
     const kwhEdit = hours * (sel?.powerKw || 0);
+    const selEdit = state.machines.find((m) => m.id === recordEditForm.machineId);
+    const defectEdit = Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0);
+    const materialUnitsEdit = produced + defectEdit;
+    let rawMaterialActualKg:
+      | { rawMaterialId: string; quantityKg: number }[]
+      | undefined;
+    if (
+      selEdit?.type === 'semi' &&
+      materialUnitsEdit > 0 &&
+      recordEditForm.productType.trim()
+    ) {
+      const plannedRows = getPlannedSemiRawRows(
+        state.warehouseProducts,
+        recordEditForm.productType,
+        materialUnitsEdit,
+      );
+      if (plannedRows.length > 0) {
+        rawMaterialActualKg = [];
+        for (const row of plannedRows) {
+          const s = recordEditForm.rawKgOverrides[row.rawMaterialId]?.trim();
+          const kg = s ? parseDecimalInput(s) : row.plannedKg;
+          if (!Number.isFinite(kg) || kg <= 0) {
+            setRecordEditError(`${t.shiftMaterialInvalidKg}: ${row.name}`);
+            return;
+          }
+          rawMaterialActualKg.push({ rawMaterialId: row.rawMaterialId, quantityKg: kg });
+        }
+      }
+    }
+
     try {
       await dispatch({
         type: 'UPDATE_SHIFT_RECORD',
@@ -1211,9 +1194,10 @@ export function ShiftWork() {
           productType: recordEditForm.productType,
           machineReading: recordEditForm.machineReading,
           producedQty: produced,
-          defectCount: Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0),
+          defectCount: defectEdit,
           electricityKwh: parseFloat(kwhEdit.toFixed(1)),
           notes: recordEditForm.notes,
+          ...(rawMaterialActualKg != null ? { rawMaterialActualKg } : {}),
         },
       });
       // Elektr xarajati (Expense) backendda sync qilinadi; ro‘yxatni yangilab olamiz.
@@ -1230,22 +1214,30 @@ export function ShiftWork() {
       prev.map((ln) => {
         if (ln.id !== id) return ln;
         const next = { ...ln, ...patch };
-        if (patch.machineId !== undefined) {
-          const machine = state.machines.find((m) => m.id === next.machineId);
-          const allowed = shiftLineProductOptions;
-          const fallback = allowed[0];
-          if (fallback && !allowed.includes(next.productType)) {
-            next.productType = fallback;
+        if (
+          patch.machineId !== undefined ||
+          patch.productType !== undefined ||
+          patch.producedQty !== undefined ||
+          patch.defectCount !== undefined
+        ) {
+          if (patch.machineId !== undefined) {
+            const machine = state.machines.find((m) => m.id === next.machineId);
+            const allowed = shiftLineProductOptions;
+            const fallback = allowed[0];
+            if (fallback && !allowed.includes(next.productType)) {
+              next.productType = fallback;
+            }
+            if (!fallback && next.productType) {
+              next.productType = '';
+            }
+            if (machine?.type !== 'semi') {
+              next.paintUsed = false;
+              next.paintRawMaterialId = '';
+              next.paintQuantity = '';
+              next.paintUnit = 'kg';
+            }
           }
-          if (!fallback && next.productType) {
-            next.productType = '';
-          }
-          if (machine?.type !== 'semi') {
-            next.paintUsed = false;
-            next.paintRawMaterialId = '';
-            next.paintQuantity = '';
-            next.paintUnit = 'kg';
-          }
+          next.rawKgOverrides = {};
         }
         return next;
       }),
@@ -1326,6 +1318,28 @@ export function ShiftWork() {
       }
     }
 
+    for (const ln of meaningfulLines) {
+      const machine = state.machines.find((m) => m.id === ln.machineId);
+      if (machine?.type !== 'semi') continue;
+      const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
+      const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
+      const materialUnits = produced + defect;
+      const rows = getPlannedSemiRawRows(
+        state.warehouseProducts,
+        ln.productType,
+        materialUnits,
+      );
+      for (const row of rows) {
+        const s = ln.rawKgOverrides[row.rawMaterialId]?.trim();
+        if (!s) continue;
+        const kg = parseDecimalInput(s);
+        if (!Number.isFinite(kg) || kg <= 0) {
+          setError(`${t.shiftMaterialInvalidKg}: ${row.name}`);
+          return;
+        }
+      }
+    }
+
     try {
       if (!state.workers.some((w) => w === form.workerName.trim())) {
         await dispatch({
@@ -1351,26 +1365,21 @@ export function ShiftWork() {
         } else {
           paintPayload.paintUsed = false;
         }
-
-        const expected = expectedMaterialsForLine(ln);
-        const actualMap = materialsActualByLine[ln.id] ?? {};
-        const materialsPayload =
-          expected.kind === 'ok'
-            ? expected.items
-                .map((it) => {
-                  const raw = (actualMap[it.rawMaterialId] ?? '').trim();
-                  if (!raw) return null;
-                  const n = parseDecimalInput(raw);
-                  if (!Number.isFinite(n) || n <= 0) return null;
-                  if (n + MATERIAL_KG_EPS < it.expectedKg) {
-                    throw new Error(`Actual < expected: ${it.name}`);
-                  }
-                  if (Math.abs(n - it.expectedKg) <= 1e-6) return null;
-                  return { rawMaterialId: it.rawMaterialId, actualKg: n };
-                })
-                .filter(Boolean)
-            : undefined;
-
+        const materialUnits =
+          Math.max(0, parseNonNegativeInt(ln.producedQty) || 0) +
+          Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
+        const plannedRaw = getPlannedSemiRawRows(
+          state.warehouseProducts,
+          ln.productType,
+          materialUnits,
+        );
+        const rawMaterialActualKg: { rawMaterialId: string; quantityKg: number }[] = [];
+        for (const row of plannedRaw) {
+          const s = ln.rawKgOverrides[row.rawMaterialId]?.trim();
+          if (!s) continue;
+          const kg = parseDecimalInput(s);
+          rawMaterialActualKg.push({ rawMaterialId: row.rawMaterialId, quantityKg: kg });
+        }
         await dispatch({
           type: 'ADD_SHIFT_RECORD',
           payload: {
@@ -1386,7 +1395,7 @@ export function ShiftWork() {
             electricityKwh: parseFloat(kwh.toFixed(1)),
             notes: ln.notes,
             ...paintPayload,
-            ...(materialsPayload ? { materials: materialsPayload } : {}),
+            ...(rawMaterialActualKg.length > 0 ? { rawMaterialActualKg } : {}),
           }
         });
       }
@@ -1547,7 +1556,6 @@ export function ShiftWork() {
   const tabs = [
     { key: 'form', label: t.tab1, icon: Plus },
     { key: 'history', label: t.tab2, icon: Clock },
-    { key: 'materialsHistory', label: t.tab6, icon: Droplets },
     { key: 'shiftDefs', label: t.tab5, icon: Layers },
     { key: 'workers', label: t.tab3, icon: Users },
     { key: 'machines', label: t.tab4, icon: Cpu },
@@ -1725,7 +1733,7 @@ export function ShiftWork() {
 
       {/* ── TAB: Form ── */}
       {activeTab === 'form' && (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-[400px]:gap-6 min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 min-[400px]:gap-6 min-w-0">
           {/* Form */}
           <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0">
             <div className="flex items-center gap-2 mb-5">
@@ -1893,24 +1901,10 @@ export function ShiftWork() {
                   const selectedMachine = state.machines.find((m) => m.id === ln.machineId);
                   const hours = parseDecimalInput(ln.hoursWorked);
                   const kwh = hours * (selectedMachine?.powerKw || 0);
-                  const isActive = ln.id === activeLineId;
                   return (
                     <div
                       key={ln.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setActiveLineId(ln.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setActiveLineId(ln.id);
-                        }
-                      }}
-                      className={`p-3 rounded-2xl border bg-slate-50/60 dark:bg-slate-900/20 space-y-3 outline-none transition-colors ${
-                        isActive
-                          ? 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-400/30'
-                          : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                      }`}
+                      className="p-3 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/20 space-y-3"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
@@ -2163,106 +2157,135 @@ export function ShiftWork() {
             </form>
           </div>
 
-          {/* Materials panel */}
-          <div className="lg:col-span-3 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0">
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="min-w-0">
-                <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
-                  {t.materialsPanelTitle}
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
-                  {t.materialsPanelSubtitle}
-                </p>
+          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0 flex flex-col max-h-[min(80vh,52rem)] lg:max-h-none">
+            <div className="flex items-center gap-2 mb-4 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
+                <Layers size={16} className="text-white" />
               </div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm leading-tight">
+                {t.shiftMaterialsPanelTitle}
+              </h3>
             </div>
-
-            {!activeLine ? (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30 px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                {t.materialsPickLineHint}
-              </div>
-            ) : activeLineExpectedMaterials.kind === 'not-semi' ? (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30 px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                {t.materialsOnlySemiHint}
-              </div>
-            ) : activeLineExpectedMaterials.kind === 'no-recipe' ? (
-              <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 px-3 py-3 text-xs text-amber-950 dark:text-amber-100/90">
-                {t.materialsNoRecipeHint}
-              </div>
-            ) : activeLineExpectedMaterials.kind !== 'ok' ? (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30 px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                {t.materialsPickLineHint}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="grid grid-cols-12 gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400 px-2">
-                  <div className="col-span-6">{t.shiftPaintMaterial}</div>
-                  <div className="col-span-3 text-right">{t.materialsExpected}</div>
-                  <div className="col-span-3 text-right">{t.materialsActual}</div>
-                </div>
-                {activeLineExpectedMaterials.items.map((it) => {
-                  const lineMap = materialsActualByLine[activeLine.id] ?? {};
-                  const current = lineMap[it.rawMaterialId] ?? '';
-                  const currentN = current.trim() ? parseDecimalInput(current) : null;
-                  const isInvalid =
-                    current.trim() !== '' &&
-                    (!Number.isFinite(currentN ?? NaN) || (currentN ?? 0) + MATERIAL_KG_EPS < it.expectedKg);
-                  const delta =
-                    currentN != null && Number.isFinite(currentN)
-                      ? currentN - it.expectedKg
-                      : 0;
+            <div className="space-y-4 overflow-y-auto flex-1 min-h-0 pr-0.5">
+              {lines.every((ln) => {
+                const m = state.machines.find((x) => x.id === ln.machineId);
+                return m?.type !== 'semi';
+              }) ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {t.shiftMaterialsPickSemi}
+                </p>
+              ) : null}
+              {lines.map((ln, idx) => {
+                const mach = state.machines.find((x) => x.id === ln.machineId);
+                if (mach?.type !== 'semi') return null;
+                const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
+                const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
+                const materialUnits = produced + defect;
+                const planned = getPlannedSemiRawRows(
+                  state.warehouseProducts,
+                  ln.productType,
+                  materialUnits,
+                );
+                if (planned.length === 0) {
                   return (
                     <div
-                      key={it.rawMaterialId}
-                      className="grid grid-cols-12 gap-2 items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/20 px-3 py-2"
+                      key={ln.id}
+                      className="rounded-xl border border-dashed border-slate-200 dark:border-slate-600 p-3 text-xs text-slate-500 dark:text-slate-400"
                     >
-                      <div className="col-span-6 min-w-0">
-                        <div className="text-xs font-semibold text-slate-800 dark:text-white truncate">
-                          {it.name}
-                        </div>
-                        {delta > MATERIAL_KG_EPS ? (
-                          <div className="text-[11px] text-amber-600 dark:text-amber-400">
-                            +{formatKgAmount(delta)} kg
-                          </div>
-                        ) : null}
-                      </div>
-                      <div className="col-span-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
-                        {formatKgAmount(it.expectedKg)}
-                      </div>
-                      <div className="col-span-3">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          autoComplete="off"
-                          value={current}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setMaterialsActualByLine((prev) => ({
-                              ...prev,
-                              [activeLine.id]: {
-                                ...(prev[activeLine.id] ?? {}),
-                                [it.rawMaterialId]: v,
-                              },
-                            }));
-                          }}
-                          placeholder={String(it.expectedKg.toFixed(3))}
-                          className={`w-full px-2.5 py-2 rounded-lg border text-xs bg-white dark:bg-slate-800 text-right tabular-nums ${
-                            isInvalid
-                              ? 'border-red-300 dark:border-red-700 focus:ring-red-400'
-                              : 'border-slate-200 dark:border-slate-600 focus:ring-indigo-400'
-                          } focus:outline-none focus:ring-2`}
-                        />
-                      </div>
+                      <span className="font-semibold text-slate-600 dark:text-slate-300">#{idx + 1}</span>
+                      {' · '}
+                      {t.shiftMaterialsPickSemi}
                     </div>
                   );
-                })}
-              </div>
-            )}
+                }
+                return (
+                  <div
+                    key={ln.id}
+                    className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-900/25 p-3 space-y-2"
+                  >
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      #{idx + 1} · {ln.productType || '—'} · {materialUnits} {t.unitPiecesAbbr}
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t.shiftMaterialHintEmpty}</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs min-w-[280px]">
+                        <thead>
+                          <tr className="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-600">
+                            <th className="py-1.5 pr-2 font-medium">{t.shiftMaterialNameCol}</th>
+                            <th className="py-1.5 pr-2 font-medium whitespace-nowrap">{t.shiftMaterialPlannedShort}</th>
+                            <th className="py-1.5 font-medium whitespace-nowrap">{t.shiftMaterialActualShort}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {planned.map((row) => {
+                            const raw = ln.rawKgOverrides[row.rawMaterialId]?.trim();
+                            const actualNum = raw ? parseDecimalInput(raw) : row.plannedKg;
+                            const delta =
+                              raw && Number.isFinite(actualNum)
+                                ? actualNum - row.plannedKg
+                                : 0;
+                            return (
+                              <tr
+                                key={row.rawMaterialId}
+                                className="border-b border-slate-100 dark:border-slate-700/80 last:border-0"
+                              >
+                                <td className="py-2 pr-2 font-medium text-slate-800 dark:text-slate-100">
+                                  {row.name}
+                                </td>
+                                <td className="py-2 pr-2 tabular-nums text-slate-600 dark:text-slate-300">
+                                  {formatKgAmount(row.plannedKg)}
+                                </td>
+                                <td className="py-2">
+                                  <div className="flex flex-col gap-0.5">
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      autoComplete="off"
+                                      value={ln.rawKgOverrides[row.rawMaterialId] ?? ''}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        if (isValidPartialDecimalHours(v)) {
+                                          updateLine(ln.id, {
+                                            rawKgOverrides: {
+                                              ...ln.rawKgOverrides,
+                                              [row.rawMaterialId]: v,
+                                            },
+                                          });
+                                        }
+                                      }}
+                                      placeholder={formatKgAmount(row.plannedKg)}
+                                      className="w-full min-w-[5.5rem] px-2 py-1.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white tabular-nums"
+                                    />
+                                    {raw && Number.isFinite(delta) && Math.abs(delta) > 1e-4 ? (
+                                      <span
+                                        className={`text-[10px] font-semibold ${
+                                          delta > 0
+                                            ? 'text-amber-600 dark:text-amber-400'
+                                            : 'text-emerald-600 dark:text-emerald-400'
+                                        }`}
+                                      >
+                                        {delta > 0 ? '+' : ''}
+                                        {formatKgAmount(delta)} {t.shiftMaterialDeltaShort}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Today's table preview */}
           <div
             ref={todayPreviewPanelRef}
-            className={`lg:col-span-3 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 flex flex-col min-h-0 ${
+            className={`lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 flex flex-col min-h-0 ${
               todayPreviewFullscreen
                 ? '!rounded-none h-screen max-h-screen border-0 shadow-none'
                 : ''
@@ -2321,22 +2344,7 @@ export function ShiftWork() {
                             </span>
                           </td>
                           <td className="px-3 py-3 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{r.workerName}</td>
-                        <td className="px-3 py-3">
-                          <div className="space-y-1">
-                            <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
-                            {r.materials && r.materials.length > 0 ? (() => {
-                              const exp = r.materials.reduce((s, x) => s + (x.expectedKg ?? 0), 0);
-                              const act = r.materials.reduce((s, x) => s + (x.actualKg ?? 0), 0);
-                              const d = act - exp;
-                              if (!Number.isFinite(d) || d <= MATERIAL_KG_EPS) return null;
-                              return (
-                                <div className="text-[11px] text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                                  Σ {formatKgAmount(exp)} → {formatKgAmount(act)} (+{formatKgAmount(d)}) kg
-                                </div>
-                              );
-                            })() : null}
-                          </div>
-                        </td>
+                          <td className="px-3 py-3"><span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span></td>
                           <td className="px-3 py-3 text-xs text-slate-500 whitespace-nowrap">{machine?.name?.split(' ').slice(-1)[0] || '—'}</td>
                           <td className="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300">{r.hoursWorked}{t.hoursShort}</td>
                           <td className="px-3 py-3 text-xs text-slate-400 font-mono whitespace-nowrap">{r.machineReading || '—'}</td>
@@ -2441,20 +2449,7 @@ export function ShiftWork() {
                           </div>
                         </td>
                         <td className="px-3 py-3">
-                          <div className="space-y-1">
-                            <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
-                            {r.materials && r.materials.length > 0 ? (() => {
-                              const exp = r.materials.reduce((s, x) => s + (x.expectedKg ?? 0), 0);
-                              const act = r.materials.reduce((s, x) => s + (x.actualKg ?? 0), 0);
-                              const d = act - exp;
-                              if (!Number.isFinite(d) || d <= MATERIAL_KG_EPS) return null;
-                              return (
-                                <div className="text-[11px] text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                                  Σ {formatKgAmount(exp)} → {formatKgAmount(act)} (+{formatKgAmount(d)}) kg
-                                </div>
-                              );
-                            })() : null}
-                          </div>
+                          <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
                         </td>
                         <td className="px-3 py-3 text-xs text-slate-500">{machine?.name?.split('#')[0]?.trim() || '—'}</td>
                         <td className="px-3 py-3 text-center">
@@ -2521,95 +2516,6 @@ export function ShiftWork() {
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* ── TAB: Materials history ── */}
-      {activeTab === 'materialsHistory' && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3 min-[400px]:px-5 py-3 min-[400px]:py-4 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-xs min-[400px]:text-sm">
-              {t.tab6}
-            </h3>
-            <span className="text-xs text-slate-400">
-              {
-                state.shiftRecords.reduce((count, r) => count + (r.materials?.length ?? 0), 0)
-              } {t.records}
-            </span>
-          </div>
-          {(() => {
-            const rows = state.shiftRecords.flatMap((r) =>
-              (r.materials ?? [])
-                .filter((m) => Number.isFinite(m.deltaKg) && m.deltaKg > MATERIAL_KG_EPS)
-                .map((m) => ({
-                  id: `${r.id}-${m.rawMaterialId}`,
-                  date: r.date,
-                  shift: r.shift,
-                  workerName: r.workerName,
-                  productType: r.productType,
-                  rawMaterialName: m.rawMaterialName || '—',
-                  expectedKg: m.expectedKg,
-                  actualKg: m.actualKg,
-                  deltaKg: m.deltaKg,
-                })),
-            );
-            const sorted = filterData(rows).sort((a, b) => {
-              const byDate = b.date.localeCompare(a.date);
-              if (byDate !== 0) return byDate;
-              return b.deltaKg - a.deltaKg;
-            });
-            if (sorted.length === 0) {
-              return (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-400 gap-2">
-                  <Droplets size={32} className="opacity-30" />
-                  <p className="text-sm">{t.noData}</p>
-                </div>
-              );
-            }
-            return (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[980px]">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-700/50">
-                      {[t.colDate, t.colShift, t.colWorker, t.colProduct, t.shiftPaintMaterial, t.materialsExpected, t.materialsActual, '+Δ (kg)'].map((h) => (
-                        <th key={h} className="text-left px-3 py-3 text-[11px] min-[400px]:text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sorted.map((row, idx) => {
-                      const sc = shiftStyleFor(row.shift);
-                      const shiftLab = getShiftLabel(shiftDefinitions, row.shift, t);
-                      return (
-                        <tr
-                          key={row.id}
-                          className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${idx % 2 !== 0 ? 'bg-slate-50/30 dark:bg-slate-800/30' : ''}`}
-                        >
-                          <td className="px-3 py-3 text-xs text-slate-500 whitespace-nowrap">{formatDate(row.date)}</td>
-                          <td className="px-3 py-3">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold max-w-[9rem] min-w-0 ${sc.badge}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${sc.dot}`} />
-                              <span className="truncate">{shiftLab}</span>
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.workerName}</td>
-                          <td className="px-3 py-3">
-                            <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[row.productType] || 'bg-slate-100 text-slate-700'}`}>{row.productType}</span>
-                          </td>
-                          <td className="px-3 py-3 text-xs text-slate-700 dark:text-slate-200 whitespace-nowrap">{row.rawMaterialName}</td>
-                          <td className="px-3 py-3 text-right text-xs tabular-nums text-slate-600 dark:text-slate-300">{formatKgAmount(row.expectedKg)}</td>
-                          <td className="px-3 py-3 text-right text-xs tabular-nums text-slate-700 dark:text-slate-200 font-semibold">{formatKgAmount(row.actualKg)}</td>
-                          <td className="px-3 py-3 text-right text-xs tabular-nums font-bold text-amber-600 dark:text-amber-400">+{formatKgAmount(row.deltaKg)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            );
-          })()}
         </div>
       )}
 
@@ -3175,7 +3081,14 @@ export function ShiftWork() {
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelMachine}</label>
                   <UiDropdown
                     value={recordEditForm.machineId}
-                    onChange={(machineId) => setRecordEditForm({ ...recordEditForm, machineId })}
+                    onChange={(machineId) => {
+                      const m = state.machines.find((x) => x.id === machineId);
+                      setRecordEditForm((prev) => ({
+                        ...prev,
+                        machineId,
+                        rawKgOverrides: m?.type === 'semi' ? prev.rawKgOverrides : {},
+                      }));
+                    }}
                     options={shiftFormMachineOptions.map((m) => ({ value: m.id, label: m.name }))}
                     placeholder={t.labelMachine}
                   />
@@ -3219,7 +3132,13 @@ export function ShiftWork() {
                         <button
                           key={pt}
                           type="button"
-                          onClick={() => setRecordEditForm({ ...recordEditForm, productType: pt })}
+                          onClick={() =>
+                            setRecordEditForm((prev) => ({
+                              ...prev,
+                              productType: pt,
+                              rawKgOverrides: {},
+                            }))
+                          }
                           className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
                             recordEditForm.productType === pt
                               ? 'bg-indigo-600 text-white border-indigo-600'
@@ -3233,6 +3152,90 @@ export function ShiftWork() {
                   );
                 })()}
               </div>
+              {(() => {
+                const editMach = state.machines.find((m) => m.id === recordEditForm.machineId);
+                if (editMach?.type !== 'semi') return null;
+                const pEd = Math.max(0, parseNonNegativeInt(recordEditForm.producedQty) || 0);
+                const dEd = Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0);
+                const muEd = pEd + dEd;
+                const plannedEdit = getPlannedSemiRawRows(
+                  state.warehouseProducts,
+                  recordEditForm.productType,
+                  muEd,
+                );
+                if (plannedEdit.length === 0) return null;
+                return (
+                  <div className="rounded-xl border border-teal-200/70 bg-teal-50/30 dark:border-teal-800 dark:bg-teal-950/20 p-3 space-y-2">
+                    <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      {t.shiftMaterialsPanelTitle}
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t.shiftMaterialHintEmpty}</p>
+                    <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                      <table className="w-full text-xs min-w-[260px]">
+                        <thead>
+                          <tr className="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-600">
+                            <th className="py-1 pr-2">{t.shiftMaterialNameCol}</th>
+                            <th className="py-1 pr-2 whitespace-nowrap">{t.shiftMaterialPlannedShort}</th>
+                            <th className="py-1 whitespace-nowrap">{t.shiftMaterialActualShort}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {plannedEdit.map((row) => {
+                            const raw = recordEditForm.rawKgOverrides[row.rawMaterialId]?.trim();
+                            const actualNum = raw ? parseDecimalInput(raw) : row.plannedKg;
+                            const delta =
+                              raw && Number.isFinite(actualNum) ? actualNum - row.plannedKg : 0;
+                            return (
+                              <tr
+                                key={row.rawMaterialId}
+                                className="border-b border-slate-100 dark:border-slate-700/80 last:border-0"
+                              >
+                                <td className="py-1.5 pr-2 font-medium text-slate-800 dark:text-slate-100">
+                                  {row.name}
+                                </td>
+                                <td className="py-1.5 pr-2 tabular-nums">{formatKgAmount(row.plannedKg)}</td>
+                                <td className="py-1.5">
+                                  <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    autoComplete="off"
+                                    value={recordEditForm.rawKgOverrides[row.rawMaterialId] ?? ''}
+                                    onChange={(e) => {
+                                      const v = e.target.value;
+                                      if (!isValidPartialDecimalHours(v)) return;
+                                      setRecordEditForm((prev) => ({
+                                        ...prev,
+                                        rawKgOverrides: {
+                                          ...prev.rawKgOverrides,
+                                          [row.rawMaterialId]: v,
+                                        },
+                                      }));
+                                    }}
+                                    placeholder={formatKgAmount(row.plannedKg)}
+                                    className="w-full min-w-[5rem] px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 tabular-nums"
+                                  />
+                                  {raw && Number.isFinite(delta) && Math.abs(delta) > 1e-4 ? (
+                                    <span
+                                      className={`block text-[10px] font-semibold mt-0.5 ${
+                                        delta > 0
+                                          ? 'text-amber-600 dark:text-amber-400'
+                                          : 'text-emerald-600 dark:text-emerald-400'
+                                      }`}
+                                    >
+                                      {delta > 0 ? '+' : ''}
+                                      {formatKgAmount(delta)} {t.shiftMaterialDeltaShort}
+                                    </span>
+                                  ) : null}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })()}
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelReading}</label>
                 <input
@@ -3253,7 +3256,11 @@ export function ShiftWork() {
                     onChange={(e) => {
                       const v = e.target.value;
                       if (isValidPartialNonNegativeInt(v)) {
-                        setRecordEditForm({ ...recordEditForm, producedQty: v });
+                        setRecordEditForm((prev) => ({
+                          ...prev,
+                          producedQty: v,
+                          rawKgOverrides: {},
+                        }));
                       }
                     }}
                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
@@ -3269,7 +3276,11 @@ export function ShiftWork() {
                     onChange={(e) => {
                       const v = e.target.value;
                       if (isValidPartialNonNegativeInt(v)) {
-                        setRecordEditForm({ ...recordEditForm, defectCount: v });
+                        setRecordEditForm((prev) => ({
+                          ...prev,
+                          defectCount: v,
+                          rawKgOverrides: {},
+                        }));
                       }
                     }}
                     className="w-full px-3 py-2.5 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/10 text-slate-800 dark:text-white text-sm"

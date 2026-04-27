@@ -10,6 +10,10 @@ export interface T {
   navSemiProduction: string;
   navFinalProduction: string;
   navWarehouse: string;
+  /** Sidebar Ombor dropdown — qisqa bola yorliqlari */
+  whSidebarRaw: string;
+  whSidebarSemi: string;
+  whSidebarFinal: string;
   navSales: string;
   navExpenses: string;
   navReports: string;
@@ -102,6 +106,9 @@ export interface T {
   apiShiftFinishedNoSemiRecipe: string;
   apiShiftInsufficientSemiStock: string;
   apiShiftFinishedBalanceMissing: string;
+  apiShiftRawOverrideUnknown: string;
+  apiShiftRawActualInvalid: string;
+  apiShiftRawOverrideSemiOnly: string;
 
   // Common
   btnAdd: string;
@@ -396,6 +403,9 @@ export interface T {
   whHistoryTypeFinal: string;
   whHistoryKindRaw: string;
   whHistoryKindSemi: string;
+  /** Смена: ретсепт (кг) — факт ортиқча */
+  whHistoryPlannedKg: string;
+  whHistoryExtraKg: string;
   whRecipePerPiece: string;
   whRecipePerThousand: string;
   whMaterial: string;
@@ -930,6 +940,9 @@ const uz_cyrillic: T = {
   navSemiProduction: 'Қолип ишлаб чиқариш',
   navFinalProduction: 'Бакалашка ишлаб чиқариш',
   navWarehouse: 'Омбор',
+  whSidebarRaw: 'Хом ашё',
+  whSidebarSemi: 'Ярим тайёр',
+  whSidebarFinal: 'Тайёр',
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
   navReports: 'Ҳисоботлар',
@@ -1018,6 +1031,11 @@ const uz_cyrillic: T = {
   apiShiftFinishedNoSemiRecipe: 'Тайёр маҳсулот учун ярим тайёр ретсепти йўқ',
   apiShiftInsufficientSemiStock: 'Ярим тайёр омборда етарли эмас: {name}',
   apiShiftFinishedBalanceMissing: 'Тайёр маҳсулот учун омбор қолдиғи топилмади',
+  apiShiftRawOverrideUnknown:
+    'Ретсептда йўқ хомашё учун ҳақиқий миқдор юборилди (ID): {id}',
+  apiShiftRawActualInvalid: 'Хомашё учун ҳақиқий миқдор нотўғри: {name}',
+  apiShiftRawOverrideSemiOnly:
+    'Ҳақиқий сиро (кг) фақат қолип (ярим тайёр) аппарати учун юборилади',
 
   btnAdd: 'Қўшиш',
   btnSave: 'Сақлаш',
@@ -1298,6 +1316,8 @@ const uz_cyrillic: T = {
   whHistoryTypeFinal: 'Тайёр',
   whHistoryKindRaw: 'Хомашё',
   whHistoryKindSemi: 'Қолип',
+  whHistoryPlannedKg: 'режа',
+  whHistoryExtraKg: 'ортикча',
   whRecipePerPiece: '1 дона қолип учун (каталог)',
   whRecipePerThousand: '1000 дона ≈',
   whMaterial: 'ПЭТ Сиро',
@@ -1815,6 +1835,9 @@ const uz_latin: T = {
   navSemiProduction: 'Qolip ishlab chiqarish',
   navFinalProduction: 'Bakalashka ishlab chiqarish',
   navWarehouse: 'Ombor',
+  whSidebarRaw: 'Xom ashyo',
+  whSidebarSemi: 'Yarim tayyor',
+  whSidebarFinal: 'Tayyor',
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
   navReports: 'Hisobotlar',
@@ -1903,6 +1926,11 @@ const uz_latin: T = {
   apiShiftFinishedNoSemiRecipe: 'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
   apiShiftInsufficientSemiStock: 'Yarim tayyor omborda yetarli emas: {name}',
   apiShiftFinishedBalanceMissing: 'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
+  apiShiftRawOverrideUnknown:
+    'Retseptda yo‘q xomashyo uchun haqiqiy miqdor yuborildi (ID): {id}',
+  apiShiftRawActualInvalid: 'Xomashyo uchun haqiqiy miqdor noto‘g‘ri: {name}',
+  apiShiftRawOverrideSemiOnly:
+    'Haqiqiy siro (kg) faqat qolip (yarim tayyor) apparati uchun yuboriladi',
 
   btnAdd: "Qo'shish",
   btnSave: 'Saqlash',
@@ -2183,6 +2211,8 @@ const uz_latin: T = {
   whHistoryTypeFinal: 'Tayyor',
   whHistoryKindRaw: 'Xomashyo',
   whHistoryKindSemi: 'Qolip',
+  whHistoryPlannedKg: 'reja',
+  whHistoryExtraKg: 'ortiqcha',
   whRecipePerPiece: '1 dona qolip uchun (katalog)',
   whRecipePerThousand: '1000 dona ≈',
   whMaterial: 'PET Siro',
@@ -2700,6 +2730,9 @@ const ru: T = {
   navSemiProduction: 'Производство заготовок',
   navFinalProduction: 'Производство бутылок',
   navWarehouse: 'Склад',
+  whSidebarRaw: 'Сырьё',
+  whSidebarSemi: 'Полуфабрикаты',
+  whSidebarFinal: 'Готовая продукция',
   navSales: 'Продажи',
   navExpenses: 'Расходы',
   navReports: 'Отчёты',
@@ -2788,6 +2821,11 @@ const ru: T = {
   apiShiftFinishedNoSemiRecipe: 'Для готовой продукции нет рецепта полуфабрикатов',
   apiShiftInsufficientSemiStock: 'Недостаточно полуфабриката на складе: {name}',
   apiShiftFinishedBalanceMissing: 'Не найден складской остаток для готовой продукции',
+  apiShiftRawOverrideUnknown:
+    'Указан фактический расход для сырья вне рецепта (ID): {id}',
+  apiShiftRawActualInvalid: 'Некорректный фактический расход (кг): {name}',
+  apiShiftRawOverrideSemiOnly:
+    'Фактический расход сырья (кг) допустим только для полуфабрикатного (колпак) оборудования',
 
   btnAdd: 'Добавить',
   btnSave: 'Сохранить',
@@ -3068,6 +3106,8 @@ const ru: T = {
   whHistoryTypeFinal: 'Готовый',
   whHistoryKindRaw: 'Сырьё',
   whHistoryKindSemi: 'Заготовка',
+  whHistoryPlannedKg: 'план',
+  whHistoryExtraKg: 'перерасход',
   whRecipePerPiece: 'На 1 шт. заготовки (каталог)',
   whRecipePerThousand: '1000 шт. ≈',
   whMaterial: 'ПЭТ Сырьё',

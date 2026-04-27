@@ -47,6 +47,12 @@ export function translateShiftInventoryApiError(message: string, t: T): string {
       return t.apiShiftInsufficientSemiStock.replace('{name}', param);
     case 'FINISHED_BALANCE_MISSING':
       return t.apiShiftFinishedBalanceMissing;
+    case 'RAW_OVERRIDE_UNKNOWN':
+      return t.apiShiftRawOverrideUnknown.replace('{id}', param);
+    case 'RAW_ACTUAL_INVALID':
+      return t.apiShiftRawActualInvalid.replace('{name}', param);
+    case 'RAW_OVERRIDE_SEMI_ONLY':
+      return t.apiShiftRawOverrideSemiOnly;
     default:
       return message;
   }

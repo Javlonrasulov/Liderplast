@@ -269,6 +269,10 @@ export interface ProductionHistoryConsumption {
   quantity: number;
   unitLabel: string;
   kind: 'raw' | 'semi';
+  /** Smena siro: retsept (kg) — ixtiyoriy */
+  plannedQuantity?: number;
+  /** Smena: haqiqiy − reja (kg) */
+  deltaQuantity?: number;
 }
 
 export interface ProductionHistoryRow {
@@ -323,6 +327,18 @@ export interface ShiftRecord {
   paintRawMaterialId?: string;
   paintQuantityKg?: number;
   paintRawMaterialName?: string;
+  /** Backend `ShiftMaterialUsage` — qolip retsepti bo‘yicha reja / haqiqiy */
+  materialUsages?: ShiftMaterialUsageRow[];
+  /** Faqat `ADD_SHIFT_RECORD` / `UPDATE_SHIFT_RECORD` orqali yuboriladi */
+  rawMaterialActualKg?: { rawMaterialId: string; quantityKg: number }[];
+}
+
+export interface ShiftMaterialUsageRow {
+  rawMaterialId: string;
+  rawMaterialName?: string;
+  expectedKg: number;
+  actualKg: number;
+  deltaKg: number;
 }
 
 export interface Payment {
@@ -629,6 +645,7 @@ type ERPAction =
         paintUsed?: boolean;
         paintRawMaterialId?: string;
         paintQuantityKg?: number;
+        rawMaterialActualKg?: { rawMaterialId: string; quantityKg: number }[];
       };
     }
   | { type: 'DELETE_SHIFT_RECORD'; payload: string }
@@ -881,6 +898,13 @@ type BackendShiftRecord = {
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
   worker: { id: string; fullName: string };
   machine?: { id: string } | null;
+  materialUsages?: Array<{
+    rawMaterialId: string;
+    expectedKg: number;
+    actualKg: number;
+    deltaKg: number;
+    rawMaterial?: { id: string; name: string; unit?: string } | null;
+  }>;
 };
 
 type BackendProductionRecord = {
@@ -979,16 +1003,27 @@ export function buildShiftRecordsToProductionHistory(
       if (machine?.type === 'semi' && label && materialUnits > 0) {
         const semi = semis.find((s) => namesMatchCatalog(s.name, label));
         if (semi) {
+          const usageByRm = new Map(
+            (shift.materialUsages ?? []).map((u) => [u.rawMaterialId, u]),
+          );
           for (const rm of semi.rawMaterials) {
             const raw = rawById.get(rm.rawMaterialId);
             if (raw?.rawMaterialKind === 'PAINT') continue;
-            const qtyKg = (rm.amountGram * materialUnits) / 1000;
+            const plannedKg = (rm.amountGram * materialUnits) / 1000;
+            if (plannedKg <= 0) continue;
+            const usage = usageByRm.get(rm.rawMaterialId);
+            const qtyKg = usage != null ? usage.actualKg : plannedKg;
             if (qtyKg <= 0) continue;
             consumptions.push({
               resourceName: rm.name,
               quantity: qtyKg,
               unitLabel: 'kg',
               kind: 'raw',
+              plannedQuantity: usage != null ? usage.expectedKg : plannedKg,
+              deltaQuantity:
+                usage != null && Math.abs(usage.deltaKg) > 1e-6
+                  ? usage.deltaKg
+                  : undefined,
             });
           }
         }
@@ -1918,6 +1953,13 @@ async function loadStateFromApi() {
     paintRawMaterialId: shift.paintRawMaterialId ?? undefined,
     paintQuantityKg: shift.paintQuantityKg ?? undefined,
     paintRawMaterialName: shift.paintRawMaterial?.name,
+    materialUsages: shift.materialUsages?.map((u) => ({
+      rawMaterialId: u.rawMaterialId,
+      rawMaterialName: u.rawMaterial?.name,
+      expectedKg: u.expectedKg,
+      actualKg: u.actualKg,
+      deltaKg: u.deltaKg,
+    })),
   }));
 
   const payrollUsers = users.filter((user) => user.role === 'WORKER');
@@ -2518,6 +2560,11 @@ export function ERPProvider({ children }: { children: ReactNode }) {
                   paintQuantityKg: p.paintQuantityKg,
                 }
               : { paintUsed: false as const };
+          const rawBody =
+            action.payload.rawMaterialActualKg &&
+            action.payload.rawMaterialActualKg.length > 0
+              ? { rawMaterialActualKg: action.payload.rawMaterialActualKg }
+              : {};
           await apiRequest('/production/shifts', {
             method: 'POST',
             body: JSON.stringify({
@@ -2533,6 +2580,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               electricityKwh: action.payload.electricityKwh,
               notes: action.payload.notes,
               ...paintBody,
+              ...rawBody,
             }),
           });
           break;
@@ -2563,6 +2611,9 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             body.paintQuantityKg = p.paintQuantityKg;
           } else if (p.paintUsed === false) {
             body.paintUsed = false;
+          }
+          if (p.rawMaterialActualKg !== undefined) {
+            body.rawMaterialActualKg = p.rawMaterialActualKg;
           }
           if (Object.keys(body).length === 0) break;
           await apiRequest(`/production/shifts/${p.id}`, {

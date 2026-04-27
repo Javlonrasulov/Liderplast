@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,18 +9,17 @@ import {
   IsString,
   Max,
   Min,
-  ValidateNested,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
-class ShiftMaterialActualDto {
+export class RawMaterialActualKgDto {
   @IsString()
   rawMaterialId!: string;
 
   @IsNumber()
-  @Min(0)
-  actualKg!: number;
+  @Min(0.000001)
+  quantityKg!: number;
 }
 
 export class CreateShiftRecordDto {
@@ -83,10 +83,10 @@ export class CreateShiftRecordDto {
   @Min(0.000001)
   paintQuantityKg?: number;
 
-  /** Retseptdagi xomashyo (kg) actual qiymatlari (expected dan kam bo‘lmasin) */
+  /** Qolip smenasi: retseptdan tashqari siro (kg) — har хомашё учун */
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ShiftMaterialActualDto)
-  materials?: ShiftMaterialActualDto[];
+  @Type(() => RawMaterialActualKgDto)
+  rawMaterialActualKg?: RawMaterialActualKgDto[];
 }

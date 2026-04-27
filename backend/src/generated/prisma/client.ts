@@ -143,7 +143,7 @@ export type ProductionConsumption = Prisma.ProductionConsumptionModel
 export type ShiftRecord = Prisma.ShiftRecordModel
 /**
  * Model ShiftMaterialUsage
- * Smena davomida sarflangan xom ashyo (retsept va aslidagi farqi)
+ * Smena (qolip) retsept bo‘yicha siro sarfi: reja vs haqiqiy (ortiqcha)
  */
 export type ShiftMaterialUsage = Prisma.ShiftMaterialUsageModel
 /**

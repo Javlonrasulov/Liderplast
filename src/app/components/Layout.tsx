@@ -5,7 +5,7 @@ import {
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
-  ClipboardList,
+  ClipboardList, Factory, Package,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP } from '../store/erp-store';
@@ -145,36 +145,102 @@ export function Layout() {
   const { t } = useApp();
   const { user, logout, hasPermission } = useAuth();
 
-  const navDefs: Array<{
+  type NavLeaf = {
+    kind: 'leaf';
     path: string;
     icon: typeof LayoutDashboard;
     label: string;
     exact?: boolean;
     perm: AppPermissionKey;
-  }> = [
-    { path: '/', icon: LayoutDashboard, label: t.navDashboard, exact: true, perm: 'view_dashboard' },
-    { path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
-    { path: '/raw-material', icon: Droplets, label: t.navRawMaterial, perm: 'view_raw_material' },
-    { path: '/warehouse', icon: Boxes, label: t.navWarehouse, perm: 'view_warehouse' },
-    { path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_warehouse' },
-    { path: '/sales', icon: ShoppingCart, label: t.navSales, perm: 'view_sales' },
-    { path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
-    { path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
-    { path: '/reports', icon: BarChart3, label: t.navReports, perm: 'view_reports' },
-    { path: '/system-users', icon: UserCog, label: t.navSystemUsers, perm: 'manage_users' },
+  };
+  type NavGroup = {
+    kind: 'group';
+    /** Group identifier for expand/collapse */
+    id: string;
+    icon: typeof LayoutDashboard;
+    label: string;
+    /** Eng kamida bittasiga huquq bo‘lsa, guruh ko‘rinadi */
+    perms: AppPermissionKey[];
+    /** Hozirgi pathname guruhga tegishli ekanligini aniqlash */
+    pathPrefixes: string[];
+    children: NavLeaf[];
+  };
+  type NavDef = NavLeaf | NavGroup;
+
+  const navDefs: NavDef[] = [
+    { kind: 'leaf', path: '/', icon: LayoutDashboard, label: t.navDashboard, exact: true, perm: 'view_dashboard' },
+    /** Top-level «Ишлаб чиқариш» — Ombor ichida ham bola sifatida ko‘rinadi */
+    { kind: 'leaf', path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
+    {
+      kind: 'group',
+      id: 'ombor',
+      icon: Boxes,
+      label: t.navWarehouse,
+      perms: ['view_raw_material', 'view_warehouse', 'view_shift'],
+      pathPrefixes: ['/raw-material', '/shifts', '/warehouse'],
+      children: [
+        { kind: 'leaf', path: '/raw-material', icon: Droplets, label: t.whSidebarRaw, perm: 'view_raw_material' },
+        { kind: 'leaf', path: '/shifts', icon: CalendarClock, label: t.navShifts, perm: 'view_shift' },
+        { kind: 'leaf', path: '/warehouse/semi', icon: Factory, label: t.whSidebarSemi, perm: 'view_warehouse' },
+        { kind: 'leaf', path: '/warehouse/final', icon: Package, label: t.whSidebarFinal, perm: 'view_warehouse' },
+      ],
+    },
+    { kind: 'leaf', path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_warehouse' },
+    { kind: 'leaf', path: '/sales', icon: ShoppingCart, label: t.navSales, perm: 'view_sales' },
+    { kind: 'leaf', path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
+    { kind: 'leaf', path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
+    { kind: 'leaf', path: '/reports', icon: BarChart3, label: t.navReports, perm: 'view_reports' },
+    { kind: 'leaf', path: '/system-users', icon: UserCog, label: t.navSystemUsers, perm: 'manage_users' },
   ];
 
-  const navItems = navDefs.filter((item) => {
-    if (item.path === '/payroll') {
+  const allowLeaf = (leaf: NavLeaf) => {
+    if (leaf.path === '/payroll') {
       return hasPermission('view_payroll') || hasPermission('view_vedemost');
     }
-    return hasPermission(item.perm);
+    return hasPermission(leaf.perm);
+  };
+
+  const navItems: NavDef[] = navDefs
+    .map((def) => {
+      if (def.kind === 'leaf') return allowLeaf(def) ? def : null;
+      const visibleChildren = def.children.filter(allowLeaf);
+      if (visibleChildren.length === 0) return null;
+      return { ...def, children: visibleChildren } satisfies NavGroup;
+    })
+    .filter((x): x is NavDef => x !== null);
+
+  const isPathActiveForGroup = (group: NavGroup) =>
+    group.pathPrefixes.some((p) => location.pathname.startsWith(p));
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const def of navDefs) {
+      if (def.kind === 'group' && isPathActiveForGroup(def)) initial[def.id] = true;
+    }
+    return initial;
   });
+  /** Joriy yo‘l guruhga tegishli bo‘lsa, dropdownni avtomatik ochib qo‘yish */
+  useEffect(() => {
+    setOpenGroups((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const def of navDefs) {
+        if (def.kind === 'group' && isPathActiveForGroup(def) && !next[def.id]) {
+          next[def.id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const PAGE_TITLES: Record<string, string> = {
     '/': t.navDashboard,
     '/raw-material': t.navRawMaterial,
     '/warehouse': t.navWarehouse,
+    '/warehouse/semi': t.whSemiStats,
+    '/warehouse/final': t.whFinalStats,
     '/inventory': t.navInventory,
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
@@ -240,26 +306,140 @@ export function Layout() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
           {navItems.map((item) => {
+            if (item.kind === 'leaf') {
+              const Icon = item.icon;
+              const isActive = item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === '/'}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group relative border ${isActive ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white border-transparent'} ${collapsed ? 'justify-center' : ''}`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <Icon size={18} className={`flex-shrink-0 ${isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white'}`} />
+                  {!collapsed && <span className="truncate text-xs">{item.label}</span>}
+                  {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />}
+                  {collapsed && (
+                    <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
+                      {item.label}
+                    </div>
+                  )}
+                </NavLink>
+              );
+            }
+
             const Icon = item.icon;
-            const isActive = item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === '/'}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group relative border ${isActive ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white border-transparent'} ${collapsed ? 'justify-center' : ''}`}
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon size={18} className={`flex-shrink-0 ${isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white'}`} />
-                {!collapsed && <span className="truncate text-xs">{item.label}</span>}
-                {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />}
-                {collapsed && (
-                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
-                    {item.label}
+            const groupActive = isPathActiveForGroup(item);
+            const isOpen = !!openGroups[item.id];
+
+            if (collapsed) {
+              return (
+                <div key={`group-${item.id}`} className="relative group">
+                  <button
+                    type="button"
+                    onClick={() => setCollapsed(false)}
+                    className={`flex w-full items-center justify-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 border ${groupActive ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white border-transparent'}`}
+                    title={item.label}
+                  >
+                    <Icon size={18} className={`flex-shrink-0 ${groupActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white'}`} />
+                  </button>
+                  <div className="absolute left-full top-0 ml-3 hidden min-w-[10rem] rounded-xl border border-slate-700 bg-slate-800 p-1 text-xs shadow-xl group-hover:block z-50">
+                    <p className="px-2 py-1 font-semibold text-slate-200">{item.label}</p>
+                    {item.children.map((child) => {
+                      const ChildIcon = child.icon;
+                      return (
+                        <NavLink
+                          key={child.path}
+                          to={child.path}
+                          onClick={() => setMobileOpen(false)}
+                          className={({ isActive }) =>
+                            `flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-200 hover:bg-slate-700 ${isActive ? 'bg-slate-700/70 text-white' : ''}`
+                          }
+                        >
+                          <ChildIcon size={14} />
+                          <span className="truncate">{child.label}</span>
+                        </NavLink>
+                      );
+                    })}
                   </div>
-                )}
-              </NavLink>
+                </div>
+              );
+            }
+
+            return (
+              <div key={`group-${item.id}`} className="space-y-0.5">
+                <button
+                  type="button"
+                  onClick={() => setOpenGroups((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
+                  className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 ${
+                    isOpen && !groupActive
+                      ? 'text-slate-700 dark:text-white bg-slate-50 dark:bg-slate-800/60'
+                      : groupActive
+                        ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300'
+                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white'
+                  }`}
+                  aria-expanded={isOpen}
+                >
+                  <Icon size={18} className={`flex-shrink-0 ${groupActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                  <span className="flex-1 truncate text-left text-xs">{item.label}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-indigo-500 dark:text-indigo-400' : ''}`} />
+                </button>
+                <div
+                  className={`grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="relative ml-5 mt-0.5 space-y-0.5 pl-3">
+                      {/* Soft vertical guide line */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-slate-200/0 via-slate-200 to-slate-200/0 dark:via-slate-700"
+                      />
+                      {item.children.map((child) => {
+                        const ChildIcon = child.icon;
+                        return (
+                          <NavLink
+                            key={child.path}
+                            to={child.path}
+                            onClick={() => setMobileOpen(false)}
+                            className={({ isActive }) =>
+                              `group/child relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors duration-150 ${
+                                isActive
+                                  ? 'bg-indigo-50/70 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300'
+                                  : 'text-slate-500 hover:bg-slate-100/70 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white'
+                              }`
+                            }
+                          >
+                            {({ isActive }) => (
+                              <>
+                                {/* Active marker dot on the guide line */}
+                                <span
+                                  aria-hidden
+                                  className={`pointer-events-none absolute -left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full transition-all ${
+                                    isActive
+                                      ? 'bg-indigo-500 dark:bg-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-500/20'
+                                      : 'bg-transparent'
+                                  }`}
+                                />
+                                <ChildIcon
+                                  size={14}
+                                  className={`flex-shrink-0 ${
+                                    isActive
+                                      ? 'text-indigo-500 dark:text-indigo-400'
+                                      : 'text-slate-400 dark:text-slate-500 group-hover/child:text-slate-700 dark:group-hover/child:text-white'
+                                  }`}
+                                />
+                                <span className={`truncate ${isActive ? 'font-medium' : ''}`}>{child.label}</span>
+                              </>
+                            )}
+                          </NavLink>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </nav>
