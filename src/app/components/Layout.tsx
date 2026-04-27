@@ -5,7 +5,7 @@ import {
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
-  ClipboardList, Factory, Package, TrendingUp,
+  ClipboardList, Factory, Package,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP } from '../store/erp-store';
@@ -195,13 +195,6 @@ export function Layout() {
           perm: 'view_shift',
           exact: true,
         },
-        {
-          kind: 'leaf',
-          path: '/shifts/over-consumption',
-          icon: TrendingUp,
-          label: t.navShiftOverConsumption,
-          perm: 'view_shift',
-        },
         { kind: 'leaf', path: '/warehouse/semi', icon: Factory, label: t.whSidebarSemi, perm: 'view_warehouse' },
         { kind: 'leaf', path: '/warehouse/final', icon: Package, label: t.whSidebarFinal, perm: 'view_warehouse' },
       ],
@@ -266,7 +259,6 @@ export function Layout() {
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
     '/shifts': t.navShifts,
-    '/shifts/over-consumption': t.navShiftOverConsumption,
     '/payroll': t.navPayroll,
     '/reports': t.navReports,
     '/system-users': t.navSystemUsers,

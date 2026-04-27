@@ -9,7 +9,6 @@ import { Sales } from './pages/Sales';
 import { Expenses } from './pages/Expenses';
 import { Reports } from './pages/Reports';
 import { ShiftWork } from './pages/ShiftWork';
-import { ProductionOverConsumption } from './pages/ProductionOverConsumption';
 import { Payroll } from './pages/Payroll';
 import { SystemUsers } from './pages/SystemUsers';
 import { Inventory } from './pages/Inventory';
@@ -60,7 +59,7 @@ export const router = createBrowserRouter([
       { path: 'expenses', Component: Expenses },
       { path: 'employees', element: <Navigate to="/payroll" replace /> },
       { path: 'shifts', Component: ShiftWork },
-      { path: 'shifts/over-consumption', Component: ProductionOverConsumption },
+      { path: 'shifts/over-consumption', element: <Navigate to="/shifts" replace /> },
       { path: 'reports', Component: Reports },
       { path: 'payroll', Component: Payroll },
       {
