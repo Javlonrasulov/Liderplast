@@ -4,7 +4,6 @@ import { Layout } from './components/Layout';
 import { ERPProvider } from './store/erp-store';
 import { Dashboard } from './pages/Dashboard';
 import { RawMaterial } from './pages/RawMaterial';
-import { RawMaterialWarehouseStock } from './pages/RawMaterialWarehouseStock';
 import { Warehouse } from './pages/Warehouse';
 import { Sales } from './pages/Sales';
 import { Expenses } from './pages/Expenses';
@@ -29,23 +28,16 @@ export const router = createBrowserRouter([
     Component: Root,
     children: [
       { index: true, Component: Dashboard },
-      { path: 'raw-material', element: <Navigate to="/raw-material/overview" replace /> },
       {
-        path: 'raw-material/overview',
+        path: 'raw-material',
         element: (
           <RouteGuard permission="view_raw_material">
             <RawMaterial />
           </RouteGuard>
         ),
       },
-      {
-        path: 'raw-material/stock',
-        element: (
-          <RouteGuard permission="view_raw_material">
-            <RawMaterialWarehouseStock />
-          </RouteGuard>
-        ),
-      },
+      { path: 'raw-material/overview', element: <Navigate to="/raw-material" replace /> },
+      { path: 'raw-material/stock', element: <Navigate to="/raw-material" replace /> },
       { path: 'warehouse', element: <Navigate to="/warehouse/semi" replace /> },
       {
         path: 'warehouse/semi',

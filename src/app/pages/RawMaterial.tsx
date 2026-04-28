@@ -10,7 +10,9 @@ import {
   History,
   ChevronDown,
   BarChart3,
+  ClipboardList,
 } from 'lucide-react';
+import { RawMaterialWarehouseStock } from './RawMaterialWarehouseStock';
 import {
   useERP,
   type RawMaterialKind,
@@ -78,7 +80,7 @@ export function RawMaterial() {
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
   const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [rmTab, setRmTab] = useState<'catalog' | 'overview'>('catalog');
+  const [rmTab, setRmTab] = useState<'catalog' | 'overview' | 'stock'>('catalog');
   const [incomingQtyMismatchPayload, setIncomingQtyMismatchPayload] = useState<
     | null
     | {
@@ -313,7 +315,21 @@ export function RawMaterial() {
             <BarChart3 size={14} className="shrink-0" />
             <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionOverview}</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setRmTab('stock')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'stock' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+          >
+            <ClipboardList size={14} className="shrink-0" />
+            <span className="truncate max-w-[10rem] min-[360px]:max-w-none">{t.rmSidebarWarehouseStock}</span>
+          </button>
         </div>
+
+        {rmTab === 'stock' && (
+          <div className="mt-0 focus-visible:outline-none">
+            <RawMaterialWarehouseStock />
+          </div>
+        )}
 
         {rmTab === 'overview' && (
         <div className="mt-0 space-y-4 focus-visible:outline-none">

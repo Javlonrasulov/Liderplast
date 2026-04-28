@@ -313,18 +313,26 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
   /**
-   * Bu sahifada (Yarim tayyor / Tayyor) xom ashyo ko‘rinmaydi — chunki
-   * xom ashyolar alohida `/raw-material` sahifasida boshqariladi.
-   * Lekin `attemptDeleteRawMaterial` mavjud xom ashyo ID bo‘yicha qoldiq
-   * tekshiradi, shuning uchun xaritani saqlaymiz.
+   * Xom ashyolar katalogi alohida `/raw-material` sahifasida ham boshqariladi,
+   * lekin yarim tayyor mahsulot retsepti uchun xom ashyo ro‘yxati kerak.
    */
   const rawMaterials = useMemo<Array<Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }>>>(
-    () => [],
-    [],
+    () =>
+      state.warehouseProducts.filter(
+        (item): item is Extract<WarehouseProduct, { itemType: 'RAW_MATERIAL' }> =>
+          item.itemType === 'RAW_MATERIAL',
+      ),
+    [state.warehouseProducts],
   );
 
-  const siroRawMaterials = useMemo<typeof rawMaterials>(() => [], []);
-  const paintRawMaterials = useMemo<typeof rawMaterials>(() => [], []);
+  const siroRawMaterials = useMemo(
+    () => rawMaterials.filter((rm) => rm.rawMaterialKind !== 'PAINT'),
+    [rawMaterials],
+  );
+  const paintRawMaterials = useMemo(
+    () => rawMaterials.filter((rm) => rm.rawMaterialKind === 'PAINT'),
+    [rawMaterials],
+  );
 
   const rawStockByName = useMemo(() => {
     const map = new Map<string, number>();

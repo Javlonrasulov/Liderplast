@@ -40,10 +40,8 @@ export function RawMaterialWarehouseStock() {
   );
 
   return (
-    <div className="flex min-h-full w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden bg-slate-50 p-3 min-[400px]:p-4 lg:p-6 dark:bg-slate-950">
-      <div className="flex w-full min-w-0 flex-col gap-2">
-        <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
-      </div>
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden">
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
 
       {rows.length === 0 ? (
         <p className="rounded-2xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
