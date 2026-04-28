@@ -24,13 +24,24 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const userRole = request.user?.role;
+    const sessionUser = request.user;
+    const userRole = sessionUser?.role;
 
     if (!userRole) {
       throw new ForbiddenException('Insufficient role permissions');
     }
 
     if (userRole === Role.ADMIN) {
+      return true;
+    }
+
+    /**
+     * Maxsus (custom) lavozimli foydalanuvchilar — `MANAGER` ostida saqlansa-da,
+     * ularning kirishini faqat aniq ruxsatlar (permissions) belgilaydi:
+     * shu yerda ro‘l filtri qattiq qo‘yilmaydi va keyingi `AppPermissionGuard`
+     * o‘zining kalitlari orqali nazoratni davom ettiradi.
+     */
+    if (sessionUser?.customRoleLabel && sessionUser.customRoleLabel.trim().length > 0) {
       return true;
     }
 

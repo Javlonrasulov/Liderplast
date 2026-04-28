@@ -188,6 +188,7 @@ export class AuthService {
       phone: user.phone,
       role: user.role,
       permissions,
+      customRoleLabel: user.customRoleLabel ?? null,
     };
 
     const accessSecret =

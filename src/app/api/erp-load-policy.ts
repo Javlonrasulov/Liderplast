@@ -6,6 +6,12 @@ type HasPerm = (key: AppPermissionKey) => boolean;
 /** Backend `@Roles` + `AppPermissionGuard` qoidalariga mos: keraksiz so‘rovlar 403 bermasligi uchun */
 function hasRole(user: SessionUser, ...allowed: SessionRole[]): boolean {
   if (user.role === 'ADMIN') return true;
+  /**
+   * Maxsus (custom) lavozim — backenddagi `RolesGuard` ham bunday foydalanuvchilarda
+   * qattiq ro‘l filtrini chetlab o‘tadi va kirishni faqat permissionlar belgilaydi.
+   * Shuning uchun frontend yuk-rejasi ham roldagi cheklovlarni qo‘llamasligi kerak.
+   */
+  if (user.customRoleLabel && user.customRoleLabel.trim().length > 0) return true;
   return allowed.includes(user.role);
 }
 
