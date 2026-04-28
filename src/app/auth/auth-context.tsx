@@ -7,7 +7,13 @@ import React, {
   useState,
 } from 'react';
 import { apiRequest, ApiError } from '../api/http';
-import { clearTokens, getAccessToken, setTokens } from '../api/token-storage';
+import {
+  clearTokens,
+  getAccessToken,
+  getCachedUser,
+  setCachedUser,
+  setTokens,
+} from '../api/token-storage';
 import type { AppPermissionKey } from './permission-keys';
 
 export type SessionRole =
@@ -44,12 +50,28 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null);
+  /**
+   * Sahifa yangilanganda darrov keshlangan foydalanuvchi bilan boshlaymiz —
+   * shu tariqa /auth/me kechikib kelsa yoki kichik xato bersa ham foydalanuvchi
+   * loginga otib ketmaydi. /auth/me javobi keyin user-ni yangilab qo‘yadi.
+   */
+  const cachedInitialUser = (() => {
+    if (!getAccessToken()) return null;
+    return getCachedUser<SessionUser>();
+  })();
+  const [user, setUserState] = useState<SessionUser | null>(cachedInitialUser);
   const [loading, setLoading] = useState(true);
+
+  const setUser = useCallback((next: SessionUser | null) => {
+    setUserState(next);
+    if (next) {
+      setCachedUser(next);
+    }
+  }, []);
 
   const fetchMe = useCallback(async () => {
     if (!getAccessToken()) {
-      setUser(null);
+      setUserState(null);
       setLoading(false);
       return;
     }
@@ -61,12 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       /**
        * Tokenlarni faqat haqiqiy autentifikatsiya xatosi (401) bo‘lganda tozalaymiz.
        * 403 (ruxsat yetmasligi), tarmoq xatolari yoki backend muammosi sahifa
-       * yangilanganda foydalanuvchini tizimdan chiqarib yubormasligi kerak.
+       * yangilanganda foydalanuvchini tizimdan chiqarib yubormasligi kerak —
+       * keshlangan profil bilan davom ettiramiz.
        */
       const isAuthError = err instanceof ApiError && err.status === 401;
       if (isAuthError) {
         clearTokens();
-        setUser(null);
+        setUserState(null);
       } else {
         if (typeof console !== 'undefined' && console.warn) {
           const msg = err instanceof Error ? err.message : String(err);
@@ -76,25 +99,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setUser]);
 
   useEffect(() => {
     void fetchMe();
   }, [fetchMe]);
 
-  const login = useCallback(async (identifier: string, password: string) => {
-    const payload = await apiRequest<{
-      user: SessionUser;
-      accessToken: string;
-      refreshToken: string;
-    }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ identifier, password }),
-    });
+  const login = useCallback(
+    async (identifier: string, password: string) => {
+      const payload = await apiRequest<{
+        user: SessionUser;
+        accessToken: string;
+        refreshToken: string;
+      }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ identifier, password }),
+      });
 
-    setTokens(payload.accessToken, payload.refreshToken);
-    setUser(payload.user);
-  }, []);
+      setTokens(payload.accessToken, payload.refreshToken);
+      setUser(payload.user);
+    },
+    [setUser],
+  );
 
   const updateCredentials = useCallback(
     async (payload: { currentPassword: string; login?: string; newPassword?: string }) => {
@@ -109,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setTokens(res.accessToken, res.refreshToken);
       setUser(res.user);
     },
-    [],
+    [setUser],
   );
 
   const logout = useCallback(async () => {
@@ -125,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore logout backend errors
     } finally {
       clearTokens();
-      setUser(null);
+      setUserState(null);
     }
   }, []);
 

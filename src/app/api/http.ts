@@ -30,7 +30,7 @@ async function tryRefresh() {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
     clearTokens();
-    throw new Error('No refresh token');
+    throw new ApiError('No refresh token', 401);
   }
 
   if (!refreshPromise) {
@@ -43,8 +43,16 @@ async function tryRefresh() {
     })
       .then(async (response) => {
         if (!response.ok) {
-          clearTokens();
-          throw new Error('Unable to refresh session');
+          /**
+           * Tokenlarni faqat refresh tokeni haqiqatdan ham yaroqsiz bo‘lganda
+           * (401 / 400) tozalaymiz. Tarmoq xatosi yoki backend muammosida
+           * (5xx) sessiyani saqlab qolamiz — foydalanuvchi keyingi urinishda
+           * yana ulanishi mumkin va sahifa yangilaganda loginga otib ketmaydi.
+           */
+          if (response.status === 401 || response.status === 400) {
+            clearTokens();
+          }
+          throw new ApiError('Unable to refresh session', response.status);
         }
 
         const payload = await response.json();

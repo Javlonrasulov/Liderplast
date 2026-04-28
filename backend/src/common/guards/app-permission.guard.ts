@@ -33,8 +33,13 @@ function requiredPermissionGroups(
     method: string | string[];
     anyOf: string[];
   }> = [
-    { test: /^\/auth\/me$/, method: 'GET', anyOf: ['view_dashboard'] },
-    { test: /^\/auth\/logout$/, method: 'POST', anyOf: ['view_dashboard'] },
+    /**
+     * `/auth/me` va `/auth/logout` — autentifikatsiya bazaviy endpointlari.
+     * Foydalanuvchining permissionlari nima bo‘lishidan qat’i nazar, JWT
+     * to‘g‘ri bo‘lsa, ularga kirish ochiq bo‘lishi shart (aks holda foydalanuvchi
+     * o‘z profilini ham ololmaydi yoki tizimdan chiqa olmaydi). Shuning uchun
+     * bu yo‘llarda permission talab qilinmaydi — JWT guard yetarli.
+     */
 
     { test: /^\/warehouse\/stock$/, method: 'GET', anyOf: ['view_warehouse'] },
     { test: /^\/warehouse\/catalog$/, method: 'GET', anyOf: ['view_warehouse'] },

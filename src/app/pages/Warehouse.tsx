@@ -285,7 +285,7 @@ export type WarehouseMode = 'semi' | 'final';
 
 export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const { state, semiStockByProductName, finalStockByProductName, dispatch } = useERP();
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
 
@@ -314,7 +314,15 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     'overview',
   );
 
-  const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
+  /**
+   * Mahsulotlarni boshqarish: Admin, Director — har doim;
+   * MANAGER va custom lavozimlar — `view_warehouse` ruxsati bo‘lsa kifoya
+   * (backenddagi `RolesGuard` custom lavozim foydalanuvchilarini ham o‘tkazadi).
+   */
+  const canManage =
+    user?.role === 'ADMIN' ||
+    user?.role === 'DIRECTOR' ||
+    hasPermission('view_warehouse');
   /**
    * Xom ashyolar katalogi alohida `/raw-material` sahifasida ham boshqariladi,
    * lekin yarim tayyor mahsulot retsepti uchun xom ashyo ro‘yxati kerak.

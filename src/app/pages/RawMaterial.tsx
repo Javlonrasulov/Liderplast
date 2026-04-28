@@ -531,17 +531,23 @@ export function RawMaterial() {
           {(siroMaterialAlerts.length > 0 || paintMaterialAlerts.length > 0) && (
             <div className="space-y-4">
               {siroMaterialAlerts.length > 0 && (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
-                      <AlertTriangle size={18} className="text-white" />
+                <details className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+                  <summary className="cursor-pointer select-none">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                        <AlertTriangle size={18} className="text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
+                          {t.rmAlertsTitle} ({siroMaterialAlerts.length})
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          {t.rmAlertsSubtitle}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitle}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitle}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  </summary>
+                  <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {siroMaterialAlerts.map((item) => (
                       <div
                         key={item.id}
@@ -553,7 +559,9 @@ export function RawMaterial() {
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                              {item.name}
+                            </p>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                               {formatNumber(item.quantityKg)} {t.unitKg}
                             </p>
@@ -571,21 +579,27 @@ export function RawMaterial() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </details>
               )}
 
               {paintMaterialAlerts.length > 0 && (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
-                      <AlertTriangle size={18} className="text-white" />
+                <details className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-violet-900/40 p-5 shadow-sm">
+                  <summary className="cursor-pointer select-none">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+                        <AlertTriangle size={18} className="text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
+                          {t.rmAlertsTitlePaint} ({paintMaterialAlerts.length})
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          {t.rmAlertsSubtitlePaint}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.rmAlertsTitlePaint}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rmAlertsSubtitlePaint}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  </summary>
+                  <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {paintMaterialAlerts.map((item) => (
                       <div
                         key={item.id}
@@ -597,7 +611,9 @@ export function RawMaterial() {
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                              {item.name}
+                            </p>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                               {formatNumber(item.quantityKg)} {t.unitKg}
                             </p>
@@ -615,7 +631,7 @@ export function RawMaterial() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </details>
               )}
             </div>
           )}

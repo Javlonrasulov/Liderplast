@@ -21,8 +21,17 @@ const LOW_PAINT_KG = 200;
 export function RawMaterialWarehouseStock() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
-  const { user } = useAuth();
-  const canManage = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
+  const { user, hasPermission } = useAuth();
+  /**
+   * Xom ashyo katalogini boshqarish (qo‘shish/tahrirlash/o‘chirish):
+   * Admin va Director — har doim; boshqalar — `view_warehouse` yoki
+   * `view_raw_material` ruxsati bo‘lsa.
+   */
+  const canManage =
+    user?.role === 'ADMIN' ||
+    user?.role === 'DIRECTOR' ||
+    hasPermission('view_warehouse') ||
+    hasPermission('view_raw_material');
 
   const [editing, setEditing] = useState<RawMaterialProduct | null>(null);
   const [nameDraft, setNameDraft] = useState('');
