@@ -3139,6 +3139,7 @@ export const FinishedProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   volumeLiter: 'volumeLiter',
+  piecesPerBag: 'piecesPerBag',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',

@@ -59,7 +59,7 @@ export const router = createBrowserRouter([
       {
         path: 'inventory',
         element: (
-          <RouteGuard permission="view_warehouse">
+          <RouteGuard permission="view_inventory">
             <Inventory />
           </RouteGuard>
         ),

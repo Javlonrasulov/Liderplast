@@ -145,6 +145,24 @@ export function Layout() {
   const { t } = useApp();
   const { user, logout, hasPermission } = useAuth();
 
+  /** Sarlavhada ko‘rsatish uchun: maxsus lavozim bo‘lsa — uning nomi, aks holda mahalliy rol nomi. */
+  const displayRoleLabel = (() => {
+    const custom = user?.customRoleLabel?.trim();
+    if (custom) return custom;
+    switch (user?.role) {
+      case 'ADMIN':
+        return t.suRoleAdmin;
+      case 'DIRECTOR':
+        return t.suRoleDirector;
+      case 'ACCOUNTANT':
+        return t.suRoleAccountant;
+      case 'MANAGER':
+        return t.suRoleOperator;
+      default:
+        return user?.role ?? '';
+    }
+  })();
+
   type NavLeaf = {
     kind: 'leaf';
     path: string;
@@ -205,7 +223,7 @@ export function Layout() {
         { kind: 'leaf', path: '/warehouse/final', icon: Package, label: t.whSidebarFinal, perm: 'view_warehouse' },
       ],
     },
-    { kind: 'leaf', path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_warehouse' },
+    { kind: 'leaf', path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_inventory' },
     { kind: 'leaf', path: '/sales', icon: ShoppingCart, label: t.navSales, perm: 'view_sales' },
     { kind: 'leaf', path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
     { kind: 'leaf', path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
@@ -573,7 +591,7 @@ export function Layout() {
                         </div>
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{user?.fullName ?? '—'}</p>
-                          <p className="truncate text-[11px] text-slate-400">{user?.role ? `${t.suRole}: ${user.role}` : ''}</p>
+                          <p className="truncate text-[11px] text-slate-400">{displayRoleLabel ? `${t.suRole}: ${displayRoleLabel}` : ''}</p>
                         </div>
                       </button>
 
@@ -626,7 +644,7 @@ export function Layout() {
                       {user?.fullName ?? '—'}
                     </p>
                     <p className="truncate text-[10px] text-slate-400">
-                      {user?.role ? `${t.suRole}: ${user.role}` : ''}
+                      {displayRoleLabel ? `${t.suRole}: ${displayRoleLabel}` : ''}
                     </p>
                   </div>
                 </button>

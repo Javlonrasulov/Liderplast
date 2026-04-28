@@ -126,6 +126,7 @@ function labelForPermission(t: T, key: AppPermissionKey): string {
     view_raw_material_bags: t.suPermViewRawMaterialBags,
     manage_raw_material_bags: t.suPermManageRawMaterialBags,
     view_warehouse: t.suPermViewWarehouse,
+    view_inventory: t.suPermViewInventory,
     view_sales: t.suPermViewSales,
     view_expenses: t.suPermViewExpenses,
     view_payroll: t.suPermViewPayroll,
@@ -166,6 +167,7 @@ function defaultPermissionSet(preset: RolePreset): Set<AppPermissionKey> {
       'view_raw_material_bags',
       'manage_raw_material_bags',
       'view_warehouse',
+      'view_inventory',
       'view_sales',
       'view_expenses',
       'view_payroll',
@@ -510,7 +512,14 @@ export function SystemUsers() {
                 const { preset: p, customLabel: cl } = applySelectValue(value, extraPositions);
                 setPreset(p);
                 setCustomLabel(cl);
-                setSelected(defaultPermissionSet(p));
+                /**
+                 * Maxsus (qo‘shimcha) lavozim tanlanganda ruxsatlar bo‘sh qolib ketmasligi uchun
+                 * operator darajasidagi base ruxsatlarni avtomatik belgilab qo‘yamiz —
+                 * keyin foydalanuvchi qo‘shimcha qutichalarni tasdiqlashi yoki olib tashlashi mumkin.
+                 */
+                setSelected(
+                  p === 'custom' ? defaultPermissionSet('operator') : defaultPermissionSet(p),
+                );
               }}
             >
               <SelectTrigger

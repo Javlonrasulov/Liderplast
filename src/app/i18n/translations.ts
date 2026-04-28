@@ -102,6 +102,7 @@ export interface T {
   suPermViewRawMaterialBags: string;
   suPermManageRawMaterialBags: string;
   suPermViewWarehouse: string;
+  suPermViewInventory: string;
   suPermViewSales: string;
   suPermViewExpenses: string;
   suPermViewPayroll: string;
@@ -1063,7 +1064,8 @@ const uz_cyrillic: T = {
   suPermViewRawMaterial: 'Хомашё',
   suPermViewRawMaterialBags: 'Хомашё қоплари (кўриш)',
   suPermManageRawMaterialBags: 'Хомашё қопларини бошқариш',
-  suPermViewWarehouse: 'Омбор / инвентаризация',
+  suPermViewWarehouse: 'Омбор',
+  suPermViewInventory: 'Инвентаризация',
   suPermViewSales: 'Сотув',
   suPermViewExpenses: 'Харажатлар',
   suPermViewPayroll: 'Иш ҳақи / ходимлар',
@@ -1992,7 +1994,8 @@ const uz_latin: T = {
   suPermViewRawMaterial: 'Xomashyo',
   suPermViewRawMaterialBags: 'Xomashyo qoplari (ko‘rish)',
   suPermManageRawMaterialBags: 'Xomashyo qoplarini boshqarish',
-  suPermViewWarehouse: 'Ombor / inventarizatsiya',
+  suPermViewWarehouse: 'Ombor',
+  suPermViewInventory: 'Inventarizatsiya',
   suPermViewSales: 'Sotuv',
   suPermViewExpenses: 'Xarajatlar',
   suPermViewPayroll: 'Ish haqi / xodimlar',
@@ -2921,7 +2924,8 @@ const ru: T = {
   suPermViewRawMaterial: 'Сырьё',
   suPermViewRawMaterialBags: 'Мешки сырья (просмотр)',
   suPermManageRawMaterialBags: 'Управление мешками сырья',
-  suPermViewWarehouse: 'Склад / инвентаризация',
+  suPermViewWarehouse: 'Склад',
+  suPermViewInventory: 'Инвентаризация',
   suPermViewSales: 'Продажи',
   suPermViewExpenses: 'Расходы',
   suPermViewPayroll: 'Зарплата / сотрудники',

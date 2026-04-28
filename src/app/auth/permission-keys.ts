@@ -7,6 +7,7 @@ export const APP_PERMISSION_KEYS = [
   'view_raw_material_bags',
   'manage_raw_material_bags',
   'view_warehouse',
+  'view_inventory',
   'view_sales',
   'view_expenses',
   'view_payroll',
