@@ -11,11 +11,11 @@ interface InventoryTableProps {
 
 function fmt(n: number): string {
   if (!Number.isFinite(n)) return '0';
-  if (Math.abs(n) >= 1) return formatNumber(n);
   if (n === 0) return '0';
+  if (Number.isInteger(n)) return formatNumber(n);
   return new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
+    maximumFractionDigits: 4,
   }).format(n);
 }
 

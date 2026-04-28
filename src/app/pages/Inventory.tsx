@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useERP, type WarehouseProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
+import { apiRequest } from '../api/http';
 import { TODAY, formatDate } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -106,7 +107,7 @@ interface CreateDialogValues {
 
 
 export function Inventory() {
-  const { state } = useERP();
+  const { state, refresh } = useERP();
   const { t } = useApp();
 
   const [records, setRecords] = useState<InventoryRecord[]>(() =>
@@ -221,21 +222,67 @@ export function Inventory() {
     updateRecord(id, (r) => ({ ...r, status: 'NOT_STARTED' }));
   };
 
-  const handleFinish = (id: string) => {
-    updateRecord(id, (r) => {
-      const finalRows = r.rows.map((row) => ({
-        ...row,
-        systemQuantityEnd: row.realQuantityEnd,
-      }));
-      return {
-        ...r,
-        rows: finalRows,
-        status: 'COMPLETED',
-        finishedAt: new Date().toISOString(),
-      };
-    });
-    setConfirmFinishId(null);
-    setToast(`${t.invToastFinished} • ${t.invStockUpdated}`);
+  const handleFinish = async (id: string) => {
+    const current = records.find((r) => r.id === id);
+    if (!current) return;
+
+    try {
+      const movements = current.rows
+        .map((row) => {
+          const diff = row.realQuantityEnd - row.systemQuantityEnd;
+          if (!Number.isFinite(diff) || diff === 0) return null;
+
+          const itemType =
+            row.category === 'RAW_MATERIAL'
+              ? ('RAW_MATERIAL' as const)
+              : row.category === 'SEMI_PRODUCT'
+                ? ('SEMI_PRODUCT' as const)
+                : ('FINISHED_PRODUCT' as const);
+
+          const dto: Record<string, unknown> = {
+            itemType,
+            movementType: diff > 0 ? 'INCOMING' : 'CONSUMPTION',
+            quantity: Math.abs(diff),
+            note: `Inventory ${current.docNumber}`,
+          };
+
+          if (itemType === 'RAW_MATERIAL') dto.rawMaterialId = row.productId;
+          else if (itemType === 'SEMI_PRODUCT') dto.semiProductId = row.productId;
+          else dto.finishedProductId = row.productId;
+
+          return dto;
+        })
+        .filter((x): x is Record<string, unknown> => x !== null);
+
+      // Apply movements (surplus -> incoming, shortage -> consumption)
+      for (const m of movements) {
+        await apiRequest('/warehouse/adjust', {
+          method: 'POST',
+          body: JSON.stringify(m),
+        });
+      }
+
+      await refresh();
+
+      updateRecord(id, (r) => {
+        const finalRows = r.rows.map((row) => ({
+          ...row,
+          systemQuantityEnd: row.realQuantityEnd,
+        }));
+        return {
+          ...r,
+          rows: finalRows,
+          status: 'COMPLETED',
+          finishedAt: new Date().toISOString(),
+        };
+      });
+      setConfirmFinishId(null);
+      setToast(`${t.invToastFinished} • ${t.invStockUpdated}`);
+    } catch (err) {
+      setConfirmFinishId(null);
+      const msg = err instanceof Error ? err.message : String(err);
+      setToast(msg || 'Warehouse update failed');
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -528,7 +575,7 @@ export function Inventory() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t.invBack}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => confirmFinishId && handleFinish(confirmFinishId)}
+              onClick={() => confirmFinishId && void handleFinish(confirmFinishId)}
             >
               {t.invActionFinish}
             </AlertDialogAction>

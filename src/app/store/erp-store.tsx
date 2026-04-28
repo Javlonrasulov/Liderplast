@@ -14,6 +14,8 @@ import {
   finalStockSlotFromCatalog,
   semiBucketFromCatalog,
 } from '../utils/warehouse-catalog-buckets';
+import { useAuth } from '../auth/auth-context';
+import { getErpApiLoadPlan, type ErpApiLoadPlan } from '../api/erp-load-policy';
 
 export interface RawMaterialEntry {
   id: string;
@@ -1712,9 +1714,25 @@ async function mutateExpenseCategoryApi(
   throw lastError;
 }
 
-async function loadStateFromApi() {
-  const expenseCategoriesPromise = fetchExpenseCategoriesSafe();
-  const rawMaterialOrdersPromise = fetchRawMaterialPurchaseOrdersSafe();
+/**
+ * Foydalanuvchining ruxsatlari yetmaydigan endpointlarga umuman so‘rov yubormaymiz —
+ * shu tariqa konsoldagi 403 (Forbidden) shovqini ham yo‘qoladi va sahifa tezroq yuklanadi.
+ * `loadPlan` ushbu yondashuvni boshqaradi (`erp-load-policy.ts`).
+ */
+async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
+  const allow = (key: keyof ErpApiLoadPlan) =>
+    loadPlan ? loadPlan[key] : true;
+
+  function skipped<T>(value: T): Promise<T> {
+    return Promise.resolve(value);
+  }
+
+  const expenseCategoriesPromise = allow('expenses')
+    ? fetchExpenseCategoriesSafe()
+    : skipped<BackendExpenseCategory[]>([]);
+  const rawMaterialOrdersPromise = allow('expenses')
+    ? fetchRawMaterialPurchaseOrdersSafe()
+    : skipped<BackendRawMaterialPurchaseOrder[]>([]);
 
   const [
     catalog,
@@ -1738,38 +1756,80 @@ async function loadStateFromApi() {
     salaryPaymentSummaries,
     rawMaterialOrders,
   ] = await Promise.all([
-    safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
-      rawMaterials: [],
-      semiProducts: [],
-      finishedProducts: [],
-    } as unknown as CatalogResponse),
-    safeLoad(apiRequest<WarehouseStockItem[]>('/warehouse/stock'), [] as WarehouseStockItem[]),
-    safeLoad(apiRequest<WarehouseHistoryItem[]>('/warehouse/history'), [] as WarehouseHistoryItem[]),
-    safeLoad(apiRequest<BackendRawMaterialBag[]>('/raw-material-bags'), [] as BackendRawMaterialBag[]),
-    safeLoad(apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active'), null),
-    safeLoad(apiRequest<BackendBagLog[]>('/raw-material-bags/logs'), [] as BackendBagLog[]),
-    safeLoad(apiRequest<BackendProductionRecord[]>('/production'), [] as BackendProductionRecord[]),
-    safeLoad(apiRequest<BackendMachine[]>('/production/machines'), [] as BackendMachine[]),
-    safeLoad(apiRequest<BackendShiftRecord[]>('/production/shifts'), [] as BackendShiftRecord[]),
-    safeLoad(apiRequest<BackendClient[]>('/clients'), [] as BackendClient[]),
-    safeLoad(apiRequest<BackendOrder[]>('/orders'), [] as BackendOrder[]),
-    safeLoad(apiRequest<BackendPayment[]>('/payments'), [] as BackendPayment[]),
-    safeLoad(apiRequest<BackendExpense[]>('/finance/expenses'), [] as BackendExpense[]),
-    safeLoad(apiRequest<BackendUser[]>('/users'), [] as BackendUser[]),
-    safeLoad(
-      apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
-      [] as BackendEmployeeProductRate[],
-    ),
-    safeLoad(
-      apiRequest<BackendSalarySettings>('/finance/salary-settings'),
-      null as unknown as BackendSalarySettings,
-    ),
-    safeLoad(apiRequest<BackendSalaryRow[]>('/finance/salary'), [] as BackendSalaryRow[]),
-    safeLoad(apiRequest<BackendBankVedomost[]>('/finance/vedomosts'), [] as BackendBankVedomost[]),
-    safeLoad(
-      apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
-      [] as BackendSalaryPaymentSummary[],
-    ),
+    allow('warehouseCatalog')
+      ? safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
+          rawMaterials: [],
+          semiProducts: [],
+          finishedProducts: [],
+        } as unknown as CatalogResponse)
+      : skipped<CatalogResponse>({
+          rawMaterials: [],
+          semiProducts: [],
+          finishedProducts: [],
+        } as unknown as CatalogResponse),
+    allow('warehouseStock')
+      ? safeLoad(apiRequest<WarehouseStockItem[]>('/warehouse/stock'), [] as WarehouseStockItem[])
+      : skipped<WarehouseStockItem[]>([]),
+    allow('warehouseHistory')
+      ? safeLoad(apiRequest<WarehouseHistoryItem[]>('/warehouse/history'), [] as WarehouseHistoryItem[])
+      : skipped<WarehouseHistoryItem[]>([]),
+    allow('rawMaterialBags')
+      ? safeLoad(apiRequest<BackendRawMaterialBag[]>('/raw-material-bags'), [] as BackendRawMaterialBag[])
+      : skipped<BackendRawMaterialBag[]>([]),
+    allow('rawMaterialBags')
+      ? safeLoad(apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active'), null)
+      : skipped<BackendRawMaterialBag | null>(null),
+    allow('rawMaterialBags')
+      ? safeLoad(apiRequest<BackendBagLog[]>('/raw-material-bags/logs'), [] as BackendBagLog[])
+      : skipped<BackendBagLog[]>([]),
+    allow('production')
+      ? safeLoad(apiRequest<BackendProductionRecord[]>('/production'), [] as BackendProductionRecord[])
+      : skipped<BackendProductionRecord[]>([]),
+    allow('machines')
+      ? safeLoad(apiRequest<BackendMachine[]>('/production/machines'), [] as BackendMachine[])
+      : skipped<BackendMachine[]>([]),
+    allow('shifts')
+      ? safeLoad(apiRequest<BackendShiftRecord[]>('/production/shifts'), [] as BackendShiftRecord[])
+      : skipped<BackendShiftRecord[]>([]),
+    allow('clients')
+      ? safeLoad(apiRequest<BackendClient[]>('/clients'), [] as BackendClient[])
+      : skipped<BackendClient[]>([]),
+    allow('orders')
+      ? safeLoad(apiRequest<BackendOrder[]>('/orders'), [] as BackendOrder[])
+      : skipped<BackendOrder[]>([]),
+    allow('payments')
+      ? safeLoad(apiRequest<BackendPayment[]>('/payments'), [] as BackendPayment[])
+      : skipped<BackendPayment[]>([]),
+    allow('expenses')
+      ? safeLoad(apiRequest<BackendExpense[]>('/finance/expenses'), [] as BackendExpense[])
+      : skipped<BackendExpense[]>([]),
+    allow('users')
+      ? safeLoad(apiRequest<BackendUser[]>('/users'), [] as BackendUser[])
+      : skipped<BackendUser[]>([]),
+    allow('salarySettings')
+      ? safeLoad(
+          apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
+          [] as BackendEmployeeProductRate[],
+        )
+      : skipped<BackendEmployeeProductRate[]>([]),
+    allow('salarySettings')
+      ? safeLoad(
+          apiRequest<BackendSalarySettings>('/finance/salary-settings'),
+          null as unknown as BackendSalarySettings,
+        )
+      : skipped<BackendSalarySettings>(null as unknown as BackendSalarySettings),
+    allow('salaryRows')
+      ? safeLoad(apiRequest<BackendSalaryRow[]>('/finance/salary'), [] as BackendSalaryRow[])
+      : skipped<BackendSalaryRow[]>([]),
+    allow('salaryRows')
+      ? safeLoad(apiRequest<BackendBankVedomost[]>('/finance/vedomosts'), [] as BackendBankVedomost[])
+      : skipped<BackendBankVedomost[]>([]),
+    allow('salaryRows')
+      ? safeLoad(
+          apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
+          [] as BackendSalaryPaymentSummary[],
+        )
+      : skipped<BackendSalaryPaymentSummary[]>([]),
     rawMaterialOrdersPromise,
   ]);
 
@@ -2125,6 +2185,7 @@ async function loadStateFromApi() {
 }
 
 export function ERPProvider({ children }: { children: ReactNode }) {
+  const { user, hasPermission } = useAuth();
   const [state, setState] = useState<ERPState>(emptyState);
   const [lookups, setLookups] = useState<LookupMap>({
     rawByName: new Map(),
@@ -2140,11 +2201,21 @@ export function ERPProvider({ children }: { children: ReactNode }) {
   stateRef.current = state;
   lookupsRef.current = lookups;
 
+  /**
+   * Joriy foydalanuvchining ruxsatlari asosida yuk-rejasini hisoblaymiz.
+   * Bu rejada `false` bo‘lgan endpointlarga so‘rov yubormaymiz — natijada
+   * konsoldagi 403 lar shovqini yo‘qoladi va sahifa tezroq yuklanadi.
+   */
+  const loadPlan = useMemo<ErpApiLoadPlan | undefined>(() => {
+    if (!user) return undefined;
+    return getErpApiLoadPlan(user, hasPermission);
+  }, [user, hasPermission]);
+
   const refresh = useCallback(async () => {
     setIsLoading(true);
     setError('');
     try {
-      const next = await loadStateFromApi();
+      const next = await loadStateFromApi(loadPlan);
       setState(next.state);
       setLookups(next.lookups);
     } catch (err) {
@@ -2154,11 +2225,12 @@ export function ERPProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [loadPlan]);
 
   useEffect(() => {
+    if (!user) return;
     void refresh().catch(() => undefined);
-  }, [refresh]);
+  }, [refresh, user]);
 
   const dispatch = useCallback(
     async (action: ERPAction) => {
