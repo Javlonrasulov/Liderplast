@@ -8,8 +8,8 @@ const MASHINALAR_CRM_URL = 'https://mashina.liderplast.uz';
 export function LoginScreen() {
   const { login, loading } = useAuth();
   const { t } = useApp();
-  const [identifier, setIdentifier] = useState('+998900000001');
-  const [password, setPassword] = useState('Director123');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
