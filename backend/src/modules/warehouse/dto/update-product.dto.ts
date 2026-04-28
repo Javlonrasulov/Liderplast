@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsIn,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -44,6 +45,13 @@ export class UpdateProductDto {
   @IsNumber()
   @Min(0.01)
   volumeLiter?: number;
+
+  /** Faqat tayyor mahsulotlar uchun: 1 qopdagi dona */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  piecesPerBag?: number;
 
   @IsOptional()
   @Type(() => Number)

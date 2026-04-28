@@ -82,6 +82,8 @@ type ProductFormState = {
   name: string;
   description: string;
   weightGram: string;
+  /** Faqat tayyor mahsulot: 1 qopdagi dona */
+  piecesPerBag: string;
   rawMaterials: Array<{
     rawMaterialId: string;
     amountGram: string;
@@ -102,6 +104,7 @@ const DEFAULT_FORM: ProductFormState = {
   name: '',
   description: '',
   weightGram: '',
+  piecesPerBag: '',
   rawMaterials: [{ rawMaterialId: '', amountGram: '' }],
   semiProductIds: [],
   machineIds: [],
@@ -462,7 +465,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
   const hasCatalogSiro = siroRawMaterials.length > 0;
   const hasCatalogPaint = paintRawMaterials.length > 0;
-  const hasCatalogRaw = hasCatalogSiro || hasCatalogPaint;
   const hasCatalogSemi = semiProducts.length > 0;
   const hasCatalogFinal = finishedProducts.length > 0;
 
@@ -478,8 +480,9 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const totalPiecesInCatalogStock =
     totalSemiInCatalogStock + totalFinalInCatalogStock;
 
-  const hasAnyStockDetailCard =
-    hasCatalogSiro || hasCatalogPaint || hasCatalogSemi || hasCatalogFinal;
+  // Xom ashyo qoldig‘i alohida `Raw material` sahifasida ko‘rsatiladi.
+  // Ombor (yarim/tayyor) sahifasida faqat yarim tayyor va tayyor mahsulotlar qoldig‘ini ko‘rsatamiz.
+  const hasAnyStockDetailCard = hasCatalogSemi || hasCatalogFinal;
 
   const warehouseSummaryCards = useMemo(() => {
     const cards: Array<{
@@ -491,30 +494,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       shadow: string;
       icon: React.ComponentType<{ size?: number; className?: string }>;
     }> = [];
-    for (const rm of siroRawMaterialsSorted) {
-      const kg = rawStockByName.get(rm.name) ?? 0;
-      cards.push({
-        key: `raw-siro-${rm.id}`,
-        label: rm.name,
-        sub: `${calcPercent(kg, 5000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatKgAmount(kg)} ${t.unitKg}`,
-        from: 'from-blue-500 to-blue-600',
-        shadow: 'shadow-blue-200 dark:shadow-blue-900/30',
-        icon: Droplets,
-      });
-    }
-    for (const rm of paintRawMaterialsSorted) {
-      const kg = rawStockByName.get(rm.name) ?? 0;
-      cards.push({
-        key: `raw-paint-${rm.id}`,
-        label: rm.name,
-        sub: `${calcPercent(kg, 2000).toFixed(0)}% ${t.whInWarehouse}`,
-        val: `${formatKgAmount(kg)} ${t.unitKg}`,
-        from: 'from-fuchsia-500 to-pink-600',
-        shadow: 'shadow-fuchsia-200 dark:shadow-fuchsia-900/30',
-        icon: Palette,
-      });
-    }
     semiProducts.forEach((p, i) => {
       const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
       const qty = semiStockByProductName[p.name] ?? 0;
@@ -531,10 +510,19 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     finishedProducts.forEach((p, i) => {
       const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
       const qty = finalStockByProductName[p.name] ?? 0;
+      const ppb = p.piecesPerBag ?? 0;
+      const fullBags = ppb > 0 ? Math.floor(qty / ppb) : 0;
+      const rem = ppb > 0 ? qty % ppb : 0;
+      const bagsLine =
+        ppb > 0
+          ? rem > 0
+            ? `${fullBags} ${t.unitBag} + ${formatNumber(rem)} ${t.unitPiece}`
+            : `${fullBags} ${t.unitBag}`
+          : '';
       cards.push({
         key: `final-${p.id}`,
         label: p.name,
-        sub: `${p.volumeLiter} L · ${t.whInWarehouse}`,
+        sub: `${p.volumeLiter} L · ${t.whInWarehouse}${bagsLine ? ` · ${bagsLine}` : ''}`,
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -554,15 +542,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     }
     return cards;
   }, [
-    hasCatalogSiro,
-    hasCatalogPaint,
     hasCatalogSemi,
     hasCatalogFinal,
     semiProducts,
     finishedProducts,
-    siroRawMaterialsSorted,
-    paintRawMaterialsSorted,
-    rawStockByName,
     semiStockByProductName,
     finalStockByProductName,
     totalPiecesInCatalogStock,
@@ -705,6 +688,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       description: product.description ?? '',
       weightGram:
         product.itemType === 'SEMI_PRODUCT' ? String(product.weightGram) : '',
+      piecesPerBag:
+        product.itemType === 'FINISHED_PRODUCT'
+          ? String(product.piecesPerBag ?? '')
+          : '',
       rawMaterials:
         product.itemType === 'SEMI_PRODUCT'
           ? product.rawMaterials.map((item) => ({
@@ -826,6 +813,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       throw new Error(t.whMachineRequired);
     }
 
+    const piecesPerBag = Math.floor(Number(form.piecesPerBag.replace(',', '.')));
+    if (!Number.isFinite(piecesPerBag) || piecesPerBag <= 0) {
+      throw new Error(t.whPiecesPerBagRequired);
+    }
+
     const volumeLiter =
       editingProduct?.itemType === 'FINISHED_PRODUCT'
         ? editingProduct.volumeLiter
@@ -836,6 +828,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
       volumeLiter,
+      piecesPerBag,
       relations: {
         semiProductIds: form.semiProductIds,
         machineIds: form.machineIds,
@@ -1074,18 +1067,35 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           </div>
         </div>
       ) : (
-        <div>
-          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
-            {t.labelDesc}
-          </label>
-          <textarea
-            rows={3}
-            value={form.description}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, description: e.target.value }))
-            }
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
-          />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {t.whPiecesPerBag}
+            </label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.piecesPerBag}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, piecesPerBag: e.target.value }))
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {t.labelDesc}
+            </label>
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, description: e.target.value }))
+              }
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+          </div>
         </div>
       )}
 
@@ -1427,40 +1437,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               </h3>
               {hasAnyStockDetailCard ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {siroRawMaterialsSorted.map((rm) => {
-              const kg = rawStockByName.get(rm.name) ?? 0;
-              return (
-                <StockItem
-                  key={rm.id}
-                  label={rm.name}
-                  value={kg}
-                  max={5000}
-                  unit={t.unitKg}
-                  valueMode="massKg"
-                  color={kg < 1000 ? 'bg-amber-500' : 'bg-blue-500'}
-                  bgColor="bg-blue-100 dark:bg-blue-900/30"
-                  icon={<Droplets size={18} className="text-blue-600 dark:text-blue-400" />}
-                  warning={kg < 1000}
-                />
-              );
-            })}
-            {paintRawMaterialsSorted.map((rm) => {
-              const kg = rawStockByName.get(rm.name) ?? 0;
-              return (
-                <StockItem
-                  key={rm.id}
-                  label={rm.name}
-                  value={kg}
-                  max={2000}
-                  unit={t.unitKg}
-                  valueMode="massKg"
-                  color={kg < 200 ? 'bg-amber-500' : 'bg-fuchsia-500'}
-                  bgColor="bg-fuchsia-100 dark:bg-fuchsia-900/30"
-                  icon={<Palette size={18} className="text-fuchsia-600 dark:text-fuchsia-400" />}
-                  warning={kg < 200}
-                />
-              );
-            })}
             {semiProducts.map((p, idx) => {
               const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
               return (
@@ -1478,11 +1454,21 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             })}
             {finishedProducts.map((p, idx) => {
               const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
+              const qty = finalStockByProductName[p.name] ?? 0;
+              const ppb = p.piecesPerBag ?? 0;
+              const fullBags = ppb > 0 ? Math.floor(qty / ppb) : 0;
+              const rem = ppb > 0 ? qty % ppb : 0;
+              const bagsSuffix =
+                ppb > 0
+                  ? rem > 0
+                    ? ` · ${fullBags} ${t.unitBag} + ${formatNumber(rem)} ${t.unitPiece}`
+                    : ` · ${fullBags} ${t.unitBag}`
+                  : '';
               return (
                 <StockItem
                   key={p.id}
-                  label={p.name}
-                  value={finalStockByProductName[p.name] ?? 0}
+                  label={`${p.name}${bagsSuffix}`}
+                  value={qty}
                   max={20000}
                   unit={t.unitPiece}
                   color={st.color}

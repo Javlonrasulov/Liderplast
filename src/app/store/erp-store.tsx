@@ -170,6 +170,8 @@ export interface FinishedProductMachineRelation {
 export interface FinishedProductCatalogItem extends WarehouseProductBase {
   itemType: 'FINISHED_PRODUCT';
   volumeLiter: number;
+  /** Faqat tayyor mahsulot: 1 qopdagi dona */
+  piecesPerBag?: number;
   semiProducts: FinishedProductSemiRelation[];
   machines: FinishedProductMachineRelation[];
 }
@@ -1817,6 +1819,7 @@ async function loadStateFromApi() {
       itemType: 'FINISHED_PRODUCT' as const,
       name: item.name,
       volumeLiter: item.volumeLiter,
+      piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,

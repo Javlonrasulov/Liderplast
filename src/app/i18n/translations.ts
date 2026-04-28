@@ -166,7 +166,10 @@ export interface T {
   unitKg: string;
   unitTon: string;
   unitPiece: string;
+  unitBag: string;
   unitSum: string;
+  whPiecesPerBag: string;
+  whPiecesPerBagRequired: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1124,6 +1127,7 @@ const uz_cyrillic: T = {
   unitKg: 'кг',
   unitTon: 'тонна',
   unitPiece: 'дона',
+  unitBag: 'қоп',
   unitSum: 'сўм',
   statusLow: 'Кам!',
   statusCritical: 'Критик!',
@@ -1400,6 +1404,8 @@ const uz_cyrillic: T = {
   whUnit: 'Ўлчов',
   whWeightGram: 'Оғирлиги (грамм)',
   whVolumeLiter: 'Ҳажми (литр)',
+  whPiecesPerBag: '1 қопда (дона)',
+  whPiecesPerBagRequired: '1 қопда неча дона эканини киритинг',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2050,6 +2056,7 @@ const uz_latin: T = {
   unitKg: 'kg',
   unitTon: 'tonna',
   unitPiece: 'dona',
+  unitBag: 'qop',
   unitSum: "so'm",
   statusLow: 'Kam!',
   statusCritical: 'Kritik!',
@@ -2326,6 +2333,8 @@ const uz_latin: T = {
   whUnit: 'O\'lchov',
   whWeightGram: 'Og\'irligi (gramm)',
   whVolumeLiter: 'Hajmi (litr)',
+  whPiecesPerBag: '1 qopda (dona)',
+  whPiecesPerBagRequired: '1 qopda nechta dona ekanini kiriting',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -2976,6 +2985,7 @@ const ru: T = {
   unitKg: 'кг',
   unitTon: 'тонна',
   unitPiece: 'шт',
+  unitBag: 'мешок',
   unitSum: 'сум',
   statusLow: 'Мало!',
   statusCritical: 'Критично!',
@@ -3252,6 +3262,8 @@ const ru: T = {
   whUnit: 'Единица',
   whWeightGram: 'Вес (грамм)',
   whVolumeLiter: 'Объём (литр)',
+  whPiecesPerBag: 'В мешке (шт)',
+  whPiecesPerBagRequired: 'Укажите количество штук в мешке',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

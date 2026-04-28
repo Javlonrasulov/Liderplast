@@ -47,6 +47,7 @@ type ProductSnapshot = {
   defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
+  piecesPerBag?: number;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -82,6 +83,7 @@ type ResolvedProductInput = {
   defaultBagWeightKg?: number;
   weightGram?: number;
   volumeLiter?: number;
+  piecesPerBag?: number;
   relations: {
     rawMaterials?: SemiProductRawMaterialInputDto[];
     semiProductIds?: string[];
@@ -443,6 +445,7 @@ export class WarehouseService {
       defaultBagWeightKg: dto.defaultBagWeightKg,
       weightGram: dto.weightGram,
       volumeLiter: dto.volumeLiter,
+      piecesPerBag: dto.piecesPerBag,
       relations: this.normalizeRelations(dto.relations),
     };
 
@@ -480,6 +483,8 @@ export class WarehouseService {
         dto.weightGram !== undefined ? dto.weightGram : current.weightGram,
       volumeLiter:
         dto.volumeLiter !== undefined ? dto.volumeLiter : current.volumeLiter,
+      piecesPerBag:
+        dto.piecesPerBag !== undefined ? dto.piecesPerBag : current.piecesPerBag,
       relations: {
         rawMaterials:
           nextRelations.rawMaterials ??
@@ -546,6 +551,15 @@ export class WarehouseService {
         if (!input.volumeLiter || input.volumeLiter <= 0) {
           throw new BadRequestException(
             'Finished product volumeLiter must be greater than zero',
+          );
+        }
+        if (
+          input.piecesPerBag == null ||
+          !Number.isFinite(input.piecesPerBag) ||
+          input.piecesPerBag <= 0
+        ) {
+          throw new BadRequestException(
+            'Finished product piecesPerBag must be greater than zero',
           );
         }
         if (!input.relations.semiProductIds?.length) {
@@ -699,6 +713,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             volumeLiter: input.volumeLiter!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceFinishedProductRelations(tx, item.id, input.relations);
@@ -749,6 +764,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             volumeLiter: input.volumeLiter!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceFinishedProductRelations(tx, id, input.relations);
@@ -796,6 +812,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             volumeLiter: input.volumeLiter!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceFinishedProductRelations(tx, id, input.relations);
@@ -1292,6 +1309,7 @@ export class WarehouseService {
     id: string;
     name: string;
     volumeLiter: number;
+    piecesPerBag: number | null;
     description: string | null;
     isDeleted: boolean;
     createdAt: Date;
@@ -1326,6 +1344,7 @@ export class WarehouseService {
       itemType: InventoryItemType.FINISHED_PRODUCT,
       name: item.name,
       volumeLiter: item.volumeLiter,
+      piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),

@@ -235,6 +235,7 @@ model FinishedProduct {
   id            String               @id @default(cuid())
   name          String               @unique
   volumeLiter   Float
+  piecesPerBag  Int?
   description   String?
   isDeleted     Boolean              @default(false)
   status        EntityStatus         @default(COMPLETED)
