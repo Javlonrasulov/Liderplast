@@ -6,6 +6,24 @@ import {
   setTokens,
 } from './token-storage';
 
+/** HTTP status kodini saqlovchi xato — chaqiruvchi 403/404 ni alohida ushlay olishi uchun. */
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+export function isForbiddenApiError(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 403;
+}
+
+export function isNotFoundApiError(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 404;
+}
+
 let refreshPromise: Promise<void> | null = null;
 
 async function tryRefresh() {
@@ -88,7 +106,7 @@ export async function apiRequest<T>(
         if (stripped.length > 0) message = stripped;
       }
     }
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
 
   if (response.status === 204) {

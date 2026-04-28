@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { apiRequest } from '../api/http';
+import { apiRequest, ApiError } from '../api/http';
 import { clearTokens, getAccessToken, setTokens } from '../api/token-storage';
 import type { AppPermissionKey } from './permission-keys';
 
@@ -57,9 +57,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const me = await apiRequest<SessionUser>('/auth/me');
       setUser(me);
-    } catch {
-      clearTokens();
-      setUser(null);
+    } catch (err) {
+      /**
+       * Tokenlarni faqat haqiqiy autentifikatsiya xatosi (401) bo‘lganda tozalaymiz.
+       * 403 (ruxsat yetmasligi), tarmoq xatolari yoki backend muammosi sahifa
+       * yangilanganda foydalanuvchini tizimdan chiqarib yubormasligi kerak.
+       */
+      const isAuthError = err instanceof ApiError && err.status === 401;
+      if (isAuthError) {
+        clearTokens();
+        setUser(null);
+      } else {
+        if (typeof console !== 'undefined' && console.warn) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn('[auth] /auth/me failed, sessiya saqlandi:', msg);
+        }
+      }
     } finally {
       setLoading(false);
     }

@@ -1619,6 +1619,25 @@ function isNotFoundApiError(e: unknown): boolean {
   return m.includes('404') || m.includes('Not Found');
 }
 
+/**
+ * Bosh-load (initial) paytida ayrim endpointlar foydalanuvchining ruxsatiga qarab
+ * 403 (Forbidden) qaytarishi mumkin. Bunday holatda umumiy `Promise.all` bekor
+ * bo‘lib, butun store bo‘sh qolib ketardi. `safeLoad` har bir so‘rovni alohida
+ * o‘rab oladi: ruxsat yo‘qligi yoki kichik xato bo‘lsa — fallback qiymat qaytaradi,
+ * boshqa so‘rovlar esa o‘z ma’lumotlarini yuklab davom ettiradi.
+ */
+async function safeLoad<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await promise;
+  } catch (err) {
+    if (typeof console !== 'undefined' && console.warn) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[erp-store] partial load skipped:', msg);
+    }
+    return fallback;
+  }
+}
+
 /** Eski backendda faqat `/finance/expense-categories` bo‘lishi mumkin — 404 bo‘lsa shu yerga tushamiz */
 async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
   try {
@@ -1719,25 +1738,38 @@ async function loadStateFromApi() {
     salaryPaymentSummaries,
     rawMaterialOrders,
   ] = await Promise.all([
-    apiRequest<CatalogResponse>('/warehouse/catalog'),
-    apiRequest<WarehouseStockItem[]>('/warehouse/stock'),
-    apiRequest<WarehouseHistoryItem[]>('/warehouse/history'),
-    apiRequest<BackendRawMaterialBag[]>('/raw-material-bags'),
-    apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active'),
-    apiRequest<BackendBagLog[]>('/raw-material-bags/logs'),
-    apiRequest<BackendProductionRecord[]>('/production'),
-    apiRequest<BackendMachine[]>('/production/machines'),
-    apiRequest<BackendShiftRecord[]>('/production/shifts'),
-    apiRequest<BackendClient[]>('/clients'),
-    apiRequest<BackendOrder[]>('/orders'),
-    apiRequest<BackendPayment[]>('/payments'),
-    apiRequest<BackendExpense[]>('/finance/expenses'),
-    apiRequest<BackendUser[]>('/users'),
-    apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
-    apiRequest<BackendSalarySettings>('/finance/salary-settings'),
-    apiRequest<BackendSalaryRow[]>('/finance/salary'),
-    apiRequest<BackendBankVedomost[]>('/finance/vedomosts'),
-    apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
+    safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
+      rawMaterials: [],
+      semiProducts: [],
+      finishedProducts: [],
+    } as unknown as CatalogResponse),
+    safeLoad(apiRequest<WarehouseStockItem[]>('/warehouse/stock'), [] as WarehouseStockItem[]),
+    safeLoad(apiRequest<WarehouseHistoryItem[]>('/warehouse/history'), [] as WarehouseHistoryItem[]),
+    safeLoad(apiRequest<BackendRawMaterialBag[]>('/raw-material-bags'), [] as BackendRawMaterialBag[]),
+    safeLoad(apiRequest<BackendRawMaterialBag | null>('/raw-material-bags/active'), null),
+    safeLoad(apiRequest<BackendBagLog[]>('/raw-material-bags/logs'), [] as BackendBagLog[]),
+    safeLoad(apiRequest<BackendProductionRecord[]>('/production'), [] as BackendProductionRecord[]),
+    safeLoad(apiRequest<BackendMachine[]>('/production/machines'), [] as BackendMachine[]),
+    safeLoad(apiRequest<BackendShiftRecord[]>('/production/shifts'), [] as BackendShiftRecord[]),
+    safeLoad(apiRequest<BackendClient[]>('/clients'), [] as BackendClient[]),
+    safeLoad(apiRequest<BackendOrder[]>('/orders'), [] as BackendOrder[]),
+    safeLoad(apiRequest<BackendPayment[]>('/payments'), [] as BackendPayment[]),
+    safeLoad(apiRequest<BackendExpense[]>('/finance/expenses'), [] as BackendExpense[]),
+    safeLoad(apiRequest<BackendUser[]>('/users'), [] as BackendUser[]),
+    safeLoad(
+      apiRequest<BackendEmployeeProductRate[]>('/finance/employee-product-rates'),
+      [] as BackendEmployeeProductRate[],
+    ),
+    safeLoad(
+      apiRequest<BackendSalarySettings>('/finance/salary-settings'),
+      null as unknown as BackendSalarySettings,
+    ),
+    safeLoad(apiRequest<BackendSalaryRow[]>('/finance/salary'), [] as BackendSalaryRow[]),
+    safeLoad(apiRequest<BackendBankVedomost[]>('/finance/vedomosts'), [] as BackendBankVedomost[]),
+    safeLoad(
+      apiRequest<BackendSalaryPaymentSummary[]>('/finance/salary-vedomost'),
+      [] as BackendSalaryPaymentSummary[],
+    ),
     rawMaterialOrdersPromise,
   ]);
 
