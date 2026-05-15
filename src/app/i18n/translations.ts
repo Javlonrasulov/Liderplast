@@ -60,6 +60,7 @@ export interface T {
   authLoading: string;
   authMachines: string;
   authMachinesDisabledHint: string;
+  authSaralash: string;
   authShowPassword: string;
   authHidePassword: string;
 
@@ -1024,6 +1025,7 @@ const uz_cyrillic: T = {
   authLoading: 'Юкланмоқда…',
   authMachines: 'Машиналар',
   authMachinesDisabledHint: 'CRM манзили ҳозирча ўрнатилмаган (VITE_MACHINES_CRM_URL)',
+  authSaralash: 'Саралаш',
   authShowPassword: 'Паролни кўрсатиш',
   authHidePassword: 'Паролни яшириш',
   suTitle: 'Тизим фойдаланувчилари',
@@ -1954,6 +1956,7 @@ const uz_latin: T = {
   authLoading: 'Yuklanmoqda…',
   authMachines: 'Mashinalar',
   authMachinesDisabledHint: 'CRM manzili hozircha o‘rnatilmagan (VITE_MACHINES_CRM_URL)',
+  authSaralash: 'Saralash',
   authShowPassword: 'Parolni ko‘rsatish',
   authHidePassword: 'Parolni yashirish',
   suTitle: 'Tizim foydalanuvchilari',
@@ -2884,6 +2887,7 @@ const ru: T = {
   authLoading: 'Загрузка…',
   authMachines: 'Машины',
   authMachinesDisabledHint: 'Адрес CRM не задан (VITE_MACHINES_CRM_URL)',
+  authSaralash: 'Сортировка',
   authShowPassword: 'Показать пароль',
   authHidePassword: 'Скрыть пароль',
   suTitle: 'Пользователи системы',
