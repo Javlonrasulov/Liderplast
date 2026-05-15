@@ -52,10 +52,11 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     orders:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_sales'),
     payments: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_sales'),
-    expenses: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_expenses'),
+    expenses:
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_expenses'),
     users:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
-      (has('manage_users') || has('view_payroll')),
+      (has('manage_users') || has('view_payroll') || has('manage_shift_workers')),
     salarySettings:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('view_vedemost') || has('create_vedemost')),

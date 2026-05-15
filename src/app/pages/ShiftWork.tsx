@@ -620,6 +620,14 @@ function isValidPartialNonNegativeInt(raw: string): boolean {
   return v === '' || /^\d+$/.test(v);
 }
 
+/** Default "0" dan keyin yozilganda "020" bo‘lmasin — boshidagi ortiqcha nollarni olib tashlash */
+function normalizeNonNegativeIntInput(raw: string): string {
+  const v = String(raw).trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+  if (v === '') return '';
+  const w = v.replace(/^0+(?=\d)/, '');
+  return w === '' ? '0' : w;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export function ShiftWork() {
   const { state, dispatch, refresh } = useERP();
@@ -1980,7 +1988,7 @@ export function ShiftWork() {
                             onChange={(e) => {
                               const v = e.target.value;
                               if (isValidPartialNonNegativeInt(v)) {
-                                updateLine(ln.id, { producedQty: v });
+                                updateLine(ln.id, { producedQty: normalizeNonNegativeIntInput(v) });
                               }
                             }}
                             placeholder="0"
@@ -1997,7 +2005,7 @@ export function ShiftWork() {
                             onChange={(e) => {
                               const v = e.target.value;
                               if (isValidPartialNonNegativeInt(v)) {
-                                updateLine(ln.id, { defectCount: v });
+                                updateLine(ln.id, { defectCount: normalizeNonNegativeIntInput(v) });
                               }
                             }}
                             placeholder="0"
@@ -3147,7 +3155,7 @@ export function ShiftWork() {
                       if (isValidPartialNonNegativeInt(v)) {
                         setRecordEditForm((prev) => ({
                           ...prev,
-                          producedQty: v,
+                          producedQty: normalizeNonNegativeIntInput(v),
                           rawKgOverrides: {},
                         }));
                       }
@@ -3167,7 +3175,7 @@ export function ShiftWork() {
                       if (isValidPartialNonNegativeInt(v)) {
                         setRecordEditForm((prev) => ({
                           ...prev,
-                          defectCount: v,
+                          defectCount: normalizeNonNegativeIntInput(v),
                           rawKgOverrides: {},
                         }));
                       }

@@ -250,13 +250,21 @@ function requiredPermissionGroups(
       anyOf: ['view_vedemost'],
     },
 
-    { test: /^\/users$/, method: 'GET', anyOf: ['manage_users', 'view_payroll'] },
+    {
+      test: /^\/users$/,
+      method: 'GET',
+      anyOf: ['manage_users', 'view_payroll', 'manage_shift_workers'],
+    },
     {
       test: /^\/users$/,
       method: 'POST',
       anyOf: ['manage_users', 'manage_shift_workers'],
     },
-    { test: /^\/users\/[^/]+$/, method: 'GET', anyOf: ['manage_users', 'view_payroll'] },
+    {
+      test: /^\/users\/[^/]+$/,
+      method: 'GET',
+      anyOf: ['manage_users', 'view_payroll', 'manage_shift_workers'],
+    },
     {
       test: /^\/users\/[^/]+$/,
       method: 'PATCH',
