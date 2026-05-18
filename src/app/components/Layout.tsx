@@ -231,7 +231,7 @@ export function Layout() {
       path: '/suppliers',
       icon: Truck,
       label: t.navSuppliers,
-      perm: 'view_expenses',
+      perm: 'view_suppliers',
     },
     { kind: 'leaf', path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
     { kind: 'leaf', path: '/reports', icon: BarChart3, label: t.navReports, perm: 'view_reports' },
@@ -241,9 +241,6 @@ export function Layout() {
   const allowLeaf = (leaf: NavLeaf) => {
     if (leaf.path === '/payroll') {
       return hasPermission('view_payroll') || hasPermission('view_vedemost');
-    }
-    if (leaf.path === '/suppliers') {
-      return hasPermission('view_expenses') || hasPermission('view_raw_material');
     }
     return hasPermission(leaf.perm);
   };

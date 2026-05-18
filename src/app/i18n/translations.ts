@@ -149,6 +149,8 @@ export interface T {
   suPermViewInventory: string;
   suPermViewSales: string;
   suPermViewExpenses: string;
+  suPermViewSuppliers: string;
+  suPermManageSuppliers: string;
   suPermViewPayroll: string;
   suPermViewVedomost: string;
   suPermCreateVedomost: string;
@@ -1158,6 +1160,8 @@ const uz_cyrillic: T = {
   suPermViewInventory: 'Инвентаризация',
   suPermViewSales: 'Сотув',
   suPermViewExpenses: 'Харажатлар',
+  suPermViewSuppliers: 'Етказиб берувчи (кўриш)',
+  suPermManageSuppliers: 'Етказиб берувчини бошқариш',
   suPermViewPayroll: 'Иш ҳақи / ходимлар',
   suPermViewVedomost: 'Ведомост (кўриш)',
   suPermCreateVedomost: 'Ведомост яратиш',
@@ -2134,6 +2138,8 @@ const uz_latin: T = {
   suPermViewInventory: 'Inventarizatsiya',
   suPermViewSales: 'Sotuv',
   suPermViewExpenses: 'Xarajatlar',
+  suPermViewSuppliers: 'Yetkazib beruvchi (ko‘rish)',
+  suPermManageSuppliers: 'Yetkazib beruvchini boshqarish',
   suPermViewPayroll: 'Ish haqi / xodimlar',
   suPermViewVedomost: 'Vedomost (ko‘rish)',
   suPermCreateVedomost: 'Vedomost yaratish',
@@ -3110,6 +3116,8 @@ const ru: T = {
   suPermViewInventory: 'Инвентаризация',
   suPermViewSales: 'Продажи',
   suPermViewExpenses: 'Расходы',
+  suPermViewSuppliers: 'Поставщики (просмотр)',
+  suPermManageSuppliers: 'Управление поставщиками',
   suPermViewPayroll: 'Зарплата / сотрудники',
   suPermViewVedomost: 'Ведомость (просмотр)',
   suPermCreateVedomost: 'Создание ведомости',

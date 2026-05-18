@@ -95,7 +95,8 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const { state, dispatch } = useERP();
   const { t } = useApp();
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('view_expenses');
+  const canCreate =
+    hasPermission('manage_suppliers') || hasPermission('view_expenses');
 
   const { usd, eur, loading: fxLoading, error: fxErr, updatedAt, refetch } = useCbuRates();
   const [fxRefreshPending, setFxRefreshPending] = useState(false);

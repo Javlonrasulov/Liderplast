@@ -33,7 +33,7 @@ export function Suppliers() {
     );
   }
 
-  if (!hasPermission('view_expenses') && !hasPermission('view_raw_material')) {
+  if (!hasPermission('view_suppliers')) {
     return <Navigate to="/" replace />;
   }
 

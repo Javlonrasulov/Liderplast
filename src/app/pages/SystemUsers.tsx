@@ -129,6 +129,8 @@ function labelForPermission(t: T, key: AppPermissionKey): string {
     view_inventory: t.suPermViewInventory,
     view_sales: t.suPermViewSales,
     view_expenses: t.suPermViewExpenses,
+    view_suppliers: t.suPermViewSuppliers,
+    manage_suppliers: t.suPermManageSuppliers,
     view_payroll: t.suPermViewPayroll,
     view_vedemost: t.suPermViewVedomost,
     create_vedemost: t.suPermCreateVedomost,
@@ -170,6 +172,8 @@ function defaultPermissionSet(preset: RolePreset): Set<AppPermissionKey> {
       'view_inventory',
       'view_sales',
       'view_expenses',
+      'view_suppliers',
+      'manage_suppliers',
       'view_payroll',
       'view_vedemost',
       'view_reports',
@@ -184,6 +188,8 @@ function defaultPermissionSet(preset: RolePreset): Set<AppPermissionKey> {
       'create_vedemost',
       'view_reports',
       'view_expenses',
+      'view_suppliers',
+      'manage_suppliers',
       'view_sales',
     ]);
   }

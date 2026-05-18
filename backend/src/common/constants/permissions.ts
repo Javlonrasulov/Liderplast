@@ -12,6 +12,8 @@ export const ALL_APP_PERMISSIONS = [
   'view_inventory',
   'view_sales',
   'view_expenses',
+  'view_suppliers',
+  'manage_suppliers',
   'view_payroll',
   'view_vedemost',
   'create_vedemost',
@@ -40,6 +42,8 @@ export function defaultPermissionsForRole(role: Role): string[] {
         'view_inventory',
         'view_sales',
         'view_expenses',
+        'view_suppliers',
+        'manage_suppliers',
         'view_payroll',
         'view_vedemost',
         'view_reports',
@@ -53,6 +57,8 @@ export function defaultPermissionsForRole(role: Role): string[] {
         'create_vedemost',
         'view_reports',
         'view_expenses',
+        'view_suppliers',
+        'manage_suppliers',
         'view_sales',
       ];
     case Role.MANAGER:

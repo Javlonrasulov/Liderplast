@@ -17,7 +17,8 @@ export function SupplierListSection({
   const { state } = useERP();
   const { t } = useApp();
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('view_expenses');
+  const canCreate =
+    hasPermission('manage_suppliers') || hasPermission('view_expenses');
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {

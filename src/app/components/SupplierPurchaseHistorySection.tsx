@@ -18,7 +18,10 @@ export function SupplierPurchaseHistorySection() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
   const { hasPermission } = useAuth();
-  const canFulfill = hasPermission('view_expenses') || hasPermission('view_raw_material');
+  const canFulfill =
+    hasPermission('manage_suppliers') ||
+    hasPermission('view_expenses') ||
+    hasPermission('view_raw_material');
 
   const historySorted = useMemo(
     () =>

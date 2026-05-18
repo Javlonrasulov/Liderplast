@@ -59,10 +59,10 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_expenses'),
     supplierOrders:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
-      (has('view_expenses') || has('view_raw_material')),
+      (has('view_suppliers') || has('view_expenses') || has('view_raw_material')),
     suppliers:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
-      (has('view_expenses') || has('view_raw_material')),
+      (has('view_suppliers') || has('view_expenses') || has('view_raw_material')),
     users:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('manage_users') || has('view_payroll') || has('manage_shift_workers')),

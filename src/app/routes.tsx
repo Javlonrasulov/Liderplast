@@ -67,7 +67,14 @@ export const router = createBrowserRouter([
       },
       { path: 'inventarizatsiya', element: <Navigate to="/inventory" replace /> },
       { path: 'expenses', Component: Expenses },
-      { path: 'suppliers', Component: Suppliers },
+      {
+        path: 'suppliers',
+        element: (
+          <RouteGuard permission="view_suppliers">
+            <Suppliers />
+          </RouteGuard>
+        ),
+      },
       { path: 'employees', element: <Navigate to="/payroll" replace /> },
       { path: 'shifts', Component: ShiftWork },
       { path: 'shifts/over-consumption', element: <Navigate to="/shifts" replace /> },

@@ -10,6 +10,8 @@ export const APP_PERMISSION_KEYS = [
   'view_inventory',
   'view_sales',
   'view_expenses',
+  'view_suppliers',
+  'manage_suppliers',
   'view_payroll',
   'view_vedemost',
   'create_vedemost',
