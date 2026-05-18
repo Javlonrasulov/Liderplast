@@ -12,13 +12,18 @@ import {
   EmployeeRateType,
   EntityStatus,
   ExpenseType,
+  InventoryItemType,
   PurchaseOrderCurrency,
+  PurchasePaymentType,
+  PurchaseQuantityUnit,
   RawMaterialOrderStatus,
   Role,
   SalaryType,
 } from '../../generated/prisma/enums.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
+import { CreateSupplierDto } from './dto/create-supplier.dto.js';
+import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
@@ -30,6 +35,7 @@ import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 const SALARY_PURPOSE_KEYWORDS = ['oylik', 'ish haqi', 'zarplata', 'salary'];
 
 const RAW_MATERIAL_ORDER_CATEGORY_ID = 'expseed_raw_material_orders';
+const RAW_MATERIAL_ORDER_CATEGORY_NAME = 'Yetkazib beruvchi xarid';
 const ELECTRICITY_EXPENSE_CATEGORY_SEED_ID = 'expseed_electricity';
 
 type ProductRateRow = {
@@ -408,6 +414,28 @@ export class FinanceService {
     });
   }
 
+  /** Migration seed bo‘lmasa ham yetkazib beruvchi xaridlari ishlaydi */
+  private async ensureRawMaterialOrderExpenseCategory() {
+    const row = await this.prisma.expenseCategory.findUnique({
+      where: { id: RAW_MATERIAL_ORDER_CATEGORY_ID },
+    });
+    if (row && row.deletedAt == null) return row;
+    if (row?.deletedAt) {
+      return this.prisma.expenseCategory.update({
+        where: { id: RAW_MATERIAL_ORDER_CATEGORY_ID },
+        data: { deletedAt: null },
+      });
+    }
+    return this.prisma.expenseCategory.create({
+      data: {
+        id: RAW_MATERIAL_ORDER_CATEGORY_ID,
+        name: RAW_MATERIAL_ORDER_CATEGORY_NAME,
+        legacyExpenseType: ExpenseType.OTHER,
+        electricityCalc: false,
+      },
+    });
+  }
+
   async createRawMaterialPurchaseOrder(
     dto: CreateRawMaterialPurchaseOrderDto,
     createdById?: string,
@@ -419,14 +447,7 @@ export class FinanceService {
       throw new BadRequestException('Raw material not found');
     }
 
-    const category = await this.prisma.expenseCategory.findFirst({
-      where: { id: RAW_MATERIAL_ORDER_CATEGORY_ID, deletedAt: null },
-    });
-    if (!category) {
-      throw new BadRequestException(
-        'Expense category for raw material orders is missing (run migrations).',
-      );
-    }
+    const category = await this.ensureRawMaterialOrderExpenseCategory();
 
     let fx = dto.fxRateToUzs;
     if (dto.currency === PurchaseOrderCurrency.UZS) {
@@ -525,6 +546,301 @@ export class FinanceService {
     });
   }
 
+  getSuppliers() {
+    return this.prisma.supplier.findMany({
+      where: { isDeleted: false },
+      orderBy: [{ name: 'asc' }],
+    });
+  }
+
+  createSupplier(dto: CreateSupplierDto) {
+    const name = dto.name.trim();
+    if (!name) {
+      throw new BadRequestException('Supplier name is required');
+    }
+    return this.prisma.supplier.create({
+      data: {
+        name,
+        phone: dto.phone?.trim() || null,
+        address: dto.address?.trim() || null,
+        notes: dto.notes?.trim() || null,
+      },
+    });
+  }
+
+  async updateSupplier(id: string, dto: CreateSupplierDto) {
+    const name = dto.name.trim();
+    if (!name) {
+      throw new BadRequestException('Supplier name is required');
+    }
+    const row = await this.prisma.supplier.findFirst({
+      where: { id, isDeleted: false },
+    });
+    if (!row) {
+      throw new NotFoundException('Supplier not found');
+    }
+    return this.prisma.supplier.update({
+      where: { id },
+      data: {
+        name,
+        phone: dto.phone?.trim() || null,
+        address: dto.address?.trim() || null,
+        notes: dto.notes?.trim() || null,
+      },
+    });
+  }
+
+  private async resolveSupplierPurchaseProduct(dto: CreateSupplierPurchaseOrderDto) {
+    if (dto.itemType === InventoryItemType.RAW_MATERIAL) {
+      const id = dto.rawMaterialId?.trim();
+      if (!id) throw new BadRequestException('rawMaterialId is required');
+      const row = await this.prisma.rawMaterial.findFirst({
+        where: { id, isDeleted: false },
+      });
+      if (!row) throw new BadRequestException('Raw material not found');
+      return { name: row.name, rawMaterialId: row.id, semiProductId: null, finishedProductId: null };
+    }
+    if (dto.itemType === InventoryItemType.SEMI_PRODUCT) {
+      const id = dto.semiProductId?.trim();
+      if (!id) throw new BadRequestException('semiProductId is required');
+      const row = await this.prisma.semiProduct.findFirst({
+        where: { id, isDeleted: false },
+      });
+      if (!row) throw new BadRequestException('Semi product not found');
+      return { name: row.name, rawMaterialId: null, semiProductId: row.id, finishedProductId: null };
+    }
+    const id = dto.finishedProductId?.trim();
+    if (!id) throw new BadRequestException('finishedProductId is required');
+    const row = await this.prisma.finishedProduct.findFirst({
+      where: { id, isDeleted: false },
+    });
+    if (!row) throw new BadRequestException('Finished product not found');
+    return { name: row.name, rawMaterialId: null, semiProductId: null, finishedProductId: row.id };
+  }
+
+  private quantityUnitLabel(unit: PurchaseQuantityUnit): string {
+    if (unit === PurchaseQuantityUnit.TON) return 'tonna';
+    if (unit === PurchaseQuantityUnit.PIECES) return 'dona';
+    return 'kg';
+  }
+
+  async createSupplierPurchaseOrder(
+    dto: CreateSupplierPurchaseOrderDto,
+    createdById?: string,
+  ) {
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { id: dto.supplierId, isDeleted: false },
+    });
+    if (!supplier) {
+      throw new BadRequestException('Supplier not found');
+    }
+
+    const product = await this.resolveSupplierPurchaseProduct(dto);
+
+    const category = await this.ensureRawMaterialOrderExpenseCategory();
+
+    let fx = dto.fxRateToUzs;
+    if (dto.currency === PurchaseOrderCurrency.UZS) {
+      fx = 1;
+    }
+    if (!Number.isFinite(fx) || fx <= 0) {
+      throw new BadRequestException('Invalid CBU / exchange rate');
+    }
+
+    const amountUzs =
+      dto.currency === PurchaseOrderCurrency.UZS
+        ? dto.amountOriginal
+        : dto.amountOriginal * fx;
+
+    if (!Number.isFinite(amountUzs) || amountUzs < 0) {
+      throw new BadRequestException('Invalid amounts');
+    }
+
+    let paidAmountUzs = dto.paidAmountUzs ?? amountUzs;
+    if (dto.paymentType === PurchasePaymentType.CASH) {
+      paidAmountUzs = amountUzs;
+    }
+    if (!Number.isFinite(paidAmountUzs) || paidAmountUzs < 0 || paidAmountUzs > amountUzs) {
+      throw new BadRequestException('Invalid paid amount');
+    }
+    const debtAmountUzs = Math.max(0, amountUzs - paidAmountUzs);
+    if (dto.paymentType === PurchasePaymentType.CREDIT && debtAmountUzs <= 0) {
+      throw new BadRequestException('Credit order requires remaining debt');
+    }
+
+    const unitLbl = this.quantityUnitLabel(dto.quantityUnit);
+    const paymentLbl =
+      dto.paymentType === PurchasePaymentType.CREDIT
+        ? `qarz ${Math.round(debtAmountUzs)} UZS`
+        : 'naqd';
+
+    return this.prisma.$transaction(async (tx) => {
+      const expense = await tx.expense.create({
+        data: {
+          title: `Sotib olish: ${product.name} (${supplier.name})`,
+          type: category.legacyExpenseType,
+          categoryId: category.id,
+          amount: amountUzs,
+          description: [
+            `${dto.quantity} ${unitLbl}`,
+            `${dto.currency} ${dto.amountOriginal}`,
+            `kurs ${fx}`,
+            `→ ${Math.round(amountUzs)} UZS`,
+            paymentLbl,
+            dto.notes?.trim(),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          incurredAt: new Date(),
+          createdById,
+        },
+      });
+
+      return tx.supplierPurchaseOrder.create({
+        data: {
+          supplierId: supplier.id,
+          itemType: dto.itemType,
+          rawMaterialId: product.rawMaterialId,
+          semiProductId: product.semiProductId,
+          finishedProductId: product.finishedProductId,
+          quantity: dto.quantity,
+          quantityUnit: dto.quantityUnit,
+          currency: dto.currency,
+          fxRateToUzs: fx,
+          amountOriginal: dto.amountOriginal,
+          amountUzs,
+          paymentType: dto.paymentType,
+          paidAmountUzs,
+          debtAmountUzs,
+          debtDueDate: dto.debtDueDate ? new Date(dto.debtDueDate) : null,
+          expenseId: expense.id,
+          notes: dto.notes?.trim() || null,
+          createdById: createdById ?? null,
+        },
+        include: this.supplierPurchaseOrderInclude(),
+      });
+    });
+  }
+
+  private supplierPurchaseOrderInclude() {
+    return {
+      supplier: { select: { id: true, name: true } },
+      rawMaterial: { select: { id: true, name: true } },
+      semiProduct: { select: { id: true, name: true } },
+      finishedProduct: { select: { id: true, name: true } },
+      expense: {
+        select: { id: true, amount: true, title: true, incurredAt: true },
+      },
+    } as const;
+  }
+
+  async getSupplierPurchaseOrders() {
+    const [legacy, modern] = await Promise.all([
+      this.prisma.rawMaterialPurchaseOrder.findMany({
+        orderBy: [{ orderedAt: 'desc' }],
+        include: {
+          rawMaterial: { select: { id: true, name: true } },
+          expense: {
+            select: { id: true, amount: true, title: true, incurredAt: true },
+          },
+        },
+      }),
+      this.prisma.supplierPurchaseOrder.findMany({
+        orderBy: [{ orderedAt: 'desc' }],
+        include: this.supplierPurchaseOrderInclude(),
+      }),
+    ]);
+
+    const legacyMapped = legacy.map((r) => ({
+      id: r.id,
+      legacy: true as const,
+      supplierId: null as string | null,
+      supplierName: null as string | null,
+      itemType: InventoryItemType.RAW_MATERIAL,
+      rawMaterialId: r.rawMaterialId,
+      semiProductId: null as string | null,
+      finishedProductId: null as string | null,
+      productName: r.rawMaterial.name,
+      quantity: r.quantityKg,
+      quantityUnit: PurchaseQuantityUnit.KG,
+      quantityKg: r.quantityKg,
+      currency: r.currency,
+      fxRateToUzs: r.fxRateToUzs,
+      amountOriginal: r.amountOriginal,
+      amountUzs: r.amountUzs,
+      paymentType: PurchasePaymentType.CASH,
+      paidAmountUzs: r.amountUzs,
+      debtAmountUzs: 0,
+      debtDueDate: null as string | null,
+      expenseId: r.expenseId,
+      status: r.status,
+      orderedAt: r.orderedAt,
+      fulfilledAt: r.fulfilledAt,
+      notes: r.notes,
+    }));
+
+    const modernMapped = modern.map((r) => ({
+      id: r.id,
+      legacy: false as const,
+      supplierId: r.supplierId,
+      supplierName: r.supplier.name,
+      itemType: r.itemType,
+      rawMaterialId: r.rawMaterialId,
+      semiProductId: r.semiProductId,
+      finishedProductId: r.finishedProductId,
+      productName:
+        r.rawMaterial?.name ??
+        r.semiProduct?.name ??
+        r.finishedProduct?.name ??
+        '',
+      quantity: r.quantity,
+      quantityUnit: r.quantityUnit,
+      quantityKg:
+        r.quantityUnit === PurchaseQuantityUnit.TON
+          ? r.quantity * 1000
+          : r.quantityUnit === PurchaseQuantityUnit.KG
+            ? r.quantity
+            : null,
+      currency: r.currency,
+      fxRateToUzs: r.fxRateToUzs,
+      amountOriginal: r.amountOriginal,
+      amountUzs: r.amountUzs,
+      paymentType: r.paymentType,
+      paidAmountUzs: r.paidAmountUzs,
+      debtAmountUzs: r.debtAmountUzs,
+      debtDueDate: r.debtDueDate,
+      expenseId: r.expenseId,
+      status: r.status,
+      orderedAt: r.orderedAt,
+      fulfilledAt: r.fulfilledAt,
+      notes: r.notes,
+    }));
+
+    return [...modernMapped, ...legacyMapped].sort(
+      (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
+    );
+  }
+
+  async fulfillSupplierPurchaseOrder(id: string) {
+    const modern = await this.prisma.supplierPurchaseOrder.findUnique({
+      where: { id },
+    });
+    if (modern) {
+      if (modern.status !== RawMaterialOrderStatus.PENDING) {
+        throw new BadRequestException('Order is not pending');
+      }
+      return this.prisma.supplierPurchaseOrder.update({
+        where: { id },
+        data: {
+          status: RawMaterialOrderStatus.FULFILLED,
+          fulfilledAt: new Date(),
+        },
+        include: this.supplierPurchaseOrderInclude(),
+      });
+    }
+    return this.fulfillRawMaterialPurchaseOrder(id);
+  }
+
   async getExpenseCategories() {
     await this.prisma.expenseCategory.updateMany({
       where: { legacyExpenseType: 'ELECTRICITY', electricityCalc: false },
@@ -596,6 +912,16 @@ export class FinanceService {
       include: { worker: true, machine: true },
     });
     if (!shift) {
+      return;
+    }
+
+    if (shift.recordKind === 'PACKAGING') {
+      const existing = await this.prisma.expense.findFirst({
+        where: { sourceShiftId: shiftId },
+      });
+      if (existing) {
+        await this.prisma.expense.delete({ where: { id: existing.id } });
+      }
       return;
     }
 

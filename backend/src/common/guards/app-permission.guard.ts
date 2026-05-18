@@ -162,6 +162,36 @@ function requiredPermissionGroups(
       anyOf: ['view_expenses', 'view_raw_material'],
     },
     {
+      test: /^\/finance\/suppliers$/,
+      method: 'GET',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
+      test: /^\/finance\/suppliers$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/suppliers\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/supplier-purchase-orders$/,
+      method: 'GET',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
+      test: /^\/finance\/supplier-purchase-orders$/,
+      method: 'POST',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/supplier-purchase-orders\/[^/]+\/fulfill$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses', 'view_raw_material'],
+    },
+    {
       test: /^\/finance\/expenses\/categories$/,
       method: 'GET',
       anyOf: ['view_expenses'],

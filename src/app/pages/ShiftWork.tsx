@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import {
   Users, Plus, Trash2, CheckCircle2, Clock, Zap,
   AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu,
-  Pencil, Layers, X, Maximize2, Minimize2, Droplets,
+  Pencil, Layers, X, Maximize2, Minimize2, Droplets, Package,
 } from 'lucide-react';
+import { ShiftPackagingForm } from './ShiftPackagingForm';
 import {
   useERP,
   type Employee,
@@ -88,6 +89,13 @@ const TR = {
     tab6MaterialHistory: 'Хомашё тарихи',
     tab3: 'Ишчилар',
     formTitle: 'Янги Смена Ёзуви',
+    formTitlePackaging: 'Қадоқлаш',
+    labelBagCount: 'Қоп сони',
+    labelPackCount: 'Пачка сони',
+    btnPackagingSave: 'Қадоқлаш ёзувини сақлаш',
+    packagingKindBadge: 'Қадоқлаш',
+    packagingPiecesPreview: 'Жами: {pieces} дона (1 қоп = {ppb} дона)',
+    packagingNoPiecesPerBag: 'Қоп ёки пачка миқдорини киритинг',
     labelDate: 'Сана',
     labelShift: 'Смена',
     labelWorker: 'Ишчи исми',
@@ -228,6 +236,13 @@ const TR = {
     tab6MaterialHistory: 'Xomashyo tarixi',
     tab3: 'Ishchilar',
     formTitle: 'Yangi Smena Yozuvi',
+    formTitlePackaging: 'Qadoqlash',
+    labelBagCount: 'Qop soni',
+    labelPackCount: 'Pachka soni',
+    btnPackagingSave: 'Qadoqlash yozuvini saqlash',
+    packagingKindBadge: 'Qadoqlash',
+    packagingPiecesPreview: 'Jami: {pieces} dona (1 qop = {ppb} dona)',
+    packagingNoPiecesPerBag: 'Qop yoki pachka miqdorini kiriting',
     labelDate: 'Sana',
     labelShift: 'Smena',
     labelWorker: 'Ishchi ismi',
@@ -368,6 +383,13 @@ const TR = {
     tab6MaterialHistory: 'История сырья',
     tab3: 'Сотрудники',
     formTitle: 'Новая запись смены',
+    formTitlePackaging: 'Упаковка',
+    labelBagCount: 'Мешков',
+    labelPackCount: 'Пачек',
+    btnPackagingSave: 'Сохранить упаковку',
+    packagingKindBadge: 'Упаковка',
+    packagingPiecesPreview: 'Итого: {pieces} шт (1 мешок = {ppb} шт)',
+    packagingNoPiecesPerBag: 'Укажите количество мешков или пачек',
     labelDate: 'Дата',
     labelShift: 'Смена',
     labelWorker: 'Имя рабочего',
@@ -503,6 +525,23 @@ function getShiftLabel(defs: ShiftDefinition[], number: number, t: (typeof TR)['
   const name = d?.name?.trim();
   if (name) return name;
   return t.shiftGenericName.replace('{n}', String(number));
+}
+
+function formatShiftReadingDisplay(
+  r: {
+    recordKind?: string;
+    machineReading?: string;
+    bagCount?: number;
+    packCount?: number;
+  },
+  t: (typeof TR)['ru'],
+): string {
+  if (r.recordKind === 'PACKAGING') {
+    const bags = r.bagCount ?? 0;
+    const packs = r.packCount ?? 0;
+    return `${bags} ${t.labelBagCount.toLowerCase()} · ${packs} ${t.labelPackCount.toLowerCase()}`;
+  }
+  return r.machineReading?.trim() || '—';
 }
 
 function getShiftTimeDisplay(defs: ShiftDefinition[], number: number, t: (typeof TR)['ru']) {
@@ -762,6 +801,10 @@ export function ShiftWork() {
 
   const productTypes = shiftLineProductOptions;
 
+  const [formEntryMode, setFormEntryMode] = useState<'production' | 'packaging'>(
+    'production',
+  );
+
   const [activeTab, setActiveTab] = useState<
     'form' | 'history' | 'materialHistory' | 'workers' | 'machines' | 'shiftDefs'
   >('form');
@@ -971,11 +1014,20 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
+  const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
 
   useEffect(() => {
     if (lines.length > 0) return;
     setLines([createEmptyLine()]);
   }, [lines.length, createEmptyLine]);
+
+  useEffect(() => {
+    if (lines.length === 0) return;
+    setExpandedLineId((prev) => {
+      if (prev && lines.some((l) => l.id === prev)) return prev;
+      return lines[lines.length - 1]?.id ?? null;
+    });
+  }, [lines]);
 
   const workerSuggestions = useMemo(() => {
     const query = form.workerName.trim().toLowerCase();
@@ -1182,7 +1234,9 @@ export function ShiftWork() {
   }, [state.machines, shiftLineProductOptions]);
 
   const addLine = useCallback(() => {
-    setLines((prev) => [...prev, createEmptyLine()]);
+    const newLine = createEmptyLine();
+    setExpandedLineId(newLine.id);
+    setLines((prev) => [...prev, newLine]);
   }, [createEmptyLine]);
 
   const removeLine = useCallback((id: string) => {
@@ -1221,8 +1275,6 @@ export function ShiftWork() {
     }
 
     for (const ln of meaningfulLines) {
-      const hours = parseDecimalInput(ln.hoursWorked);
-      if (!hours || hours <= 0) { setError(t.labelHours + '!'); return; }
       const produced = parseNonNegativeInt(ln.producedQty);
       if (Number.isNaN(produced) || produced < 0) { setError(t.labelProduced + '!'); return; }
       if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
@@ -1670,13 +1722,65 @@ export function ShiftWork() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-[400px]:gap-6 min-w-0 items-start">
           {/* Form */}
           <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
-                <Plus size={16} className="text-white" />
-              </div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.formTitle}</h3>
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <button
+                type="button"
+                onClick={() => setFormEntryMode('production')}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                  formEntryMode === 'production'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'
+                }`}
+              >
+                <Plus size={16} />
+                {t.formTitle}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormEntryMode('packaging')}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                  formEntryMode === 'packaging'
+                    ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'
+                }`}
+              >
+                <Package size={16} />
+                {t.formTitlePackaging}
+              </button>
             </div>
 
+            {formEntryMode === 'packaging' ? (
+              <ShiftPackagingForm
+                t={{
+                  labelDate: t.labelDate,
+                  labelShift: t.labelShift,
+                  labelWorker: t.labelWorker,
+                  labelProduct: t.labelProduct,
+                  labelHours: t.labelHours,
+                  labelBagCount: t.labelBagCount,
+                  labelPackCount: t.labelPackCount,
+                  labelNotes: t.labelNotes,
+                  placeholderWorker: t.placeholderWorker,
+                  placeholderNotes: t.placeholderNotes,
+                  formAddRow: t.formAddRow,
+                  btn: t.btnPackagingSave,
+                  labelMachine: t.labelMachine,
+                  shiftNoDefsHint: t.shiftNoDefsHint,
+                  shiftNoDefsGoToTab: t.shiftNoDefsGoToTab,
+                  productTypesEmptyHint: t.productTypesEmptyHint,
+                  shiftNoDefect: t.shiftNoDefect,
+                  unitPiecesAbbr: t.unitPiecesAbbr,
+                  hoursShort: t.hoursShort,
+                  packagingPiecesPreview: t.packagingPiecesPreview,
+                  packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
+                }}
+                shiftPickerDefs={shiftPickerDefs}
+                finishedProductTypes={finishedProductTypes}
+                onNeedShiftDefs={() => setActiveTab('shiftDefs')}
+                getShiftLabel={(defs, n) => getShiftLabel(defs, n, t)}
+              />
+            ) : (
+              <>
             {success && (
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl flex items-center gap-2">
                 <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
@@ -1790,10 +1894,25 @@ export function ShiftWork() {
                   const selectedMachine = state.machines.find((m) => m.id === ln.machineId);
                   const hours = parseDecimalInput(ln.hoursWorked);
                   const kwh = hours * (selectedMachine?.powerKw || 0);
+                  const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
+                  const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
+                  const brakPct =
+                    produced + defect > 0
+                      ? ((defect / (produced + defect)) * 100).toFixed(1)
+                      : '0';
+                  const isExpanded = lines.length === 1 || ln.id === expandedLineId;
+                  const machineLabel =
+                    selectedMachine?.name?.split('#')[0]?.trim() || '—';
+                  const hoursLabel =
+                    ln.hoursWorked.trim() && hours > 0
+                      ? `${hours}${t.hoursShort}`
+                      : '—';
                   return (
                     <div
                       key={ln.id}
-                      className="p-3 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/20 space-y-3"
+                      className={`rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/20 ${
+                        isExpanded ? 'p-3 space-y-3' : 'p-2'
+                      }`}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
@@ -1809,6 +1928,59 @@ export function ShiftWork() {
                         </button>
                       </div>
 
+                      {!isExpanded ? (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedLineId(ln.id)}
+                          className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 px-1 py-1.5 rounded-xl text-left hover:bg-white/70 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          {ln.productType ? (
+                            <span
+                              className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                                PRODUCT_COLORS[ln.productType] ||
+                                'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              {ln.productType}
+                            </span>
+                          ) : null}
+                          <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[8rem]">
+                            {machineLabel}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">
+                            <Clock size={10} className="text-slate-400 shrink-0" />
+                            {hoursLabel}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono truncate max-w-[6rem]">
+                            {ln.machineReading.trim() || '—'}
+                          </span>
+                          {defect > 0 ? (
+                            <span className="text-red-600 dark:text-red-400 font-bold text-xs">
+                              {defect}
+                              <span className="text-red-400 font-normal ml-0.5">({brakPct}%)</span>
+                            </span>
+                          ) : (
+                            <span className="text-emerald-500 text-xs font-medium">
+                              ✓ {t.shiftNoDefect}
+                            </span>
+                          )}
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs whitespace-nowrap">
+                            {formatNumber(produced)}{' '}
+                            <span className="font-normal text-slate-400">{t.unitPiecesAbbr}</span>
+                          </span>
+                          {hours > 0 && selectedMachine ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400">
+                              <Zap size={10} />
+                              {kwh.toFixed(1)}
+                            </span>
+                          ) : null}
+                          <ChevronDown
+                            size={14}
+                            className="ml-auto text-slate-400 shrink-0 -rotate-90"
+                          />
+                        </button>
+                      ) : (
+                        <>
                       {/* Machine + Hours */}
                       <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
                         <div>
@@ -2025,6 +2197,8 @@ export function ShiftWork() {
                           className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                         />
                       </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
@@ -2044,8 +2218,11 @@ export function ShiftWork() {
                 <CheckCircle2 size={16} /> {t.btn}
               </button>
             </form>
+              </>
+            )}
           </div>
 
+          {formEntryMode === 'production' ? (
           <div className="bg-white dark:bg-slate-800 rounded-xl min-[400px]:rounded-2xl border border-slate-200 dark:border-slate-700 p-4 min-[400px]:p-5 shadow-sm min-w-0 flex flex-col max-h-[min(80vh,52rem)] lg:max-h-none">
             <div className="flex items-center gap-2 mb-4 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
@@ -2170,6 +2347,7 @@ export function ShiftWork() {
               })}
             </div>
           </div>
+          ) : null}
           </div>
 
           {/* Today's table preview */}
@@ -2234,10 +2412,15 @@ export function ShiftWork() {
                             </span>
                           </td>
                           <td className="px-3 py-3 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{r.workerName}</td>
-                          <td className="px-3 py-3"><span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span></td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
+                            {r.recordKind === 'PACKAGING' ? (
+                              <span className="ml-1 inline-flex px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300">{t.packagingKindBadge}</span>
+                            ) : null}
+                          </td>
                           <td className="px-3 py-3 text-xs text-slate-500 whitespace-nowrap">{machine?.name?.split(' ').slice(-1)[0] || '—'}</td>
                           <td className="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300">{r.hoursWorked}{t.hoursShort}</td>
-                          <td className="px-3 py-3 text-xs text-slate-400 font-mono whitespace-nowrap">{r.machineReading || '—'}</td>
+                          <td className="px-3 py-3 text-xs text-slate-400 font-mono whitespace-nowrap">{formatShiftReadingDisplay(r, t)}</td>
                           <td className="px-3 py-3 text-center">
                             {r.defectCount > 0 ? (
                               <span className="text-red-600 dark:text-red-400 font-bold text-xs">{r.defectCount} <span className="text-red-400 font-normal">({brakPct}%)</span></span>
@@ -2246,7 +2429,9 @@ export function ShiftWork() {
                             )}
                           </td>
                           <td className="px-3 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400">{formatNumber(r.producedQty)}</td>
-                          <td className="px-3 py-3 text-right text-xs text-yellow-600 dark:text-yellow-400 font-medium">{r.electricityKwh}</td>
+                          <td className="px-3 py-3 text-right text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+                            {r.recordKind === 'PACKAGING' ? '—' : r.electricityKwh}
+                          </td>
                         </tr>
                       );
                     })}
@@ -2340,6 +2525,9 @@ export function ShiftWork() {
                         </td>
                         <td className="px-3 py-3">
                           <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
+                          {r.recordKind === 'PACKAGING' ? (
+                            <span className="ml-1 inline-flex px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300">{t.packagingKindBadge}</span>
+                          ) : null}
                         </td>
                         <td className="px-3 py-3 text-xs text-slate-500">{machine?.name?.split('#')[0]?.trim() || '—'}</td>
                         <td className="px-3 py-3 text-center">
@@ -2347,7 +2535,7 @@ export function ShiftWork() {
                             <Clock size={10} className="text-slate-400" />{r.hoursWorked}{t.hoursShort}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-xs text-slate-400 font-mono">{r.machineReading || '—'}</td>
+                        <td className="px-3 py-3 text-xs text-slate-400 font-mono">{formatShiftReadingDisplay(r, t)}</td>
                         <td className="px-3 py-3 text-center">
                           {r.defectCount > 0 ? (
                             <div>
@@ -2362,9 +2550,13 @@ export function ShiftWork() {
                           {formatNumber(r.producedQty)} <span className="text-xs font-normal text-slate-400">{t.unitPiecesAbbr}</span>
                         </td>
                         <td className="px-3 py-3 text-right text-xs">
-                          <span className="flex items-center justify-end gap-1 text-yellow-600 dark:text-yellow-400">
-                            <Zap size={10} />{r.electricityKwh}
-                          </span>
+                          {r.recordKind === 'PACKAGING' ? (
+                            <span className="text-slate-400">—</span>
+                          ) : (
+                            <span className="flex items-center justify-end gap-1 text-yellow-600 dark:text-yellow-400">
+                              <Zap size={10} />{r.electricityKwh}
+                            </span>
+                          )}
                         </td>
                         <td className="px-2 min-[400px]:px-3 py-2 min-[400px]:py-3">
                           {deleteConfirm === r.id ? (

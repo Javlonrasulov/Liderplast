@@ -79,6 +79,8 @@ export const ModelName = {
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
   RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
+  Supplier: 'Supplier',
+  SupplierPurchaseOrder: 'SupplierPurchaseOrder',
   SalarySetting: 'SalarySetting',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
@@ -395,11 +397,14 @@ export const ShiftRecordScalarFieldEnum = {
   machineId: 'machineId',
   shiftNumber: 'shiftNumber',
   date: 'date',
+  recordKind: 'recordKind',
   hoursWorked: 'hoursWorked',
   productLabel: 'productLabel',
   machineReading: 'machineReading',
   producedQty: 'producedQty',
   defectCount: 'defectCount',
+  bagCount: 'bagCount',
+  packCount: 'packCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
   paintUsed: 'paintUsed',
@@ -529,6 +534,48 @@ export const RawMaterialPurchaseOrderScalarFieldEnum = {
 } as const
 
 export type RawMaterialPurchaseOrderScalarFieldEnum = (typeof RawMaterialPurchaseOrderScalarFieldEnum)[keyof typeof RawMaterialPurchaseOrderScalarFieldEnum]
+
+
+export const SupplierScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  address: 'address',
+  notes: 'notes',
+  isDeleted: 'isDeleted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typeof SupplierScalarFieldEnum]
+
+
+export const SupplierPurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  supplierId: 'supplierId',
+  itemType: 'itemType',
+  rawMaterialId: 'rawMaterialId',
+  semiProductId: 'semiProductId',
+  finishedProductId: 'finishedProductId',
+  quantity: 'quantity',
+  quantityUnit: 'quantityUnit',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  amountOriginal: 'amountOriginal',
+  amountUzs: 'amountUzs',
+  paymentType: 'paymentType',
+  paidAmountUzs: 'paidAmountUzs',
+  debtAmountUzs: 'debtAmountUzs',
+  debtDueDate: 'debtDueDate',
+  expenseId: 'expenseId',
+  status: 'status',
+  orderedAt: 'orderedAt',
+  fulfilledAt: 'fulfilledAt',
+  notes: 'notes',
+  createdById: 'createdById'
+} as const
+
+export type SupplierPurchaseOrderScalarFieldEnum = (typeof SupplierPurchaseOrderScalarFieldEnum)[keyof typeof SupplierPurchaseOrderScalarFieldEnum]
 
 
 export const SalarySettingScalarFieldEnum = {

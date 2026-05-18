@@ -74,6 +74,11 @@ enum ProductionStage {
   FINISHED
 }
 
+enum ShiftRecordKind {
+  PRODUCTION
+  PACKAGING
+}
+
 enum TokenType {
   REFRESH
 }
@@ -105,6 +110,17 @@ enum PurchaseOrderCurrency {
   UZS
   USD
   EUR
+}
+
+enum PurchaseQuantityUnit {
+  KG
+  TON
+  PIECES
+}
+
+enum PurchasePaymentType {
+  CASH
+  CREDIT
 }
 
 enum BagStatus {
@@ -173,6 +189,7 @@ model User {
   bankTransactions    BankTransaction[]
   uploadedBankVedomosts BankVedomost[]
   rawMaterialPurchaseOrdersCreated RawMaterialPurchaseOrder[] @relation("RawMaterialOrderCreator")
+  supplierPurchaseOrdersCreated    SupplierPurchaseOrder[]    @relation("SupplierPurchaseOrderCreator")
 
   @@index([stir])
 }
@@ -207,6 +224,7 @@ model RawMaterial {
   semiProductLinks SemiProductRawMaterial[]
   productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
   purchaseOrders   RawMaterialPurchaseOrder[]
+  supplierPurchaseOrders SupplierPurchaseOrder[]
   paintShiftRecords ShiftRecord[]      @relation("ShiftPaintRawMaterial")
   shiftMaterialUsages ShiftMaterialUsage[]
 }
@@ -229,6 +247,7 @@ model SemiProduct {
   machineLinks     SemiProductMachine[]
   finishedProductLinks FinishedProductSemiProduct[]
   productAuditLogs ProductAuditLog[]     @relation("ProductAuditSemiProduct")
+  supplierPurchaseOrders SupplierPurchaseOrder[]
 }
 
 model FinishedProduct {
@@ -248,6 +267,7 @@ model FinishedProduct {
   semiProductLinks FinishedProductSemiProduct[]
   machineLinks  FinishedProductMachine[]
   productAuditLogs ProductAuditLog[] @relation("ProductAuditFinishedProduct")
+  supplierPurchaseOrders SupplierPurchaseOrder[]
 }
 
 model InventoryBalance {
@@ -491,11 +511,14 @@ model ShiftRecord {
   machine       Machine?      @relation(fields: [machineId], references: [id], onDelete: SetNull)
   shiftNumber   Int
   date          DateTime
+  recordKind    ShiftRecordKind @default(PRODUCTION)
   hoursWorked   Float
   productLabel  String?
   machineReading String?
   producedQty   Int
   defectCount   Int           @default(0)
+  bagCount      Int?
+  packCount     Int?
   electricityKwh Float        @default(0)
   notes         String?
   paintUsed           Boolean       @default(false)
@@ -608,6 +631,7 @@ model Expense {
   sourceShiftId String?        @unique
   sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
   rawMaterialPurchaseOrder RawMaterialPurchaseOrder?
+  supplierPurchaseOrder    SupplierPurchaseOrder?
   bagWriteoff              BagWriteoff?
 }
 
@@ -636,6 +660,57 @@ model RawMaterialPurchaseOrder {
 
   @@index([status, orderedAt])
   @@index([rawMaterialId])
+}
+
+/// Yetkazib beruvchi (postavchik)
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  notes     String?
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  purchaseOrders SupplierPurchaseOrder[]
+
+  @@index([isDeleted, name])
+}
+
+/// Yetkazib beruvchidan mahsulot buyurtmasi (barcha turdagi mahsulotlar)
+model SupplierPurchaseOrder {
+  id                String                 @id @default(cuid())
+  supplierId        String
+  supplier          Supplier               @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  itemType          InventoryItemType
+  rawMaterialId     String?
+  rawMaterial       RawMaterial?           @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  semiProductId     String?
+  semiProduct       SemiProduct?           @relation(fields: [semiProductId], references: [id], onDelete: Restrict)
+  finishedProductId String?
+  finishedProduct   FinishedProduct?       @relation(fields: [finishedProductId], references: [id], onDelete: Restrict)
+  quantity          Float
+  quantityUnit      PurchaseQuantityUnit
+  currency          PurchaseOrderCurrency
+  fxRateToUzs       Float
+  amountOriginal    Float
+  amountUzs         Float
+  paymentType       PurchasePaymentType    @default(CASH)
+  paidAmountUzs     Float                  @default(0)
+  debtAmountUzs     Float                  @default(0)
+  debtDueDate       DateTime?
+  expenseId         String                 @unique
+  expense           Expense                @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+  status            RawMaterialOrderStatus @default(PENDING)
+  orderedAt         DateTime               @default(now())
+  fulfilledAt       DateTime?
+  notes             String?
+  createdById       String?
+  createdBy         User?                  @relation("SupplierPurchaseOrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status, orderedAt])
+  @@index([supplierId])
+  @@index([itemType])
 }
 
 model SalarySetting {

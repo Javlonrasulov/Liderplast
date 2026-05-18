@@ -11,6 +11,7 @@ import {
   ProductionStage,
   RawMaterialKind,
   Role,
+  ShiftRecordKind,
 } from '../../generated/prisma/enums.js';
 import { Prisma } from '../../generated/prisma/client.js';
 
@@ -395,8 +396,10 @@ export class ProductionService {
       defectCount: number;
       /** Qolip retsepti: rawMaterialId → haqiqiy sarflangan kg (bo‘lmasa retsept bo‘yicha) */
       rawMaterialActualKg?: Record<string, number>;
+      outputNote?: string;
     },
   ) {
+    const finishedOutputNote = params.outputNote ?? 'Smena: ishlab chiqarish';
     const materialUnits = params.producedQty + params.defectCount;
     const goodPieces = params.producedQty;
     if (materialUnits <= 0 && goodPieces <= 0) {
@@ -574,7 +577,7 @@ export class ProductionService {
             referenceType: 'shift',
             referenceId: params.shiftId,
             status: EntityStatus.COMPLETED,
-            note: 'Smena: ishlab chiqarish',
+            note: finishedOutputNote,
           },
         });
       }
@@ -682,10 +685,52 @@ export class ProductionService {
           referenceType: 'shift',
           referenceId: params.shiftId,
           status: EntityStatus.COMPLETED,
-          note: 'Smena: ishlab chiqarish',
+          note: finishedOutputNote,
         },
       });
     }
+  }
+
+  private async resolvePackagingForShift(
+    tx: Tx,
+    params: {
+      productLabel: string | null | undefined;
+      bagCount: number;
+      packCount: number;
+    },
+  ): Promise<{ producedQty: number; machineId: string }> {
+    const label = params.productLabel?.trim();
+    if (!label) {
+      throw new BadRequestException('Mahsulot turi tanlanishi kerak');
+    }
+    const finished = await tx.finishedProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+      include: { machineLinks: true },
+    });
+    if (!finished) {
+      throw new BadRequestException(
+        shiftInventoryErr('FINISHED_NOT_FOUND', label),
+      );
+    }
+    const piecesPerBag =
+      finished.piecesPerBag != null && finished.piecesPerBag > 0
+        ? finished.piecesPerBag
+        : 1;
+    const producedQty =
+      params.bagCount * piecesPerBag + Math.max(0, params.packCount);
+    if (producedQty <= 0) {
+      throw new BadRequestException(
+        'Kamida bitta qop yoki pachka miqdori kiritilishi kerak',
+      );
+    }
+    const machineId = finished.machineLinks[0]?.machineId;
+    if (!machineId) {
+      throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
+    }
+    return { producedQty, machineId };
   }
 
   private async applyShiftPaintConsumption(
@@ -778,21 +823,55 @@ export class ProductionService {
 
     await this.assertActiveWorkerForShiftAssignment(dto.workerId);
 
-    const rawKgMap = this.normalizeRawMaterialActualKg(dto.rawMaterialActualKg);
+    const recordKind = dto.recordKind ?? ShiftRecordKind.PRODUCTION;
+    if (recordKind === ShiftRecordKind.PACKAGING && wantsPaint) {
+      throw new BadRequestException(
+        'Qadoqlash smenasida kraska/bo‘yoq kiritilmaydi',
+      );
+    }
+
+    const rawKgMap =
+      recordKind === ShiftRecordKind.PACKAGING
+        ? {}
+        : this.normalizeRawMaterialActualKg(dto.rawMaterialActualKg);
 
     const created = await this.prisma.$transaction(async (tx) => {
+      let machineId = dto.machineId;
+      let producedQty = dto.producedQty;
+      let electricityKwh = dto.electricityKwh ?? 0;
+      let bagCount: number | null = null;
+      let packCount: number | null = null;
+      let outputNote = 'Smena: ishlab chiqarish';
+
+      if (recordKind === ShiftRecordKind.PACKAGING) {
+        const pkg = await this.resolvePackagingForShift(tx, {
+          productLabel: dto.productLabel,
+          bagCount: dto.bagCount ?? 0,
+          packCount: dto.packCount ?? 0,
+        });
+        machineId = pkg.machineId;
+        producedQty = pkg.producedQty;
+        electricityKwh = 0;
+        bagCount = dto.bagCount ?? 0;
+        packCount = dto.packCount ?? 0;
+        outputNote = 'Smena: qadoqlash';
+      }
+
       const shift = await tx.shiftRecord.create({
         data: {
           workerId: dto.workerId,
-          machineId: dto.machineId,
+          machineId,
           shiftNumber: dto.shiftNumber,
           date: new Date(dto.date),
+          recordKind,
           hoursWorked: dto.hoursWorked,
           productLabel: dto.productLabel,
           machineReading: dto.machineReading,
-          producedQty: dto.producedQty,
+          producedQty,
           defectCount: dto.defectCount ?? 0,
-          electricityKwh: dto.electricityKwh ?? 0,
+          bagCount,
+          packCount,
+          electricityKwh,
           notes: dto.notes,
           paintUsed: wantsPaint,
           paintRawMaterialId: wantsPaint ? dto.paintRawMaterialId! : null,
@@ -809,8 +888,8 @@ export class ProductionService {
         });
       }
 
-      const machine = dto.machineId
-        ? await tx.machine.findUnique({ where: { id: dto.machineId } })
+      const machine = machineId
+        ? await tx.machine.findUnique({ where: { id: machineId } })
         : null;
 
       await this.applyShiftRecipeAndOutput(tx, {
@@ -818,9 +897,10 @@ export class ProductionService {
         workerId: dto.workerId,
         machine,
         productLabel: dto.productLabel,
-        producedQty: dto.producedQty,
+        producedQty,
         defectCount: dto.defectCount ?? 0,
         rawMaterialActualKg: rawKgMap,
+        outputNote,
       });
 
       return tx.shiftRecord.findUniqueOrThrow({
@@ -845,7 +925,9 @@ export class ProductionService {
       shiftId: created.id,
     });
 
-    await this.financeService.syncShiftElectricityExpense(created.id);
+    if (created.recordKind !== ShiftRecordKind.PACKAGING) {
+      await this.financeService.syncShiftElectricityExpense(created.id);
+    }
 
     return created;
   }

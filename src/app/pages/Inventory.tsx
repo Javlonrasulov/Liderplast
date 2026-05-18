@@ -238,9 +238,12 @@ export function Inventory() {
       };
 
       const pickLastRawMaterialUnitPriceUzs = (rawMaterialId: string): number => {
-        const orders = state.rawMaterialPurchaseOrders ?? [];
+        const orders = state.supplierPurchaseOrders ?? [];
         const filtered = orders.filter(
-          (o) => o.rawMaterialId === rawMaterialId && o.quantityKg > 0,
+          (o) =>
+            o.rawMaterialId === rawMaterialId &&
+            o.quantityKg != null &&
+            o.quantityKg > 0,
         );
         if (filtered.length === 0) return 0;
         filtered.sort((a, b) => {
@@ -250,7 +253,7 @@ export function Inventory() {
         });
         const last = filtered[0];
         if (!last) return 0;
-        return last.amountUzs / last.quantityKg;
+        return last.amountUzs / (last.quantityKg ?? 1);
       };
 
       const ensureExpenseCategoryId = async (name: string): Promise<string> => {

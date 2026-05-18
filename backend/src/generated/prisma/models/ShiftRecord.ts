@@ -31,6 +31,8 @@ export type ShiftRecordAvgAggregateOutputType = {
   hoursWorked: number | null
   producedQty: number | null
   defectCount: number | null
+  bagCount: number | null
+  packCount: number | null
   electricityKwh: number | null
   paintQuantityKg: number | null
 }
@@ -40,6 +42,8 @@ export type ShiftRecordSumAggregateOutputType = {
   hoursWorked: number | null
   producedQty: number | null
   defectCount: number | null
+  bagCount: number | null
+  packCount: number | null
   electricityKwh: number | null
   paintQuantityKg: number | null
 }
@@ -50,11 +54,14 @@ export type ShiftRecordMinAggregateOutputType = {
   machineId: string | null
   shiftNumber: number | null
   date: Date | null
+  recordKind: $Enums.ShiftRecordKind | null
   hoursWorked: number | null
   productLabel: string | null
   machineReading: string | null
   producedQty: number | null
   defectCount: number | null
+  bagCount: number | null
+  packCount: number | null
   electricityKwh: number | null
   notes: string | null
   paintUsed: boolean | null
@@ -70,11 +77,14 @@ export type ShiftRecordMaxAggregateOutputType = {
   machineId: string | null
   shiftNumber: number | null
   date: Date | null
+  recordKind: $Enums.ShiftRecordKind | null
   hoursWorked: number | null
   productLabel: string | null
   machineReading: string | null
   producedQty: number | null
   defectCount: number | null
+  bagCount: number | null
+  packCount: number | null
   electricityKwh: number | null
   notes: string | null
   paintUsed: boolean | null
@@ -90,11 +100,14 @@ export type ShiftRecordCountAggregateOutputType = {
   machineId: number
   shiftNumber: number
   date: number
+  recordKind: number
   hoursWorked: number
   productLabel: number
   machineReading: number
   producedQty: number
   defectCount: number
+  bagCount: number
+  packCount: number
   electricityKwh: number
   notes: number
   paintUsed: number
@@ -111,6 +124,8 @@ export type ShiftRecordAvgAggregateInputType = {
   hoursWorked?: true
   producedQty?: true
   defectCount?: true
+  bagCount?: true
+  packCount?: true
   electricityKwh?: true
   paintQuantityKg?: true
 }
@@ -120,6 +135,8 @@ export type ShiftRecordSumAggregateInputType = {
   hoursWorked?: true
   producedQty?: true
   defectCount?: true
+  bagCount?: true
+  packCount?: true
   electricityKwh?: true
   paintQuantityKg?: true
 }
@@ -130,11 +147,14 @@ export type ShiftRecordMinAggregateInputType = {
   machineId?: true
   shiftNumber?: true
   date?: true
+  recordKind?: true
   hoursWorked?: true
   productLabel?: true
   machineReading?: true
   producedQty?: true
   defectCount?: true
+  bagCount?: true
+  packCount?: true
   electricityKwh?: true
   notes?: true
   paintUsed?: true
@@ -150,11 +170,14 @@ export type ShiftRecordMaxAggregateInputType = {
   machineId?: true
   shiftNumber?: true
   date?: true
+  recordKind?: true
   hoursWorked?: true
   productLabel?: true
   machineReading?: true
   producedQty?: true
   defectCount?: true
+  bagCount?: true
+  packCount?: true
   electricityKwh?: true
   notes?: true
   paintUsed?: true
@@ -170,11 +193,14 @@ export type ShiftRecordCountAggregateInputType = {
   machineId?: true
   shiftNumber?: true
   date?: true
+  recordKind?: true
   hoursWorked?: true
   productLabel?: true
   machineReading?: true
   producedQty?: true
   defectCount?: true
+  bagCount?: true
+  packCount?: true
   electricityKwh?: true
   notes?: true
   paintUsed?: true
@@ -277,11 +303,14 @@ export type ShiftRecordGroupByOutputType = {
   machineId: string | null
   shiftNumber: number
   date: Date
+  recordKind: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel: string | null
   machineReading: string | null
   producedQty: number
   defectCount: number
+  bagCount: number | null
+  packCount: number | null
   electricityKwh: number
   notes: string | null
   paintUsed: boolean
@@ -320,11 +349,14 @@ export type ShiftRecordWhereInput = {
   machineId?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   shiftNumber?: Prisma.IntFilter<"ShiftRecord"> | number
   date?: Prisma.DateTimeFilter<"ShiftRecord"> | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFilter<"ShiftRecord"> | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFilter<"ShiftRecord"> | number
   productLabel?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   machineReading?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   producedQty?: Prisma.IntFilter<"ShiftRecord"> | number
   defectCount?: Prisma.IntFilter<"ShiftRecord"> | number
+  bagCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
+  packCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
   electricityKwh?: Prisma.FloatFilter<"ShiftRecord"> | number
   notes?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   paintUsed?: Prisma.BoolFilter<"ShiftRecord"> | boolean
@@ -345,11 +377,14 @@ export type ShiftRecordOrderByWithRelationInput = {
   machineId?: Prisma.SortOrderInput | Prisma.SortOrder
   shiftNumber?: Prisma.SortOrder
   date?: Prisma.SortOrder
+  recordKind?: Prisma.SortOrder
   hoursWorked?: Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   machineReading?: Prisma.SortOrderInput | Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  packCount?: Prisma.SortOrderInput | Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   paintUsed?: Prisma.SortOrder
@@ -373,11 +408,14 @@ export type ShiftRecordWhereUniqueInput = Prisma.AtLeast<{
   machineId?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   shiftNumber?: Prisma.IntFilter<"ShiftRecord"> | number
   date?: Prisma.DateTimeFilter<"ShiftRecord"> | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFilter<"ShiftRecord"> | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFilter<"ShiftRecord"> | number
   productLabel?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   machineReading?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   producedQty?: Prisma.IntFilter<"ShiftRecord"> | number
   defectCount?: Prisma.IntFilter<"ShiftRecord"> | number
+  bagCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
+  packCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
   electricityKwh?: Prisma.FloatFilter<"ShiftRecord"> | number
   notes?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   paintUsed?: Prisma.BoolFilter<"ShiftRecord"> | boolean
@@ -398,11 +436,14 @@ export type ShiftRecordOrderByWithAggregationInput = {
   machineId?: Prisma.SortOrderInput | Prisma.SortOrder
   shiftNumber?: Prisma.SortOrder
   date?: Prisma.SortOrder
+  recordKind?: Prisma.SortOrder
   hoursWorked?: Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   machineReading?: Prisma.SortOrderInput | Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  packCount?: Prisma.SortOrderInput | Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   paintUsed?: Prisma.SortOrder
@@ -426,11 +467,14 @@ export type ShiftRecordScalarWhereWithAggregatesInput = {
   machineId?: Prisma.StringNullableWithAggregatesFilter<"ShiftRecord"> | string | null
   shiftNumber?: Prisma.IntWithAggregatesFilter<"ShiftRecord"> | number
   date?: Prisma.DateTimeWithAggregatesFilter<"ShiftRecord"> | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindWithAggregatesFilter<"ShiftRecord"> | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatWithAggregatesFilter<"ShiftRecord"> | number
   productLabel?: Prisma.StringNullableWithAggregatesFilter<"ShiftRecord"> | string | null
   machineReading?: Prisma.StringNullableWithAggregatesFilter<"ShiftRecord"> | string | null
   producedQty?: Prisma.IntWithAggregatesFilter<"ShiftRecord"> | number
   defectCount?: Prisma.IntWithAggregatesFilter<"ShiftRecord"> | number
+  bagCount?: Prisma.IntNullableWithAggregatesFilter<"ShiftRecord"> | number | null
+  packCount?: Prisma.IntNullableWithAggregatesFilter<"ShiftRecord"> | number | null
   electricityKwh?: Prisma.FloatWithAggregatesFilter<"ShiftRecord"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"ShiftRecord"> | string | null
   paintUsed?: Prisma.BoolWithAggregatesFilter<"ShiftRecord"> | boolean
@@ -444,11 +488,14 @@ export type ShiftRecordCreateInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -468,11 +515,14 @@ export type ShiftRecordUncheckedCreateInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -488,11 +538,14 @@ export type ShiftRecordUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -512,11 +565,14 @@ export type ShiftRecordUncheckedUpdateInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -534,11 +590,14 @@ export type ShiftRecordCreateManyInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -552,11 +611,14 @@ export type ShiftRecordUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -571,11 +633,14 @@ export type ShiftRecordUncheckedUpdateManyInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -601,11 +666,14 @@ export type ShiftRecordCountOrderByAggregateInput = {
   machineId?: Prisma.SortOrder
   shiftNumber?: Prisma.SortOrder
   date?: Prisma.SortOrder
+  recordKind?: Prisma.SortOrder
   hoursWorked?: Prisma.SortOrder
   productLabel?: Prisma.SortOrder
   machineReading?: Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrder
+  packCount?: Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   paintUsed?: Prisma.SortOrder
@@ -620,6 +688,8 @@ export type ShiftRecordAvgOrderByAggregateInput = {
   hoursWorked?: Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrder
+  packCount?: Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   paintQuantityKg?: Prisma.SortOrder
 }
@@ -630,11 +700,14 @@ export type ShiftRecordMaxOrderByAggregateInput = {
   machineId?: Prisma.SortOrder
   shiftNumber?: Prisma.SortOrder
   date?: Prisma.SortOrder
+  recordKind?: Prisma.SortOrder
   hoursWorked?: Prisma.SortOrder
   productLabel?: Prisma.SortOrder
   machineReading?: Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrder
+  packCount?: Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   paintUsed?: Prisma.SortOrder
@@ -650,11 +723,14 @@ export type ShiftRecordMinOrderByAggregateInput = {
   machineId?: Prisma.SortOrder
   shiftNumber?: Prisma.SortOrder
   date?: Prisma.SortOrder
+  recordKind?: Prisma.SortOrder
   hoursWorked?: Prisma.SortOrder
   productLabel?: Prisma.SortOrder
   machineReading?: Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrder
+  packCount?: Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   paintUsed?: Prisma.SortOrder
@@ -669,6 +745,8 @@ export type ShiftRecordSumOrderByAggregateInput = {
   hoursWorked?: Prisma.SortOrder
   producedQty?: Prisma.SortOrder
   defectCount?: Prisma.SortOrder
+  bagCount?: Prisma.SortOrder
+  packCount?: Prisma.SortOrder
   electricityKwh?: Prisma.SortOrder
   paintQuantityKg?: Prisma.SortOrder
 }
@@ -809,6 +887,10 @@ export type ShiftRecordUncheckedUpdateManyWithoutMachineNestedInput = {
   deleteMany?: Prisma.ShiftRecordScalarWhereInput | Prisma.ShiftRecordScalarWhereInput[]
 }
 
+export type EnumShiftRecordKindFieldUpdateOperationsInput = {
+  set?: $Enums.ShiftRecordKind
+}
+
 export type ShiftRecordCreateNestedOneWithoutMaterialUsagesInput = {
   create?: Prisma.XOR<Prisma.ShiftRecordCreateWithoutMaterialUsagesInput, Prisma.ShiftRecordUncheckedCreateWithoutMaterialUsagesInput>
   connectOrCreate?: Prisma.ShiftRecordCreateOrConnectWithoutMaterialUsagesInput
@@ -843,11 +925,14 @@ export type ShiftRecordCreateWithoutWorkerInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -865,11 +950,14 @@ export type ShiftRecordUncheckedCreateWithoutWorkerInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -916,11 +1004,14 @@ export type ShiftRecordScalarWhereInput = {
   machineId?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   shiftNumber?: Prisma.IntFilter<"ShiftRecord"> | number
   date?: Prisma.DateTimeFilter<"ShiftRecord"> | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFilter<"ShiftRecord"> | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFilter<"ShiftRecord"> | number
   productLabel?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   machineReading?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   producedQty?: Prisma.IntFilter<"ShiftRecord"> | number
   defectCount?: Prisma.IntFilter<"ShiftRecord"> | number
+  bagCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
+  packCount?: Prisma.IntNullableFilter<"ShiftRecord"> | number | null
   electricityKwh?: Prisma.FloatFilter<"ShiftRecord"> | number
   notes?: Prisma.StringNullableFilter<"ShiftRecord"> | string | null
   paintUsed?: Prisma.BoolFilter<"ShiftRecord"> | boolean
@@ -934,11 +1025,14 @@ export type ShiftRecordCreateWithoutPaintRawMaterialInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -957,11 +1051,14 @@ export type ShiftRecordUncheckedCreateWithoutPaintRawMaterialInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1002,11 +1099,14 @@ export type ShiftRecordCreateWithoutMachineInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1024,11 +1124,14 @@ export type ShiftRecordUncheckedCreateWithoutMachineInput = {
   workerId: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1070,11 +1173,14 @@ export type ShiftRecordCreateWithoutMaterialUsagesInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1093,11 +1199,14 @@ export type ShiftRecordUncheckedCreateWithoutMaterialUsagesInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1128,11 +1237,14 @@ export type ShiftRecordUpdateWithoutMaterialUsagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1151,11 +1263,14 @@ export type ShiftRecordUncheckedUpdateWithoutMaterialUsagesInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1170,11 +1285,14 @@ export type ShiftRecordCreateWithoutShiftElectricityExpenseInput = {
   id?: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1193,11 +1311,14 @@ export type ShiftRecordUncheckedCreateWithoutShiftElectricityExpenseInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1228,11 +1349,14 @@ export type ShiftRecordUpdateWithoutShiftElectricityExpenseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1251,11 +1375,14 @@ export type ShiftRecordUncheckedUpdateWithoutShiftElectricityExpenseInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1271,11 +1398,14 @@ export type ShiftRecordCreateManyWorkerInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1289,11 +1419,14 @@ export type ShiftRecordUpdateWithoutWorkerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1311,11 +1444,14 @@ export type ShiftRecordUncheckedUpdateWithoutWorkerInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1332,11 +1468,14 @@ export type ShiftRecordUncheckedUpdateManyWithoutWorkerInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1352,11 +1491,14 @@ export type ShiftRecordCreateManyPaintRawMaterialInput = {
   machineId?: string | null
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1369,11 +1511,14 @@ export type ShiftRecordUpdateWithoutPaintRawMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1392,11 +1537,14 @@ export type ShiftRecordUncheckedUpdateWithoutPaintRawMaterialInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1413,11 +1561,14 @@ export type ShiftRecordUncheckedUpdateManyWithoutPaintRawMaterialInput = {
   machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1431,11 +1582,14 @@ export type ShiftRecordCreateManyMachineInput = {
   workerId: string
   shiftNumber: number
   date: Date | string
+  recordKind?: $Enums.ShiftRecordKind
   hoursWorked: number
   productLabel?: string | null
   machineReading?: string | null
   producedQty: number
   defectCount?: number
+  bagCount?: number | null
+  packCount?: number | null
   electricityKwh?: number
   notes?: string | null
   paintUsed?: boolean
@@ -1449,11 +1603,14 @@ export type ShiftRecordUpdateWithoutMachineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1471,11 +1628,14 @@ export type ShiftRecordUncheckedUpdateWithoutMachineInput = {
   workerId?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1492,11 +1652,14 @@ export type ShiftRecordUncheckedUpdateManyWithoutMachineInput = {
   workerId?: Prisma.StringFieldUpdateOperationsInput | string
   shiftNumber?: Prisma.IntFieldUpdateOperationsInput | number
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recordKind?: Prisma.EnumShiftRecordKindFieldUpdateOperationsInput | $Enums.ShiftRecordKind
   hoursWorked?: Prisma.FloatFieldUpdateOperationsInput | number
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   machineReading?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   producedQty?: Prisma.IntFieldUpdateOperationsInput | number
   defectCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bagCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electricityKwh?: Prisma.FloatFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paintUsed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1543,11 +1706,14 @@ export type ShiftRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   machineId?: boolean
   shiftNumber?: boolean
   date?: boolean
+  recordKind?: boolean
   hoursWorked?: boolean
   productLabel?: boolean
   machineReading?: boolean
   producedQty?: boolean
   defectCount?: boolean
+  bagCount?: boolean
+  packCount?: boolean
   electricityKwh?: boolean
   notes?: boolean
   paintUsed?: boolean
@@ -1569,11 +1735,14 @@ export type ShiftRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   machineId?: boolean
   shiftNumber?: boolean
   date?: boolean
+  recordKind?: boolean
   hoursWorked?: boolean
   productLabel?: boolean
   machineReading?: boolean
   producedQty?: boolean
   defectCount?: boolean
+  bagCount?: boolean
+  packCount?: boolean
   electricityKwh?: boolean
   notes?: boolean
   paintUsed?: boolean
@@ -1592,11 +1761,14 @@ export type ShiftRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   machineId?: boolean
   shiftNumber?: boolean
   date?: boolean
+  recordKind?: boolean
   hoursWorked?: boolean
   productLabel?: boolean
   machineReading?: boolean
   producedQty?: boolean
   defectCount?: boolean
+  bagCount?: boolean
+  packCount?: boolean
   electricityKwh?: boolean
   notes?: boolean
   paintUsed?: boolean
@@ -1615,11 +1787,14 @@ export type ShiftRecordSelectScalar = {
   machineId?: boolean
   shiftNumber?: boolean
   date?: boolean
+  recordKind?: boolean
   hoursWorked?: boolean
   productLabel?: boolean
   machineReading?: boolean
   producedQty?: boolean
   defectCount?: boolean
+  bagCount?: boolean
+  packCount?: boolean
   electricityKwh?: boolean
   notes?: boolean
   paintUsed?: boolean
@@ -1629,7 +1804,7 @@ export type ShiftRecordSelectScalar = {
   createdAt?: boolean
 }
 
-export type ShiftRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workerId" | "machineId" | "shiftNumber" | "date" | "hoursWorked" | "productLabel" | "machineReading" | "producedQty" | "defectCount" | "electricityKwh" | "notes" | "paintUsed" | "paintRawMaterialId" | "paintQuantityKg" | "status" | "createdAt", ExtArgs["result"]["shiftRecord"]>
+export type ShiftRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workerId" | "machineId" | "shiftNumber" | "date" | "recordKind" | "hoursWorked" | "productLabel" | "machineReading" | "producedQty" | "defectCount" | "bagCount" | "packCount" | "electricityKwh" | "notes" | "paintUsed" | "paintRawMaterialId" | "paintQuantityKg" | "status" | "createdAt", ExtArgs["result"]["shiftRecord"]>
 export type ShiftRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   worker?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   machine?: boolean | Prisma.ShiftRecord$machineArgs<ExtArgs>
@@ -1664,11 +1839,14 @@ export type $ShiftRecordPayload<ExtArgs extends runtime.Types.Extensions.Interna
     machineId: string | null
     shiftNumber: number
     date: Date
+    recordKind: $Enums.ShiftRecordKind
     hoursWorked: number
     productLabel: string | null
     machineReading: string | null
     producedQty: number
     defectCount: number
+    bagCount: number | null
+    packCount: number | null
     electricityKwh: number
     notes: string | null
     paintUsed: boolean
@@ -2109,11 +2287,14 @@ export interface ShiftRecordFieldRefs {
   readonly machineId: Prisma.FieldRef<"ShiftRecord", 'String'>
   readonly shiftNumber: Prisma.FieldRef<"ShiftRecord", 'Int'>
   readonly date: Prisma.FieldRef<"ShiftRecord", 'DateTime'>
+  readonly recordKind: Prisma.FieldRef<"ShiftRecord", 'ShiftRecordKind'>
   readonly hoursWorked: Prisma.FieldRef<"ShiftRecord", 'Float'>
   readonly productLabel: Prisma.FieldRef<"ShiftRecord", 'String'>
   readonly machineReading: Prisma.FieldRef<"ShiftRecord", 'String'>
   readonly producedQty: Prisma.FieldRef<"ShiftRecord", 'Int'>
   readonly defectCount: Prisma.FieldRef<"ShiftRecord", 'Int'>
+  readonly bagCount: Prisma.FieldRef<"ShiftRecord", 'Int'>
+  readonly packCount: Prisma.FieldRef<"ShiftRecord", 'Int'>
   readonly electricityKwh: Prisma.FieldRef<"ShiftRecord", 'Float'>
   readonly notes: Prisma.FieldRef<"ShiftRecord", 'String'>
   readonly paintUsed: Prisma.FieldRef<"ShiftRecord", 'Boolean'>

@@ -16,6 +16,7 @@ import { RealtimeGateway } from '../../socket/realtime.gateway.js';
 import { CreateClientDto } from './dto/create-client.dto.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
+import { UpdateClientDto } from './dto/update-client.dto.js';
 
 /** Bazada `deletedAt` bo‘lmasa ham ishlaydi — o‘chirilgan mijoz telefoni `__del__` qatorini o‘z ichiga oladi */
 function isClientRemoved(client: { phone: string }): boolean {
@@ -28,6 +29,22 @@ export class CrmService {
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
   ) {}
+
+  /** +998XXXXXXXXX yoki null (bo‘sh / to‘liq emas) */
+  private normalizeClientPhone(input?: string | null): string | null {
+    if (!input?.trim()) {
+      return null;
+    }
+    const digits = input.replace(/\D/g, '');
+    const national = digits.startsWith('998') ? digits.slice(3) : digits;
+    if (national.length === 0) {
+      return null;
+    }
+    if (national.length !== 9) {
+      return null;
+    }
+    return `+998${national}`;
+  }
 
   private async allocatePlaceholderPhone(): Promise<string> {
     for (let i = 0; i < 50; i += 1) {
@@ -77,7 +94,8 @@ export class CrmService {
   }
 
   async createClient(dto: CreateClientDto) {
-    const phone = dto.phone?.trim() || (await this.allocatePlaceholderPhone());
+    const normalized = this.normalizeClientPhone(dto.phone);
+    const phone = normalized ?? (await this.allocatePlaceholderPhone());
 
     const existing = await this.prisma.client.findUnique({
       where: { phone },
@@ -87,11 +105,67 @@ export class CrmService {
       throw new ConflictException('Client phone already exists');
     }
 
+    const { phone: _ignored, ...rest } = dto;
+
     return this.prisma.client.create({
       data: {
-        ...dto,
+        ...rest,
         phone,
       },
+    });
+  }
+
+  async updateClient(id: string, dto: UpdateClientDto) {
+    const client = await this.prisma.client.findUnique({ where: { id } });
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+    if (isClientRemoved(client)) {
+      throw new BadRequestException('Client already removed');
+    }
+
+    const data: {
+      name?: string;
+      phone?: string;
+      address?: string | null;
+      bankAccount?: string | null;
+      bankName?: string | null;
+    } = {};
+
+    if (dto.name !== undefined) {
+      data.name = dto.name.trim();
+    }
+
+    if (dto.phone !== undefined) {
+      const normalized = this.normalizeClientPhone(dto.phone);
+      if (normalized) {
+        const existing = await this.prisma.client.findUnique({ where: { phone: normalized } });
+        if (existing && existing.id !== id) {
+          throw new ConflictException('Client phone already exists');
+        }
+        data.phone = normalized;
+      }
+    }
+
+    if (dto.address !== undefined) {
+      data.address = dto.address.trim() || null;
+    }
+
+    if (dto.bankAccount !== undefined) {
+      data.bankAccount = dto.bankAccount.trim() || null;
+    }
+
+    if (dto.bankName !== undefined) {
+      data.bankName = dto.bankName.trim() || null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return client;
+    }
+
+    return this.prisma.client.update({
+      where: { id },
+      data,
     });
   }
 

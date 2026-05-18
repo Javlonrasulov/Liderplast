@@ -412,6 +412,8 @@ export const ModelName = {
   ExpenseCategory: 'ExpenseCategory',
   Expense: 'Expense',
   RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
+  Supplier: 'Supplier',
+  SupplierPurchaseOrder: 'SupplierPurchaseOrder',
   SalarySetting: 'SalarySetting',
   EmployeeProductRate: 'EmployeeProductRate',
   SalaryRecord: 'SalaryRecord',
@@ -434,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2510,6 +2512,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Supplier: {
+      payload: Prisma.$SupplierPayload<ExtArgs>
+      fields: Prisma.SupplierFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SupplierFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SupplierFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        findFirst: {
+          args: Prisma.SupplierFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SupplierFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        findMany: {
+          args: Prisma.SupplierFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>[]
+        }
+        create: {
+          args: Prisma.SupplierCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        createMany: {
+          args: Prisma.SupplierCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SupplierCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>[]
+        }
+        delete: {
+          args: Prisma.SupplierDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        update: {
+          args: Prisma.SupplierUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        deleteMany: {
+          args: Prisma.SupplierDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SupplierUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SupplierUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>[]
+        }
+        upsert: {
+          args: Prisma.SupplierUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPayload>
+        }
+        aggregate: {
+          args: Prisma.SupplierAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSupplier>
+        }
+        groupBy: {
+          args: Prisma.SupplierGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SupplierGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SupplierCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SupplierCountAggregateOutputType> | number
+        }
+      }
+    }
+    SupplierPurchaseOrder: {
+      payload: Prisma.$SupplierPurchaseOrderPayload<ExtArgs>
+      fields: Prisma.SupplierPurchaseOrderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SupplierPurchaseOrderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SupplierPurchaseOrderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        findFirst: {
+          args: Prisma.SupplierPurchaseOrderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SupplierPurchaseOrderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        findMany: {
+          args: Prisma.SupplierPurchaseOrderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>[]
+        }
+        create: {
+          args: Prisma.SupplierPurchaseOrderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        createMany: {
+          args: Prisma.SupplierPurchaseOrderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SupplierPurchaseOrderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>[]
+        }
+        delete: {
+          args: Prisma.SupplierPurchaseOrderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        update: {
+          args: Prisma.SupplierPurchaseOrderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        deleteMany: {
+          args: Prisma.SupplierPurchaseOrderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SupplierPurchaseOrderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SupplierPurchaseOrderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>[]
+        }
+        upsert: {
+          args: Prisma.SupplierPurchaseOrderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupplierPurchaseOrderPayload>
+        }
+        aggregate: {
+          args: Prisma.SupplierPurchaseOrderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSupplierPurchaseOrder>
+        }
+        groupBy: {
+          args: Prisma.SupplierPurchaseOrderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SupplierPurchaseOrderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SupplierPurchaseOrderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SupplierPurchaseOrderCountAggregateOutputType> | number
+        }
+      }
+    }
     SalarySetting: {
       payload: Prisma.$SalarySettingPayload<ExtArgs>
       fields: Prisma.SalarySettingFieldRefs
@@ -3358,11 +3508,14 @@ export const ShiftRecordScalarFieldEnum = {
   machineId: 'machineId',
   shiftNumber: 'shiftNumber',
   date: 'date',
+  recordKind: 'recordKind',
   hoursWorked: 'hoursWorked',
   productLabel: 'productLabel',
   machineReading: 'machineReading',
   producedQty: 'producedQty',
   defectCount: 'defectCount',
+  bagCount: 'bagCount',
+  packCount: 'packCount',
   electricityKwh: 'electricityKwh',
   notes: 'notes',
   paintUsed: 'paintUsed',
@@ -3492,6 +3645,48 @@ export const RawMaterialPurchaseOrderScalarFieldEnum = {
 } as const
 
 export type RawMaterialPurchaseOrderScalarFieldEnum = (typeof RawMaterialPurchaseOrderScalarFieldEnum)[keyof typeof RawMaterialPurchaseOrderScalarFieldEnum]
+
+
+export const SupplierScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  address: 'address',
+  notes: 'notes',
+  isDeleted: 'isDeleted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typeof SupplierScalarFieldEnum]
+
+
+export const SupplierPurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  supplierId: 'supplierId',
+  itemType: 'itemType',
+  rawMaterialId: 'rawMaterialId',
+  semiProductId: 'semiProductId',
+  finishedProductId: 'finishedProductId',
+  quantity: 'quantity',
+  quantityUnit: 'quantityUnit',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  amountOriginal: 'amountOriginal',
+  amountUzs: 'amountUzs',
+  paymentType: 'paymentType',
+  paidAmountUzs: 'paidAmountUzs',
+  debtAmountUzs: 'debtAmountUzs',
+  debtDueDate: 'debtDueDate',
+  expenseId: 'expenseId',
+  status: 'status',
+  orderedAt: 'orderedAt',
+  fulfilledAt: 'fulfilledAt',
+  notes: 'notes',
+  createdById: 'createdById'
+} as const
+
+export type SupplierPurchaseOrderScalarFieldEnum = (typeof SupplierPurchaseOrderScalarFieldEnum)[keyof typeof SupplierPurchaseOrderScalarFieldEnum]
 
 
 export const SalarySettingScalarFieldEnum = {
@@ -3908,6 +4103,20 @@ export type ListEnumBagAuditActionTypeFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'ShiftRecordKind'
+ */
+export type EnumShiftRecordKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShiftRecordKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ShiftRecordKind[]'
+ */
+export type ListEnumShiftRecordKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShiftRecordKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'OrderStatus'
  */
 export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
@@ -3974,6 +4183,34 @@ export type EnumRawMaterialOrderStatusFieldRefInput<$PrismaModel> = FieldRefInpu
  * Reference to a field of type 'RawMaterialOrderStatus[]'
  */
 export type ListEnumRawMaterialOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawMaterialOrderStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchaseQuantityUnit'
+ */
+export type EnumPurchaseQuantityUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseQuantityUnit'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchaseQuantityUnit[]'
+ */
+export type ListEnumPurchaseQuantityUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseQuantityUnit[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchasePaymentType'
+ */
+export type EnumPurchasePaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchasePaymentType'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchasePaymentType[]'
+ */
+export type ListEnumPurchasePaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchasePaymentType[]'>
     
 
 
@@ -4155,6 +4392,8 @@ export type GlobalOmitConfig = {
   expenseCategory?: Prisma.ExpenseCategoryOmit
   expense?: Prisma.ExpenseOmit
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOmit
+  supplier?: Prisma.SupplierOmit
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderOmit
   salarySetting?: Prisma.SalarySettingOmit
   employeeProductRate?: Prisma.EmployeeProductRateOmit
   salaryRecord?: Prisma.SalaryRecordOmit

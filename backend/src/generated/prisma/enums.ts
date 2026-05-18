@@ -109,6 +109,14 @@ export const ProductionStage = {
 export type ProductionStage = (typeof ProductionStage)[keyof typeof ProductionStage]
 
 
+export const ShiftRecordKind = {
+  PRODUCTION: 'PRODUCTION',
+  PACKAGING: 'PACKAGING'
+} as const
+
+export type ShiftRecordKind = (typeof ShiftRecordKind)[keyof typeof ShiftRecordKind]
+
+
 export const TokenType = {
   REFRESH: 'REFRESH'
 } as const
@@ -157,6 +165,23 @@ export const PurchaseOrderCurrency = {
 } as const
 
 export type PurchaseOrderCurrency = (typeof PurchaseOrderCurrency)[keyof typeof PurchaseOrderCurrency]
+
+
+export const PurchaseQuantityUnit = {
+  KG: 'KG',
+  TON: 'TON',
+  PIECES: 'PIECES'
+} as const
+
+export type PurchaseQuantityUnit = (typeof PurchaseQuantityUnit)[keyof typeof PurchaseQuantityUnit]
+
+
+export const PurchasePaymentType = {
+  CASH: 'CASH',
+  CREDIT: 'CREDIT'
+} as const
+
+export type PurchasePaymentType = (typeof PurchasePaymentType)[keyof typeof PurchasePaymentType]
 
 
 export const BagStatus = {

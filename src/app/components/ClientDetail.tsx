@@ -1,12 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ArrowLeft, User, Phone, Building2, CreditCard, ShoppingCart, Wallet,
   Plus, Trash2, CheckCircle2, AlertTriangle, Scale, Calendar, ChevronDown,
-  ChevronUp, TrendingUp, Copy, Check, BadgeCheck, Clock
+  ChevronUp, TrendingUp, Copy, Check, BadgeCheck, Clock, Pencil, Printer
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatCurrency, formatDate, formatNumber, TODAY } from '../utils/format';
+import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
+import { PhoneInput } from './PhoneInput';
+import {
+  emptyUzPhoneInput,
+  formatUzPhoneDisplay,
+  normalizeUzPhoneForApi,
+  uzPhoneTelHref,
+} from '../utils/phone';
 import { AktSverka } from './AktSverka';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -18,15 +26,32 @@ type Tab = 'info' | 'sales' | 'payments' | 'akt';
 interface ClientDetailProps {
   clientId: string;
   onBack: () => void;
+  initialEditing?: boolean;
 }
 
-export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
-  const { state, dispatch } = useERP();
+type ClientEditForm = {
+  name: string;
+  phone: string;
+  bankAccount: string;
+  bankName: string;
+};
+
+export function ClientDetail({ clientId, onBack, initialEditing = false }: ClientDetailProps) {
+  const { state, dispatch, isLoading } = useERP();
   const { t } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('info');
   const [copiedAccount, setCopiedAccount] = useState(false);
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(initialEditing);
+  const [editForm, setEditForm] = useState<ClientEditForm>({
+    name: '',
+    phone: emptyUzPhoneInput(),
+    bankAccount: '',
+    bankName: '',
+  });
+  const [editError, setEditError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Payment form
   const [pmAmount, setPmAmount] = useState('');
@@ -36,7 +61,6 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
   const [pmError, setPmError] = useState('');
 
   const client = state.clients.find(c => c.id === clientId);
-  if (!client) return null;
 
   const clientSales = useMemo(
     () => [...state.sales].filter(s => s.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
@@ -49,6 +73,23 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
 
   const totalPurchases = clientSales.reduce((s, x) => s + x.total, 0);
   const totalPaid = clientSales.reduce((s, x) => s + x.paid, 0) + clientPayments.reduce((s, x) => s + x.amount, 0);
+
+  useEffect(() => {
+    setIsEditing(initialEditing);
+  }, [clientId, initialEditing]);
+
+  useEffect(() => {
+    if (!client) return;
+    setEditForm({
+      name: client.name,
+      phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
+      bankAccount: client.bankAccount ?? '',
+      bankName: client.bankName ?? '',
+    });
+    setEditError('');
+  }, [clientId, client?.name, client?.phone, client?.bankAccount, client?.bankName]);
+
+  if (!client) return null;
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleCopyAccount = () => {
@@ -82,6 +123,56 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
   const handleDeletePayment = (id: string) => {
     if (!window.confirm(t.pmDeleteConfirm)) return;
     dispatch({ type: 'DELETE_PAYMENT', payload: id });
+  };
+
+  const handleStartEdit = () => {
+    setEditForm({
+      name: client.name,
+      phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
+      bankAccount: client.bankAccount ?? '',
+      bankName: client.bankName ?? '',
+    });
+    setEditError('');
+    setIsEditing(true);
+    setActiveTab('info');
+  };
+
+  const handleCancelEdit = () => {
+    setEditForm({
+      name: client.name,
+      phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
+      bankAccount: client.bankAccount ?? '',
+      bankName: client.bankName ?? '',
+    });
+    setEditError('');
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditError('');
+    if (!editForm.name.trim()) {
+      setEditError(`${t.labelName}!`);
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await dispatch({
+        type: 'UPDATE_CLIENT',
+        payload: {
+          id: clientId,
+          name: editForm.name.trim(),
+          phone: normalizeUzPhoneForApi(editForm.phone),
+          bankAccount: editForm.bankAccount.trim() || undefined,
+          bankName: editForm.bankName.trim() || undefined,
+        },
+      });
+      setIsEditing(false);
+    } catch {
+      setEditError('Saqlashda xatolik yuz berdi');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // ── Tabs config ───────────────────────────────────────────────────────────────
@@ -119,9 +210,21 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                 <BadgeCheck size={15} className="text-emerald-500 flex-shrink-0" />
               )}
             </div>
-            <p className="text-slate-400 text-xs">{client.phone}</p>
+            {formatUzPhoneDisplay(client.phone) ? (
+              <p className="text-slate-400 text-xs">{formatUzPhoneDisplay(client.phone)}</p>
+            ) : null}
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={isEditing ? handleCancelEdit : handleStartEdit}
+          disabled={isLoading || isSaving}
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
+        >
+          <Pencil size={13} />
+          <span className="hidden sm:inline">{isEditing ? t.btnCancel : t.cdEdit}</span>
+        </button>
 
         {/* Debt badge */}
         <div className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold ${
@@ -181,6 +284,76 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
       {/* INFO TAB                                                   */}
       {/* ════════════════════════════════════════════════════════════ */}
       {activeTab === 'info' && (
+        isEditing ? (
+          <form
+            onSubmit={handleSaveEdit}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4"
+          >
+            <h3 className="text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center gap-2">
+              <Pencil size={14} className="text-indigo-500" />
+              {t.cdEdit}
+            </h3>
+            {editError && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl flex items-start gap-2">
+                <AlertTriangle size={13} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-600 dark:text-red-400 text-xs">{editError}</p>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelName}</label>
+                <input
+                  value={editForm.name}
+                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                  className={INPUT_CLS}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelPhone}</label>
+                <PhoneInput
+                  value={editForm.phone}
+                  onChange={(phone) => setEditForm({ ...editForm, phone })}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelBankName}</label>
+                <input
+                  value={editForm.bankName}
+                  onChange={e => setEditForm({ ...editForm, bankName: e.target.value })}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelBankAccount}</label>
+                <input
+                  value={editForm.bankAccount}
+                  onChange={e => setEditForm({ ...editForm, bankAccount: e.target.value })}
+                  placeholder="20208000001234567890"
+                  className={INPUT_CLS}
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="submit"
+                disabled={isSaving || isLoading}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                {t.btnSave}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                disabled={isSaving || isLoading}
+                className="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+              >
+                {t.btnCancel}
+              </button>
+            </div>
+          </form>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Contact info */}
@@ -205,9 +378,16 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">{t.labelPhone}</p>
-                  <a href={`tel:${client.phone}`} className="text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:underline">
-                    {client.phone}
-                  </a>
+                  {uzPhoneTelHref(client.phone) ? (
+                    <a
+                      href={`tel:${uzPhoneTelHref(client.phone)}`}
+                      className="text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:underline"
+                    >
+                      {formatUzPhoneDisplay(client.phone)}
+                    </a>
+                  ) : (
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">—</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -293,6 +473,7 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
             </div>
           </div>
         </div>
+        )
       )}
 
       {/* ════════════════════════════════════════════════════════════ */}
@@ -320,7 +501,7 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-700/50">
-                      {[t.colDate, t.colProduct, t.colQty, t.labelPrice, t.colTotal, t.colPaid, t.colDebt, ''].map((h, i) => (
+                      {[t.colDate, t.colProduct, t.colQty, t.labelPrice, t.colTotal, t.colPaid, t.colDebt, t.prPrint].map((h, i) => (
                         <th key={i} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -358,12 +539,22 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                               }
                             </td>
                             <td className="px-4 py-3">
-                              {isMulti && (
-                                <button onClick={() => setExpandedSale(isExpanded ? null : sale.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-                                  {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => printSaleDeliveryNote(sale, state.sales)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
+                                  title={t.prPrint}
+                                >
+                                  <Printer size={13} />
                                 </button>
-                              )}
+                                {isMulti && (
+                                  <button onClick={() => setExpandedSale(isExpanded ? null : sale.id)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+                                    {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                           {isMulti && isExpanded && sale.items!.map((item, ii) => (
@@ -407,7 +598,15 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                           </div>
                           <p className="text-xs text-slate-500">{formatNumber(sale.quantity)} ta × {formatNumber(sale.pricePerUnit)}</p>
                         </div>
-                        <div className="text-right flex-shrink-0">
+                        <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => printSaleDeliveryNote(sale, state.sales)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40"
+                            title={t.prPrint}
+                          >
+                            <Printer size={13} />
+                          </button>
                           <p className="text-sm font-bold text-slate-800 dark:text-white">{formatCurrency(sale.total)}</p>
                           {saleDebt > 0
                             ? <p className="text-xs text-red-500">Qarz: {formatCurrency(saleDebt)}</p>

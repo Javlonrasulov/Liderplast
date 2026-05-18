@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer } from 'lucide-react';
+import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil } from 'lucide-react';
 import {
   useERP,
   type FinishedProductCatalogItem,
@@ -9,7 +9,10 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
+import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
+import { PhoneInput } from '../components/PhoneInput';
+import { emptyUzPhoneInput, formatUzPhoneDisplay, normalizeUzPhoneForApi } from '../utils/phone';
 import {
   finalBucketFromCatalog,
   semiBucketFromCatalog,
@@ -238,12 +241,20 @@ export function Sales() {
   };
 
   // ---- Client form ----
-  const [clientForm, setClientForm] = useState({ name: '', phone: '', bankAccount: '', bankName: '' });
+  const [clientForm, setClientForm] = useState({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
   const handleAddClient = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientForm.name.trim()) return;
-    dispatch({ type: 'ADD_CLIENT', payload: clientForm });
-    setClientForm({ name: '', phone: '', bankAccount: '', bankName: '' });
+    dispatch({
+      type: 'ADD_CLIENT',
+      payload: {
+        name: clientForm.name.trim(),
+        phone: normalizeUzPhoneForApi(clientForm.phone),
+        bankAccount: clientForm.bankAccount.trim() || undefined,
+        bankName: clientForm.bankName.trim() || undefined,
+      },
+    });
+    setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
   };
 
   // ---- History ----
@@ -261,6 +272,7 @@ export function Sales() {
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedClientDetail, setSelectedClientDetail] = useState<string | null>(null);
+  const [clientDetailEditing, setClientDetailEditing] = useState(false);
   const [clientIdToDelete, setClientIdToDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -284,104 +296,7 @@ export function Sales() {
   };
 
   const handlePrintSale = (sale: Sale) => {
-    const debtAmount = Math.max(0, (sale.total ?? 0) - (sale.paid ?? 0));
-    const hasDebt = debtAmount > 0.01;
-
-    const items = sale.items && sale.items.length > 0
-      ? sale.items
-      : [{
-          productCategory: sale.productCategory,
-          productType: sale.productType,
-          quantity: sale.quantity,
-          pricePerUnit: sale.pricePerUnit,
-          total: sale.total,
-        }];
-
-    const html = `
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${t.slTitle} — ${sale.clientName}</title>
-    <style>
-      :root { color-scheme: light; }
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #0f172a; }
-      h1 { font-size: 18px; margin: 0 0 8px; }
-      .muted { color: #64748b; font-size: 12px; }
-      .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
-      .box { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; min-width: 220px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-      th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; font-size: 12px; text-align: left; }
-      th { background: #f8fafc; font-weight: 700; }
-      .sum { font-weight: 800; }
-      .badge { display:inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-      .bad { background:#fee2e2; color:#991b1b; }
-      .ok { background:#dcfce7; color:#166534; }
-      @media print { body { margin: 10mm; } }
-    </style>
-  </head>
-  <body>
-    <h1>${t.slCompanyName}</h1>
-    <div class="muted">${t.slTitle} • ${formatDate(sale.date)} • ID: ${sale.id}</div>
-
-    <div class="row">
-      <div class="box">
-        <div class="muted">${t.colClient}</div>
-        <div class="sum">${sale.clientName}</div>
-      </div>
-      <div class="box">
-        <div class="muted">${t.labelTotal}</div>
-        <div class="sum">${formatCurrency(sale.total)}</div>
-      </div>
-      <div class="box">
-        <div class="muted">${t.labelPaid}</div>
-        <div class="sum">${formatCurrency(sale.paid)}</div>
-      </div>
-      <div class="box">
-        <div class="muted">${t.labelDebt}</div>
-        <div class="sum">${formatCurrency(debtAmount)}</div>
-        <div style="margin-top:8px">
-          <span class="badge ${hasDebt ? 'bad' : 'ok'}">${hasDebt ? t.slDebtStatusYes : t.slDebtStatusNo}</span>
-        </div>
-      </div>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>${t.colProduct}</th>
-          <th>${t.colQty}</th>
-          <th>${t.labelPrice}</th>
-          <th>${t.colTotal}</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${items.map((it, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td>${it.productType}</td>
-            <td>${formatNumber(it.quantity)}</td>
-            <td>${formatNumber(it.pricePerUnit)}</td>
-            <td>${formatCurrency(it.total)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-
-    <div style="margin-top:18px" class="muted">${t.slDebtPaid}: ${hasDebt ? '—' : '✓'}</div>
-    <script>
-      window.addEventListener('load', () => setTimeout(() => window.print(), 200));
-    </script>
-  </body>
-</html>`;
-
-    const w = window.open('', '_blank', 'width=900,height=720');
-    if (!w) return;
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
+    printSaleDeliveryNote(sale, state.sales);
   };
 
   const handleCopyAccount = (accountNum: string, clientId: string) => {
@@ -757,7 +672,11 @@ export function Sales() {
             <div className="py-1">
               <ClientDetail
                 clientId={selectedClientDetail}
-                onBack={() => setSelectedClientDetail(null)}
+                initialEditing={clientDetailEditing}
+                onBack={() => {
+                  setSelectedClientDetail(null);
+                  setClientDetailEditing(false);
+                }}
               />
             </div>
           ) : (
@@ -771,7 +690,11 @@ export function Sales() {
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelPhone}</label>
-                <input value={clientForm.phone} onChange={e => setClientForm({ ...clientForm, phone: e.target.value })} placeholder="+998901234567" className={INPUT_CLS} />
+                <PhoneInput
+                  value={clientForm.phone}
+                  onChange={(phone) => setClientForm({ ...clientForm, phone })}
+                  className={INPUT_CLS}
+                />
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelBankName}</label>
@@ -800,7 +723,9 @@ export function Sales() {
                           <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded text-xs font-medium">Қарздор</span>
                         )}
                       </div>
-                      <p className="text-slate-400 text-xs mb-2">{client.phone}</p>
+                      {formatUzPhoneDisplay(client.phone) && (
+                        <p className="text-slate-400 text-xs mb-2">{formatUzPhoneDisplay(client.phone)}</p>
+                      )}
                       {(client.bankName || client.bankAccount) && (
                         <div className="flex flex-wrap gap-2 mt-1.5">
                           {client.bankName && (
@@ -839,11 +764,27 @@ export function Sales() {
                         <button
                           type="button"
                           disabled={isLoading}
-                          onClick={() => setSelectedClientDetail(client.id)}
+                          onClick={() => {
+                            setClientDetailEditing(false);
+                            setSelectedClientDetail(client.id);
+                          }}
                           className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
                         >
                           <ExternalLink size={11} />
                           {t.cdInfo}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setClientDetailEditing(true);
+                            setSelectedClientDetail(client.id);
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                          title={t.cdEdit}
+                        >
+                          <Pencil size={11} />
+                          {t.cdEdit}
                         </button>
                         <button
                           type="button"

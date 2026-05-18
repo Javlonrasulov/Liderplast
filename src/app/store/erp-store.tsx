@@ -241,21 +241,45 @@ export interface Expense {
   sourceShiftId?: string | null;
 }
 
-export interface RawMaterialPurchaseOrder {
+export interface Supplier {
   id: string;
-  rawMaterialId: string;
-  rawMaterialName: string;
-  quantityKg: number;
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+  notes?: string | null;
+}
+
+export interface SupplierPurchaseOrder {
+  id: string;
+  legacy?: boolean;
+  supplierId: string | null;
+  supplierName: string | null;
+  itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+  rawMaterialId: string | null;
+  semiProductId: string | null;
+  finishedProductId: string | null;
+  productName: string;
+  quantity: number;
+  quantityUnit: 'KG' | 'TON' | 'PIECES';
+  /** Xomashyo kirimi bilan solishtirish uchun (kg) */
+  quantityKg: number | null;
   currency: 'UZS' | 'USD' | 'EUR';
   fxRateToUzs: number;
   amountOriginal: number;
   amountUzs: number;
+  paymentType: 'CASH' | 'CREDIT';
+  paidAmountUzs: number;
+  debtAmountUzs: number;
+  debtDueDate?: string | null;
   expenseId: string;
   status: 'PENDING' | 'FULFILLED';
   orderedAt: string;
   fulfilledAt?: string | null;
   notes?: string | null;
 }
+
+/** @deprecated — `SupplierPurchaseOrder` ishlating */
+export type RawMaterialPurchaseOrder = SupplierPurchaseOrder;
 
 export interface Machine {
   id: string;
@@ -310,6 +334,8 @@ export interface OperationLog {
   unit?: string;
 }
 
+export type ShiftRecordKind = 'PRODUCTION' | 'PACKAGING';
+
 export interface ShiftRecord {
   id: string;
   date: string;
@@ -317,9 +343,12 @@ export interface ShiftRecord {
   workerName: string;
   /** Backend worker.id — bugalteriya / tarix фильтри */
   employeeId?: string;
+  recordKind?: ShiftRecordKind;
   machineId: string;
   hoursWorked: number;
   productType: string;
+  bagCount?: number;
+  packCount?: number;
   machineReading: string;
   producedQty: number;
   defectCount: number;
@@ -493,7 +522,8 @@ export interface ERPState {
   sales: Sale[];
   expenses: Expense[];
   expenseCategories: ExpenseCategory[];
-  rawMaterialPurchaseOrders: RawMaterialPurchaseOrder[];
+  suppliers: Supplier[];
+  supplierPurchaseOrders: SupplierPurchaseOrder[];
   machines: Machine[];
   /** Ishlab chiqarish partiyalari (xomashyo / қолип сарфи билан) */
   productionHistory: ProductionHistoryRow[];
@@ -628,7 +658,18 @@ type ERPAction =
   | { type: 'ADD_EXPENSE_CATEGORY'; payload: { name: string } }
   | { type: 'UPDATE_EXPENSE_CATEGORY'; payload: { id: string; name: string } }
   | { type: 'DELETE_EXPENSE_CATEGORY'; payload: string }
-  | { type: 'ADD_CLIENT'; payload: { name: string; phone: string; bankAccount?: string; bankName?: string } }
+  | { type: 'ADD_CLIENT'; payload: { name: string; phone?: string; bankAccount?: string; bankName?: string } }
+  | {
+      type: 'UPDATE_CLIENT';
+      payload: {
+        id: string;
+        name: string;
+        phone?: string;
+        bankAccount?: string;
+        bankName?: string;
+      };
+    }
+  | { type: 'DELETE_CLIENT'; payload: string }
   | { type: 'SET_ELECTRICITY_PRICE'; payload: number }
   | { type: 'ADD_SHIFT_RECORD'; payload: Omit<ShiftRecord, 'id' | 'createdAt'> }
   | {
@@ -695,17 +736,33 @@ type ERPAction =
   | { type: 'DELETE_PAYMENT'; payload: string }
   | { type: 'SET_MONTH_STATUS'; payload: { month: string; status: 'paid' | 'unpaid' } }
   | {
-      type: 'CREATE_RAW_MATERIAL_PURCHASE_ORDER';
+      type: 'CREATE_SUPPLIER';
+      payload: { name: string; phone?: string; address?: string; notes?: string };
+    }
+  | {
+      type: 'UPDATE_SUPPLIER';
+      payload: { id: string; name: string; phone?: string; address?: string; notes?: string };
+    }
+  | {
+      type: 'CREATE_SUPPLIER_PURCHASE_ORDER';
       payload: {
-        rawMaterialId: string;
-        quantityKg: number;
+        supplierId: string;
+        itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+        rawMaterialId?: string;
+        semiProductId?: string;
+        finishedProductId?: string;
+        quantity: number;
+        quantityUnit: 'KG' | 'TON' | 'PIECES';
         currency: 'UZS' | 'USD' | 'EUR';
         fxRateToUzs: number;
         amountOriginal: number;
+        paymentType: 'CASH' | 'CREDIT';
+        paidAmountUzs?: number;
+        debtDueDate?: string;
         notes?: string;
       };
     }
-  | { type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER'; payload: string };
+  | { type: 'FULFILL_SUPPLIER_PURCHASE_ORDER'; payload: string };
 
 interface ERPContextValue {
   state: ERPState;
@@ -736,7 +793,8 @@ const emptyState: ERPState = {
   sales: [],
   expenses: [],
   expenseCategories: [],
-  rawMaterialPurchaseOrders: [],
+  suppliers: [],
+  supplierPurchaseOrders: [],
   machines: [],
   productionHistory: [],
   logs: [],
@@ -888,10 +946,13 @@ type BackendShiftRecord = {
   id: string;
   date: string;
   shiftNumber: number;
+  recordKind?: 'PRODUCTION' | 'PACKAGING';
   producedQty: number;
   defectCount: number;
   electricityKwh: number;
   hoursWorked: number;
+  bagCount?: number | null;
+  packCount?: number | null;
   productLabel?: string | null;
   machineReading?: string | null;
   notes?: string | null;
@@ -1151,21 +1212,40 @@ type BackendExpense = {
   sourceShiftId?: string | null;
 };
 
-type BackendRawMaterialPurchaseOrder = {
+type BackendSupplier = {
   id: string;
-  rawMaterialId: string;
-  quantityKg: number;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+};
+
+type BackendSupplierPurchaseOrder = {
+  id: string;
+  legacy?: boolean;
+  supplierId: string | null;
+  supplierName: string | null;
+  itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+  rawMaterialId: string | null;
+  semiProductId: string | null;
+  finishedProductId: string | null;
+  productName: string;
+  quantity: number;
+  quantityUnit: 'KG' | 'TON' | 'PIECES';
+  quantityKg: number | null;
   currency: 'UZS' | 'USD' | 'EUR';
   fxRateToUzs: number;
   amountOriginal: number;
   amountUzs: number;
+  paymentType: 'CASH' | 'CREDIT';
+  paidAmountUzs: number;
+  debtAmountUzs: number;
+  debtDueDate: string | null;
   expenseId: string;
   status: 'PENDING' | 'FULFILLED';
   orderedAt: string;
   fulfilledAt: string | null;
   notes: string | null;
-  rawMaterial: { id: string; name: string };
-  expense: { id: string; amount: number; title: string; incurredAt: string };
 };
 
 type BackendUser = {
@@ -1653,32 +1733,109 @@ async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
   }
 }
 
-async function fetchRawMaterialPurchaseOrdersSafe(): Promise<BackendRawMaterialPurchaseOrder[]> {
-  for (const path of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
-    try {
-      return await apiRequest<BackendRawMaterialPurchaseOrder[]>(path);
-    } catch (e) {
-      if (isNotFoundApiError(e)) {
-        continue;
-      }
-      return [];
-    }
+async function fetchSuppliersSafe(): Promise<BackendSupplier[]> {
+  try {
+    return await apiRequest<BackendSupplier[]>('/finance/suppliers');
+  } catch {
+    return [];
   }
-  return [];
 }
 
-function mapRawMaterialPurchaseOrders(
-  rows: BackendRawMaterialPurchaseOrder[],
-): RawMaterialPurchaseOrder[] {
+async function fetchSupplierPurchaseOrdersSafe(): Promise<BackendSupplierPurchaseOrder[]> {
+  try {
+    return await apiRequest<BackendSupplierPurchaseOrder[]>(
+      '/finance/supplier-purchase-orders',
+    );
+  } catch {
+    for (const path of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
+      try {
+        const legacy = await apiRequest<
+          Array<{
+            id: string;
+            rawMaterialId: string;
+            quantityKg: number;
+            currency: 'UZS' | 'USD' | 'EUR';
+            fxRateToUzs: number;
+            amountOriginal: number;
+            amountUzs: number;
+            expenseId: string;
+            status: 'PENDING' | 'FULFILLED';
+            orderedAt: string;
+            fulfilledAt: string | null;
+            notes: string | null;
+            rawMaterial: { id: string; name: string };
+          }>
+        >(path);
+        return legacy.map((r) => ({
+          id: r.id,
+          legacy: true,
+          supplierId: null,
+          supplierName: null,
+          itemType: 'RAW_MATERIAL' as const,
+          rawMaterialId: r.rawMaterialId,
+          semiProductId: null,
+          finishedProductId: null,
+          productName: r.rawMaterial?.name ?? '',
+          quantity: r.quantityKg,
+          quantityUnit: 'KG' as const,
+          quantityKg: r.quantityKg,
+          currency: r.currency,
+          fxRateToUzs: r.fxRateToUzs,
+          amountOriginal: r.amountOriginal,
+          amountUzs: r.amountUzs,
+          paymentType: 'CASH' as const,
+          paidAmountUzs: r.amountUzs,
+          debtAmountUzs: 0,
+          debtDueDate: null,
+          expenseId: r.expenseId,
+          status: r.status,
+          orderedAt: r.orderedAt,
+          fulfilledAt: r.fulfilledAt,
+          notes: r.notes,
+        }));
+      } catch (e) {
+        if (isNotFoundApiError(e)) continue;
+        throw e;
+      }
+    }
+    return [];
+  }
+}
+
+function mapSuppliers(rows: BackendSupplier[]): Supplier[] {
   return rows.map((r) => ({
     id: r.id,
+    name: r.name,
+    phone: r.phone,
+    address: r.address,
+    notes: r.notes,
+  }));
+}
+
+function mapSupplierPurchaseOrders(
+  rows: BackendSupplierPurchaseOrder[],
+): SupplierPurchaseOrder[] {
+  return rows.map((r) => ({
+    id: r.id,
+    legacy: r.legacy,
+    supplierId: r.supplierId,
+    supplierName: r.supplierName,
+    itemType: r.itemType,
     rawMaterialId: r.rawMaterialId,
-    rawMaterialName: r.rawMaterial?.name ?? '',
+    semiProductId: r.semiProductId,
+    finishedProductId: r.finishedProductId,
+    productName: r.productName,
+    quantity: r.quantity,
+    quantityUnit: r.quantityUnit,
     quantityKg: r.quantityKg,
     currency: r.currency,
     fxRateToUzs: r.fxRateToUzs,
     amountOriginal: r.amountOriginal,
     amountUzs: r.amountUzs,
+    paymentType: r.paymentType,
+    paidAmountUzs: r.paidAmountUzs,
+    debtAmountUzs: r.debtAmountUzs,
+    debtDueDate: r.debtDueDate,
     expenseId: r.expenseId,
     status: r.status,
     orderedAt: r.orderedAt,
@@ -1730,9 +1887,12 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
   const expenseCategoriesPromise = allow('expenses')
     ? fetchExpenseCategoriesSafe()
     : skipped<BackendExpenseCategory[]>([]);
-  const rawMaterialOrdersPromise = allow('expenses')
-    ? fetchRawMaterialPurchaseOrdersSafe()
-    : skipped<BackendRawMaterialPurchaseOrder[]>([]);
+  const suppliersPromise = allow('suppliers')
+    ? fetchSuppliersSafe()
+    : skipped<BackendSupplier[]>([]);
+  const supplierOrdersPromise = allow('supplierOrders')
+    ? fetchSupplierPurchaseOrdersSafe()
+    : skipped<BackendSupplierPurchaseOrder[]>([]);
 
   const [
     catalog,
@@ -1754,7 +1914,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     salaryRows,
     bankVedomosts,
     salaryPaymentSummaries,
-    rawMaterialOrders,
+    suppliersRows,
+    supplierOrders,
   ] = await Promise.all([
     allow('warehouseCatalog')
       ? safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
@@ -1830,7 +1991,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
           [] as BackendSalaryPaymentSummary[],
         )
       : skipped<BackendSalaryPaymentSummary[]>([]),
-    rawMaterialOrdersPromise,
+    suppliersPromise,
+    supplierOrdersPromise,
   ]);
 
   const expenseCategories = await expenseCategoriesPromise;
@@ -2035,9 +2197,12 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     shift: shift.shiftNumber,
     workerName: shift.worker.fullName,
     employeeId: shift.worker.id,
+    recordKind: shift.recordKind ?? 'PRODUCTION',
     machineId: shift.machine?.id ?? '',
     hoursWorked: shift.hoursWorked,
     productType: shift.productLabel ?? '',
+    bagCount: shift.bagCount ?? undefined,
+    packCount: shift.packCount ?? undefined,
     machineReading: shift.machineReading ?? '',
     producedQty: shift.producedQty,
     defectCount: shift.defectCount,
@@ -2096,8 +2261,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     new Set([...employees.map((e) => e.fullName.trim()).filter(Boolean), ...workerNamesFromShifts]),
   ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
-  const rawMaterialPurchaseOrdersState =
-    mapRawMaterialPurchaseOrders(rawMaterialOrders);
+  const suppliersState = mapSuppliers(suppliersRows);
+  const supplierPurchaseOrdersState = mapSupplierPurchaseOrders(supplierOrders);
 
   const employeeProductRatesState: EmployeeProductRate[] = employeeProductRates.map((item) => ({
     id: item.id,
@@ -2156,7 +2321,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     sales,
     expenses: mappedExpenses,
     expenseCategories: mappedExpenseCategories,
-    rawMaterialPurchaseOrders: rawMaterialPurchaseOrdersState,
+    suppliers: suppliersState,
+    supplierPurchaseOrders: supplierPurchaseOrdersState,
     machines: mappedMachines,
     productionHistory: mapProductionHistoryRows(productions),
     logs,
@@ -2304,7 +2470,28 @@ export function ERPProvider({ children }: { children: ReactNode }) {
         case 'ADD_CLIENT':
           await apiRequest('/clients', {
             method: 'POST',
-            body: JSON.stringify(action.payload),
+            body: JSON.stringify({
+              name: action.payload.name,
+              phone: action.payload.phone || undefined,
+              bankAccount: action.payload.bankAccount,
+              bankName: action.payload.bankName,
+            }),
+          });
+          break;
+        case 'UPDATE_CLIENT':
+          await apiRequest(`/clients/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              name: action.payload.name,
+              phone: action.payload.phone || undefined,
+              bankAccount: action.payload.bankAccount,
+              bankName: action.payload.bankName,
+            }),
+          });
+          break;
+        case 'DELETE_CLIENT':
+          await apiRequest(`/clients/${action.payload}`, {
+            method: 'DELETE',
           });
           break;
         case 'ADD_SALE_ORDER':
@@ -2347,52 +2534,50 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
-        case 'CREATE_RAW_MATERIAL_PURCHASE_ORDER': {
-          const body = JSON.stringify({
-            rawMaterialId: action.payload.rawMaterialId,
-            quantityKg: action.payload.quantityKg,
-            currency: action.payload.currency,
-            fxRateToUzs: action.payload.fxRateToUzs,
-            amountOriginal: action.payload.amountOriginal,
-            notes: action.payload.notes,
+        case 'CREATE_SUPPLIER':
+          await apiRequest('/finance/suppliers', {
+            method: 'POST',
+            body: JSON.stringify(action.payload),
           });
-          let lastErr: unknown;
-          for (const base of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
-            try {
-              await apiRequest(base, { method: 'POST', body });
-              lastErr = undefined;
-              break;
-            } catch (e) {
-              lastErr = e;
-              if (isNotFoundApiError(e)) {
-                continue;
-              }
-              throw e;
-            }
-          }
-          if (lastErr) {
-            throw lastErr;
-          }
           break;
-        }
-        case 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER': {
+        case 'UPDATE_SUPPLIER':
+          await apiRequest(`/finance/suppliers/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              name: action.payload.name,
+              phone: action.payload.phone,
+              address: action.payload.address,
+              notes: action.payload.notes,
+            }),
+          });
+          break;
+        case 'CREATE_SUPPLIER_PURCHASE_ORDER':
+          await apiRequest('/finance/supplier-purchase-orders', {
+            method: 'POST',
+            body: JSON.stringify(action.payload),
+          });
+          break;
+        case 'FULFILL_SUPPLIER_PURCHASE_ORDER': {
           const id = action.payload;
-          let lastFulfillErr: unknown;
-          for (const base of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
-            try {
-              await apiRequest(`${base}/${id}/fulfill`, { method: 'PATCH' });
-              lastFulfillErr = undefined;
-              break;
-            } catch (e) {
-              lastFulfillErr = e;
-              if (isNotFoundApiError(e)) {
-                continue;
+          try {
+            await apiRequest(`/finance/supplier-purchase-orders/${id}/fulfill`, {
+              method: 'PATCH',
+            });
+          } catch (e) {
+            if (!isNotFoundApiError(e)) throw e;
+            let lastFulfillErr: unknown;
+            for (const base of RAW_MATERIAL_PURCHASE_ORDER_PATHS) {
+              try {
+                await apiRequest(`${base}/${id}/fulfill`, { method: 'PATCH' });
+                lastFulfillErr = undefined;
+                break;
+              } catch (err) {
+                lastFulfillErr = err;
+                if (isNotFoundApiError(err)) continue;
+                throw err;
               }
-              throw e;
             }
-          }
-          if (lastFulfillErr) {
-            throw lastFulfillErr;
+            if (lastFulfillErr) throw lastFulfillErr;
           }
           break;
         }
@@ -2676,15 +2861,18 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             method: 'POST',
             body: JSON.stringify({
               workerId,
-              machineId: action.payload.machineId,
+              machineId: action.payload.machineId || undefined,
               shiftNumber: action.payload.shift,
               date: action.payload.date,
+              recordKind: action.payload.recordKind ?? 'PRODUCTION',
               hoursWorked: action.payload.hoursWorked,
               productLabel: action.payload.productType,
               machineReading: action.payload.machineReading,
               producedQty: action.payload.producedQty,
               defectCount: action.payload.defectCount,
               electricityKwh: action.payload.electricityKwh,
+              bagCount: action.payload.bagCount,
+              packCount: action.payload.packCount,
               notes: action.payload.notes,
               ...paintBody,
               ...rawBody,

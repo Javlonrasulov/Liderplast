@@ -158,6 +158,16 @@ export type Expense = Prisma.ExpenseModel
  */
 export type RawMaterialPurchaseOrder = Prisma.RawMaterialPurchaseOrderModel
 /**
+ * Model Supplier
+ * Yetkazib beruvchi (postavchik)
+ */
+export type Supplier = Prisma.SupplierModel
+/**
+ * Model SupplierPurchaseOrder
+ * Yetkazib beruvchidan mahsulot buyurtmasi (barcha turdagi mahsulotlar)
+ */
+export type SupplierPurchaseOrder = Prisma.SupplierPurchaseOrderModel
+/**
  * Model SalarySetting
  * 
  */

@@ -1,13 +1,11 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Pencil, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
   UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar,
-  ShoppingCart, RefreshCw, Package,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useCbuRates, parseCbuRate } from '../hooks/use-cbu-rates';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import {
@@ -20,7 +18,7 @@ import {
   displayGroupedIntInput,
   parseDigitsFromAmountInput,
 } from '../utils/format';
-import type { Employee, EmployeeProductRate, ShiftRecord, RawMaterialProduct } from '../store/erp-store';
+import type { Employee, EmployeeProductRate, ShiftRecord } from '../store/erp-store';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,7 +192,7 @@ function VedomostTab() {
   return (
     <div className="space-y-5">
 
-      {/* ── Controls ─────────────────────────────────────────────── */}
+      {/* в”Ђв”Ђ Controls в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Month picker */}
         <div className="flex items-center gap-2">
@@ -213,7 +211,7 @@ function VedomostTab() {
           className={`flex items-center gap-2 h-9 px-4 rounded-xl text-sm font-medium transition-all shadow-sm ${generated ? 'bg-emerald-500 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
         >
           <FileText size={15} />
-          {generated ? '✓ ' + t.prGenerate : t.prGenerate}
+          {generated ? 'вњ“ ' + t.prGenerate : t.prGenerate}
         </button>
 
         {/* Status filter pills */}
@@ -244,7 +242,7 @@ function VedomostTab() {
         </button>
       </div>
 
-      {/* ── KPI Summary cards ─────────────────────────────────────── */}
+      {/* в”Ђв”Ђ KPI Summary cards в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {allRows.length > 0 && (
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
@@ -262,7 +260,7 @@ function VedomostTab() {
           <StatCard
             label={t.prIncomeTax}
             value={formatCurrency(totals.incomeTax)}
-            sub={`${t.prNps}: ${formatCurrency(totals.nps)} · ${t.prKpiLabelSocial}: ${formatCurrency(totals.social)}`}
+            sub={`${t.prNps}: ${formatCurrency(totals.nps)} В· ${t.prKpiLabelSocial}: ${formatCurrency(totals.social)}`}
             color="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
           />
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
@@ -284,7 +282,7 @@ function VedomostTab() {
         </div>
       )}
 
-      {/* ── NET formula info strip ────────────────────────────────── */}
+      {/* в”Ђв”Ђ NET formula info strip в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {allRows.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl">
           <Info size={14} className="text-blue-500 flex-shrink-0" />
@@ -294,16 +292,16 @@ function VedomostTab() {
               <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 rounded text-emerald-800 dark:text-emerald-300">NET</span>
               <span className="text-slate-400">=</span>
               <span className="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 rounded text-indigo-700 dark:text-indigo-300">Brutto</span>
-              <span className="text-red-500 font-bold">−</span>
+              <span className="text-red-500 font-bold">в€’</span>
               <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 rounded text-orange-700 dark:text-orange-300">{t.prIncomeTax}</span>
             </span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="text-slate-300 dark:text-slate-600">В·</span>
             {/* NPS note */}
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-slate-200 dark:bg-slate-600 text-[8px] font-bold text-slate-500">*</span>
               {t.prNpsNote}
             </span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="text-slate-300 dark:text-slate-600">В·</span>
             {/* Social note */}
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-slate-200 dark:bg-slate-600 text-[8px] font-bold text-slate-500">*</span>
@@ -313,7 +311,7 @@ function VedomostTab() {
         </div>
       )}
 
-      {/* ── Table / Empty state ──────────────────────────────────── */}
+      {/* в”Ђв”Ђ Table / Empty state в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {rows.length === 0 ? (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
           <FileText size={40} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
@@ -328,7 +326,7 @@ function VedomostTab() {
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
-                {monthLabel(month)} — {t.prTitle}
+                {monthLabel(month)} вЂ” {t.prTitle}
               </h3>
               <p className="text-slate-400 text-xs">{rows.length} {t.totalRecords}</p>
             </div>
@@ -347,26 +345,26 @@ function VedomostTab() {
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{t.prProductionAmt}</th>
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{t.prAklad}</th>
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{t.prBonus}</th>
-                  {/* Brutto — highlighted indigo */}
+                  {/* Brutto вЂ” highlighted indigo */}
                   <th className="text-right px-3 py-2.5 font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap bg-indigo-50/60 dark:bg-indigo-900/10">
                     {t.prBrutto}
                   </th>
-                  {/* Income Tax — DEDUCTED (-) */}
+                  {/* Income Tax вЂ” DEDUCTED (-) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap bg-orange-50/40 dark:bg-orange-900/10">
                     <div>{t.prIncomeTax}</div>
                     <div className="text-[9px] font-normal text-red-500 dark:text-red-400">{t.prVedColHintDeduct}</div>
                   </th>
-                  {/* NPS — NOT deducted (*) */}
+                  {/* NPS вЂ” NOT deducted (*) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     <div>{t.prNps} <span className="text-[9px] text-slate-400">*</span></div>
                     <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">{t.prVedColHintExempt}</div>
                   </th>
-                  {/* Social Tax — NOT deducted (*) */}
+                  {/* Social Tax вЂ” NOT deducted (*) */}
                   <th className="text-right px-3 py-2.5 font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     <div>{t.prSocialTax} <span className="text-[9px] text-slate-400">*</span></div>
                     <div className="text-[9px] font-normal text-slate-400 dark:text-slate-500">{t.prVedColHintExempt}</div>
                   </th>
-                  {/* NET — highlighted emerald */}
+                  {/* NET вЂ” highlighted emerald */}
                   <th className="text-right px-3 py-2.5 font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap bg-emerald-50/50 dark:bg-emerald-900/10">
                     <div>{t.prNet}</div>
                     <div className="text-[9px] font-normal text-emerald-500">{t.prVedColNetShort}</div>
@@ -397,7 +395,7 @@ function VedomostTab() {
                             <span className="text-white text-[10px] font-bold">{emp?.fullName?.charAt(0) ?? '?'}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-slate-800 dark:text-slate-200">{emp?.fullName ?? '—'}</p>
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{emp?.fullName ?? 'вЂ”'}</p>
                             <p className="text-slate-400 text-[10px] font-mono">{emp?.cardNumber}</p>
                           </div>
                         </div>
@@ -441,50 +439,50 @@ function VedomostTab() {
                         )}
                       </td>
 
-                      {/* ── BRUTTO ──────────────────────────────────── */}
+                      {/* в”Ђв”Ђ BRUTTO в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5 text-right bg-indigo-50/30 dark:bg-indigo-900/5">
                         <span className="font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                           {formatCurrency(row.totalSalary)}
                         </span>
                       </td>
 
-                      {/* ── INCOME TAX — DEDUCTED ───────────────────── */}
+                      {/* в”Ђв”Ђ INCOME TAX вЂ” DEDUCTED в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5 text-right bg-orange-50/30 dark:bg-orange-900/5">
                         <div className="flex flex-col items-end gap-0.5">
                           <span className="text-orange-700 dark:text-orange-400 font-semibold">
                             {formatCurrency(row.incomeTax)}
                           </span>
                           <span className="text-[9px] text-orange-400 opacity-70">
-                            −{((row.incomeTax / (row.totalSalary || 1)) * 100).toFixed(0)}%
+                            в€’{((row.incomeTax / (row.totalSalary || 1)) * 100).toFixed(0)}%
                           </span>
                         </div>
                       </td>
 
-                      {/* ── NPS — NOT DEDUCTED (dimmer) ─────────────── */}
+                      {/* в”Ђв”Ђ NPS вЂ” NOT DEDUCTED (dimmer) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5 text-right">
                         <span className="text-slate-500 dark:text-slate-400">
                           {formatCurrency(row.nps)}
                         </span>
                       </td>
 
-                      {/* ── SOCIAL TAX — NOT DEDUCTED (dimmer) ──────── */}
+                      {/* в”Ђв”Ђ SOCIAL TAX вЂ” NOT DEDUCTED (dimmer) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5 text-right">
                         <span className="text-slate-500 dark:text-slate-400">
                           {formatCurrency(row.socialTax)}
                         </span>
                       </td>
 
-                      {/* ── NET — Brutto - Income Tax ONLY ─────────── */}
+                      {/* в”Ђв”Ђ NET вЂ” Brutto - Income Tax ONLY в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5 text-right bg-emerald-50/30 dark:bg-emerald-900/5">
                         <div className="flex flex-col items-end gap-0.5">
                           <span className="font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                             {formatCurrency(row.netSalary)}
                           </span>
-                          <span className="text-[9px] text-slate-400 font-mono">B−I</span>
+                          <span className="text-[9px] text-slate-400 font-mono">Bв€’I</span>
                         </div>
                       </td>
 
-                      {/* ── STATUS — Berilmadi / Berildi ─────────────── */}
+                      {/* в”Ђв”Ђ STATUS вЂ” Berilmadi / Berildi в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
                       <td className="px-3 py-2.5">
                         <button
                           onClick={() => handleToggleStatus(row.id, row.status)}
@@ -526,7 +524,7 @@ function VedomostTab() {
                 })}
               </tbody>
 
-              {/* ── Totals footer ──────────────────────────────────── */}
+              {/* в”Ђв”Ђ Totals footer в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
               {rows.length > 0 && (
                 <tfoot>
                   <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600">
@@ -558,10 +556,10 @@ function VedomostTab() {
             </table>
           </div>
 
-          {/* ── Footnote / Legend ────────────────────────────────────── */}
+          {/* в”Ђв”Ђ Footnote / Legend в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
           <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-wrap items-center gap-x-5 gap-y-1.5">
             <p className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-bold text-[9px]">−</span>
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-bold text-[9px]">в€’</span>
               <strong>{t.prIncomeTax}:</strong>&nbsp;{t.prIncomeTaxOnly}
             </p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -760,11 +758,11 @@ function BankTab() {
                               {t.prBankUploadDate}:
                             </span>{' '}
                             {formatDateTime(item.createdAt)}
-                            <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+                            <span className="mx-1.5 text-slate-300 dark:text-slate-600">В·</span>
                             <span className="font-medium text-slate-500 dark:text-slate-400">
                               {t.prBankUploadedBy}:
                             </span>{' '}
-                            {item.uploadedByName ?? '—'}
+                            {item.uploadedByName ?? 'вЂ”'}
                           </p>
                         </div>
                         <span className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${statusColor}`}>
@@ -853,11 +851,11 @@ function BankTab() {
                       {t.prBankUploadDate}:
                     </span>{' '}
                     {formatDateTime(selectedVedomost.createdAt)}
-                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">В·</span>
                     <span className="font-medium text-slate-500 dark:text-slate-400">
                       {t.prBankUploadedBy}:
                     </span>{' '}
-                    {selectedVedomost.uploadedByName ?? '—'}
+                    {selectedVedomost.uploadedByName ?? 'вЂ”'}
                   </p>
                 )}
               </div>
@@ -918,21 +916,21 @@ function BankTab() {
                           {transaction.operationDate.slice(0, 10)}
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap text-slate-500 dark:text-slate-400">
-                          {transaction.documentNumber || '—'}
+                          {transaction.documentNumber || 'вЂ”'}
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="min-w-[180px]">
                             <p className="font-medium text-slate-700 dark:text-slate-200">
-                              {transaction.receiverName || '—'}
+                              {transaction.receiverName || 'вЂ”'}
                             </p>
                             <p className="text-[10px] text-slate-400">
-                              {transaction.employeeName || transaction.receiverStir || '—'}
+                              {transaction.employeeName || transaction.receiverStir || 'вЂ”'}
                             </p>
                           </div>
                         </td>
                         <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">
                           <div className="max-w-[320px] truncate">
-                            {transaction.paymentPurpose || '—'}
+                            {transaction.paymentPurpose || 'вЂ”'}
                           </div>
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
@@ -990,10 +988,10 @@ function BankTab() {
                   <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-800 dark:text-slate-200">
-                        {item.receiverName || '—'}
+                        {item.receiverName || 'вЂ”'}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {item.receiverBankName || '—'} · {item.receiverAccount || '—'}
+                        {item.receiverBankName || 'вЂ”'} В· {item.receiverAccount || 'вЂ”'}
                       </p>
                       <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(item.totalAmount)}
@@ -1033,10 +1031,10 @@ function BankTab() {
                   <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-800 dark:text-slate-200">
-                        {item.receiverName || '—'}
+                        {item.receiverName || 'вЂ”'}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {item.receiverStir || '—'} · {item.paymentPurpose || '—'}
+                        {item.receiverStir || 'вЂ”'} В· {item.paymentPurpose || 'вЂ”'}
                       </p>
                       <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(item.totalAmount)}
@@ -1241,11 +1239,11 @@ function EmployeesTab() {
     const merged = Array.from(new Set([...fromCatalog, ...workerRateProductLabels]));
     if (merged.length === 0) {
       return [
-        '18g Қолип',
-        '20g Қолип',
-        '0.5L Бакалашка',
-        '1L Бакалашка',
-        '5L Бакалашка',
+        '18g ТљРѕР»РёРї',
+        '20g ТљРѕР»РёРї',
+        '0.5L Р‘Р°РєР°Р»Р°С€РєР°',
+        '1L Р‘Р°РєР°Р»Р°С€РєР°',
+        '5L Р‘Р°РєР°Р»Р°С€РєР°',
       ];
     }
     return merged.sort((a, b) =>
@@ -1441,12 +1439,12 @@ function EmployeesTab() {
     hybrid: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   };
 
-  /** Ishdan chiqish: aniq `employmentEndedAt`, bo‘lmasa (eski yozuvlar) `updatedAt` taxmini */
+  /** Ishdan chiqish: aniq `employmentEndedAt`, boвЂlmasa (eski yozuvlar) `updatedAt` taxmini */
   const formatEmploymentLeaveDisplay = (emp: Employee) => {
-    if (emp.isActive !== false) return '—';
+    if (emp.isActive !== false) return 'вЂ”';
     if (emp.employmentEndedAt) return formatDate(emp.employmentEndedAt);
     if (emp.updatedAt) return formatDate(emp.updatedAt);
-    return '—';
+    return 'вЂ”';
   };
 
   return (
@@ -1716,7 +1714,7 @@ function EmployeesTab() {
                         <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{rate.productType}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {rate.rateType === 'percent'
-                            ? `${rate.rateValue}%${rate.baseAmount ? ` · baza ${formatCurrency(rate.baseAmount)}` : ''}`
+                            ? `${rate.rateValue}%${rate.baseAmount ? ` В· baza ${formatCurrency(rate.baseAmount)}` : ''}`
                             : `${formatCurrency(rate.rateValue)} / dona`}
                         </p>
                       </div>
@@ -1836,10 +1834,10 @@ function EmployeesTab() {
                 <p className="text-slate-400 text-xs">{emp.position}</p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   <span className="whitespace-nowrap">
-                    {t.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : '—'}
+                    {t.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : 'вЂ”'}
                   </span>
                   <span className="whitespace-nowrap">
-                    {' · '}
+                    {' В· '}
                     {t.prLeaveDateLabel}:{' '}
                     {formatEmploymentLeaveDisplay(emp)}
                   </span>
@@ -1850,8 +1848,8 @@ function EmployeesTab() {
                   </p>
                 ) : null}
                 <div className="flex items-center gap-4 mt-1">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || '—'}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || '—'}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || 'вЂ”'}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || 'вЂ”'}</span>
                   {emp.salaryAmount > 0 && <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(emp.salaryAmount)}</span>}
                 </div>
               </div>
@@ -1883,10 +1881,10 @@ function EmployeesTab() {
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               <span className="whitespace-nowrap">
                 {t.prHireDateLabel}:{' '}
-                {selectedEmployee.createdAt ? formatDate(selectedEmployee.createdAt) : '—'}
+                {selectedEmployee.createdAt ? formatDate(selectedEmployee.createdAt) : 'вЂ”'}
               </span>
               <span className="whitespace-nowrap">
-                {' · '}
+                {' В· '}
                 {t.prLeaveDateLabel}:{' '}
                 {formatEmploymentLeaveDisplay(selectedEmployee)}
               </span>
@@ -1923,12 +1921,12 @@ function EmployeesTab() {
                   <tbody>
                     {selectedShiftLog.map((row) => {
                       const mName = row.machineId
-                        ? machineNameById.get(row.machineId) || '—'
-                        : '—';
+                        ? machineNameById.get(row.machineId) || 'вЂ”'
+                        : 'вЂ”';
                       const paintStr =
                         row.paintUsed && (row.paintQuantityKg ?? 0) > 0
-                          ? `${row.paintRawMaterialName ? `${row.paintRawMaterialName} · ` : ''}${formatKgAmount(row.paintQuantityKg ?? 0)} kg`
-                          : '—';
+                          ? `${row.paintRawMaterialName ? `${row.paintRawMaterialName} В· ` : ''}${formatKgAmount(row.paintQuantityKg ?? 0)} kg`
+                          : 'вЂ”';
                       return (
                         <tr
                           key={row.id}
@@ -1937,7 +1935,7 @@ function EmployeesTab() {
                           <td className="whitespace-nowrap px-2 py-2 text-slate-800 dark:text-slate-200">{row.date}</td>
                           <td className="whitespace-nowrap px-2 py-2 text-slate-700 dark:text-slate-300">{row.shift}</td>
                           <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{mName}</td>
-                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{row.productType || '—'}</td>
+                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{row.productType || 'вЂ”'}</td>
                           <td className="whitespace-nowrap px-2 py-2 tabular-nums text-slate-800 dark:text-slate-200">
                             {fmtDec(row.hoursWorked)}
                           </td>
@@ -1952,13 +1950,13 @@ function EmployeesTab() {
                           </td>
                           <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{paintStr}</td>
                           <td className="max-w-[6rem] truncate px-2 py-2 text-slate-600 dark:text-slate-400" title={row.machineReading}>
-                            {row.machineReading || '—'}
+                            {row.machineReading || 'вЂ”'}
                           </td>
                           <td
                             className="max-w-[8rem] truncate px-2 py-2 text-slate-500 dark:text-slate-500"
                             title={row.notes}
                           >
-                            {row.notes || '—'}
+                            {row.notes || 'вЂ”'}
                           </td>
                         </tr>
                       );
@@ -2015,414 +2013,6 @@ function EmployeesTab() {
   );
 }
 
-// ======================== RAW MATERIAL ORDERS (BUXGALTERIYA) ========================
-
-function daysSinceOrder(orderedAtIso: string) {
-  const t0 = new Date(orderedAtIso).getTime();
-  return Math.max(0, Math.floor((Date.now() - t0) / 86400000));
-}
-
-function formatAmountInCurrency(amount: number, currency: 'UZS' | 'USD' | 'EUR'): string {
-  if (!Number.isFinite(amount) || amount < 0) return '—';
-  return `${new Intl.NumberFormat('ru-RU', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount)} ${currency}`;
-}
-
-function RawMaterialOrdersTab() {
-  const { state, dispatch } = useERP();
-  const { t } = useApp();
-  const { usd, eur, loading: fxLoading, error: fxErr, updatedAt, refetch } = useCbuRates();
-  const [sub, setSub] = useState<'new' | 'history'>('new');
-  const [rawMaterialId, setRawMaterialId] = useState('');
-  const [weight, setWeight] = useState('');
-  const [wu, setWu] = useState<'kg' | 'ton'>('kg');
-  const [cur, setCur] = useState<'UZS' | 'USD' | 'EUR'>('UZS');
-  const [fxMan, setFxMan] = useState('1');
-  /** 1 kg narxi — tanlangan valyutada */
-  const [pricePerKg, setPricePerKg] = useState('');
-  const [notes, setNotes] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  const rawList = useMemo(
-    () =>
-      state.warehouseProducts.filter((p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL'),
-    [state.warehouseProducts],
-  );
-
-  const pending = useMemo(
-    () =>
-      [...state.rawMaterialPurchaseOrders]
-        .filter((o) => o.status === 'PENDING')
-        .sort((a, b) => new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime()),
-    [state.rawMaterialPurchaseOrders],
-  );
-
-  const historySorted = useMemo(
-    () =>
-      [...state.rawMaterialPurchaseOrders].sort(
-        (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
-      ),
-    [state.rawMaterialPurchaseOrders],
-  );
-
-  const qKg = useMemo(() => {
-    const w = parseFloat(String(weight).replace(',', '.'));
-    if (!Number.isFinite(w) || w <= 0) return 0;
-    return wu === 'ton' ? w * 1000 : w;
-  }, [weight, wu]);
-
-  useEffect(() => {
-    if (cur === 'UZS') {
-      setFxMan('1');
-      return;
-    }
-    if (cur === 'USD' && usd) {
-      setFxMan(String(parseCbuRate(usd.Rate)));
-      return;
-    }
-    if (cur === 'EUR' && eur) {
-      setFxMan(String(parseCbuRate(eur.Rate)));
-    }
-  }, [cur, usd, eur]);
-
-  const fx = useMemo(() => {
-    if (cur === 'UZS') return 1;
-    const m = parseFloat(String(fxMan).replace(',', '.'));
-    return Number.isFinite(m) && m > 0 ? m : 0;
-  }, [cur, fxMan]);
-
-  const pricePerKgOrig = useMemo(() => {
-    const a = parseFloat(String(pricePerKg).replace(',', '.'));
-    return Number.isFinite(a) && a >= 0 ? a : 0;
-  }, [pricePerKg]);
-
-  const totalOriginal = useMemo(
-    () => (qKg > 0 && pricePerKgOrig > 0 ? pricePerKgOrig * qKg : 0),
-    [pricePerKgOrig, qKg],
-  );
-
-  const amountUzs = useMemo(() => {
-    if (totalOriginal <= 0) return 0;
-    return cur === 'UZS' ? totalOriginal : totalOriginal * fx;
-  }, [totalOriginal, cur, fx]);
-
-  const perKgUzs = qKg > 0 && amountUzs > 0 ? amountUzs / qKg : 0;
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!rawMaterialId || qKg <= 0) return;
-    if (pricePerKgOrig <= 0 || totalOriginal <= 0) return;
-    if (cur !== 'UZS' && fx <= 0) return;
-    setBusy(true);
-    try {
-      await dispatch({
-        type: 'CREATE_RAW_MATERIAL_PURCHASE_ORDER',
-        payload: {
-          rawMaterialId,
-          quantityKg: qKg,
-          currency: cur,
-          fxRateToUzs: fx,
-          amountOriginal: totalOriginal,
-          notes: notes.trim() || undefined,
-        },
-      });
-      setPricePerKg('');
-      setWeight('');
-      setNotes('');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const onFulfill = async (id: string) => {
-    await dispatch({ type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER', payload: id });
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-        <div className="flex items-center gap-2 mb-2">
-          <Package size={16} className="text-amber-700 dark:text-amber-400" />
-          <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t.prRmPendingAlert}</p>
-        </div>
-        {pending.length === 0 ? (
-          <p className="text-xs text-amber-800/80 dark:text-amber-300/90">{t.prRmNoPendingOrders}</p>
-        ) : (
-          <ul className="flex flex-wrap gap-2">
-            {pending.map((o) => {
-              const d = daysSinceOrder(o.orderedAt);
-              return (
-                <li
-                  key={o.id}
-                  className="text-xs rounded-xl border border-amber-300/60 bg-white/80 px-3 py-2 dark:border-amber-700 dark:bg-slate-900/40"
-                >
-                  {t.prRmDaysWaitingTpl
-                    .replace('{name}', o.rawMaterialName)
-                    .replace('{kg}', formatNumber(o.quantityKg))
-                    .replace('{days}', String(d))}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-
-      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
-        {(['new', 'history'] as const).map((k) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => setSub(k)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              sub === k
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'
-            }`}
-          >
-            {k === 'new' ? t.prRmSubtabNew : t.prRmSubtabHistory}
-          </button>
-        ))}
-      </div>
-
-      {sub === 'new' ? (
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          <form
-            onSubmit={onSubmit}
-            className="xl:col-span-3 space-y-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                <ShoppingCart size={16} className="text-teal-600 dark:text-teal-400" />
-              </div>
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prRmSubtabNew}</h3>
-            </div>
-            <div>
-              <Label>{t.prProductType}</Label>
-              <StyledSelect
-                value={rawMaterialId}
-                onValueChange={setRawMaterialId}
-                options={rawList.map((p) => ({ value: p.id, label: p.name }))}
-                placeholder="—"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>{t.prRmWeightLabel}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.001"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label>
-                  {t.prRmWeightUnitKg} / {t.prRmWeightUnitTon}
-                </Label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setWu('kg')}
-                    className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
-                      wu === 'kg'
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-slate-200 dark:border-slate-600'
-                    }`}
-                  >
-                    {t.prRmWeightUnitKg}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWu('ton')}
-                    className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
-                      wu === 'ton'
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-slate-200 dark:border-slate-600'
-                    }`}
-                  >
-                    {t.prRmWeightUnitTon}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <Label>{t.prRmCurrencyLabel}</Label>
-              <StyledSelect
-                value={cur}
-                onValueChange={(v) => setCur(v as 'UZS' | 'USD' | 'EUR')}
-                options={[
-                  { value: 'UZS', label: 'UZS' },
-                  { value: 'USD', label: 'USD' },
-                  { value: 'EUR', label: 'EUR' },
-                ]}
-              />
-            </div>
-            {cur !== 'UZS' && (
-              <div>
-                <Label>{t.prRmFxRateLabel}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={fxMan}
-                  onChange={(e) => setFxMan(e.target.value)}
-                />
-                <p className="text-xs text-slate-400 mt-1">{t.prRmFxCbuHint}</p>
-              </div>
-            )}
-            <div>
-              <Label>{t.prRmPricePerKgLabel}</Label>
-              <Input
-                type="number"
-                min={0}
-                step="0.0001"
-                value={pricePerKg}
-                onChange={(e) => setPricePerKg(e.target.value)}
-              />
-              <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1.5 leading-relaxed">
-                {t.prRmPricePerKgHint}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs space-y-1">
-              <p className="text-slate-600 dark:text-slate-300">
-                {t.prRmTotalOrderInCurrency}:{' '}
-                <strong>{formatAmountInCurrency(totalOriginal, cur)}</strong>
-              </p>
-              <p className="text-slate-600 dark:text-slate-300">
-                {t.prRmAmountUzsEst}: <strong>{formatCurrency(amountUzs)}</strong>
-              </p>
-              <p className="text-slate-600 dark:text-slate-300">
-                {t.prRmCostPerKg}:{' '}
-                <strong>{qKg > 0 && perKgUzs > 0 ? formatCurrency(perKgUzs) : '—'}</strong>
-              </p>
-            </div>
-            <div>
-              <Label>{t.labelDesc}</Label>
-              <textarea
-                rows={2}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full min-h-[4rem] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full h-10 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium"
-            >
-              {busy ? '…' : t.prRmSubmitOrder}
-            </button>
-          </form>
-
-          <div className="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">CBU</p>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
-                title="Refresh"
-              >
-                <RefreshCw size={14} className={fxLoading ? 'animate-spin' : ''} />
-              </button>
-            </div>
-            {fxErr ? (
-              <p className="text-xs text-amber-600">{t.dashCbuFetchError}</p>
-            ) : (
-              <div className="space-y-2 text-xs">
-                {usd && (
-                  <p className="text-slate-600 dark:text-slate-300">
-                    USD: <strong>{parseCbuRate(usd.Rate)}</strong> {t.labelDate}: {updatedAt || usd.Date}
-                  </p>
-                )}
-                {eur && (
-                  <p className="text-slate-600 dark:text-slate-300">
-                    EUR: <strong>{parseCbuRate(eur.Rate)}</strong>
-                  </p>
-                )}
-              </div>
-            )}
-            <p className="text-xs text-slate-400 mt-3">{t.prRmFulfilledHint}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.prRmOrdersHistory}</h3>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
-          <table className="w-full text-xs min-w-[720px]">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
-                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prRmColOrderedAt}</th>
-                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prProductType}</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">kg</th>
-                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prRmCurrencyLabel}</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">{t.labelAmount}</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">UZS</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-slate-500">{t.prRmCostPerKg}</th>
-                <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prStatusLabel}</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-slate-500" />
-              </tr>
-            </thead>
-            <tbody>
-              {historySorted.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
-                    {t.prRmNoOrders}
-                  </td>
-                </tr>
-              ) : (
-                historySorted.map((o, idx) => (
-                  <tr
-                    key={o.id}
-                    className={`border-t border-slate-100 dark:border-slate-700 ${
-                      idx % 2 ? 'bg-slate-50/50 dark:bg-slate-800/40' : ''
-                    }`}
-                  >
-                    <td className="px-3 py-2 text-slate-500 font-mono whitespace-nowrap">
-                      {o.orderedAt.slice(0, 10)}
-                    </td>
-                    <td className="px-3 py-2 font-medium text-slate-700 dark:text-slate-200">{o.rawMaterialName}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatNumber(o.quantityKg)}</td>
-                    <td className="px-3 py-2">{o.currency}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatNumber(o.amountOriginal)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(o.amountUzs)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {formatCurrency(o.quantityKg > 0 ? o.amountUzs / o.quantityKg : 0)}
-                    </td>
-                    <td className="px-3 py-2">
-                      {o.status === 'PENDING' ? (
-                        <span className="text-amber-700 dark:text-amber-400">{t.prRmStatusPending}</span>
-                      ) : (
-                        <span className="text-emerald-700 dark:text-emerald-400">{t.prRmStatusFulfilled}</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {o.status === 'PENDING' && (
-                        <button
-                          type="button"
-                          onClick={() => onFulfill(o.id)}
-                          className="text-indigo-600 hover:underline text-xs font-medium"
-                        >
-                          {t.prRmMarkFulfilled}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ======================== SETTINGS TAB ========================
 
 function SettingsTab() {
@@ -2467,7 +2057,7 @@ function SettingsTab() {
               />
               <span className="text-sm text-slate-500 font-medium">%</span>
             </div>
-            <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">↓ {t.prIncomeTaxOnly}</p>
+            <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">в†“ {t.prIncomeTaxOnly}</p>
           </div>
           <div>
             <Label>{t.prNpsPct}</Label>
@@ -2509,14 +2099,13 @@ function SettingsTab() {
 export function Payroll() {
   const { t } = useApp();
   const [activeTab, setActiveTab] = useState<
-    'vedomost' | 'bank' | 'employees' | 'rawOrders' | 'settings'
+    'vedomost' | 'bank' | 'employees' | 'settings'
   >('vedomost');
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
     { key: 'bank', label: t.prTabBank, icon: Landmark },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
-    { key: 'rawOrders', label: t.prTabRawOrders, icon: ShoppingCart },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
   ] as const;
 
@@ -2550,7 +2139,6 @@ export function Payroll() {
       {activeTab === 'vedomost' && <VedomostTab />}
       {activeTab === 'bank' && <BankTab />}
       {activeTab === 'employees' && <EmployeesTab />}
-      {activeTab === 'rawOrders' && <RawMaterialOrdersTab />}
       {activeTab === 'settings' && <SettingsTab />}
     </div>
   );

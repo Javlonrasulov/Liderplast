@@ -3,6 +3,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
@@ -12,6 +13,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { ShiftRecordKind } from '../../../generated/prisma/enums.js';
 
 export class RawMaterialActualKgDto {
   @IsString()
@@ -38,9 +40,25 @@ export class CreateShiftRecordDto {
   @IsDateString()
   date!: string;
 
+  @IsOptional()
+  @IsEnum(ShiftRecordKind)
+  recordKind?: ShiftRecordKind;
+
   @IsNumber()
   @Min(0)
   hoursWorked!: number;
+
+  @ValidateIf((o) => o.recordKind === ShiftRecordKind.PACKAGING)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  bagCount?: number;
+
+  @ValidateIf((o) => o.recordKind === ShiftRecordKind.PACKAGING)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  packCount?: number;
 
   @IsOptional()
   @IsString()

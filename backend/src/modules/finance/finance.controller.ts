@@ -25,6 +25,8 @@ import { PatchElectricityPriceDto } from './dto/patch-electricity-price.dto.js';
 import { UpdateSalarySettingsDto } from './dto/update-salary-settings.dto.js';
 import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
+import { CreateSupplierDto } from './dto/create-supplier.dto.js';
+import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
 import { FinanceService } from './finance.service.js';
 
 @Controller('finance')
@@ -92,6 +94,45 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   fulfillRawMaterialPurchaseOrder(@Param('id') id: string) {
     return this.financeService.fulfillRawMaterialPurchaseOrder(id);
+  }
+
+  @Get('suppliers')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  getSuppliers() {
+    return this.financeService.getSuppliers();
+  }
+
+  @Post('suppliers')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createSupplier(@Body() dto: CreateSupplierDto) {
+    return this.financeService.createSupplier(dto);
+  }
+
+  @Patch('suppliers/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateSupplier(@Param('id') id: string, @Body() dto: CreateSupplierDto) {
+    return this.financeService.updateSupplier(id, dto);
+  }
+
+  @Post('supplier-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createSupplierPurchaseOrder(
+    @Body() dto: CreateSupplierPurchaseOrderDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.createSupplierPurchaseOrder(dto, userId);
+  }
+
+  @Get('supplier-purchase-orders')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  getSupplierPurchaseOrders() {
+    return this.financeService.getSupplierPurchaseOrders();
+  }
+
+  @Patch('supplier-purchase-orders/:id/fulfill')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
+  fulfillSupplierPurchaseOrder(@Param('id') id: string) {
+    return this.financeService.fulfillSupplierPurchaseOrder(id);
   }
 
   /** @deprecated — ikkala URL ham qo‘llab-quvvatlanadi (proxy / eski mijozlar) */

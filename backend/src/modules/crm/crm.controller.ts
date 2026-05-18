@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { CreateClientDto } from './dto/create-client.dto.js';
+import { UpdateClientDto } from './dto/update-client.dto.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
 import { CrmService } from './crm.service.js';
@@ -21,6 +22,12 @@ export class CrmController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   getClients() {
     return this.crmService.getClients();
+  }
+
+  @Patch('clients/:id')
+  @Roles(Role.DIRECTOR, Role.MANAGER)
+  updateClient(@Param('id') id: string, @Body() dto: UpdateClientDto) {
+    return this.crmService.updateClient(id, dto);
   }
 
   @Delete('clients/:id')

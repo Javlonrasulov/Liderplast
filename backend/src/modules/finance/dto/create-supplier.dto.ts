@@ -1,8 +1,8 @@
 import { IsOptional, IsString, MinLength } from 'class-validator';
 
-export class CreateClientDto {
+export class CreateSupplierDto {
   @IsString()
-  @MinLength(2)
+  @MinLength(1)
   name!: string;
 
   @IsOptional()
@@ -15,9 +15,5 @@ export class CreateClientDto {
 
   @IsOptional()
   @IsString()
-  bankAccount?: string;
-
-  @IsOptional()
-  @IsString()
-  bankName?: string;
+  notes?: string;
 }

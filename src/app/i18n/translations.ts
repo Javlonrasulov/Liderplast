@@ -22,6 +22,49 @@ export interface T {
   rmWarehouseStockEmpty: string;
   navSales: string;
   navExpenses: string;
+  navSuppliers: string;
+  supTitle: string;
+  supSubtitle: string;
+  supFormTitle: string;
+  supReadOnlyHint: string;
+  supTabOrders: string;
+  supTabPurchase: string;
+  supTabHistory: string;
+  supTabSuppliers: string;
+  supEditSupplier: string;
+  supDebtAmountLabel: string;
+  supListTitle: string;
+  supListCount: string;
+  supSearchPlaceholder: string;
+  supNoSearchResults: string;
+  supSuppliersHint: string;
+  supAddSupplier: string;
+  supColName: string;
+  supColAddress: string;
+  supColSupplier: string;
+  supColQty: string;
+  supNoSuppliers: string;
+  supSelectSupplier: string;
+  supProductCategory: string;
+  supProductName: string;
+  supChooseProduct: string;
+  supNoProductsInCategory: string;
+  supCatRaw: string;
+  supCatSemi: string;
+  supCatFinal: string;
+  supQuantityLabel: string;
+  supQtyUnitLabel: string;
+  supUnitPieces: string;
+  supPricePerPieceLabel: string;
+  supPricePerKgLabel: string;
+  supPaymentType: string;
+  supPaymentCash: string;
+  supPaymentCredit: string;
+  supPaidNowLabel: string;
+  supDebtDueDate: string;
+  supDebtRemaining: string;
+  supPendingTpl: string;
+  supSubmitPurchase: string;
   navReports: string;
   navShifts: string;
   /** Smena ichidagi tab: qolip bo‘yicha siro tarixi */
@@ -221,6 +264,7 @@ export interface T {
   dashCbuFetchError: string;
   dashCbuRetry: string;
   dashCbuRefresh: string;
+  dashCbuUpdatedOk: string;
   dashCbuChangeToday: string;
 
   // Raw Material
@@ -666,6 +710,7 @@ export interface T {
   cdNoSales: string;
   cdBankInfo: string;
   cdContactInfo: string;
+  cdEdit: string;
 
   // AKT Sverka
   aktTitle: string;
@@ -986,6 +1031,49 @@ const uz_cyrillic: T = {
   rmWarehouseStockEmpty: 'Хомашё каталоги бўш — аввал тур яратинг.',
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
+  navSuppliers: 'Етказиб берувчи',
+  supTitle: 'Етказиб берувчи',
+  supSubtitle: 'Ташқи етказиб берувчидан хомашё сотиб олиш ва буюртмалар',
+  supFormTitle: 'Янги буюртма',
+  supReadOnlyHint: 'Буюртма яратиш учун харажатлар бўлимига рухсат керак. Сиз фақат кутилаётган буюртмаларни кўриш ва «омборга келди» белгилашингиз мумкин.',
+  supTabOrders: 'Буюртмалар',
+  supTabPurchase: 'Сотиб олиш',
+  supTabHistory: 'Тарих',
+  supTabSuppliers: 'Етказиб берувчилар',
+  supEditSupplier: 'Етказиб берувchini таҳрирлаш',
+  supDebtAmountLabel: 'Қарз суммаси (UZS)',
+  supListTitle: 'Етказиб берувчилар рўйхати',
+  supListCount: 'Жами: {n} та',
+  supSearchPlaceholder: 'Исм, телефон ёки манзил бўйича қидирув…',
+  supNoSearchResults: 'Қидирув бўйича натижа топилмади',
+  supSuppliersHint: 'Янги етказиб берувchini рўйхатга қўшинг ёки мавжудларни кўринг.',
+  supAddSupplier: 'Етказиб берувчи қўшиш',
+  supColName: 'Номи',
+  supColAddress: 'Манзил',
+  supColSupplier: 'Етказиб берувчи',
+  supColQty: 'Миқдор',
+  supNoSuppliers: 'Етказиб берувчи йўқ — аввал қўшинг.',
+  supSelectSupplier: 'Етказиб берувчини танланг',
+  supProductCategory: 'Маҳсулот тури',
+  supProductName: 'Маҳсулот',
+  supChooseProduct: 'Маҳсулотни танланг',
+  supNoProductsInCategory: 'Бу турда каталогда маҳсулот йўқ. Аввал омборда яратинг.',
+  supCatRaw: 'Хомашё',
+  supCatSemi: 'Ярим тайёр',
+  supCatFinal: 'Тайёр',
+  supQuantityLabel: 'Миқдор',
+  supQtyUnitLabel: 'Ўлчов',
+  supUnitPieces: 'дона',
+  supPricePerPieceLabel: '1 дона нархи',
+  supPricePerKgLabel: '1 кг нархи',
+  supPaymentType: 'Тўлов',
+  supPaymentCash: 'Нақд',
+  supPaymentCredit: 'Қарзга',
+  supPaidNowLabel: 'Ҳозир тўланди (UZS)',
+  supDebtDueDate: 'Қарз муддати',
+  supDebtRemaining: 'Қолган қарз',
+  supPendingTpl: '{supplier}: {name} — {qty} ({days} кун)',
+  supSubmitPurchase: 'Сотиб олиш',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
   shiftRmHistTitle: 'Хомашё тарихи (қолип сменаси)',
@@ -1297,6 +1385,7 @@ const uz_cyrillic: T = {
   dashCbuFetchError: 'Курс юкланмади. Интернетни текширинг.',
   dashCbuRetry: 'Қайта уриниш',
   dashCbuRefresh: 'Янгилаш',
+  dashCbuUpdatedOk: 'Курс янгиланди',
   dashCbuChangeToday: 'бугун',
 
   rmTitle: 'Хомашё бошқаруви',
@@ -1606,6 +1695,7 @@ const uz_cyrillic: T = {
   cdNoSales: 'Бу клиент учун сотувлар йўқ',
   cdBankInfo: 'Банк маълумотлари',
   cdContactInfo: 'Алоқа маълумотлари',
+  cdEdit: 'Таҳрирлаш',
 
   // AKT Sverka
   aktTitle: 'АКТ Сверка',
@@ -1917,6 +2007,49 @@ const uz_latin: T = {
   rmWarehouseStockEmpty: 'Xomashyo katalogi bo‘sh — avval tur yarating.',
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
+  navSuppliers: 'Yetkazib beruvchi',
+  supTitle: 'Yetkazib beruvchi',
+  supSubtitle: 'Tashqi yetkazib beruvchidan xomashyo sotib olish va buyurtmalar',
+  supFormTitle: 'Yangi buyurtma',
+  supReadOnlyHint: 'Buyurtma yaratish uchun xarajatlar bo‘limiga ruxsat kerak. Siz faqat kutilayotgan buyurtmalarni ko‘rish va «omborxona keldi» belgilashingiz mumkin.',
+  supTabOrders: 'Buyurtmalar',
+  supTabPurchase: 'Sotib olish',
+  supTabHistory: 'Tarix',
+  supTabSuppliers: 'Yetkazib beruvchilar',
+  supEditSupplier: 'Yetkazib beruvchini tahrirlash',
+  supDebtAmountLabel: 'Qarz summasi (UZS)',
+  supListTitle: 'Yetkazib beruvchilar ro‘yxati',
+  supListCount: 'Jami: {n} ta',
+  supSearchPlaceholder: 'Ism, telefon yoki manzil bo‘yicha qidiruv…',
+  supNoSearchResults: 'Qidiruv bo‘yicha natija topilmadi',
+  supSuppliersHint: 'Yangi yetkazib beruvchini ro‘yxatga qo‘shing yoki mavjudlarni ko‘ring.',
+  supAddSupplier: 'Yetkazib beruvchi qo‘shish',
+  supColName: 'Nomi',
+  supColAddress: 'Manzil',
+  supColSupplier: 'Yetkazib beruvchi',
+  supColQty: 'Miqdor',
+  supNoSuppliers: 'Yetkazib beruvchi yo‘q — avval qo‘shing.',
+  supSelectSupplier: 'Yetkazib beruvchini tanlang',
+  supProductCategory: 'Mahsulot turi',
+  supProductName: 'Mahsulot',
+  supChooseProduct: 'Mahsulotni tanlang',
+  supNoProductsInCategory: 'Bu turda katalogda mahsulot yo‘q. Avval omborda yarating.',
+  supCatRaw: 'Xomashyo',
+  supCatSemi: 'Yarim tayyor',
+  supCatFinal: 'Tayyor',
+  supQuantityLabel: 'Miqdor',
+  supQtyUnitLabel: 'O‘lchov',
+  supUnitPieces: 'dona',
+  supPricePerPieceLabel: '1 dona narxi',
+  supPricePerKgLabel: '1 kg narxi',
+  supPaymentType: 'To‘lov',
+  supPaymentCash: 'Naqd',
+  supPaymentCredit: 'Qarzga',
+  supPaidNowLabel: 'Hozir to‘landi (UZS)',
+  supDebtDueDate: 'Qarz muddati',
+  supDebtRemaining: 'Qolgan qarz',
+  supPendingTpl: '{supplier}: {name} — {qty} ({days} kun)',
+  supSubmitPurchase: 'Sotib olish',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
   shiftRmHistTitle: 'Xomashyo tarixi (qolip smenasi)',
@@ -2228,6 +2361,7 @@ const uz_latin: T = {
   dashCbuFetchError: 'Kurs yuklanmadi. Internetni tekshiring.',
   dashCbuRetry: 'Qayta urinish',
   dashCbuRefresh: 'Yangilash',
+  dashCbuUpdatedOk: 'Kurs yangilandi',
   dashCbuChangeToday: 'bugun',
 
   rmTitle: 'Xomashyo boshqaruvi',
@@ -2537,6 +2671,7 @@ const uz_latin: T = {
   cdNoSales: 'Bu klient uchun sotuvlar yo\'q',
   cdBankInfo: 'Bank ma\'lumotlari',
   cdContactInfo: 'Aloqa ma\'lumotlari',
+  cdEdit: 'Tahrirlash',
 
   // AKT Sverka
   aktTitle: 'AKT Sverka',
@@ -2848,6 +2983,49 @@ const ru: T = {
   rmWarehouseStockEmpty: 'Каталог сырья пуст — сначала добавьте тип.',
   navSales: 'Продажи',
   navExpenses: 'Расходы',
+  navSuppliers: 'Поставщик',
+  supTitle: 'Поставщик',
+  supSubtitle: 'Закупка сырья у внешнего поставщика и заказы',
+  supFormTitle: 'Новый заказ',
+  supReadOnlyHint: 'Для создания заказа нужен доступ к расходам. Вы можете просматривать ожидающие заказы и отмечать «поступило на склад».',
+  supTabOrders: 'Заказы',
+  supTabPurchase: 'Купить',
+  supTabHistory: 'История',
+  supTabSuppliers: 'Поставщики',
+  supEditSupplier: 'Редактировать поставщика',
+  supDebtAmountLabel: 'Сумма долга (UZS)',
+  supListTitle: 'Список поставщиков',
+  supListCount: 'Всего: {n}',
+  supSearchPlaceholder: 'Поиск по имени, телефону или адресу…',
+  supNoSearchResults: 'По запросу ничего не найдено',
+  supSuppliersHint: 'Добавьте нового поставщика или просмотрите список.',
+  supAddSupplier: 'Добавить поставщика',
+  supColName: 'Название',
+  supColAddress: 'Адрес',
+  supColSupplier: 'Поставщик',
+  supColQty: 'Кол-во',
+  supNoSuppliers: 'Нет поставщиков — сначала добавьте.',
+  supSelectSupplier: 'Выберите поставщика',
+  supProductCategory: 'Тип товара',
+  supProductName: 'Товар',
+  supChooseProduct: 'Выберите товар',
+  supNoProductsInCategory: 'В этом типе нет товаров в каталоге. Сначала создайте на складе.',
+  supCatRaw: 'Сырьё',
+  supCatSemi: 'Полуфабрикат',
+  supCatFinal: 'Готовая',
+  supQuantityLabel: 'Количество',
+  supQtyUnitLabel: 'Единица',
+  supUnitPieces: 'шт',
+  supPricePerPieceLabel: 'Цена за шт',
+  supPricePerKgLabel: 'Цена за кг',
+  supPaymentType: 'Оплата',
+  supPaymentCash: 'Наличные',
+  supPaymentCredit: 'В долг',
+  supPaidNowLabel: 'Оплачено сейчас (UZS)',
+  supDebtDueDate: 'Срок долга',
+  supDebtRemaining: 'Остаток долга',
+  supPendingTpl: '{supplier}: {name} — {qty} ({days} дн.)',
+  supSubmitPurchase: 'Купить',
   navReports: 'Отчёты',
   navShifts: 'Производство',
   shiftRmHistTitle: 'История сырья (смена преформ)',
@@ -3159,6 +3337,7 @@ const ru: T = {
   dashCbuFetchError: 'Курс не загрузился. Проверьте интернет.',
   dashCbuRetry: 'Повторить',
   dashCbuRefresh: 'Обновить',
+  dashCbuUpdatedOk: 'Курс обновлён',
   dashCbuChangeToday: 'сегодня',
 
   rmTitle: 'Управление сырьём и краской',
@@ -3468,6 +3647,7 @@ const ru: T = {
   cdNoSales: 'Продажи для этого клиента отсутствуют',
   cdBankInfo: 'Банковские реквизиты',
   cdContactInfo: 'Контактная информация',
+  cdEdit: 'Редактировать',
 
   // AKT Sverka
   aktTitle: 'АКТ Сверки',

@@ -5,7 +5,7 @@ import {
   ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
-  ClipboardList, Factory, Package,
+  ClipboardList, Factory, Package, Truck,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP } from '../store/erp-store';
@@ -226,6 +226,13 @@ export function Layout() {
     { kind: 'leaf', path: '/inventory', icon: ClipboardList, label: t.navInventory, perm: 'view_inventory' },
     { kind: 'leaf', path: '/sales', icon: ShoppingCart, label: t.navSales, perm: 'view_sales' },
     { kind: 'leaf', path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
+    {
+      kind: 'leaf',
+      path: '/suppliers',
+      icon: Truck,
+      label: t.navSuppliers,
+      perm: 'view_expenses',
+    },
     { kind: 'leaf', path: '/payroll', icon: Wallet, label: t.navPayroll, perm: 'view_payroll' },
     { kind: 'leaf', path: '/reports', icon: BarChart3, label: t.navReports, perm: 'view_reports' },
     { kind: 'leaf', path: '/system-users', icon: UserCog, label: t.navSystemUsers, perm: 'manage_users' },
@@ -234,6 +241,9 @@ export function Layout() {
   const allowLeaf = (leaf: NavLeaf) => {
     if (leaf.path === '/payroll') {
       return hasPermission('view_payroll') || hasPermission('view_vedemost');
+    }
+    if (leaf.path === '/suppliers') {
+      return hasPermission('view_expenses') || hasPermission('view_raw_material');
     }
     return hasPermission(leaf.perm);
   };
@@ -282,6 +292,7 @@ export function Layout() {
     '/inventory': t.navInventory,
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
+    '/suppliers': t.navSuppliers,
     '/shifts': t.navShifts,
     '/payroll': t.navPayroll,
     '/reports': t.navReports,

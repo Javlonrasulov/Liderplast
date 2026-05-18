@@ -27,6 +27,8 @@ export type ErpApiLoadPlan = {
   orders: boolean;
   payments: boolean;
   expenses: boolean;
+  supplierOrders: boolean;
+  suppliers: boolean;
   users: boolean;
   salarySettings: boolean;
   salaryRows: boolean;
@@ -35,7 +37,8 @@ export type ErpApiLoadPlan = {
 export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPlan {
   return {
     warehouseCatalog:
-      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_warehouse'),
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
+      (has('view_warehouse') || has('view_expenses')),
     warehouseStock:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_warehouse'),
     warehouseHistory:
@@ -54,6 +57,12 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     payments: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_sales'),
     expenses:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_expenses'),
+    supplierOrders:
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
+      (has('view_expenses') || has('view_raw_material')),
+    suppliers:
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
+      (has('view_expenses') || has('view_raw_material')),
     users:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('manage_users') || has('view_payroll') || has('manage_shift_workers')),

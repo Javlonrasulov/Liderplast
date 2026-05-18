@@ -7,6 +7,7 @@ import { RawMaterial } from './pages/RawMaterial';
 import { Warehouse } from './pages/Warehouse';
 import { Sales } from './pages/Sales';
 import { Expenses } from './pages/Expenses';
+import { Suppliers } from './pages/Suppliers';
 import { Reports } from './pages/Reports';
 import { ShiftWork } from './pages/ShiftWork';
 import { Payroll } from './pages/Payroll';
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
       },
       { path: 'inventarizatsiya', element: <Navigate to="/inventory" replace /> },
       { path: 'expenses', Component: Expenses },
+      { path: 'suppliers', Component: Suppliers },
       { path: 'employees', element: <Navigate to="/payroll" replace /> },
       { path: 'shifts', Component: ShiftWork },
       { path: 'shifts/over-consumption', element: <Navigate to="/shifts" replace /> },

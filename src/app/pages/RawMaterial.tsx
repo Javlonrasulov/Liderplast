@@ -102,8 +102,8 @@ export function RawMaterial() {
   );
 
   const pendingExternalOrders = useMemo(
-    () => state.rawMaterialPurchaseOrders.filter((o) => o.status === 'PENDING'),
-    [state.rawMaterialPurchaseOrders],
+    () => state.supplierPurchaseOrders.filter((o) => o.status === 'PENDING'),
+    [state.supplierPurchaseOrders],
   );
 
   const siroStockKg = stockByKind.siro;
@@ -202,11 +202,18 @@ export function RawMaterial() {
   const primaryPendingPurchaseOrder = useMemo(() => {
     const id = resolvedIncomingRawMaterialId;
     if (!id) return null;
-    const rows = state.rawMaterialPurchaseOrders
-      .filter((o) => o.status === 'PENDING' && o.rawMaterialId === id)
+    const rows = state.supplierPurchaseOrders
+      .filter(
+        (o) =>
+          o.status === 'PENDING' &&
+          o.itemType === 'RAW_MATERIAL' &&
+          o.rawMaterialId === id &&
+          o.quantityKg != null &&
+          o.quantityKg > 0,
+      )
       .sort((a, b) => new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime());
     return rows[0] ?? null;
-  }, [resolvedIncomingRawMaterialId, state.rawMaterialPurchaseOrders]);
+  }, [resolvedIncomingRawMaterialId, state.supplierPurchaseOrders]);
 
   const incomingRawMaterial = useMemo(
     () =>
@@ -267,12 +274,12 @@ export function RawMaterial() {
     const order = primaryPendingPurchaseOrder;
     if (
       order &&
-      !incomingKgMatchesOrderedOrder(amountKg, order.quantityKg)
+      !incomingKgMatchesOrderedOrder(amountKg, order.quantityKg!)
     ) {
       setIncomingQtyMismatchPayload({
         rawMaterialId,
         amountKg,
-        orderedKg: order.quantityKg,
+        orderedKg: order.quantityKg!,
         description,
         date: form.date,
       });
@@ -733,8 +740,8 @@ export function RawMaterial() {
                       >
                         <span className="text-slate-700 dark:text-slate-200">
                           {t.prRmDaysWaitingTpl
-                            .replace('{name}', o.rawMaterialName)
-                            .replace('{kg}', formatNumber(o.quantityKg))
+                            .replace('{name}', o.productName)
+                            .replace('{kg}', formatNumber(o.quantityKg ?? o.quantity))
                             .replace('{days}', String(days))}
                         </span>
                         <button
@@ -742,7 +749,7 @@ export function RawMaterial() {
                           onClick={async () => {
                             try {
                               await dispatch({
-                                type: 'FULFILL_RAW_MATERIAL_PURCHASE_ORDER',
+                                type: 'FULFILL_SUPPLIER_PURCHASE_ORDER',
                                 payload: o.id,
                               });
                               setSuccess(t.rmOrderArrivedToast);
