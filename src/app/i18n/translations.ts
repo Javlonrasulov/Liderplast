@@ -222,6 +222,8 @@ export interface T {
   whCatalogPiecesPerBag: string;
   whStockPackSubtitle: string;
   whStockPackSubtitleFull: string;
+  whStockLinePacked: string;
+  whStockLineUnpackaged: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1515,6 +1517,8 @@ const uz_cyrillic: T = {
   whStockPackSubtitle:
     '{total} дона · {bags} пачка қадоқланган ({ppb} тадан) · {rem} дона қадоқланмаган',
   whStockPackSubtitleFull: '{total} дона · {bags} пачка ({ppb} тадан)',
+  whStockLinePacked: '{bags} пачка қадоқланган ({ppb} тадан)',
+  whStockLineUnpackaged: '{rem} дона қадоқланмаган',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2500,6 +2504,8 @@ const uz_latin: T = {
   whStockPackSubtitle:
     '{total} dona · {bags} pachka qadoqlangan ({ppb} tadan) · {rem} dona qadoqlanmagan',
   whStockPackSubtitleFull: '{total} dona · {bags} pachka ({ppb} tadan)',
+  whStockLinePacked: '{bags} pachka qadoqlangan ({ppb} tadan)',
+  whStockLineUnpackaged: '{rem} dona qadoqlanmagan',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -3484,6 +3490,8 @@ const ru: T = {
   whCatalogPiecesPerBag: 'В пачке: {count} шт',
   whStockPackSubtitle: '{total} шт · {bags} пачек (по {ppb}) · {rem} шт не упаковано',
   whStockPackSubtitleFull: '{total} шт · {bags} пачек (по {ppb})',
+  whStockLinePacked: '{bags} пачек упаковано (по {ppb} шт)',
+  whStockLineUnpackaged: '{rem} шт не упаковано',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

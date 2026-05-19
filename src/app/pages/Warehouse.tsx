@@ -75,29 +75,30 @@ function catalogNamesMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
-function formatWarehousePackBreakdown(
+function getWarehousePackBreakdownLines(
   totalQty: number,
   packagedPieces: number,
   ppb: number,
   t: Pick<
     ReturnType<typeof useApp>['t'],
-    'whStockPackSubtitle' | 'whStockPackSubtitleFull'
+    'whStockLinePacked' | 'whStockLineUnpackaged'
   >,
-): string {
-  if (ppb <= 0 || totalQty <= 0) return '';
+): string[] {
+  if (ppb <= 0 || totalQty <= 0) return [];
   const packedBags = Math.floor(Math.max(0, packagedPieces) / ppb);
   const unpackaged = Math.max(0, totalQty - packagedPieces);
-  if (unpackaged > 0 || packedBags > 0) {
-    return t.whStockPackSubtitle
-      .replace('{total}', formatNumber(totalQty))
-      .replace('{bags}', String(packedBags))
-      .replace('{ppb}', formatNumber(ppb))
-      .replace('{rem}', formatNumber(unpackaged));
+  const lines: string[] = [];
+  if (packedBags > 0) {
+    lines.push(
+      t.whStockLinePacked
+        .replace('{bags}', String(packedBags))
+        .replace('{ppb}', formatNumber(ppb)),
+    );
   }
-  return t.whStockPackSubtitleFull
-    .replace('{total}', formatNumber(totalQty))
-    .replace('{bags}', String(packedBags))
-    .replace('{ppb}', formatNumber(ppb));
+  if (unpackaged > 0) {
+    lines.push(t.whStockLineUnpackaged.replace('{rem}', formatNumber(unpackaged)));
+  }
+  return lines;
 }
 
 type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
@@ -136,7 +137,8 @@ const DEFAULT_FORM: ProductFormState = {
 };
 
 function StockItem({
-  label,
+  title,
+  detailLines,
   value,
   max,
   unit,
@@ -146,7 +148,8 @@ function StockItem({
   warning,
   valueMode = 'integer',
 }: {
-  label: string;
+  title: string;
+  detailLines?: string[];
   value: number;
   max: number;
   unit: string;
@@ -185,7 +188,25 @@ function StockItem({
           {pct.toFixed(0)}%
         </span>
       </div>
-      <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-sm font-semibold text-slate-800 dark:text-white">{title}</p>
+      {detailLines && detailLines.length > 0 ? (
+        <ul className="mt-2 mb-3 space-y-1.5">
+          {detailLines.map((line) => (
+            <li
+              key={line}
+              className="flex items-start gap-2 text-xs leading-snug text-slate-500 dark:text-slate-400"
+            >
+              <span
+                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300 dark:bg-slate-500"
+                aria-hidden
+              />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="mb-3" />
+      )}
       <p className="text-2xl font-bold text-slate-900 dark:text-white">
         {valueStr}{' '}
         <span className="text-sm font-normal text-slate-400">{unit}</span>
@@ -567,7 +588,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
       const qty = semiStockByProductName[p.name] ?? 0;
       const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
-      const packLine = formatWarehousePackBreakdown(
+      const packLines = getWarehousePackBreakdownLines(
         qty,
         packagedBySemiName[p.name] ?? 0,
         ppb,
@@ -576,7 +597,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       cards.push({
         key: `semi-${p.id}`,
         label: p.name,
-        sub: `${formatNumber(p.weightGram)} g · ${t.whInWarehouse}${packLine ? ` · ${packLine}` : ''}`,
+        sub: [`${formatNumber(p.weightGram)} g · ${t.whInWarehouse}`, ...packLines].join('\n'),
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -587,7 +608,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
       const qty = finalStockByProductName[p.name] ?? 0;
       const ppb = p.piecesPerBag ?? 0;
-      const packLine = formatWarehousePackBreakdown(
+      const packLines = getWarehousePackBreakdownLines(
         qty,
         packagedByFinalName[p.name] ?? 0,
         ppb,
@@ -596,7 +617,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       cards.push({
         key: `final-${p.id}`,
         label: p.name,
-        sub: `${p.volumeLiter} L · ${t.whInWarehouse}${packLine ? ` · ${packLine}` : ''}`,
+        sub: [`${p.volumeLiter} L · ${t.whInWarehouse}`, ...packLines].join('\n'),
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -1498,7 +1519,9 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     <card.icon size={20} className="mb-3 opacity-80" />
                     <p className="mb-1 text-xs text-white/80">{card.label}</p>
                     <p className="text-2xl font-bold">{card.val}</p>
-                    <p className="mt-1 text-xs text-white/70">{card.sub}</p>
+                    <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-white/70">
+                      {card.sub}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -1518,7 +1541,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
               const qty = semiStockByProductName[p.name] ?? 0;
               const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
-              const packLine = formatWarehousePackBreakdown(
+              const detailLines = getWarehousePackBreakdownLines(
                 qty,
                 packagedBySemiName[p.name] ?? 0,
                 ppb,
@@ -1527,7 +1550,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               return (
                 <StockItem
                   key={p.id}
-                  label={packLine ? `${p.name} · ${packLine}` : p.name}
+                  title={p.name}
+                  detailLines={detailLines}
                   value={qty}
                   max={100000}
                   unit={t.unitPiece}
@@ -1541,7 +1565,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
               const qty = finalStockByProductName[p.name] ?? 0;
               const ppb = p.piecesPerBag ?? 0;
-              const packLine = formatWarehousePackBreakdown(
+              const detailLines = getWarehousePackBreakdownLines(
                 qty,
                 packagedByFinalName[p.name] ?? 0,
                 ppb,
@@ -1550,7 +1574,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               return (
                 <StockItem
                   key={p.id}
-                  label={packLine ? `${p.name} · ${packLine}` : p.name}
+                  title={p.name}
+                  detailLines={detailLines}
                   value={qty}
                   max={20000}
                   unit={t.unitPiece}
