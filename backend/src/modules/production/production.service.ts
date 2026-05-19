@@ -795,6 +795,13 @@ export class ProductionService {
     tx: Tx,
     semiProductId: string,
   ): Promise<number> {
+    const semi = await tx.semiProduct.findFirst({
+      where: { id: semiProductId, isDeleted: false },
+      select: { piecesPerBag: true },
+    });
+    if (semi?.piecesPerBag != null && semi.piecesPerBag > 0) {
+      return semi.piecesPerBag;
+    }
     const link = await tx.finishedProductSemiProduct.findFirst({
       where: { semiProductId },
       include: {

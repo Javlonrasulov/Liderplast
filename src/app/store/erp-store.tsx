@@ -150,6 +150,7 @@ export interface SemiProductRawMaterialRelation {
 export interface SemiProductCatalogItem extends WarehouseProductBase {
   itemType: 'SEMI_PRODUCT';
   weightGram: number;
+  piecesPerBag?: number;
   rawMaterials: SemiProductRawMaterialRelation[];
   machines: FinishedProductMachineRelation[];
 }
@@ -835,6 +836,7 @@ type CatalogResponse = {
     id: string;
     name: string;
     weightGram: number;
+    piecesPerBag?: number;
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -2062,6 +2064,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       itemType: 'SEMI_PRODUCT' as const,
       name: item.name,
       weightGram: item.weightGram,
+      piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,

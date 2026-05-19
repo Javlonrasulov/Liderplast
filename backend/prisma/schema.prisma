@@ -233,6 +233,8 @@ model SemiProduct {
   id             String                  @id @default(cuid())
   name           String                  @unique
   weightGram     Float
+  /** 1 qop/pachkada necha dona (qadoqlash) */
+  piecesPerBag   Int?
   description    String?
   isDeleted      Boolean                 @default(false)
   status         EntityStatus            @default(COMPLETED)

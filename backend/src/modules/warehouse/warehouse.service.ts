@@ -562,6 +562,15 @@ export class WarehouseService {
             'Semi product weightGram must be greater than zero',
           );
         }
+        if (
+          input.piecesPerBag == null ||
+          !Number.isFinite(input.piecesPerBag) ||
+          input.piecesPerBag <= 0
+        ) {
+          throw new BadRequestException(
+            'Semi product piecesPerBag must be greater than zero',
+          );
+        }
         if (!input.relations.rawMaterials?.length) {
           throw new BadRequestException(
             'Semi product requires at least one raw material',
@@ -723,6 +732,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             weightGram: input.weightGram!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceSemiProductRelations(tx, item.id, input.relations);
@@ -774,6 +784,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             weightGram: input.weightGram!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceSemiProductRelations(tx, id, input.relations);
@@ -822,6 +833,7 @@ export class WarehouseService {
             name: input.name,
             description: input.description,
             weightGram: input.weightGram!,
+            piecesPerBag: input.piecesPerBag ?? null,
           },
         });
         await this.replaceSemiProductRelations(tx, id, input.relations);
@@ -1269,6 +1281,7 @@ export class WarehouseService {
     id: string;
     name: string;
     weightGram: number;
+    piecesPerBag: number | null;
     description: string | null;
     isDeleted: boolean;
     createdAt: Date;
@@ -1304,6 +1317,7 @@ export class WarehouseService {
       itemType: InventoryItemType.SEMI_PRODUCT,
       name: item.name,
       weightGram: item.weightGram,
+      piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),

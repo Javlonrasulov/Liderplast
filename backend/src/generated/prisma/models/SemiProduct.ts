@@ -28,16 +28,19 @@ export type AggregateSemiProduct = {
 
 export type SemiProductAvgAggregateOutputType = {
   weightGram: number | null
+  piecesPerBag: number | null
 }
 
 export type SemiProductSumAggregateOutputType = {
   weightGram: number | null
+  piecesPerBag: number | null
 }
 
 export type SemiProductMinAggregateOutputType = {
   id: string | null
   name: string | null
   weightGram: number | null
+  piecesPerBag: number | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -49,6 +52,7 @@ export type SemiProductMaxAggregateOutputType = {
   id: string | null
   name: string | null
   weightGram: number | null
+  piecesPerBag: number | null
   description: string | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
@@ -60,6 +64,7 @@ export type SemiProductCountAggregateOutputType = {
   id: number
   name: number
   weightGram: number
+  piecesPerBag: number
   description: number
   isDeleted: number
   status: number
@@ -71,16 +76,19 @@ export type SemiProductCountAggregateOutputType = {
 
 export type SemiProductAvgAggregateInputType = {
   weightGram?: true
+  piecesPerBag?: true
 }
 
 export type SemiProductSumAggregateInputType = {
   weightGram?: true
+  piecesPerBag?: true
 }
 
 export type SemiProductMinAggregateInputType = {
   id?: true
   name?: true
   weightGram?: true
+  piecesPerBag?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -92,6 +100,7 @@ export type SemiProductMaxAggregateInputType = {
   id?: true
   name?: true
   weightGram?: true
+  piecesPerBag?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -103,6 +112,7 @@ export type SemiProductCountAggregateInputType = {
   id?: true
   name?: true
   weightGram?: true
+  piecesPerBag?: true
   description?: true
   isDeleted?: true
   status?: true
@@ -201,6 +211,7 @@ export type SemiProductGroupByOutputType = {
   id: string
   name: string
   weightGram: number
+  piecesPerBag: number | null
   description: string | null
   isDeleted: boolean
   status: $Enums.EntityStatus
@@ -235,6 +246,7 @@ export type SemiProductWhereInput = {
   id?: Prisma.StringFilter<"SemiProduct"> | string
   name?: Prisma.StringFilter<"SemiProduct"> | string
   weightGram?: Prisma.FloatFilter<"SemiProduct"> | number
+  piecesPerBag?: Prisma.IntNullableFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableFilter<"SemiProduct"> | string | null
   isDeleted?: Prisma.BoolFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"SemiProduct"> | $Enums.EntityStatus
@@ -256,6 +268,7 @@ export type SemiProductOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -280,6 +293,7 @@ export type SemiProductWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SemiProductWhereInput[]
   NOT?: Prisma.SemiProductWhereInput | Prisma.SemiProductWhereInput[]
   weightGram?: Prisma.FloatFilter<"SemiProduct"> | number
+  piecesPerBag?: Prisma.IntNullableFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableFilter<"SemiProduct"> | string | null
   isDeleted?: Prisma.BoolFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"SemiProduct"> | $Enums.EntityStatus
@@ -301,6 +315,7 @@ export type SemiProductOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -320,6 +335,7 @@ export type SemiProductScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"SemiProduct"> | string
   name?: Prisma.StringWithAggregatesFilter<"SemiProduct"> | string
   weightGram?: Prisma.FloatWithAggregatesFilter<"SemiProduct"> | number
+  piecesPerBag?: Prisma.IntNullableWithAggregatesFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"SemiProduct"> | string | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"SemiProduct"> | $Enums.EntityStatus
@@ -331,6 +347,7 @@ export type SemiProductCreateInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -352,6 +369,7 @@ export type SemiProductUncheckedCreateInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -373,6 +391,7 @@ export type SemiProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -394,6 +413,7 @@ export type SemiProductUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -415,6 +435,7 @@ export type SemiProductCreateManyInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -426,6 +447,7 @@ export type SemiProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -437,6 +459,7 @@ export type SemiProductUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -448,6 +471,7 @@ export type SemiProductCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -457,12 +481,14 @@ export type SemiProductCountOrderByAggregateInput = {
 
 export type SemiProductAvgOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrder
 }
 
 export type SemiProductMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -474,6 +500,7 @@ export type SemiProductMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -483,6 +510,7 @@ export type SemiProductMinOrderByAggregateInput = {
 
 export type SemiProductSumOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
+  piecesPerBag?: Prisma.SortOrder
 }
 
 export type SemiProductNullableScalarRelationFilter = {
@@ -653,6 +681,7 @@ export type SemiProductCreateWithoutBalanceInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -673,6 +702,7 @@ export type SemiProductUncheckedCreateWithoutBalanceInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -709,6 +739,7 @@ export type SemiProductUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -729,6 +760,7 @@ export type SemiProductUncheckedUpdateWithoutBalanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -749,6 +781,7 @@ export type SemiProductCreateWithoutMovementsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -769,6 +802,7 @@ export type SemiProductUncheckedCreateWithoutMovementsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -805,6 +839,7 @@ export type SemiProductUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -825,6 +860,7 @@ export type SemiProductUncheckedUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -845,6 +881,7 @@ export type SemiProductCreateWithoutRawMaterialLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -865,6 +902,7 @@ export type SemiProductUncheckedCreateWithoutRawMaterialLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -901,6 +939,7 @@ export type SemiProductUpdateWithoutRawMaterialLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -921,6 +960,7 @@ export type SemiProductUncheckedUpdateWithoutRawMaterialLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -941,6 +981,7 @@ export type SemiProductCreateWithoutMachineLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -961,6 +1002,7 @@ export type SemiProductUncheckedCreateWithoutMachineLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -997,6 +1039,7 @@ export type SemiProductUpdateWithoutMachineLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1017,6 +1060,7 @@ export type SemiProductUncheckedUpdateWithoutMachineLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1037,6 +1081,7 @@ export type SemiProductCreateWithoutFinishedProductLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1057,6 +1102,7 @@ export type SemiProductUncheckedCreateWithoutFinishedProductLinksInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1093,6 +1139,7 @@ export type SemiProductUpdateWithoutFinishedProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1113,6 +1160,7 @@ export type SemiProductUncheckedUpdateWithoutFinishedProductLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1133,6 +1181,7 @@ export type SemiProductCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1153,6 +1202,7 @@ export type SemiProductUncheckedCreateWithoutProductAuditLogsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1189,6 +1239,7 @@ export type SemiProductUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1209,6 +1260,7 @@ export type SemiProductUncheckedUpdateWithoutProductAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1229,6 +1281,7 @@ export type SemiProductCreateWithoutOutputBatchesInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1249,6 +1302,7 @@ export type SemiProductUncheckedCreateWithoutOutputBatchesInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1285,6 +1339,7 @@ export type SemiProductUpdateWithoutOutputBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1305,6 +1360,7 @@ export type SemiProductUncheckedUpdateWithoutOutputBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1325,6 +1381,7 @@ export type SemiProductCreateWithoutConsumptionsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1345,6 +1402,7 @@ export type SemiProductUncheckedCreateWithoutConsumptionsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1381,6 +1439,7 @@ export type SemiProductUpdateWithoutConsumptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1401,6 +1460,7 @@ export type SemiProductUncheckedUpdateWithoutConsumptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1421,6 +1481,7 @@ export type SemiProductCreateWithoutOrderItemsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1441,6 +1502,7 @@ export type SemiProductUncheckedCreateWithoutOrderItemsInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1477,6 +1539,7 @@ export type SemiProductUpdateWithoutOrderItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1497,6 +1560,7 @@ export type SemiProductUncheckedUpdateWithoutOrderItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1517,6 +1581,7 @@ export type SemiProductCreateWithoutSupplierPurchaseOrdersInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1537,6 +1602,7 @@ export type SemiProductUncheckedCreateWithoutSupplierPurchaseOrdersInput = {
   id?: string
   name: string
   weightGram: number
+  piecesPerBag?: number | null
   description?: string | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
@@ -1573,6 +1639,7 @@ export type SemiProductUpdateWithoutSupplierPurchaseOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1593,6 +1660,7 @@ export type SemiProductUncheckedUpdateWithoutSupplierPurchaseOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
+  piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -1716,6 +1784,7 @@ export type SemiProductSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   name?: boolean
   weightGram?: boolean
+  piecesPerBag?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1738,6 +1807,7 @@ export type SemiProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   weightGram?: boolean
+  piecesPerBag?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1749,6 +1819,7 @@ export type SemiProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   weightGram?: boolean
+  piecesPerBag?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1760,6 +1831,7 @@ export type SemiProductSelectScalar = {
   id?: boolean
   name?: boolean
   weightGram?: boolean
+  piecesPerBag?: boolean
   description?: boolean
   isDeleted?: boolean
   status?: boolean
@@ -1767,7 +1839,7 @@ export type SemiProductSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SemiProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "weightGram" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["semiProduct"]>
+export type SemiProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "weightGram" | "piecesPerBag" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["semiProduct"]>
 export type SemiProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balance?: boolean | Prisma.SemiProduct$balanceArgs<ExtArgs>
   movements?: boolean | Prisma.SemiProduct$movementsArgs<ExtArgs>
@@ -1802,6 +1874,10 @@ export type $SemiProductPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     name: string
     weightGram: number
+    /**
+     * * 1 qop/pachkada necha dona (qadoqlash)
+     */
+    piecesPerBag: number | null
     description: string | null
     isDeleted: boolean
     status: $Enums.EntityStatus
@@ -2243,6 +2319,7 @@ export interface SemiProductFieldRefs {
   readonly id: Prisma.FieldRef<"SemiProduct", 'String'>
   readonly name: Prisma.FieldRef<"SemiProduct", 'String'>
   readonly weightGram: Prisma.FieldRef<"SemiProduct", 'Float'>
+  readonly piecesPerBag: Prisma.FieldRef<"SemiProduct", 'Int'>
   readonly description: Prisma.FieldRef<"SemiProduct", 'String'>
   readonly isDeleted: Prisma.FieldRef<"SemiProduct", 'Boolean'>
   readonly status: Prisma.FieldRef<"SemiProduct", 'EntityStatus'>

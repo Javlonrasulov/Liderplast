@@ -146,6 +146,12 @@ export function ShiftPackagingForm({
   const semiPiecesPerBagByName = useMemo(() => {
     const m = new Map<string, number>();
     for (const p of state.warehouseProducts) {
+      if (p.itemType === 'SEMI_PRODUCT') {
+        const ppb = p.piecesPerBag ?? 0;
+        if (ppb > 0) m.set(p.name.trim().toLowerCase(), ppb);
+      }
+    }
+    for (const p of state.warehouseProducts) {
       if (p.itemType !== 'FINISHED_PRODUCT') continue;
       const ppb =
         'piecesPerBag' in p && p.piecesPerBag != null && p.piecesPerBag > 0

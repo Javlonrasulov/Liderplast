@@ -3275,6 +3275,7 @@ export const SemiProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   weightGram: 'weightGram',
+  piecesPerBag: 'piecesPerBag',
   description: 'description',
   isDeleted: 'isDeleted',
   status: 'status',

@@ -238,9 +238,14 @@ function useIsMobile() {
 
 function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
   if (product.itemType === 'SEMI_PRODUCT') {
+    const ppb = product.piecesPerBag ?? 0;
+    const ppbPart =
+      ppb > 0
+        ? `${t.whCatalogPiecesPerBag.replace('{count}', formatNumber(ppb))} · `
+        : '';
     const recipeCount = product.rawMaterials.length;
     const machineCount = product.machines.length;
-    return `${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
+    return `${ppbPart}${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
       machineCount > 0 ? `, ${machineCount} ${t.whMachinesShort}` : ''
     }`;
   }
@@ -463,9 +468,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     [state.warehouseProducts],
   );
 
-  /** Tayyor mahsulot qadoqlashidagi 1 pachkadagi dona — bog‘langan yarim tayyor uchun */
+  /** 1 pachkadagi dona: avval yarim tayyor o‘zidagi, keyin bog‘langan tayyor mahsulotdan */
   const semiPackPiecesPerBag = useMemo(() => {
     const m = new Map<string, number>();
+    for (const semi of allSemiProducts) {
+      const ppb = semi.piecesPerBag ?? 0;
+      if (ppb > 0) m.set(semi.name, ppb);
+    }
     for (const fin of allFinishedProducts) {
       const ppb = fin.piecesPerBag ?? 0;
       if (ppb <= 0) continue;
@@ -474,7 +483,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       }
     }
     return m;
-  }, [allFinishedProducts]);
+  }, [allSemiProducts, allFinishedProducts]);
 
   const warehouseHistoryRows = useMemo(() => {
     const merged = mergeWarehouseProductionHistory(
@@ -787,7 +796,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       weightGram:
         product.itemType === 'SEMI_PRODUCT' ? String(product.weightGram) : '',
       piecesPerBag:
-        product.itemType === 'FINISHED_PRODUCT'
+        product.itemType === 'SEMI_PRODUCT' || product.itemType === 'FINISHED_PRODUCT'
           ? String(product.piecesPerBag ?? '')
           : '',
       rawMaterials:
@@ -892,11 +901,17 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         throw new Error(t.whMachineRequired);
       }
 
+      const piecesPerBag = Math.floor(Number(form.piecesPerBag.replace(',', '.')));
+      if (!Number.isFinite(piecesPerBag) || piecesPerBag <= 0) {
+        throw new Error(t.whPiecesPerBagRequired);
+      }
+
       return {
         itemType: 'SEMI_PRODUCT' as const,
         name: form.name.trim(),
         description: form.description.trim() || undefined,
         weightGram,
+        piecesPerBag,
         relations: {
           rawMaterials: rawMaterialsPayload,
           machineIds: form.machineIds,
@@ -1151,6 +1166,21 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             />
           </div>
           <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {t.whPiecesPerBag}
+            </label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.piecesPerBag}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, piecesPerBag: e.target.value }))
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+          </div>
+          <div className="md:col-span-2">
             <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
               {t.labelDesc}
             </label>
