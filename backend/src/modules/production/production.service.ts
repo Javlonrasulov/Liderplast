@@ -695,14 +695,24 @@ export class ProductionService {
     tx: Tx,
     params: {
       productLabel: string | null | undefined;
-      bagCount: number;
       packCount: number;
     },
-  ): Promise<{ producedQty: number; machineId: string }> {
+  ): Promise<{
+    producedQty: number;
+    machineId: string;
+    stage: ProductionStage;
+  }> {
     const label = params.productLabel?.trim();
     if (!label) {
       throw new BadRequestException('Mahsulot turi tanlanishi kerak');
     }
+    const packs = Math.max(0, params.packCount);
+    if (packs <= 0) {
+      throw new BadRequestException(
+        'Pachka soni kiritilishi kerak',
+      );
+    }
+
     const finished = await tx.finishedProduct.findFirst({
       where: {
         name: { equals: label, mode: 'insensitive' },
@@ -710,27 +720,92 @@ export class ProductionService {
       },
       include: { machineLinks: true },
     });
-    if (!finished) {
+    if (finished) {
+      const piecesPerBag =
+        finished.piecesPerBag != null && finished.piecesPerBag > 0
+          ? finished.piecesPerBag
+          : 1;
+      const producedQty = packs * piecesPerBag;
+      const machineId = finished.machineLinks[0]?.machineId;
+      if (!machineId) {
+        throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
+      }
+      return { producedQty, machineId, stage: ProductionStage.FINISHED };
+    }
+
+    const semi = await tx.semiProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+      include: { machineLinks: true },
+    });
+    if (semi) {
+      const producedQty = packs;
+      const machineId = semi.machineLinks[0]?.machineId;
+      if (!machineId) {
+        throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
+      }
+      return { producedQty, machineId, stage: ProductionStage.SEMI };
+    }
+
+    throw new BadRequestException(shiftInventoryErr('SEMI_NOT_FOUND', label));
+  }
+
+  /** Qadoqlash (yarim tayyor): omborga dona qo‘shish, xomashyo sarfsiz */
+  private async applyShiftPackagingSemiOutput(
+    tx: Tx,
+    params: {
+      shiftId: string;
+      workerId: string;
+      productLabel: string;
+      producedQty: number;
+      outputNote?: string;
+    },
+  ) {
+    if (params.producedQty <= 0) return;
+
+    const semi = await tx.semiProduct.findFirst({
+      where: {
+        name: { equals: params.productLabel.trim(), mode: 'insensitive' },
+        isDeleted: false,
+      },
+    });
+    if (!semi) {
       throw new BadRequestException(
-        shiftInventoryErr('FINISHED_NOT_FOUND', label),
+        shiftInventoryErr('SEMI_NOT_FOUND', params.productLabel),
       );
     }
-    const piecesPerBag =
-      finished.piecesPerBag != null && finished.piecesPerBag > 0
-        ? finished.piecesPerBag
-        : 1;
-    const producedQty =
-      params.bagCount * piecesPerBag + Math.max(0, params.packCount);
-    if (producedQty <= 0) {
-      throw new BadRequestException(
-        'Kamida bitta qop yoki pachka miqdori kiritilishi kerak',
-      );
+
+    const semiBalance = await tx.inventoryBalance.findFirst({
+      where: { semiProductId: semi.id },
+    });
+    if (!semiBalance) {
+      throw new BadRequestException(shiftInventoryErr('SEMI_BALANCE_MISSING'));
     }
-    const machineId = finished.machineLinks[0]?.machineId;
-    if (!machineId) {
-      throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
-    }
-    return { producedQty, machineId };
+
+    const note = params.outputNote ?? 'Smena: qadoqlash';
+    const newSemiQty = semiBalance.quantity + params.producedQty;
+    await tx.inventoryBalance.update({
+      where: { id: semiBalance.id },
+      data: { quantity: newSemiQty },
+    });
+
+    await tx.inventoryMovement.create({
+      data: {
+        itemType: InventoryItemType.SEMI_PRODUCT,
+        movementType: MovementType.PRODUCTION_OUTPUT,
+        quantity: params.producedQty,
+        previousQuantity: semiBalance.quantity,
+        newQuantity: newSemiQty,
+        semiProductId: semi.id,
+        createdById: params.workerId,
+        referenceType: 'shift',
+        referenceId: params.shiftId,
+        status: EntityStatus.COMPLETED,
+        note,
+      },
+    });
   }
 
   private async applyShiftPaintConsumption(
@@ -842,17 +917,18 @@ export class ProductionService {
       let bagCount: number | null = null;
       let packCount: number | null = null;
       let outputNote = 'Smena: ishlab chiqarish';
+      let packagingStage: ProductionStage | null = null;
 
       if (recordKind === ShiftRecordKind.PACKAGING) {
         const pkg = await this.resolvePackagingForShift(tx, {
           productLabel: dto.productLabel,
-          bagCount: dto.bagCount ?? 0,
           packCount: dto.packCount ?? 0,
         });
         machineId = pkg.machineId;
         producedQty = pkg.producedQty;
+        packagingStage = pkg.stage;
         electricityKwh = 0;
-        bagCount = dto.bagCount ?? 0;
+        bagCount = 0;
         packCount = dto.packCount ?? 0;
         outputNote = 'Smena: qadoqlash';
       }
@@ -888,20 +964,33 @@ export class ProductionService {
         });
       }
 
-      const machine = machineId
-        ? await tx.machine.findUnique({ where: { id: machineId } })
-        : null;
+      if (
+        recordKind === ShiftRecordKind.PACKAGING &&
+        packagingStage === ProductionStage.SEMI
+      ) {
+        await this.applyShiftPackagingSemiOutput(tx, {
+          shiftId: shift.id,
+          workerId: dto.workerId,
+          productLabel: dto.productLabel ?? '',
+          producedQty,
+          outputNote,
+        });
+      } else {
+        const machine = machineId
+          ? await tx.machine.findUnique({ where: { id: machineId } })
+          : null;
 
-      await this.applyShiftRecipeAndOutput(tx, {
-        shiftId: shift.id,
-        workerId: dto.workerId,
-        machine,
-        productLabel: dto.productLabel,
-        producedQty,
-        defectCount: dto.defectCount ?? 0,
-        rawMaterialActualKg: rawKgMap,
-        outputNote,
-      });
+        await this.applyShiftRecipeAndOutput(tx, {
+          shiftId: shift.id,
+          workerId: dto.workerId,
+          machine,
+          productLabel: dto.productLabel,
+          producedQty,
+          defectCount: dto.defectCount ?? 0,
+          rawMaterialActualKg: rawKgMap,
+          outputNote,
+        });
+      }
 
       return tx.shiftRecord.findUniqueOrThrow({
         where: { id: shift.id },

@@ -65,6 +65,7 @@ export interface T {
   supDebtRemaining: string;
   supPendingTpl: string;
   supSubmitPurchase: string;
+  supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
   /** Smena ichidagi tab: qolip bo‘yicha siro tarixi */
@@ -217,6 +218,9 @@ export interface T {
   unitSum: string;
   whPiecesPerBag: string;
   whPiecesPerBagRequired: string;
+  whCatalogPiecesPerBag: string;
+  whStockPackSubtitle: string;
+  whStockPackSubtitleFull: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1076,6 +1080,7 @@ const uz_cyrillic: T = {
   supDebtRemaining: 'Қолган қарз',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} кун)',
   supSubmitPurchase: 'Сотиб олиш',
+  supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
   shiftRmHistTitle: 'Хомашё тарихи (қолип сменаси)',
@@ -1503,6 +1508,9 @@ const uz_cyrillic: T = {
   whVolumeLiter: 'Ҳажми (литр)',
   whPiecesPerBag: '1 қопда (дона)',
   whPiecesPerBagRequired: '1 қопда неча дона эканини киритинг',
+  whCatalogPiecesPerBag: '1 пачкада: {count} дона',
+  whStockPackSubtitle: '{total} дона · {bags} пачка ({ppb} тадан) · {rem} дона қадоқланмаган',
+  whStockPackSubtitleFull: '{total} дона · {bags} пачка ({ppb} тадан)',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2054,6 +2062,7 @@ const uz_latin: T = {
   supDebtRemaining: 'Qolgan qarz',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} kun)',
   supSubmitPurchase: 'Sotib olish',
+  supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
   shiftRmHistTitle: 'Xomashyo tarixi (qolip smenasi)',
@@ -2481,6 +2490,9 @@ const uz_latin: T = {
   whVolumeLiter: 'Hajmi (litr)',
   whPiecesPerBag: '1 qopda (dona)',
   whPiecesPerBagRequired: '1 qopda nechta dona ekanini kiriting',
+  whCatalogPiecesPerBag: '1 pachkada: {count} dona',
+  whStockPackSubtitle: '{total} dona · {bags} pachka ({ppb} tadan) · {rem} dona qadoqlanmagan',
+  whStockPackSubtitleFull: '{total} dona · {bags} pachka ({ppb} tadan)',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -3032,6 +3044,7 @@ const ru: T = {
   supDebtRemaining: 'Остаток долга',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} дн.)',
   supSubmitPurchase: 'Купить',
+  supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',
   shiftRmHistTitle: 'История сырья (смена преформ)',
@@ -3459,6 +3472,9 @@ const ru: T = {
   whVolumeLiter: 'Объём (литр)',
   whPiecesPerBag: 'В мешке (шт)',
   whPiecesPerBagRequired: 'Укажите количество штук в мешке',
+  whCatalogPiecesPerBag: 'В пачке: {count} шт',
+  whStockPackSubtitle: '{total} шт · {bags} пачек (по {ppb}) · {rem} шт не упаковано',
+  whStockPackSubtitleFull: '{total} шт · {bags} пачек (по {ppb})',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

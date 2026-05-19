@@ -1,11 +1,15 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { WarehouseService } from '../warehouse/warehouse.service.js';
+import { InventoryMovementDto } from '../warehouse/dto/inventory-movement.dto.js';
 import {
   BankTransactionType,
   BankVedomostStatus,
@@ -261,7 +265,11 @@ function monthFromDate(date: Date) {
 export class FinanceService {
   private readonly logger = new Logger(FinanceService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => WarehouseService))
+    private readonly warehouseService: WarehouseService,
+  ) {}
 
   /**
    * Smena elektr xarajati uchun kategoriya. Bazada yo‘q yoki barchasi soft-delete
@@ -624,6 +632,50 @@ export class FinanceService {
     return 'kg';
   }
 
+  private warehouseQuantityFromPurchase(
+    itemType: InventoryItemType,
+    quantity: number,
+    quantityUnit: PurchaseQuantityUnit,
+  ): number {
+    if (itemType === InventoryItemType.RAW_MATERIAL) {
+      if (quantityUnit === PurchaseQuantityUnit.TON) return quantity * 1000;
+      if (quantityUnit === PurchaseQuantityUnit.KG) return quantity;
+      throw new BadRequestException('Raw material purchase must use kg or ton');
+    }
+    if (quantityUnit === PurchaseQuantityUnit.TON) {
+      throw new BadRequestException('Ton unit is not supported for this product type');
+    }
+    return quantity;
+  }
+
+  private buildSupplierPurchaseIncomingDto(
+    itemType: InventoryItemType,
+    product: {
+      name: string;
+      rawMaterialId: string | null;
+      semiProductId: string | null;
+      finishedProductId: string | null;
+    },
+    supplierName: string,
+    quantity: number,
+    quantityUnit: PurchaseQuantityUnit,
+    orderId: string,
+  ): InventoryMovementDto {
+    const warehouseQty = this.warehouseQuantityFromPurchase(
+      itemType,
+      quantity,
+      quantityUnit,
+    );
+    return {
+      itemType,
+      rawMaterialId: product.rawMaterialId ?? undefined,
+      semiProductId: product.semiProductId ?? undefined,
+      finishedProductId: product.finishedProductId ?? undefined,
+      quantity: warehouseQty,
+      note: `Yetkazib beruvchi: ${supplierName} · ${product.name} (${orderId})`,
+    };
+  }
+
   async createSupplierPurchaseOrder(
     dto: CreateSupplierPurchaseOrderDto,
     createdById?: string,
@@ -674,7 +726,7 @@ export class FinanceService {
         ? `qarz ${Math.round(debtAmountUzs)} UZS`
         : 'naqd';
 
-    return this.prisma.$transaction(async (tx) => {
+    const movementResult = await this.prisma.$transaction(async (tx) => {
       const expense = await tx.expense.create({
         data: {
           title: `Sotib olish: ${product.name} (${supplier.name})`,
@@ -696,7 +748,7 @@ export class FinanceService {
         },
       });
 
-      return tx.supplierPurchaseOrder.create({
+      const order = await tx.supplierPurchaseOrder.create({
         data: {
           supplierId: supplier.id,
           itemType: dto.itemType,
@@ -714,12 +766,33 @@ export class FinanceService {
           debtAmountUzs,
           debtDueDate: dto.debtDueDate ? new Date(dto.debtDueDate) : null,
           expenseId: expense.id,
+          status: RawMaterialOrderStatus.FULFILLED,
+          fulfilledAt: new Date(),
           notes: dto.notes?.trim() || null,
           createdById: createdById ?? null,
         },
         include: this.supplierPurchaseOrderInclude(),
       });
+
+      const incomingDto = this.buildSupplierPurchaseIncomingDto(
+        dto.itemType,
+        product,
+        supplier.name,
+        dto.quantity,
+        dto.quantityUnit,
+        order.id,
+      );
+      const wh = await this.warehouseService.applyIncomingMovementTx(
+        tx,
+        incomingDto,
+        createdById,
+      );
+
+      return { order, wh };
     });
+
+    this.warehouseService.emitWarehouseMovement(movementResult.wh);
+    return movementResult.order;
   }
 
   private supplierPurchaseOrderInclude() {
@@ -824,19 +897,49 @@ export class FinanceService {
   async fulfillSupplierPurchaseOrder(id: string) {
     const modern = await this.prisma.supplierPurchaseOrder.findUnique({
       where: { id },
+      include: {
+        supplier: { select: { name: true } },
+        rawMaterial: { select: { id: true, name: true } },
+        semiProduct: { select: { id: true, name: true } },
+        finishedProduct: { select: { id: true, name: true } },
+      },
     });
     if (modern) {
       if (modern.status !== RawMaterialOrderStatus.PENDING) {
         throw new BadRequestException('Order is not pending');
       }
-      return this.prisma.supplierPurchaseOrder.update({
-        where: { id },
-        data: {
-          status: RawMaterialOrderStatus.FULFILLED,
-          fulfilledAt: new Date(),
-        },
-        include: this.supplierPurchaseOrderInclude(),
+      const product = {
+        name:
+          modern.rawMaterial?.name ??
+          modern.semiProduct?.name ??
+          modern.finishedProduct?.name ??
+          '',
+        rawMaterialId: modern.rawMaterialId,
+        semiProductId: modern.semiProductId,
+        finishedProductId: modern.finishedProductId,
+      };
+      const movementResult = await this.prisma.$transaction(async (tx) => {
+        const order = await tx.supplierPurchaseOrder.update({
+          where: { id },
+          data: {
+            status: RawMaterialOrderStatus.FULFILLED,
+            fulfilledAt: new Date(),
+          },
+          include: this.supplierPurchaseOrderInclude(),
+        });
+        const incomingDto = this.buildSupplierPurchaseIncomingDto(
+          modern.itemType,
+          product,
+          modern.supplier.name,
+          modern.quantity,
+          modern.quantityUnit,
+          modern.id,
+        );
+        const wh = await this.warehouseService.applyIncomingMovementTx(tx, incomingDto);
+        return { order, wh };
       });
+      this.warehouseService.emitWarehouseMovement(movementResult.wh);
+      return movementResult.order;
     }
     return this.fulfillRawMaterialPurchaseOrder(id);
   }

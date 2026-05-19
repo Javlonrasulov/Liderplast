@@ -58,7 +58,6 @@ type PackagingLine = {
   id: string;
   productType: string;
   hoursWorked: string;
-  bagCount: string;
   packCount: string;
   notes: string;
 };
@@ -69,7 +68,6 @@ export type ShiftPackagingTranslations = {
   labelWorker: string;
   labelProduct: string;
   labelHours: string;
-  labelBagCount: string;
   labelPackCount: string;
   labelNotes: string;
   placeholderWorker: string;
@@ -84,13 +82,18 @@ export type ShiftPackagingTranslations = {
   unitPiecesAbbr: string;
   hoursShort: string;
   packagingPiecesPreview: string;
+  packagingPiecesPreviewSemi: string;
   packagingNoPiecesPerBag: string;
+  packagingStockAvailable: string;
+  packagingStockInsufficient: string;
+  packagingMaxPacks: string;
 };
 
 type Props = {
   t: ShiftPackagingTranslations;
   shiftPickerDefs: ShiftDefinition[];
-  finishedProductTypes: string[];
+  /** Yarim tayyor + tayyor mahsulot nomlari */
+  productOptions: string[];
   onNeedShiftDefs: () => void;
   getShiftLabel: (defs: ShiftDefinition[], shift: number) => string;
 };
@@ -98,11 +101,11 @@ type Props = {
 export function ShiftPackagingForm({
   t,
   shiftPickerDefs,
-  finishedProductTypes,
+  productOptions,
   onNeedShiftDefs,
   getShiftLabel,
 }: Props) {
-  const { state, dispatch, refresh } = useERP();
+  const { state, dispatch, refresh, semiStockByProductName } = useERP();
   const { t: appT } = useApp();
 
   const [form, setForm] = useState({
@@ -113,6 +116,17 @@ export function ShiftPackagingForm({
   const [workerInputOpen, setWorkerInputOpen] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  const productKindByName = useMemo(() => {
+    const m = new Map<string, 'SEMI' | 'FINISHED'>();
+    for (const p of state.warehouseProducts) {
+      const name = p.name?.trim();
+      if (!name) continue;
+      if (p.itemType === 'SEMI_PRODUCT') m.set(name.toLowerCase(), 'SEMI');
+      if (p.itemType === 'FINISHED_PRODUCT') m.set(name.toLowerCase(), 'FINISHED');
+    }
+    return m;
+  }, [state.warehouseProducts]);
 
   const piecesPerBagByProduct = useMemo(() => {
     const m = new Map<string, number>();
@@ -129,16 +143,33 @@ export function ShiftPackagingForm({
     return m;
   }, [state.warehouseProducts]);
 
+  const semiStockForFinishedProduct = useCallback(
+    (finishedProductName: string): number => {
+      const key = finishedProductName.trim().toLowerCase();
+      const fin = state.warehouseProducts.find(
+        (p) =>
+          p.itemType === 'FINISHED_PRODUCT' &&
+          p.name.trim().toLowerCase() === key,
+      );
+      if (!fin || fin.itemType !== 'FINISHED_PRODUCT' || fin.semiProducts.length === 0) {
+        return 0;
+      }
+      return Math.min(
+        ...fin.semiProducts.map((sp) => semiStockByProductName[sp.name] ?? 0),
+      );
+    },
+    [state.warehouseProducts, semiStockByProductName],
+  );
+
   const createEmptyLine = useCallback((): PackagingLine => {
     return {
       id: `pkg-${Math.random().toString(16).slice(2)}`,
-      productType: finishedProductTypes[0] || '',
+      productType: productOptions[0] || '',
       hoursWorked: '',
-      bagCount: '',
       packCount: '',
       notes: '',
     };
-  }, [finishedProductTypes]);
+  }, [productOptions]);
 
   const [lines, setLines] = useState<PackagingLine[]>([]);
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
@@ -184,12 +215,16 @@ export function ShiftPackagingForm({
 
   const estimatePieces = useCallback(
     (ln: PackagingLine) => {
-      const bags = Math.max(0, parseNonNegativeInt(ln.bagCount) || 0);
       const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
-      const ppb = piecesPerBagByProduct.get(ln.productType.trim().toLowerCase()) ?? 1;
-      return bags * ppb + packs;
+      const key = ln.productType.trim().toLowerCase();
+      const kind = productKindByName.get(key);
+      if (kind === 'FINISHED') {
+        const ppb = piecesPerBagByProduct.get(key) ?? 1;
+        return packs * ppb;
+      }
+      return packs;
     },
-    [piecesPerBagByProduct],
+    [piecesPerBagByProduct, productKindByName],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,7 +234,7 @@ export function ShiftPackagingForm({
       setError(t.shiftNoDefsHint);
       return;
     }
-    if (finishedProductTypes.length === 0) {
+    if (productOptions.length === 0) {
       setError(t.productTypesEmptyHint);
       return;
     }
@@ -209,10 +244,8 @@ export function ShiftPackagingForm({
     }
 
     const meaningfulLines = lines.filter((ln) => {
-      const bags = parseNonNegativeInt(ln.bagCount);
       const packs = parseNonNegativeInt(ln.packCount);
-      const hasQty =
-        (!Number.isNaN(bags) && bags > 0) || (!Number.isNaN(packs) && packs > 0);
+      const hasQty = !Number.isNaN(packs) && packs > 0;
       return (
         hasQty ||
         Boolean(ln.hoursWorked.trim()) ||
@@ -222,15 +255,14 @@ export function ShiftPackagingForm({
     });
 
     if (meaningfulLines.length === 0) {
-      setError(`${t.labelBagCount} / ${t.labelPackCount}!`);
+      setError(`${t.labelPackCount}!`);
       return;
     }
 
     for (const ln of meaningfulLines) {
-      const bags = Math.max(0, parseNonNegativeInt(ln.bagCount) || 0);
       const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
-      if (bags <= 0 && packs <= 0) {
-        setError(`${t.labelBagCount} / ${t.labelPackCount}!`);
+      if (packs <= 0) {
+        setError(`${t.labelPackCount}!`);
         return;
       }
       if (!ln.productType.trim()) {
@@ -241,6 +273,18 @@ export function ShiftPackagingForm({
       if (pieces <= 0) {
         setError(t.packagingNoPiecesPerBag);
         return;
+      }
+      const productKey = ln.productType.trim().toLowerCase();
+      if (productKindByName.get(productKey) === 'FINISHED') {
+        const available = semiStockForFinishedProduct(ln.productType);
+        if (pieces > available) {
+          setError(
+            t.packagingStockInsufficient
+              .replace('{needed}', String(pieces))
+              .replace('{available}', String(available)),
+          );
+          return;
+        }
       }
     }
 
@@ -257,7 +301,6 @@ export function ShiftPackagingForm({
 
       for (const ln of meaningfulLines) {
         const hours = parseDecimalInput(ln.hoursWorked);
-        const bags = Math.max(0, parseNonNegativeInt(ln.bagCount) || 0);
         const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
         const producedQty = estimatePieces(ln);
 
@@ -275,7 +318,7 @@ export function ShiftPackagingForm({
             producedQty,
             defectCount: 0,
             electricityKwh: 0,
-            bagCount: bags,
+            bagCount: 0,
             packCount: packs,
             notes: ln.notes,
           },
@@ -387,7 +430,7 @@ export function ShiftPackagingForm({
 
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          {t.labelProduct} · {t.labelHours} · {t.labelBagCount}
+          {t.labelProduct} · {t.labelHours} · {t.labelPackCount}
         </div>
         <button
           type="button"
@@ -404,10 +447,16 @@ export function ShiftPackagingForm({
           const hours = parseDecimalInput(ln.hoursWorked);
           const hoursLabel =
             ln.hoursWorked.trim() && hours > 0 ? `${hours}${t.hoursShort}` : '—';
-          const bags = Math.max(0, parseNonNegativeInt(ln.bagCount) || 0);
           const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
           const pieces = estimatePieces(ln);
-          const ppb = piecesPerBagByProduct.get(ln.productType.trim().toLowerCase()) ?? 1;
+          const productKey = ln.productType.trim().toLowerCase();
+          const ppb = piecesPerBagByProduct.get(productKey) ?? 1;
+          const isFinished = productKindByName.get(productKey) === 'FINISHED';
+          const semiAvailable = isFinished ? semiStockForFinishedProduct(ln.productType) : 0;
+          const maxPacks =
+            isFinished && ppb > 0 ? Math.floor(semiAvailable / ppb) : Infinity;
+          const stockInsufficient =
+            isFinished && packs > 0 && pieces > semiAvailable;
 
           return (
             <div
@@ -444,7 +493,7 @@ export function ShiftPackagingForm({
                     </span>
                   ) : null}
                   <span className="text-xs text-slate-600 dark:text-slate-300">
-                    {bags} qop · {packs} pachka
+                    {packs} {t.labelPackCount.toLowerCase()}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">
                     <Clock size={10} className="text-slate-400" />
@@ -461,11 +510,11 @@ export function ShiftPackagingForm({
                     <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
                       {t.labelProduct}
                     </label>
-                    {finishedProductTypes.length === 0 ? (
+                    {productOptions.length === 0 ? (
                       <p className="text-xs text-amber-800 dark:text-amber-200">{t.productTypesEmptyHint}</p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        {finishedProductTypes.map((pt) => (
+                        {productOptions.map((pt) => (
                           <button
                             key={pt}
                             type="button"
@@ -483,7 +532,7 @@ export function ShiftPackagingForm({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
                         {t.labelHours}
@@ -502,30 +551,6 @@ export function ShiftPackagingForm({
                         placeholder="0"
                         className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
                       />
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                        {t.packagingPiecesPreview.replace(
-                          '{pieces}',
-                          String(pieces),
-                        ).replace('{ppb}', String(ppb))}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
-                        {t.labelBagCount}
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={ln.bagCount}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          if (isValidPartialNonNegativeInt(v)) {
-                            updateLine(ln.id, { bagCount: normalizeNonNegativeIntInput(v) });
-                          }
-                        }}
-                        placeholder="0"
-                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-sm"
-                      />
                     </div>
                     <div>
                       <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
@@ -534,6 +559,7 @@ export function ShiftPackagingForm({
                       <input
                         type="text"
                         inputMode="numeric"
+                        autoComplete="off"
                         value={ln.packCount}
                         onChange={(e) => {
                           const v = e.target.value;
@@ -542,8 +568,36 @@ export function ShiftPackagingForm({
                           }
                         }}
                         placeholder="0"
-                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-sm"
+                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
                       />
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                        {isFinished
+                          ? t.packagingPiecesPreview
+                              .replace('{pieces}', String(pieces))
+                              .replace('{ppb}', String(ppb))
+                          : t.packagingPiecesPreviewSemi.replace(
+                              '{pieces}',
+                              String(pieces),
+                            )}
+                      </p>
+                      {isFinished ? (
+                        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                          {t.packagingStockAvailable.replace(
+                            '{available}',
+                            String(semiAvailable),
+                          )}
+                          {Number.isFinite(maxPacks)
+                            ? ` · ${t.packagingMaxPacks.replace('{max}', String(maxPacks))}`
+                            : ''}
+                        </p>
+                      ) : null}
+                      {stockInsufficient ? (
+                        <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
+                          {t.packagingStockInsufficient
+                            .replace('{needed}', String(pieces))
+                            .replace('{available}', String(semiAvailable))}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 

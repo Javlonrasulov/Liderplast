@@ -368,68 +368,88 @@ export class WarehouseService {
       throw new BadRequestException('movementType is required');
     }
     const movementType = dto.movementType;
-
-    const result = await this.prisma.$transaction(async (tx) => {
-      const balance = await this.getBalanceRecord(tx, dto);
-      if (!balance) {
-        throw new NotFoundException('Inventory balance not found');
-      }
-
-      const previousQuantity = balance.quantity;
-      const delta =
-        movementType === MovementType.INCOMING ||
-        movementType === MovementType.PRODUCTION_OUTPUT
-          ? dto.quantity
-          : -dto.quantity;
-      const nextQuantity = previousQuantity + delta;
-
-      if (nextQuantity < 0) {
-        throw new BadRequestException('Stock cannot go negative');
-      }
-
-      const updatedBalance = await tx.inventoryBalance.update({
-        where: { id: balance.id },
-        data: {
-          quantity: nextQuantity,
-          status: EntityStatus.COMPLETED,
-        },
-      });
-
-      const movement = await tx.inventoryMovement.create({
-        data: {
-          itemType: dto.itemType,
-          movementType,
-          quantity: dto.quantity,
-          previousQuantity,
-          newQuantity: nextQuantity,
-          note: dto.note,
-          createdById,
-          rawMaterialId: dto.rawMaterialId,
-          semiProductId: dto.semiProductId,
-          finishedProductId: dto.finishedProductId,
-          status: EntityStatus.COMPLETED,
-        },
-      });
-
-      if (
-        dto.itemType === InventoryItemType.RAW_MATERIAL &&
-        movementType === MovementType.INCOMING &&
-        dto.rawMaterialId
-      ) {
-        await this.rawMaterialBagsService.createAutoBagsForIncomingTx(tx, {
-          rawMaterialId: dto.rawMaterialId,
-          totalQuantityKg: dto.quantity,
-          createdById,
-          referenceType: 'warehouse-incoming',
-          referenceId: movement.id,
-        });
-      }
-
-      return { movement, updatedBalance };
-    });
-
+    const result = await this.prisma.$transaction(async (tx) =>
+      this.applyMovementTx(tx, dto, movementType, createdById),
+    );
     this.realtimeGateway.emitWarehouseUpdated(result);
     return result;
+  }
+
+  /** Omborga kirim (mavjud tranzaksiya ichida — masalan, yetkazib beruvchidan sotib olish). */
+  async applyIncomingMovementTx(
+    tx: Tx,
+    dto: InventoryMovementDto,
+    createdById?: string,
+  ) {
+    return this.applyMovementTx(tx, dto, MovementType.INCOMING, createdById);
+  }
+
+  emitWarehouseMovement(result: Awaited<ReturnType<typeof this.applyMovementTx>>) {
+    this.realtimeGateway.emitWarehouseUpdated(result);
+  }
+
+  private async applyMovementTx(
+    tx: Tx,
+    dto: InventoryMovementDto,
+    movementType: MovementType,
+    createdById?: string,
+  ) {
+    const balance = await this.getBalanceRecord(tx, dto);
+    if (!balance) {
+      throw new NotFoundException('Inventory balance not found');
+    }
+
+    const previousQuantity = balance.quantity;
+    const delta =
+      movementType === MovementType.INCOMING ||
+      movementType === MovementType.PRODUCTION_OUTPUT
+        ? dto.quantity
+        : -dto.quantity;
+    const nextQuantity = previousQuantity + delta;
+
+    if (nextQuantity < 0) {
+      throw new BadRequestException('Stock cannot go negative');
+    }
+
+    const updatedBalance = await tx.inventoryBalance.update({
+      where: { id: balance.id },
+      data: {
+        quantity: nextQuantity,
+        status: EntityStatus.COMPLETED,
+      },
+    });
+
+    const movement = await tx.inventoryMovement.create({
+      data: {
+        itemType: dto.itemType,
+        movementType,
+        quantity: dto.quantity,
+        previousQuantity,
+        newQuantity: nextQuantity,
+        note: dto.note,
+        createdById,
+        rawMaterialId: dto.rawMaterialId,
+        semiProductId: dto.semiProductId,
+        finishedProductId: dto.finishedProductId,
+        status: EntityStatus.COMPLETED,
+      },
+    });
+
+    if (
+      dto.itemType === InventoryItemType.RAW_MATERIAL &&
+      movementType === MovementType.INCOMING &&
+      dto.rawMaterialId
+    ) {
+      await this.rawMaterialBagsService.createAutoBagsForIncomingTx(tx, {
+        rawMaterialId: dto.rawMaterialId,
+        totalQuantityKg: dto.quantity,
+        createdById,
+        referenceType: 'warehouse-incoming',
+        referenceId: movement.id,
+      });
+    }
+
+    return { movement, updatedBalance };
   }
 
   private resolveCreateInput(dto: CreateProductDto): ResolvedProductInput {

@@ -90,12 +90,15 @@ const TR = {
     tab3: 'Ишчилар',
     formTitle: 'Янги Смена Ёзуви',
     formTitlePackaging: 'Қадоқлаш',
-    labelBagCount: 'Қоп сони',
     labelPackCount: 'Пачка сони',
     btnPackagingSave: 'Қадоқлаш ёзувини сақлаш',
     packagingKindBadge: 'Қадоқлаш',
-    packagingPiecesPreview: 'Жами: {pieces} дона (1 қоп = {ppb} дона)',
-    packagingNoPiecesPerBag: 'Қоп ёки пачка миқдорини киритинг',
+    packagingPiecesPreview: 'Жами: {pieces} дона (1 пачка = {ppb} дона)',
+    packagingPiecesPreviewSemi: 'Жами: {pieces} дона',
+    packagingNoPiecesPerBag: 'Пачка сонини киритинг',
+    packagingStockAvailable: 'Ярим тайёр омборда: {available} дона',
+    packagingStockInsufficient: 'Етарли эмас: керак {needed} дона, омборда {available}',
+    packagingMaxPacks: 'Энг кўпи: {max} пачка',
     labelDate: 'Сана',
     labelShift: 'Смена',
     labelWorker: 'Ишчи исми',
@@ -237,12 +240,15 @@ const TR = {
     tab3: 'Ishchilar',
     formTitle: 'Yangi Smena Yozuvi',
     formTitlePackaging: 'Qadoqlash',
-    labelBagCount: 'Qop soni',
     labelPackCount: 'Pachka soni',
     btnPackagingSave: 'Qadoqlash yozuvini saqlash',
     packagingKindBadge: 'Qadoqlash',
     packagingPiecesPreview: 'Jami: {pieces} dona (1 qop = {ppb} dona)',
-    packagingNoPiecesPerBag: 'Qop yoki pachka miqdorini kiriting',
+    packagingPiecesPreviewSemi: 'Jami: {pieces} dona',
+    packagingNoPiecesPerBag: 'Pachka sonini kiriting',
+    packagingStockAvailable: 'Yarim tayyor omborda: {available} dona',
+    packagingStockInsufficient: 'Yetarli emas: kerak {needed} dona, omborda {available}',
+    packagingMaxPacks: 'Eng ko‘pi: {max} pachka',
     labelDate: 'Sana',
     labelShift: 'Smena',
     labelWorker: 'Ishchi ismi',
@@ -384,12 +390,15 @@ const TR = {
     tab3: 'Сотрудники',
     formTitle: 'Новая запись смены',
     formTitlePackaging: 'Упаковка',
-    labelBagCount: 'Мешков',
     labelPackCount: 'Пачек',
     btnPackagingSave: 'Сохранить упаковку',
     packagingKindBadge: 'Упаковка',
     packagingPiecesPreview: 'Итого: {pieces} шт (1 мешок = {ppb} шт)',
-    packagingNoPiecesPerBag: 'Укажите количество мешков или пачек',
+    packagingPiecesPreviewSemi: 'Итого: {pieces} шт',
+    packagingNoPiecesPerBag: 'Укажите количество пачек',
+    packagingStockAvailable: 'На складе полуфабриката: {available} шт',
+    packagingStockInsufficient: 'Недостаточно: нужно {needed} шт, на складе {available}',
+    packagingMaxPacks: 'Максимум: {max} пачек',
     labelDate: 'Дата',
     labelShift: 'Смена',
     labelWorker: 'Имя рабочего',
@@ -537,9 +546,8 @@ function formatShiftReadingDisplay(
   t: (typeof TR)['ru'],
 ): string {
   if (r.recordKind === 'PACKAGING') {
-    const bags = r.bagCount ?? 0;
     const packs = r.packCount ?? 0;
-    return `${bags} ${t.labelBagCount.toLowerCase()} · ${packs} ${t.labelPackCount.toLowerCase()}`;
+    return `${packs} ${t.labelPackCount.toLowerCase()}`;
   }
   return r.machineReading?.trim() || '—';
 }
@@ -1757,7 +1765,6 @@ export function ShiftWork() {
                   labelWorker: t.labelWorker,
                   labelProduct: t.labelProduct,
                   labelHours: t.labelHours,
-                  labelBagCount: t.labelBagCount,
                   labelPackCount: t.labelPackCount,
                   labelNotes: t.labelNotes,
                   placeholderWorker: t.placeholderWorker,
@@ -1772,10 +1779,14 @@ export function ShiftWork() {
                   unitPiecesAbbr: t.unitPiecesAbbr,
                   hoursShort: t.hoursShort,
                   packagingPiecesPreview: t.packagingPiecesPreview,
+                  packagingPiecesPreviewSemi: t.packagingPiecesPreviewSemi,
                   packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
+                  packagingStockAvailable: t.packagingStockAvailable,
+                  packagingStockInsufficient: t.packagingStockInsufficient,
+                  packagingMaxPacks: t.packagingMaxPacks,
                 }}
                 shiftPickerDefs={shiftPickerDefs}
-                finishedProductTypes={finishedProductTypes}
+                productOptions={shiftLineProductOptions}
                 onNeedShiftDefs={() => setActiveTab('shiftDefs')}
                 getShiftLabel={(defs, n) => getShiftLabel(defs, n, t)}
               />

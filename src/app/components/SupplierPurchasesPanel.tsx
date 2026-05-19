@@ -662,7 +662,7 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
                     )}
                   </div>
                 )}
-                <p className="text-xs text-slate-400 mt-3">{t.prRmFulfilledHint}</p>
+                <p className="text-xs text-slate-400 mt-3">{t.supPurchaseStockHint}</p>
               </div>
             </div>
     </div>

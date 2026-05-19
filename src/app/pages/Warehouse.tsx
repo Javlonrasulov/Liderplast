@@ -75,6 +75,33 @@ function catalogNamesMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
+function formatWarehousePackBreakdown(
+  qty: number,
+  ppb: number,
+  t: Pick<
+    ReturnType<typeof useApp>['t'],
+    'whStockPackSubtitle' | 'whStockPackSubtitleFull'
+  >,
+): string {
+  if (ppb <= 0 || qty <= 0) return '';
+  const bags = Math.floor(qty / ppb);
+  const rem = qty % ppb;
+  if (rem > 0) {
+    return t.whStockPackSubtitle
+      .replace('{total}', formatNumber(qty))
+      .replace('{bags}', String(bags))
+      .replace('{ppb}', formatNumber(ppb))
+      .replace('{rem}', formatNumber(rem));
+  }
+  if (bags > 0) {
+    return t.whStockPackSubtitleFull
+      .replace('{total}', formatNumber(qty))
+      .replace('{bags}', String(bags))
+      .replace('{ppb}', formatNumber(ppb));
+  }
+  return '';
+}
+
 type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
 
 type ProductFormState = {
@@ -199,7 +226,12 @@ function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['
     }`;
   }
   if (product.itemType === 'FINISHED_PRODUCT') {
-    return `${t.unitPiece} · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
+    const ppb = product.piecesPerBag ?? 0;
+    const ppbPart =
+      ppb > 0
+        ? `${t.whCatalogPiecesPerBag.replace('{count}', formatNumber(ppb))} · `
+        : '';
+    return `${ppbPart}${product.volumeLiter} L · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
   }
   return product.defaultBagWeightKg
     ? `${t.whUnit}: ${product.unit}, ${t.rmDefaultBagWeight}: ${formatNumber(product.defaultBagWeightKg)} ${t.unitKg}`
@@ -412,6 +444,19 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     [state.warehouseProducts],
   );
 
+  /** Tayyor mahsulot qadoqlashidagi 1 pachkadagi dona — bog‘langan yarim tayyor uchun */
+  const semiPackPiecesPerBag = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const fin of allFinishedProducts) {
+      const ppb = fin.piecesPerBag ?? 0;
+      if (ppb <= 0) continue;
+      for (const sp of fin.semiProducts) {
+        if (!m.has(sp.name)) m.set(sp.name, ppb);
+      }
+    }
+    return m;
+  }, [allFinishedProducts]);
+
   const warehouseHistoryRows = useMemo(() => {
     const merged = mergeWarehouseProductionHistory(
       state.productionHistory,
@@ -505,10 +550,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     semiProducts.forEach((p, i) => {
       const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
       const qty = semiStockByProductName[p.name] ?? 0;
+      const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
+      const packLine = formatWarehousePackBreakdown(qty, ppb, t);
       cards.push({
         key: `semi-${p.id}`,
         label: p.name,
-        sub: `${formatNumber(p.weightGram)} g · ${t.whInWarehouse}`,
+        sub: `${formatNumber(p.weightGram)} g · ${t.whInWarehouse}${packLine ? ` · ${packLine}` : ''}`,
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -519,18 +566,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
       const qty = finalStockByProductName[p.name] ?? 0;
       const ppb = p.piecesPerBag ?? 0;
-      const fullBags = ppb > 0 ? Math.floor(qty / ppb) : 0;
-      const rem = ppb > 0 ? qty % ppb : 0;
-      const bagsLine =
-        ppb > 0
-          ? rem > 0
-            ? `${fullBags} ${t.unitBag} + ${formatNumber(rem)} ${t.unitPiece}`
-            : `${fullBags} ${t.unitBag}`
-          : '';
+      const packLine = formatWarehousePackBreakdown(qty, ppb, t);
       cards.push({
         key: `final-${p.id}`,
         label: p.name,
-        sub: `${p.volumeLiter} L · ${t.whInWarehouse}${bagsLine ? ` · ${bagsLine}` : ''}`,
+        sub: `${p.volumeLiter} L · ${t.whInWarehouse}${packLine ? ` · ${packLine}` : ''}`,
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -556,6 +596,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     finishedProducts,
     semiStockByProductName,
     finalStockByProductName,
+    semiPackPiecesPerBag,
     totalPiecesInCatalogStock,
     t,
   ]);
@@ -1447,11 +1488,14 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {semiProducts.map((p, idx) => {
               const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
+              const qty = semiStockByProductName[p.name] ?? 0;
+              const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
+              const packLine = formatWarehousePackBreakdown(qty, ppb, t);
               return (
                 <StockItem
                   key={p.id}
-                  label={p.name}
-                  value={semiStockByProductName[p.name] ?? 0}
+                  label={packLine ? `${p.name} · ${packLine}` : p.name}
+                  value={qty}
                   max={100000}
                   unit={t.unitPiece}
                   color={st.color}
@@ -1464,18 +1508,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
               const qty = finalStockByProductName[p.name] ?? 0;
               const ppb = p.piecesPerBag ?? 0;
-              const fullBags = ppb > 0 ? Math.floor(qty / ppb) : 0;
-              const rem = ppb > 0 ? qty % ppb : 0;
-              const bagsSuffix =
-                ppb > 0
-                  ? rem > 0
-                    ? ` · ${fullBags} ${t.unitBag} + ${formatNumber(rem)} ${t.unitPiece}`
-                    : ` · ${fullBags} ${t.unitBag}`
-                  : '';
+              const packLine = formatWarehousePackBreakdown(qty, ppb, t);
               return (
                 <StockItem
                   key={p.id}
-                  label={`${p.name}${bagsSuffix}`}
+                  label={packLine ? `${p.name} · ${packLine}` : p.name}
                   value={qty}
                   max={20000}
                   unit={t.unitPiece}
