@@ -124,26 +124,30 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
       }
       .page-row {
         display: flex;
-        gap: 4mm;
+        flex-direction: row;
+        gap: 3mm;
         width: 100%;
         align-items: flex-start;
+        justify-content: space-between;
       }
       .copy {
         flex: 1 1 0;
         min-width: 0;
-        padding: 2mm 2.5mm;
-        font-size: 8pt;
-        line-height: 1.25;
+        max-width: 50%;
+        padding: 1mm 1.5mm;
+        font-size: 6.5pt;
+        line-height: 1.2;
+        page-break-inside: avoid;
       }
       .company {
         font-weight: 700;
-        font-size: 10.5pt;
-        margin-bottom: 1mm;
+        font-size: 8.5pt;
+        margin-bottom: 0.5mm;
       }
       .title {
         font-weight: 700;
-        font-size: 8.5pt;
-        margin-bottom: 2mm;
+        font-size: 7pt;
+        margin-bottom: 1.5mm;
         text-align: center;
       }
       table {
@@ -151,23 +155,23 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         border-collapse: collapse;
       }
       .meta td {
-        padding: 0.4mm 0;
+        padding: 0.3mm 0;
         vertical-align: top;
-        font-size: 7.5pt;
+        font-size: 6pt;
       }
       .meta .k {
         white-space: nowrap;
-        padding-right: 2mm;
-        width: 28%;
+        padding-right: 1mm;
+        width: 38%;
       }
       .items {
-        margin-top: 2mm;
-        font-size: 7pt;
+        margin-top: 1.5mm;
+        font-size: 5.5pt;
       }
       .items th,
       .items td {
         border: 1px solid #000;
-        padding: 0.7mm 0.8mm;
+        padding: 0.5mm 0.4mm;
         vertical-align: top;
       }
       .items th {
@@ -186,12 +190,12 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         font-weight: 700;
       }
       .sign {
-        margin-top: 3mm;
-        font-size: 7pt;
+        margin-top: 2mm;
+        font-size: 5.5pt;
         width: 100%;
       }
       .sign td {
-        padding-top: 5mm;
+        padding-top: 3mm;
         vertical-align: top;
         width: 33.33%;
       }
@@ -200,11 +204,12 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         text-align: center;
       }
       @page {
-        size: A4 landscape;
-        margin: 5mm;
+        size: A4 portrait;
+        margin: 8mm;
       }
       @media print {
         body { padding: 0; }
+        .page-row { gap: 2mm; }
       }
     </style>
   </head>
@@ -222,7 +227,7 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
 
 export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
   const html = buildSaleDeliveryNotePrintHtml(sale, allSales);
-  const w = window.open('', '_blank', 'width=1100,height=720');
+  const w = window.open('', '_blank', 'width=820,height=900');
   if (!w) return;
   w.document.open();
   w.document.write(html);
