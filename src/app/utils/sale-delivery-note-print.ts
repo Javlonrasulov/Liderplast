@@ -92,13 +92,28 @@ function buildCopyHtml(sale: Sale, documentNumber: string) {
       </table>
       <table class="sign">
         <tr>
-          <td>Бухгалтер</td>
-          <td rowspan="2" class="sign-mid">Отпустил</td>
-          <td>Принял</td>
+          <td class="sign-cell">
+            <div class="sign-label">Бухгалтер</div>
+            <div class="sign-line"></div>
+          </td>
+          <td class="sign-cell sign-mid" rowspan="2">
+            <div class="sign-label">Отпустил</div>
+            <div class="sign-line sign-line-tall"></div>
+          </td>
+          <td class="sign-cell">
+            <div class="sign-label">Принял</div>
+            <div class="sign-line"></div>
+          </td>
         </tr>
         <tr>
-          <td>Лаборант</td>
-          <td>Охрана</td>
+          <td class="sign-cell">
+            <div class="sign-label">Лаборант</div>
+            <div class="sign-line"></div>
+          </td>
+          <td class="sign-cell">
+            <div class="sign-label">Охрана</div>
+            <div class="sign-line"></div>
+          </td>
         </tr>
       </table>
     </div>`;
@@ -124,30 +139,30 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
       }
       .page-row {
         display: flex;
-        flex-direction: row;
-        gap: 3mm;
+        flex-direction: column;
+        gap: 6mm;
         width: 100%;
-        align-items: flex-start;
-        justify-content: space-between;
       }
       .copy {
-        flex: 1 1 0;
-        min-width: 0;
-        max-width: 50%;
-        padding: 1mm 1.5mm;
-        font-size: 6.5pt;
-        line-height: 1.2;
+        width: 100%;
+        padding: 2mm 0;
+        font-size: 8.5pt;
+        line-height: 1.3;
         page-break-inside: avoid;
+      }
+      .copy + .copy {
+        padding-top: 5mm;
+        border-top: 1px dashed #999;
       }
       .company {
         font-weight: 700;
-        font-size: 8.5pt;
-        margin-bottom: 0.5mm;
+        font-size: 12pt;
+        margin-bottom: 1mm;
       }
       .title {
         font-weight: 700;
-        font-size: 7pt;
-        margin-bottom: 1.5mm;
+        font-size: 10pt;
+        margin-bottom: 2.5mm;
         text-align: center;
       }
       table {
@@ -155,23 +170,24 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         border-collapse: collapse;
       }
       .meta td {
-        padding: 0.3mm 0;
+        padding: 0.5mm 0;
         vertical-align: top;
-        font-size: 6pt;
+        font-size: 8pt;
       }
       .meta .k {
         white-space: nowrap;
-        padding-right: 1mm;
-        width: 38%;
+        padding-right: 2mm;
+        width: 30%;
+        font-weight: 700;
       }
       .items {
-        margin-top: 1.5mm;
-        font-size: 5.5pt;
+        margin-top: 2.5mm;
+        font-size: 7.5pt;
       }
       .items th,
       .items td {
         border: 1px solid #000;
-        padding: 0.5mm 0.4mm;
+        padding: 0.9mm 1mm;
         vertical-align: top;
       }
       .items th {
@@ -190,18 +206,33 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         font-weight: 700;
       }
       .sign {
-        margin-top: 2mm;
-        font-size: 5.5pt;
+        margin-top: 4mm;
         width: 100%;
+        border: none;
       }
       .sign td {
-        padding-top: 3mm;
+        border: none;
+        padding: 0 2mm 0 0;
         vertical-align: top;
         width: 33.33%;
       }
       .sign-mid {
-        vertical-align: middle;
         text-align: center;
+      }
+      .sign-label {
+        font-weight: 700;
+        font-size: 8pt;
+        margin-bottom: 1mm;
+      }
+      .sign-line {
+        border-bottom: 1px solid #000;
+        height: 10mm;
+        min-height: 10mm;
+        width: 100%;
+      }
+      .sign-line-tall {
+        height: 22mm;
+        min-height: 22mm;
       }
       @page {
         size: A4 portrait;
@@ -209,7 +240,7 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
       }
       @media print {
         body { padding: 0; }
-        .page-row { gap: 2mm; }
+        .page-row { gap: 5mm; }
       }
     </style>
   </head>
@@ -227,7 +258,7 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
 
 export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
   const html = buildSaleDeliveryNotePrintHtml(sale, allSales);
-  const w = window.open('', '_blank', 'width=820,height=900');
+  const w = window.open('', '_blank', 'width=820,height=1100');
   if (!w) return;
   w.document.open();
   w.document.write(html);
