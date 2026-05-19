@@ -270,6 +270,7 @@ export class WarehouseService {
         id: balance.id,
         itemType: balance.itemType,
         quantity: balance.quantity,
+        packagedQuantity: balance.packagedQuantity,
         status: balance.status,
         itemName:
           balance.rawMaterial?.name ??

@@ -375,6 +375,49 @@ export class ProductionService {
             });
           }
         }
+      } else if (movement.movementType === MovementType.ADJUSTMENT) {
+        const isPackaging =
+          movement.referenceType === 'shift' &&
+          (movement.note?.includes('qadoqlash') ?? false);
+        if (isPackaging) {
+          if (
+            movement.itemType === InventoryItemType.SEMI_PRODUCT &&
+            movement.semiProductId
+          ) {
+            const balance = await tx.inventoryBalance.findFirst({
+              where: { semiProductId: movement.semiProductId },
+            });
+            if (balance) {
+              await tx.inventoryBalance.update({
+                where: { id: balance.id },
+                data: {
+                  packagedQuantity: Math.max(
+                    0,
+                    balance.packagedQuantity - movement.quantity,
+                  ),
+                },
+              });
+            }
+          } else if (
+            movement.itemType === InventoryItemType.FINISHED_PRODUCT &&
+            movement.finishedProductId
+          ) {
+            const balance = await tx.inventoryBalance.findFirst({
+              where: { finishedProductId: movement.finishedProductId },
+            });
+            if (balance) {
+              await tx.inventoryBalance.update({
+                where: { id: balance.id },
+                data: {
+                  packagedQuantity: Math.max(
+                    0,
+                    balance.packagedQuantity - movement.quantity,
+                  ),
+                },
+              });
+            }
+          }
+        }
       }
 
       await tx.inventoryMovement.delete({ where: { id: movement.id } });
@@ -726,10 +769,7 @@ export class ProductionService {
           ? finished.piecesPerBag
           : 1;
       const producedQty = packs * piecesPerBag;
-      const machineId = finished.machineLinks[0]?.machineId;
-      if (!machineId) {
-        throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
-      }
+      const machineId = finished.machineLinks[0]?.machineId ?? null;
       return { producedQty, machineId, stage: ProductionStage.FINISHED };
     }
 
@@ -741,18 +781,142 @@ export class ProductionService {
       include: { machineLinks: true },
     });
     if (semi) {
-      const producedQty = packs;
-      const machineId = semi.machineLinks[0]?.machineId;
-      if (!machineId) {
-        throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
-      }
+      const ppb = await this.resolvePiecesPerBagForSemiProduct(tx, semi.id);
+      const producedQty = packs * ppb;
+      const machineId = semi.machineLinks[0]?.machineId ?? null;
       return { producedQty, machineId, stage: ProductionStage.SEMI };
     }
 
-    throw new BadRequestException(shiftInventoryErr('SEMI_NOT_FOUND', label));
+    throw new BadRequestException(shiftInventoryErr('FINISHED_NOT_FOUND', label));
   }
 
-  /** Qadoqlash (yarim tayyor): omborga dona qo‘shish, xomashyo sarfsiz */
+  /** Bog‘langan tayyor mahsulotdan 1 qopdagi dona (yarim tayyor qadoqlash) */
+  private async resolvePiecesPerBagForSemiProduct(
+    tx: Tx,
+    semiProductId: string,
+  ): Promise<number> {
+    const link = await tx.finishedProductSemiProduct.findFirst({
+      where: { semiProductId },
+      include: {
+        finishedProduct: { select: { piecesPerBag: true, isDeleted: true } },
+      },
+    });
+    const ppb = link?.finishedProduct?.isDeleted
+      ? null
+      : link?.finishedProduct?.piecesPerBag;
+    return ppb != null && ppb > 0 ? ppb : 1;
+  }
+
+  /**
+   * Qadoqlash: qadoqlanmagan zaxiradan qadoqlangan qismga o‘tkazish.
+   * quantity (jami) o‘zgarmaydi, packagedQuantity oshadi.
+   */
+  private async applyShiftPackagingMarkPackaged(
+    tx: Tx,
+    params: {
+      shiftId: string;
+      workerId: string;
+      itemType:
+        | typeof InventoryItemType.SEMI_PRODUCT
+        | typeof InventoryItemType.FINISHED_PRODUCT;
+      productId: string;
+      piecesToPack: number;
+      productLabelForError: string;
+    },
+  ) {
+    if (params.piecesToPack <= 0) return;
+
+    const balance = await tx.inventoryBalance.findFirst({
+      where:
+        params.itemType === InventoryItemType.SEMI_PRODUCT
+          ? { semiProductId: params.productId }
+          : { finishedProductId: params.productId },
+    });
+    if (!balance) {
+      throw new BadRequestException(
+        params.itemType === InventoryItemType.SEMI_PRODUCT
+          ? shiftInventoryErr('SEMI_BALANCE_MISSING')
+          : shiftInventoryErr('FINISHED_BALANCE_MISSING'),
+      );
+    }
+
+    const unpackaged = balance.quantity - balance.packagedQuantity;
+    if (unpackaged + 0.0001 < params.piecesToPack) {
+      throw new BadRequestException(
+        shiftInventoryErr(
+          'INSUFFICIENT_UNPACKAGED_STOCK',
+          params.productLabelForError,
+        ),
+      );
+    }
+
+    const prevPackaged = balance.packagedQuantity;
+    const newPackaged = prevPackaged + params.piecesToPack;
+
+    await tx.inventoryBalance.update({
+      where: { id: balance.id },
+      data: { packagedQuantity: newPackaged },
+    });
+
+    const movementBase = {
+      itemType: params.itemType,
+      movementType: MovementType.ADJUSTMENT,
+      quantity: params.piecesToPack,
+      previousQuantity: prevPackaged,
+      newQuantity: newPackaged,
+      createdById: params.workerId,
+      referenceType: 'shift',
+      referenceId: params.shiftId,
+      status: EntityStatus.COMPLETED,
+      note: 'Smena: qadoqlash',
+    };
+
+    if (params.itemType === InventoryItemType.SEMI_PRODUCT) {
+      await tx.inventoryMovement.create({
+        data: { ...movementBase, semiProductId: params.productId },
+      });
+    } else {
+      await tx.inventoryMovement.create({
+        data: { ...movementBase, finishedProductId: params.productId },
+      });
+    }
+  }
+
+  /** Qadoqlash (tayyor): qadoqlanmagan donalarni qopga belgilash */
+  private async applyShiftPackagingFinishedOutput(
+    tx: Tx,
+    params: {
+      shiftId: string;
+      workerId: string;
+      productLabel: string;
+      producedQty: number;
+    },
+  ) {
+    const label = params.productLabel?.trim();
+    if (!label || params.producedQty <= 0) return;
+
+    const finished = await tx.finishedProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+    });
+
+    if (!finished) {
+      throw new BadRequestException(shiftInventoryErr('FINISHED_NOT_FOUND', label));
+    }
+
+    await this.applyShiftPackagingMarkPackaged(tx, {
+      shiftId: params.shiftId,
+      workerId: params.workerId,
+      itemType: InventoryItemType.FINISHED_PRODUCT,
+      productId: finished.id,
+      piecesToPack: params.producedQty,
+      productLabelForError: label,
+    });
+  }
+
+  /** Qadoqlash (yarim tayyor): qadoqlanmagan donalarni qopga belgilash */
   private async applyShiftPackagingSemiOutput(
     tx: Tx,
     params: {
@@ -760,7 +924,6 @@ export class ProductionService {
       workerId: string;
       productLabel: string;
       producedQty: number;
-      outputNote?: string;
     },
   ) {
     if (params.producedQty <= 0) return;
@@ -777,34 +940,13 @@ export class ProductionService {
       );
     }
 
-    const semiBalance = await tx.inventoryBalance.findFirst({
-      where: { semiProductId: semi.id },
-    });
-    if (!semiBalance) {
-      throw new BadRequestException(shiftInventoryErr('SEMI_BALANCE_MISSING'));
-    }
-
-    const note = params.outputNote ?? 'Smena: qadoqlash';
-    const newSemiQty = semiBalance.quantity + params.producedQty;
-    await tx.inventoryBalance.update({
-      where: { id: semiBalance.id },
-      data: { quantity: newSemiQty },
-    });
-
-    await tx.inventoryMovement.create({
-      data: {
-        itemType: InventoryItemType.SEMI_PRODUCT,
-        movementType: MovementType.PRODUCTION_OUTPUT,
-        quantity: params.producedQty,
-        previousQuantity: semiBalance.quantity,
-        newQuantity: newSemiQty,
-        semiProductId: semi.id,
-        createdById: params.workerId,
-        referenceType: 'shift',
-        referenceId: params.shiftId,
-        status: EntityStatus.COMPLETED,
-        note,
-      },
+    await this.applyShiftPackagingMarkPackaged(tx, {
+      shiftId: params.shiftId,
+      workerId: params.workerId,
+      itemType: InventoryItemType.SEMI_PRODUCT,
+      productId: semi.id,
+      piecesToPack: params.producedQty,
+      productLabelForError: params.productLabel,
     });
   }
 
@@ -973,7 +1115,16 @@ export class ProductionService {
           workerId: dto.workerId,
           productLabel: dto.productLabel ?? '',
           producedQty,
-          outputNote,
+        });
+      } else if (
+        recordKind === ShiftRecordKind.PACKAGING &&
+        packagingStage === ProductionStage.FINISHED
+      ) {
+        await this.applyShiftPackagingFinishedOutput(tx, {
+          shiftId: shift.id,
+          workerId: dto.workerId,
+          productLabel: dto.productLabel ?? '',
+          producedQty,
         });
       } else {
         const machine = machineId

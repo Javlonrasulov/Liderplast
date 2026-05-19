@@ -28,16 +28,19 @@ export type AggregateInventoryBalance = {
 
 export type InventoryBalanceAvgAggregateOutputType = {
   quantity: number | null
+  packagedQuantity: number | null
 }
 
 export type InventoryBalanceSumAggregateOutputType = {
   quantity: number | null
+  packagedQuantity: number | null
 }
 
 export type InventoryBalanceMinAggregateOutputType = {
   id: string | null
   itemType: $Enums.InventoryItemType | null
   quantity: number | null
+  packagedQuantity: number | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -50,6 +53,7 @@ export type InventoryBalanceMaxAggregateOutputType = {
   id: string | null
   itemType: $Enums.InventoryItemType | null
   quantity: number | null
+  packagedQuantity: number | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -62,6 +66,7 @@ export type InventoryBalanceCountAggregateOutputType = {
   id: number
   itemType: number
   quantity: number
+  packagedQuantity: number
   status: number
   createdAt: number
   updatedAt: number
@@ -74,16 +79,19 @@ export type InventoryBalanceCountAggregateOutputType = {
 
 export type InventoryBalanceAvgAggregateInputType = {
   quantity?: true
+  packagedQuantity?: true
 }
 
 export type InventoryBalanceSumAggregateInputType = {
   quantity?: true
+  packagedQuantity?: true
 }
 
 export type InventoryBalanceMinAggregateInputType = {
   id?: true
   itemType?: true
   quantity?: true
+  packagedQuantity?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -96,6 +104,7 @@ export type InventoryBalanceMaxAggregateInputType = {
   id?: true
   itemType?: true
   quantity?: true
+  packagedQuantity?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -108,6 +117,7 @@ export type InventoryBalanceCountAggregateInputType = {
   id?: true
   itemType?: true
   quantity?: true
+  packagedQuantity?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -207,6 +217,7 @@ export type InventoryBalanceGroupByOutputType = {
   id: string
   itemType: $Enums.InventoryItemType
   quantity: number
+  packagedQuantity: number
   status: $Enums.EntityStatus
   createdAt: Date
   updatedAt: Date
@@ -242,6 +253,7 @@ export type InventoryBalanceWhereInput = {
   id?: Prisma.StringFilter<"InventoryBalance"> | string
   itemType?: Prisma.EnumInventoryItemTypeFilter<"InventoryBalance"> | $Enums.InventoryItemType
   quantity?: Prisma.FloatFilter<"InventoryBalance"> | number
+  packagedQuantity?: Prisma.FloatFilter<"InventoryBalance"> | number
   status?: Prisma.EnumEntityStatusFilter<"InventoryBalance"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"InventoryBalance"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InventoryBalance"> | Date | string
@@ -257,6 +269,7 @@ export type InventoryBalanceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   itemType?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -278,6 +291,7 @@ export type InventoryBalanceWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.InventoryBalanceWhereInput | Prisma.InventoryBalanceWhereInput[]
   itemType?: Prisma.EnumInventoryItemTypeFilter<"InventoryBalance"> | $Enums.InventoryItemType
   quantity?: Prisma.FloatFilter<"InventoryBalance"> | number
+  packagedQuantity?: Prisma.FloatFilter<"InventoryBalance"> | number
   status?: Prisma.EnumEntityStatusFilter<"InventoryBalance"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"InventoryBalance"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InventoryBalance"> | Date | string
@@ -290,6 +304,7 @@ export type InventoryBalanceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   itemType?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -310,6 +325,7 @@ export type InventoryBalanceScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"InventoryBalance"> | string
   itemType?: Prisma.EnumInventoryItemTypeWithAggregatesFilter<"InventoryBalance"> | $Enums.InventoryItemType
   quantity?: Prisma.FloatWithAggregatesFilter<"InventoryBalance"> | number
+  packagedQuantity?: Prisma.FloatWithAggregatesFilter<"InventoryBalance"> | number
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"InventoryBalance"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InventoryBalance"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"InventoryBalance"> | Date | string
@@ -322,6 +338,7 @@ export type InventoryBalanceCreateInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -334,6 +351,7 @@ export type InventoryBalanceUncheckedCreateInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -346,6 +364,7 @@ export type InventoryBalanceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -358,6 +377,7 @@ export type InventoryBalanceUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -370,6 +390,7 @@ export type InventoryBalanceCreateManyInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -382,6 +403,7 @@ export type InventoryBalanceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,6 +413,7 @@ export type InventoryBalanceUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -408,6 +431,7 @@ export type InventoryBalanceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itemType?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -418,12 +442,14 @@ export type InventoryBalanceCountOrderByAggregateInput = {
 
 export type InventoryBalanceAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
 }
 
 export type InventoryBalanceMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itemType?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -436,6 +462,7 @@ export type InventoryBalanceMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itemType?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -446,6 +473,7 @@ export type InventoryBalanceMinOrderByAggregateInput = {
 
 export type InventoryBalanceSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  packagedQuantity?: Prisma.SortOrder
 }
 
 export type InventoryBalanceCreateNestedOneWithoutRawMaterialInput = {
@@ -552,6 +580,7 @@ export type InventoryBalanceCreateWithoutRawMaterialInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -563,6 +592,7 @@ export type InventoryBalanceUncheckedCreateWithoutRawMaterialInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -590,6 +620,7 @@ export type InventoryBalanceUpdateWithoutRawMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -601,6 +632,7 @@ export type InventoryBalanceUncheckedUpdateWithoutRawMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -612,6 +644,7 @@ export type InventoryBalanceCreateWithoutSemiProductInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -623,6 +656,7 @@ export type InventoryBalanceUncheckedCreateWithoutSemiProductInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -650,6 +684,7 @@ export type InventoryBalanceUpdateWithoutSemiProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -661,6 +696,7 @@ export type InventoryBalanceUncheckedUpdateWithoutSemiProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -672,6 +708,7 @@ export type InventoryBalanceCreateWithoutFinishedProductInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -683,6 +720,7 @@ export type InventoryBalanceUncheckedCreateWithoutFinishedProductInput = {
   id?: string
   itemType: $Enums.InventoryItemType
   quantity?: number
+  packagedQuantity?: number
   status?: $Enums.EntityStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -710,6 +748,7 @@ export type InventoryBalanceUpdateWithoutFinishedProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -721,6 +760,7 @@ export type InventoryBalanceUncheckedUpdateWithoutFinishedProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itemType?: Prisma.EnumInventoryItemTypeFieldUpdateOperationsInput | $Enums.InventoryItemType
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
+  packagedQuantity?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -734,6 +774,7 @@ export type InventoryBalanceSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   itemType?: boolean
   quantity?: boolean
+  packagedQuantity?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -749,6 +790,7 @@ export type InventoryBalanceSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   itemType?: boolean
   quantity?: boolean
+  packagedQuantity?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -764,6 +806,7 @@ export type InventoryBalanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   itemType?: boolean
   quantity?: boolean
+  packagedQuantity?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -779,6 +822,7 @@ export type InventoryBalanceSelectScalar = {
   id?: boolean
   itemType?: boolean
   quantity?: boolean
+  packagedQuantity?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -787,7 +831,7 @@ export type InventoryBalanceSelectScalar = {
   finishedProductId?: boolean
 }
 
-export type InventoryBalanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itemType" | "quantity" | "status" | "createdAt" | "updatedAt" | "rawMaterialId" | "semiProductId" | "finishedProductId", ExtArgs["result"]["inventoryBalance"]>
+export type InventoryBalanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itemType" | "quantity" | "packagedQuantity" | "status" | "createdAt" | "updatedAt" | "rawMaterialId" | "semiProductId" | "finishedProductId", ExtArgs["result"]["inventoryBalance"]>
 export type InventoryBalanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rawMaterial?: boolean | Prisma.InventoryBalance$rawMaterialArgs<ExtArgs>
   semiProduct?: boolean | Prisma.InventoryBalance$semiProductArgs<ExtArgs>
@@ -815,6 +859,10 @@ export type $InventoryBalancePayload<ExtArgs extends runtime.Types.Extensions.In
     id: string
     itemType: $Enums.InventoryItemType
     quantity: number
+    /**
+     * * Qadoqlangan donalar (quantity ichidagi qism; qadoqlanmagan = quantity - packagedQuantity)
+     */
+    packagedQuantity: number
     status: $Enums.EntityStatus
     createdAt: Date
     updatedAt: Date
@@ -1250,6 +1298,7 @@ export interface InventoryBalanceFieldRefs {
   readonly id: Prisma.FieldRef<"InventoryBalance", 'String'>
   readonly itemType: Prisma.FieldRef<"InventoryBalance", 'InventoryItemType'>
   readonly quantity: Prisma.FieldRef<"InventoryBalance", 'Float'>
+  readonly packagedQuantity: Prisma.FieldRef<"InventoryBalance", 'Float'>
   readonly status: Prisma.FieldRef<"InventoryBalance", 'EntityStatus'>
   readonly createdAt: Prisma.FieldRef<"InventoryBalance", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"InventoryBalance", 'DateTime'>

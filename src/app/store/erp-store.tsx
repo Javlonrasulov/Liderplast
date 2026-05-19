@@ -859,6 +859,7 @@ type WarehouseStockItem = {
   id: string;
   itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
   quantity: number;
+  packagedQuantity?: number;
   status: string;
   itemName?: string;
 };

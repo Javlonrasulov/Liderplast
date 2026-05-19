@@ -3304,6 +3304,7 @@ export const InventoryBalanceScalarFieldEnum = {
   id: 'id',
   itemType: 'itemType',
   quantity: 'quantity',
+  packagedQuantity: 'packagedQuantity',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

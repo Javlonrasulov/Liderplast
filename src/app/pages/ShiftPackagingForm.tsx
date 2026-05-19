@@ -105,7 +105,7 @@ export function ShiftPackagingForm({
   onNeedShiftDefs,
   getShiftLabel,
 }: Props) {
-  const { state, dispatch, refresh, semiStockByProductName } = useERP();
+  const { state, dispatch, refresh } = useERP();
   const { t: appT } = useApp();
 
   const [form, setForm] = useState({
@@ -143,22 +143,41 @@ export function ShiftPackagingForm({
     return m;
   }, [state.warehouseProducts]);
 
-  const semiStockForFinishedProduct = useCallback(
-    (finishedProductName: string): number => {
-      const key = finishedProductName.trim().toLowerCase();
-      const fin = state.warehouseProducts.find(
-        (p) =>
-          p.itemType === 'FINISHED_PRODUCT' &&
-          p.name.trim().toLowerCase() === key,
-      );
-      if (!fin || fin.itemType !== 'FINISHED_PRODUCT' || fin.semiProducts.length === 0) {
-        return 0;
+  const semiPiecesPerBagByName = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of state.warehouseProducts) {
+      if (p.itemType !== 'FINISHED_PRODUCT') continue;
+      const ppb =
+        'piecesPerBag' in p && p.piecesPerBag != null && p.piecesPerBag > 0
+          ? p.piecesPerBag
+          : 0;
+      if (ppb <= 0) continue;
+      for (const sp of p.semiProducts) {
+        const k = sp.name.trim().toLowerCase();
+        if (!m.has(k)) m.set(k, ppb);
       }
-      return Math.min(
-        ...fin.semiProducts.map((sp) => semiStockByProductName[sp.name] ?? 0),
-      );
+    }
+    return m;
+  }, [state.warehouseProducts]);
+
+  const unpackagedStockForProduct = useCallback(
+    (productName: string): number => {
+      const key = productName.trim().toLowerCase();
+      const kind = productKindByName.get(key);
+      if (!kind) return 0;
+      const itemType =
+        kind === 'FINISHED' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
+      let total = 0;
+      let packaged = 0;
+      for (const row of state.warehouseStock) {
+        if (row.itemType !== itemType || !row.itemName) continue;
+        if (row.itemName.trim().toLowerCase() !== key) continue;
+        total += row.quantity;
+        packaged += row.packagedQuantity ?? 0;
+      }
+      return Math.max(0, total - packaged);
     },
-    [state.warehouseProducts, semiStockByProductName],
+    [state.warehouseStock, productKindByName],
   );
 
   const createEmptyLine = useCallback((): PackagingLine => {
@@ -222,9 +241,10 @@ export function ShiftPackagingForm({
         const ppb = piecesPerBagByProduct.get(key) ?? 1;
         return packs * ppb;
       }
-      return packs;
+      const semiPpb = semiPiecesPerBagByName.get(key) ?? 1;
+      return packs * semiPpb;
     },
-    [piecesPerBagByProduct, productKindByName],
+    [piecesPerBagByProduct, productKindByName, semiPiecesPerBagByName],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -274,17 +294,14 @@ export function ShiftPackagingForm({
         setError(t.packagingNoPiecesPerBag);
         return;
       }
-      const productKey = ln.productType.trim().toLowerCase();
-      if (productKindByName.get(productKey) === 'FINISHED') {
-        const available = semiStockForFinishedProduct(ln.productType);
-        if (pieces > available) {
-          setError(
-            t.packagingStockInsufficient
-              .replace('{needed}', String(pieces))
-              .replace('{available}', String(available)),
-          );
-          return;
-        }
+      const available = unpackagedStockForProduct(ln.productType);
+      if (pieces > available) {
+        setError(
+          t.packagingStockInsufficient
+            .replace('{needed}', String(pieces))
+            .replace('{available}', String(available)),
+        );
+        return;
       }
     }
 
@@ -450,13 +467,13 @@ export function ShiftPackagingForm({
           const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
           const pieces = estimatePieces(ln);
           const productKey = ln.productType.trim().toLowerCase();
-          const ppb = piecesPerBagByProduct.get(productKey) ?? 1;
           const isFinished = productKindByName.get(productKey) === 'FINISHED';
-          const semiAvailable = isFinished ? semiStockForFinishedProduct(ln.productType) : 0;
-          const maxPacks =
-            isFinished && ppb > 0 ? Math.floor(semiAvailable / ppb) : Infinity;
-          const stockInsufficient =
-            isFinished && packs > 0 && pieces > semiAvailable;
+          const ppb = isFinished
+            ? (piecesPerBagByProduct.get(productKey) ?? 1)
+            : (semiPiecesPerBagByName.get(productKey) ?? 1);
+          const unpackagedAvailable = unpackagedStockForProduct(ln.productType);
+          const maxPacks = ppb > 0 ? Math.floor(unpackagedAvailable / ppb) : 0;
+          const stockInsufficient = packs > 0 && pieces > unpackagedAvailable;
 
           return (
             <div
@@ -571,7 +588,7 @@ export function ShiftPackagingForm({
                         className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
                       />
                       <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                        {isFinished
+                        {(isFinished || ppb > 1)
                           ? t.packagingPiecesPreview
                               .replace('{pieces}', String(pieces))
                               .replace('{ppb}', String(ppb))
@@ -580,17 +597,15 @@ export function ShiftPackagingForm({
                               String(pieces),
                             )}
                       </p>
-                      {isFinished ? (
-                        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                          {t.packagingStockAvailable.replace(
-                            '{available}',
-                            String(semiAvailable),
-                          )}
-                          {Number.isFinite(maxPacks)
-                            ? ` · ${t.packagingMaxPacks.replace('{max}', String(maxPacks))}`
-                            : ''}
-                        </p>
-                      ) : null}
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                        {t.packagingStockAvailable.replace(
+                          '{available}',
+                          String(unpackagedAvailable),
+                        )}
+                        {maxPacks > 0
+                          ? ` · ${t.packagingMaxPacks.replace('{max}', String(maxPacks))}`
+                          : ''}
+                      </p>
                       {stockInsufficient ? (
                         <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
                           {t.packagingStockInsufficient

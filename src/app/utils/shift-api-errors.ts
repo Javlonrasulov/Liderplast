@@ -45,6 +45,8 @@ export function translateShiftInventoryApiError(message: string, t: T): string {
       return t.apiShiftFinishedNoSemiRecipe;
     case 'INSUFFICIENT_SEMI_STOCK':
       return t.apiShiftInsufficientSemiStock.replace('{name}', param);
+    case 'INSUFFICIENT_UNPACKAGED_STOCK':
+      return t.apiShiftInsufficientUnpackagedStock.replace('{name}', param);
     case 'FINISHED_BALANCE_MISSING':
       return t.apiShiftFinishedBalanceMissing;
     case 'RAW_OVERRIDE_UNKNOWN':

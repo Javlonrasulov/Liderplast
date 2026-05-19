@@ -76,30 +76,28 @@ function catalogNamesMatch(a: string, b: string): boolean {
 }
 
 function formatWarehousePackBreakdown(
-  qty: number,
+  totalQty: number,
+  packagedPieces: number,
   ppb: number,
   t: Pick<
     ReturnType<typeof useApp>['t'],
     'whStockPackSubtitle' | 'whStockPackSubtitleFull'
   >,
 ): string {
-  if (ppb <= 0 || qty <= 0) return '';
-  const bags = Math.floor(qty / ppb);
-  const rem = qty % ppb;
-  if (rem > 0) {
+  if (ppb <= 0 || totalQty <= 0) return '';
+  const packedBags = Math.floor(Math.max(0, packagedPieces) / ppb);
+  const unpackaged = Math.max(0, totalQty - packagedPieces);
+  if (unpackaged > 0 || packedBags > 0) {
     return t.whStockPackSubtitle
-      .replace('{total}', formatNumber(qty))
-      .replace('{bags}', String(bags))
+      .replace('{total}', formatNumber(totalQty))
+      .replace('{bags}', String(packedBags))
       .replace('{ppb}', formatNumber(ppb))
-      .replace('{rem}', formatNumber(rem));
+      .replace('{rem}', formatNumber(unpackaged));
   }
-  if (bags > 0) {
-    return t.whStockPackSubtitleFull
-      .replace('{total}', formatNumber(qty))
-      .replace('{bags}', String(bags))
-      .replace('{ppb}', formatNumber(ppb));
-  }
-  return '';
+  return t.whStockPackSubtitleFull
+    .replace('{total}', formatNumber(totalQty))
+    .replace('{bags}', String(packedBags))
+    .replace('{ppb}', formatNumber(ppb));
 }
 
 type ProductFormType = 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
@@ -521,6 +519,24 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const hasCatalogSemi = semiProducts.length > 0;
   const hasCatalogFinal = finishedProducts.length > 0;
 
+  const packagedBySemiName = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const row of state.warehouseStock) {
+      if (row.itemType !== 'SEMI_PRODUCT' || !row.itemName) continue;
+      m[row.itemName] = (m[row.itemName] ?? 0) + (row.packagedQuantity ?? 0);
+    }
+    return m;
+  }, [state.warehouseStock]);
+
+  const packagedByFinalName = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const row of state.warehouseStock) {
+      if (row.itemType !== 'FINISHED_PRODUCT' || !row.itemName) continue;
+      m[row.itemName] = (m[row.itemName] ?? 0) + (row.packagedQuantity ?? 0);
+    }
+    return m;
+  }, [state.warehouseStock]);
+
   const totalSemiInCatalogStock = useMemo(
     () => semiProducts.reduce((sum, p) => sum + (semiStockByProductName[p.name] ?? 0), 0),
     [semiProducts, semiStockByProductName],
@@ -551,7 +567,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
       const qty = semiStockByProductName[p.name] ?? 0;
       const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
-      const packLine = formatWarehousePackBreakdown(qty, ppb, t);
+      const packLine = formatWarehousePackBreakdown(
+        qty,
+        packagedBySemiName[p.name] ?? 0,
+        ppb,
+        t,
+      );
       cards.push({
         key: `semi-${p.id}`,
         label: p.name,
@@ -566,7 +587,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
       const qty = finalStockByProductName[p.name] ?? 0;
       const ppb = p.piecesPerBag ?? 0;
-      const packLine = formatWarehousePackBreakdown(qty, ppb, t);
+      const packLine = formatWarehousePackBreakdown(
+        qty,
+        packagedByFinalName[p.name] ?? 0,
+        ppb,
+        t,
+      );
       cards.push({
         key: `final-${p.id}`,
         label: p.name,
@@ -597,6 +623,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     semiStockByProductName,
     finalStockByProductName,
     semiPackPiecesPerBag,
+    packagedBySemiName,
+    packagedByFinalName,
     totalPiecesInCatalogStock,
     t,
   ]);
@@ -1490,7 +1518,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
               const qty = semiStockByProductName[p.name] ?? 0;
               const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
-              const packLine = formatWarehousePackBreakdown(qty, ppb, t);
+              const packLine = formatWarehousePackBreakdown(
+                qty,
+                packagedBySemiName[p.name] ?? 0,
+                ppb,
+                t,
+              );
               return (
                 <StockItem
                   key={p.id}
@@ -1508,7 +1541,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
               const qty = finalStockByProductName[p.name] ?? 0;
               const ppb = p.piecesPerBag ?? 0;
-              const packLine = formatWarehousePackBreakdown(qty, ppb, t);
+              const packLine = formatWarehousePackBreakdown(
+                qty,
+                packagedByFinalName[p.name] ?? 0,
+                ppb,
+                t,
+              );
               return (
                 <StockItem
                   key={p.id}

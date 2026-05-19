@@ -183,6 +183,7 @@ export interface T {
   apiShiftMachineNotLinked: string;
   apiShiftFinishedNoSemiRecipe: string;
   apiShiftInsufficientSemiStock: string;
+  apiShiftInsufficientUnpackagedStock: string;
   apiShiftFinishedBalanceMissing: string;
   apiShiftRawOverrideUnknown: string;
   apiShiftRawActualInvalid: string;
@@ -1196,6 +1197,8 @@ const uz_cyrillic: T = {
     'Бу маҳсулот ушбу аппарат билан боғланмаган (тайёр маҳсулот → аппаратлар)',
   apiShiftFinishedNoSemiRecipe: 'Тайёр маҳсулот учун ярим тайёр ретсепти йўқ',
   apiShiftInsufficientSemiStock: 'Ярим тайёр омборда етарли эмас: {name}',
+  apiShiftInsufficientUnpackagedStock:
+    'Қадоқланмаган захира етарли эмас ({name}): керак бўлган дона омборда йўқ',
   apiShiftFinishedBalanceMissing: 'Тайёр маҳсулот учун омбор қолдиғи топилмади',
   apiShiftRawOverrideUnknown:
     'Ретсептда йўқ хомашё учун ҳақиқий миқдор юборилди (ID): {id}',
@@ -1509,7 +1512,8 @@ const uz_cyrillic: T = {
   whPiecesPerBag: '1 қопда (дона)',
   whPiecesPerBagRequired: '1 қопда неча дона эканини киритинг',
   whCatalogPiecesPerBag: '1 пачкада: {count} дона',
-  whStockPackSubtitle: '{total} дона · {bags} пачка ({ppb} тадан) · {rem} дона қадоқланмаган',
+  whStockPackSubtitle:
+    '{total} дона · {bags} пачка қадоқланган ({ppb} тадан) · {rem} дона қадоқланмаган',
   whStockPackSubtitleFull: '{total} дона · {bags} пачка ({ppb} тадан)',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
@@ -2178,6 +2182,8 @@ const uz_latin: T = {
     'Bu mahsulot ushbu apparat bilan bog‘lanmagan (tayyor mahsulot → apparatlar)',
   apiShiftFinishedNoSemiRecipe: 'Tayyor mahsulot uchun yarim tayyor retsepti yo‘q',
   apiShiftInsufficientSemiStock: 'Yarim tayyor omborda yetarli emas: {name}',
+  apiShiftInsufficientUnpackagedStock:
+    'Qadoqlanmagan zaxira yetarli emas ({name}): kerak dona omborda yo‘q',
   apiShiftFinishedBalanceMissing: 'Tayyor mahsulot uchun ombor qoldig‘i topilmadi',
   apiShiftRawOverrideUnknown:
     'Retseptda yo‘q xomashyo uchun haqiqiy miqdor yuborildi (ID): {id}',
@@ -2491,7 +2497,8 @@ const uz_latin: T = {
   whPiecesPerBag: '1 qopda (dona)',
   whPiecesPerBagRequired: '1 qopda nechta dona ekanini kiriting',
   whCatalogPiecesPerBag: '1 pachkada: {count} dona',
-  whStockPackSubtitle: '{total} dona · {bags} pachka ({ppb} tadan) · {rem} dona qadoqlanmagan',
+  whStockPackSubtitle:
+    '{total} dona · {bags} pachka qadoqlangan ({ppb} tadan) · {rem} dona qadoqlanmagan',
   whStockPackSubtitleFull: '{total} dona · {bags} pachka ({ppb} tadan)',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
@@ -3160,6 +3167,8 @@ const ru: T = {
     'Эта продукция не привязана к данному аппарату (готовая продукция → аппараты)',
   apiShiftFinishedNoSemiRecipe: 'Для готовой продукции нет рецепта полуфабрикатов',
   apiShiftInsufficientSemiStock: 'Недостаточно полуфабриката на складе: {name}',
+  apiShiftInsufficientUnpackagedStock:
+    'Недостаточно неупакованного остатка ({name})',
   apiShiftFinishedBalanceMissing: 'Не найден складской остаток для готовой продукции',
   apiShiftRawOverrideUnknown:
     'Указан фактический расход для сырья вне рецепта (ID): {id}',
