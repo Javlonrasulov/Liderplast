@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { apiRequest } from '../api/http';
+import { apiRequest, ApiError } from '../api/http';
 import { toLocalDateString } from '../utils/format';
 import {
   finalStockSlotFromCatalog,
@@ -1208,6 +1208,17 @@ export function mergeWarehouseProductionHistory(
   );
 }
 
+/** Mijoz bilan keladigan buyurtma (items bo‘lmasa ham — zaxira tarix uchun) */
+type BackendClientOrderStub = {
+  id: string;
+  clientId: string;
+  createdAt: string;
+  totalAmount: number;
+  paidAmount: number;
+  debtAmount: number;
+  items?: BackendOrder['items'];
+};
+
 type BackendClient = {
   id: string;
   name: string;
@@ -1215,7 +1226,7 @@ type BackendClient = {
   createdAt: string;
   bankAccount?: string | null;
   bankName?: string | null;
-  orders?: Array<{ debtAmount: number }>;
+  orders?: BackendClientOrderStub[];
 };
 
 type BackendOrder = {
@@ -1764,16 +1775,82 @@ function isNotFoundApiError(e: unknown): boolean {
  * o‘rab oladi: ruxsat yo‘qligi yoki kichik xato bo‘lsa — fallback qiymat qaytaradi,
  * boshqa so‘rovlar esa o‘z ma’lumotlarini yuklab davom ettiradi.
  */
-async function safeLoad<T>(promise: Promise<T>, fallback: T): Promise<T> {
+async function safeLoad<T>(
+  promise: Promise<T>,
+  fallback: T,
+  label?: string,
+): Promise<T> {
   try {
     return await promise;
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.warn('[erp-store] partial load skipped:', msg);
+      const status = err instanceof ApiError ? ` [${err.status}]` : '';
+      console.warn(
+        `[erp-store] partial load skipped${label ? ` (${label})` : ''}${status}:`,
+        msg,
+      );
     }
     return fallback;
   }
+}
+
+/** GET /orders muvaffaqiyatsiz bo‘lsa ham mijozlar ichidagi buyurtmalardan tiklash */
+function mergeOrdersFromClients(
+  orders: BackendOrder[],
+  clients: BackendClient[],
+): BackendOrder[] {
+  const byId = new Map<string, BackendOrder>();
+  for (const o of orders) {
+    byId.set(o.id, o);
+  }
+  for (const client of clients) {
+    for (const raw of client.orders ?? []) {
+      if (!byId.has(raw.id)) {
+        byId.set(raw.id, {
+          id: raw.id,
+          clientId: raw.clientId ?? client.id,
+          createdAt: raw.createdAt,
+          totalAmount: raw.totalAmount,
+          paidAmount: raw.paidAmount,
+          items: raw.items ?? [],
+          client: { name: client.name },
+        });
+      }
+    }
+  }
+  return [...byId.values()];
+}
+
+function mapBackendOrdersToSales(orders: BackendOrder[]): Sale[] {
+  return orders.map((order) => {
+    const items: SaleOrderItem[] = (order.items ?? []).map((item) => ({
+      productCategory: item.productType === 'SEMI_PRODUCT' ? 'semi' : 'final',
+      productType: item.semiProduct?.name ?? item.finishedProduct?.name ?? 'Mahsulot',
+      quantity: item.quantity,
+      pricePerUnit: item.price,
+      currency: item.currency ?? 'UZS',
+      total: item.total,
+    }));
+
+    return {
+      id: order.id,
+      date: order.createdAt.slice(0, 10),
+      clientId: order.clientId,
+      clientName: order.client?.name ?? '—',
+      productCategory: items[0]?.productCategory ?? 'final',
+      productType:
+        items.length > 1
+          ? 'aralash'
+          : items[0]?.productType ?? (order.totalAmount > 0 ? 'Buyurtma' : ''),
+      quantity: items.reduce((sum, item) => sum + item.quantity, 0),
+      pricePerUnit: items[0]?.pricePerUnit ?? 0,
+      total: order.totalAmount,
+      paid: order.paidAmount,
+      createdAt: order.createdAt,
+      items,
+    };
+  });
 }
 
 /** Eski backendda faqat `/finance/expense-categories` bo‘lishi mumkin — 404 bo‘lsa shu yerga tushamiz */
@@ -2012,7 +2089,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       ? safeLoad(apiRequest<BackendClient[]>('/clients'), [] as BackendClient[])
       : skipped<BackendClient[]>([]),
     allow('orders')
-      ? safeLoad(apiRequest<BackendOrder[]>('/orders'), [] as BackendOrder[])
+      ? safeLoad(apiRequest<BackendOrder[]>('/orders'), [] as BackendOrder[], 'orders')
       : skipped<BackendOrder[]>([]),
     allow('payments')
       ? safeLoad(apiRequest<BackendPayment[]>('/payments'), [] as BackendPayment[])
@@ -2187,31 +2264,13 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     bankName: client.bankName ?? undefined,
   }));
 
-  const sales: Sale[] = orders.map((order) => {
-    const items: SaleOrderItem[] = (order.items ?? []).map((item) => ({
-      productCategory: item.productType === 'SEMI_PRODUCT' ? 'semi' : 'final',
-      productType: item.semiProduct?.name ?? item.finishedProduct?.name ?? 'Mahsulot',
-      quantity: item.quantity,
-      pricePerUnit: item.price,
-      currency: item.currency ?? 'UZS',
-      total: item.total,
-    }));
-
-    return {
-      id: order.id,
-      date: order.createdAt.slice(0, 10),
-      clientId: order.clientId,
-      clientName: order.client?.name ?? '—',
-      productCategory: items[0]?.productCategory ?? 'final',
-      productType: items.length > 1 ? 'aralash' : items[0]?.productType ?? '',
-      quantity: items.reduce((sum, item) => sum + item.quantity, 0),
-      pricePerUnit: items[0]?.pricePerUnit ?? 0,
-      total: order.totalAmount,
-      paid: order.paidAmount,
-      createdAt: order.createdAt,
-      items,
-    };
-  });
+  const mergedOrders = mergeOrdersFromClients(orders, clients);
+  if (orders.length === 0 && mergedOrders.length > 0 && typeof console !== 'undefined') {
+    console.warn(
+      '[erp-store] /orders bo\'sh — sotuvlar mijozlar ma\'lumotidan tiklandi',
+    );
+  }
+  const sales: Sale[] = mapBackendOrdersToSales(mergedOrders);
 
   const mappedPayments: Payment[] = payments.map((payment) => ({
     id: payment.id,

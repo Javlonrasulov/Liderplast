@@ -210,7 +210,7 @@ export class CrmService {
     const clients = await this.prisma.client.findMany({
       where: { NOT: { phone: { contains: '__del__' } } },
       include: {
-        orders: true,
+        orders: { orderBy: { createdAt: 'desc' } },
         payments: true,
         bankTransactions: {
           where: {
