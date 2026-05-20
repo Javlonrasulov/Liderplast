@@ -60,6 +60,28 @@ export function warehouseSaleDefaults(product?: WarehouseSalePriceSource): {
   };
 }
 
+export type WarehousePurchasePriceSource = {
+  purchasePrice?: number;
+  priceCurrency?: SaleCurrency;
+  fxRateToUzs?: number;
+};
+
+export function warehousePurchaseDefaults(product?: WarehousePurchasePriceSource): {
+  price: string;
+  currency: SaleCurrency;
+  hasPurchasePrice: boolean;
+} {
+  const currency = product?.priceCurrency ?? 'UZS';
+  if (!product?.purchasePrice || product.purchasePrice <= 0) {
+    return { price: '', currency, hasPurchasePrice: false };
+  }
+  return {
+    price: String(product.purchasePrice),
+    currency,
+    hasPurchasePrice: true,
+  };
+}
+
 export function saleLineTotalUzs(
   quantity: number,
   price: number,

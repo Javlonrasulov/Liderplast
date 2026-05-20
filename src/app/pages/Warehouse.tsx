@@ -60,6 +60,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
@@ -1173,7 +1174,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     }
   };
 
-  const renderEditorBody = () => (
+  const renderEditorBody = ({ showInlineFooter = true }: { showInlineFooter?: boolean } = {}) => (
     <form
       id="warehouse-product-form"
       data-warehouse-editor="true"
@@ -1544,7 +1545,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         </div>
       )}
 
-      {!isMobile && (
+      {showInlineFooter && !isMobile ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={closeEditor}>
             {t.btnCancel}
@@ -1554,7 +1555,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             {submitting ? t.authLoading : editingProduct ? t.btnSave : t.whAddProduct}
           </Button>
         </div>
-      )}
+      ) : null}
     </form>
   );
 
@@ -2167,12 +2168,27 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         </Drawer>
       ) : (
         <Dialog open={isEditorOpen} onOpenChange={handleEditorOpenChange}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
+          <DialogContent className="flex max-h-[min(90dvh,56rem)] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+            <DialogHeader className="shrink-0 border-b border-slate-200 px-6 py-4 dark:border-slate-700">
               <DialogTitle>{overlayTitle}</DialogTitle>
               <DialogDescription>{overlayDescription}</DialogDescription>
             </DialogHeader>
-            {renderEditorBody()}
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+              {renderEditorBody({ showInlineFooter: false })}
+            </div>
+            <DialogFooter className="shrink-0 gap-2 border-t border-slate-200 px-6 py-4 dark:border-slate-700 sm:justify-end">
+              <Button type="button" variant="outline" onClick={closeEditor}>
+                {t.btnCancel}
+              </Button>
+              <Button
+                type="submit"
+                form="warehouse-product-form"
+                disabled={submitting}
+              >
+                {editingProduct ? <Save size={16} /> : <Plus size={16} />}
+                {submitting ? t.authLoading : editingProduct ? t.btnSave : t.whAddProduct}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

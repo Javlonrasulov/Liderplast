@@ -72,6 +72,7 @@ export interface T {
   supRemoveLine: string;
   supLinesCount: string;
   supLinePreview: string;
+  supNoWarehousePurchasePrice: string;
   supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
@@ -1113,6 +1114,8 @@ const uz_cyrillic: T = {
   supRemoveLine: 'Ўчириш',
   supLinesCount: '{n} та қатор',
   supLinePreview: 'Қатор жами',
+  supNoWarehousePurchasePrice:
+    'Сотиб олиш нархи омборда йўқ — аввал омборда маҳсулот нархини киритинг.',
   supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
@@ -2123,6 +2126,8 @@ const uz_latin: T = {
   supRemoveLine: 'O‘chirish',
   supLinesCount: '{n} ta qator',
   supLinePreview: 'Qator jami',
+  supNoWarehousePurchasePrice:
+    'Sotib olish narxi omborda yo‘q — avval omborda mahsulot narxini kiriting.',
   supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
@@ -3133,6 +3138,8 @@ const ru: T = {
   supRemoveLine: 'Удалить',
   supLinesCount: '{n} строк',
   supLinePreview: 'Итого по строке',
+  supNoWarehousePurchasePrice:
+    'Закупочная цена не задана на складе — сначала укажите её в карточке товара.',
   supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',

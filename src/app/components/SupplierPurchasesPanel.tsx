@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshCw, Package, Plus, Check, Trash2, ClipboardList } from 'lucide-react';
 import { useCbuRates, parseCbuRate } from '../hooks/use-cbu-rates';
 import {
@@ -10,6 +10,12 @@ import {
 import { useApp } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { formatCurrency, formatNumber } from '../utils/format';
+import {
+  saleFxRate,
+  warehouseFxForProduct,
+  warehousePurchaseDefaults,
+} from '../utils/sales-currency';
+import type { SaleCurrency } from '../store/erp-store';
 import {
   Select as RadixSelect,
   SelectContent,
@@ -149,6 +155,8 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const [cur, setCur] = useState<'UZS' | 'USD' | 'EUR'>('UZS');
   const [fxMan, setFxMan] = useState('1');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [priceManuallyEdited, setPriceManuallyEdited] = useState(false);
+  const lastPricedProductKey = useRef('');
   const [lines, setLines] = useState<PurchaseLine[]>([]);
   const [paymentType, setPaymentType] = useState<'CASH' | 'CREDIT'>('CASH');
   const [paidNow, setPaidNow] = useState('');
@@ -198,6 +206,62 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
     return hit?.label ?? '';
   }, [productOptions, selectedProductId]);
 
+  const selectedWarehouseProduct = useMemo(() => {
+    if (!selectedProductId) return undefined;
+    if (productCat === 'RAW_MATERIAL') {
+      return rawList.find((p) => p.id === selectedProductId);
+    }
+    if (productCat === 'SEMI_PRODUCT') {
+      return semiList.find((p) => p.id === selectedProductId);
+    }
+    return finalList.find((p) => p.id === selectedProductId);
+  }, [productCat, selectedProductId, rawList, semiList, finalList]);
+
+  const usdRate = usd ? parseCbuRate(usd.Rate) : 0;
+  const eurRate = eur ? parseCbuRate(eur.Rate) : 0;
+
+  const warehousePurchase = useMemo(
+    () => warehousePurchaseDefaults(selectedWarehouseProduct),
+    [selectedWarehouseProduct],
+  );
+
+  const productPricingKey = `${productCat}:${selectedProductId}`;
+
+  useEffect(() => {
+    if (!selectedProductId) return;
+    if (productPricingKey === lastPricedProductKey.current) return;
+    lastPricedProductKey.current = productPricingKey;
+    setPriceManuallyEdited(false);
+    const { price, currency, hasPurchasePrice } = warehousePurchaseDefaults(
+      selectedWarehouseProduct,
+    );
+    setCur(currency);
+    setPricePerUnit(hasPurchasePrice ? price : '');
+    const whFx = warehouseFxForProduct(selectedWarehouseProduct, currency);
+    if (currency === 'UZS') {
+      setFxMan('1');
+    } else {
+      const fx =
+        saleFxRate(currency, whFx, usdRate, eurRate) ??
+        (currency === 'USD' ? usdRate : eurRate);
+      if (fx > 0) setFxMan(String(fx));
+    }
+  }, [
+    productPricingKey,
+    selectedProductId,
+    selectedWarehouseProduct,
+    usdRate,
+    eurRate,
+  ]);
+
+  useEffect(() => {
+    if (priceManuallyEdited || !selectedWarehouseProduct) return;
+    const whCur = selectedWarehouseProduct.priceCurrency ?? 'UZS';
+    if (cur !== whCur) return;
+    const { price, hasPurchasePrice } = warehousePurchaseDefaults(selectedWarehouseProduct);
+    if (hasPurchasePrice) setPricePerUnit(price);
+  }, [cur, priceManuallyEdited, selectedWarehouseProduct]);
+
   useEffect(() => {
     if (productOptions.length === 0) return;
     const ok = productOptions.some((o) => o.value === selectedProductId);
@@ -246,9 +310,15 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
       setFxMan('1');
       return;
     }
-    if (cur === 'USD' && usd) setFxMan(String(parseCbuRate(usd.Rate)));
-    else if (cur === 'EUR' && eur) setFxMan(String(parseCbuRate(eur.Rate)));
-  }, [cur, usd, eur]);
+    const whFx = warehouseFxForProduct(selectedWarehouseProduct, cur);
+    const fx = saleFxRate(cur, whFx, usdRate, eurRate);
+    if (fx != null && fx > 0) {
+      setFxMan(String(fx));
+      return;
+    }
+    if (cur === 'USD' && usdRate > 0) setFxMan(String(usdRate));
+    else if (cur === 'EUR' && eurRate > 0) setFxMan(String(eurRate));
+  }, [cur, usdRate, eurRate, selectedWarehouseProduct]);
 
   const fx = useMemo(() => {
     if (cur === 'UZS') return 1;
@@ -292,6 +362,14 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
     lineTotalOriginal > 0 &&
     (cur === 'UZS' || fx > 0) &&
     productOptions.length > 0;
+
+  const priceHintBelow = !warehousePurchase.hasPurchasePrice
+    ? t.supNoWarehousePurchasePrice
+    : lineTotalOriginal > 0
+      ? `${t.supLinePreview}: ${formatAmountInCurrency(lineTotalOriginal, cur)} · ${formatCurrency(lineAmountUzs)}`
+      : warehousePurchase.hasPurchasePrice
+        ? `${t.whPurchasePrice}: ${formatNumber(parseFloat(warehousePurchase.price))} ${warehousePurchase.currency}`
+        : null;
 
   const unitPriceLabel =
     qtyUnit === 'PIECES' ? t.supPricePerPieceLabel : t.supPricePerKgLabel;
@@ -558,11 +636,12 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
                 </div>
               </div>
 
-              <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
                 <Label>{t.prRmCurrencyLabel}</Label>
                 <StyledSelect
                   value={cur}
-                  onValueChange={(v) => setCur(v as 'UZS' | 'USD' | 'EUR')}
+                  onValueChange={(v) => setCur(v as SaleCurrency)}
                   options={[
                     { value: 'UZS', label: 'UZS' },
                     { value: 'USD', label: 'USD' },
@@ -570,8 +649,9 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
                   ]}
                 />
               </div>
-              {cur !== 'UZS' && (
-                <div>
+                <div className={cur === 'UZS' ? 'hidden sm:block' : ''}>
+              {cur !== 'UZS' ? (
+                <>
                   <Label>{t.prRmFxRateLabel}</Label>
                   <Input
                     type="number"
@@ -581,35 +661,46 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
                     onChange={(e) => setFxMan(e.target.value)}
                   />
                   <p className="text-xs text-slate-400 mt-1">{t.prRmFxCbuHint}</p>
-                </div>
+                </>
+              ) : (
+                <div className="hidden sm:block h-9" aria-hidden />
               )}
+                </div>
+              </div>
 
-              <div className="flex gap-2 items-end">
-                <div className="flex-1 min-w-0">
-                  <Label>{unitPriceLabel}</Label>
+              <div>
+                <Label>{unitPriceLabel}</Label>
+                <div className="flex gap-2">
                   <Input
                     type="number"
                     min={0}
                     step="0.0001"
                     value={pricePerUnit}
-                    onChange={(e) => setPricePerUnit(e.target.value)}
+                    onChange={(e) => {
+                      setPriceManuallyEdited(true);
+                      setPricePerUnit(e.target.value);
+                    }}
+                    className="flex-1 min-w-0"
                   />
-                  {lineTotalOriginal > 0 && (
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {t.supLinePreview}: {formatAmountInCurrency(lineTotalOriginal, cur)} ·{' '}
-                      {formatCurrency(lineAmountUzs)}
-                    </p>
-                  )}
+                  <button
+                    type="button"
+                    onClick={addLine}
+                    disabled={busy || !canAddLine}
+                    title={t.supAddLine}
+                    className="h-9 w-9 shrink-0 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white flex items-center justify-center"
+                  >
+                    <Plus size={18} strokeWidth={2.5} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={addLine}
-                  disabled={busy || !canAddLine}
-                  title={t.supAddLine}
-                  className="h-9 w-9 shrink-0 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white flex items-center justify-center"
+                <p
+                  className={`min-h-[2.25rem] mt-1 text-[10px] leading-snug ${
+                    !warehousePurchase.hasPurchasePrice
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-slate-400'
+                  }`}
                 >
-                  <Plus size={18} strokeWidth={2.5} />
-                </button>
+                  {priceHintBelow ?? '\u00a0'}
+                </p>
               </div>
             </div>
 
