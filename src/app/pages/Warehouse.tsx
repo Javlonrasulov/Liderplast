@@ -40,7 +40,8 @@ import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-cata
 import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
 import {
   EMPTY_WAREHOUSE_PRICING,
-  formatProductPricingHint,
+  getProductCatalogDetailRows,
+  type ProductCatalogDetailRow,
   parseWarehousePricingPayload,
   pricingFieldsFromProduct,
   type WarehouseProductPricingFields,
@@ -246,42 +247,36 @@ function useIsMobile() {
   return isMobile;
 }
 
-function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
-  const pricingHint = formatProductPricingHint(
-    product,
-    { purchase: t.whPurchasePrice, sale: t.whSalePrice, fx: t.whFxRateToUzs },
-    formatNumber,
+function ProductCatalogDetails({
+  rows,
+}: {
+  rows: ProductCatalogDetailRow[];
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <dl className="mt-3 space-y-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-slate-700/80 dark:bg-slate-800/40">
+      {rows.map((row) => (
+        <div
+          key={row.id}
+          className="flex items-start justify-between gap-3 border-b border-slate-100/80 pb-2 last:border-0 last:pb-0 dark:border-slate-700/60"
+        >
+          <dt className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {row.label}
+          </dt>
+          <dd className="min-w-0 text-right">
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+              {row.value}
+            </span>
+            {row.subValue ? (
+              <p className="mt-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+                {row.subValue}
+              </p>
+            ) : null}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
-  const withPricing = (base: string) =>
-    pricingHint ? `${base}\n${pricingHint}` : base;
-
-  if (product.itemType === 'SEMI_PRODUCT') {
-    const ppb = product.piecesPerBag ?? 0;
-    const ppbPart =
-      ppb > 0
-        ? `${t.whCatalogPiecesPerBag.replace('{count}', formatNumber(ppb))} · `
-        : '';
-    const recipeCount = product.rawMaterials.length;
-    const machineCount = product.machines.length;
-    return withPricing(
-      `${ppbPart}${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
-        machineCount > 0 ? `, ${machineCount} ${t.whMachinesShort}` : ''
-      }`,
-    );
-  }
-  if (product.itemType === 'FINISHED_PRODUCT') {
-    const ppb = product.piecesPerBag ?? 0;
-    const ppbPart =
-      ppb > 0
-        ? `${t.whCatalogPiecesPerBag.replace('{count}', formatNumber(ppb))} · `
-        : '';
-    return withPricing(
-      `${ppbPart}${product.volumeLiter} L · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`,
-    );
-  }
-  return product.defaultBagWeightKg
-    ? `${t.whUnit}: ${product.unit}, ${t.rmDefaultBagWeight}: ${formatNumber(product.defaultBagWeightKg)} ${t.unitKg}`
-    : `${t.whUnit}: ${product.unit}`;
 }
 
 function auditLine(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
@@ -366,6 +361,27 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const { user, hasPermission } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
+
+  const catalogDetailLabels = useMemo(
+    () => ({
+      packLabel: t.whCatalogPackLabel,
+      packValue: t.whCatalogPackValue,
+      weightGram: t.whWeightGram,
+      composition: t.whCatalogComposition,
+      semiLinked: t.whCatalogSemiLinked,
+      volume: t.whCatalogVolume,
+      itemsCount: t.whCatalogItemsCount,
+      unit: t.whUnit,
+      defaultBagWeight: t.rmDefaultBagWeight,
+      unitKg: t.unitKg,
+      purchasePrice: t.whPurchasePrice,
+      salePrice: t.whSalePrice,
+      priceInUzs: t.whPriceInUzs,
+      fxLabel: t.whCatalogFxLabel,
+      fxValue: t.whCatalogFxValue,
+    }),
+    [t],
+  );
 
   const pricingFormLabels = useMemo(
     () => ({
@@ -652,7 +668,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       cards.push({
         key: `semi-${p.id}`,
         label: p.name,
-        sub: [`${formatNumber(p.weightGram)} g · ${t.whInWarehouse}`, ...packLines].join('\n'),
+        sub: packLines.join('\n'),
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -672,7 +688,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       cards.push({
         key: `final-${p.id}`,
         label: p.name,
-        sub: [`${p.volumeLiter} L · ${t.whInWarehouse}`, ...packLines].join('\n'),
+        sub: packLines.join('\n'),
         val: `${formatNumber(qty)} ${t.unitPiece}`,
         from: st.from,
         shadow: st.shadow,
@@ -2100,9 +2116,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                       {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
                     </span>
                   </div>
-                  <p className="mt-3 whitespace-pre-line text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
-                    {productMetric(product, t)}
-                  </p>
+                  <ProductCatalogDetails
+                    rows={getProductCatalogDetailRows(
+                      product,
+                      catalogDetailLabels,
+                      formatNumber,
+                    )}
+                  />
                   <p className="mt-1 text-[11px] text-slate-400">{auditLine(product, t)}</p>
                   {product.description && (
                     <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-slate-600 dark:text-slate-400">

@@ -244,6 +244,15 @@ export interface T {
   whPricingInvalid: string;
   whPriceInUzs: string;
   whCatalogPiecesPerBag: string;
+  whCatalogPackLabel: string;
+  whCatalogPackValue: string;
+  whCatalogComposition: string;
+  whCatalogMachines: string;
+  whCatalogSemiLinked: string;
+  whCatalogVolume: string;
+  whCatalogItemsCount: string;
+  whCatalogFxLabel: string;
+  whCatalogFxValue: string;
   whStockPackSubtitle: string;
   whStockPackSubtitleFull: string;
   whStockLinePacked: string;
@@ -1565,6 +1574,15 @@ const uz_cyrillic: T = {
   whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
   whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 пачкада: {count} дона',
+  whCatalogPackLabel: '1 пачкада',
+  whCatalogPackValue: '{count} дона',
+  whCatalogComposition: 'Таркиб',
+  whCatalogMachines: 'Аппарат',
+  whCatalogSemiLinked: 'Ярим тайёр',
+  whCatalogVolume: 'Ҳажм',
+  whCatalogItemsCount: '{count} та',
+  whCatalogFxLabel: 'Курс',
+  whCatalogFxValue: '1 {currency} = {rate} so‘m',
   whStockPackSubtitle:
     '{total} дона · {bags} пачка қадоқланган ({ppb} тадан) · {rem} дона қадоқланмаган',
   whStockPackSubtitleFull: '{total} дона · {bags} пачка ({ppb} тадан)',
@@ -2579,6 +2597,15 @@ const uz_latin: T = {
   whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
   whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 pachkada: {count} dona',
+  whCatalogPackLabel: '1 pachkada',
+  whCatalogPackValue: '{count} dona',
+  whCatalogComposition: 'Tarkib',
+  whCatalogMachines: 'Apparat',
+  whCatalogSemiLinked: 'Yarim tayyor',
+  whCatalogVolume: 'Hajm',
+  whCatalogItemsCount: '{count} ta',
+  whCatalogFxLabel: 'Kurs',
+  whCatalogFxValue: '1 {currency} = {rate} so‘m',
   whStockPackSubtitle:
     '{total} dona · {bags} pachka qadoqlangan ({ppb} tadan) · {rem} dona qadoqlanmagan',
   whStockPackSubtitleFull: '{total} dona · {bags} pachka ({ppb} tadan)',
@@ -3593,6 +3620,15 @@ const ru: T = {
   whPricingInvalid: 'Неверная цена или курс',
   whPriceInUzs: '≈ {amount} сум',
   whCatalogPiecesPerBag: 'В пачке: {count} шт',
+  whCatalogPackLabel: 'В пачке',
+  whCatalogPackValue: '{count} шт',
+  whCatalogComposition: 'Состав',
+  whCatalogMachines: 'Аппарат',
+  whCatalogSemiLinked: 'Полуфабрикат',
+  whCatalogVolume: 'Объём',
+  whCatalogItemsCount: '{count} шт',
+  whCatalogFxLabel: 'Курс',
+  whCatalogFxValue: '1 {currency} = {rate} сум',
   whStockPackSubtitle: '{total} шт · {bags} пачек (по {ppb}) · {rem} шт не упаковано',
   whStockPackSubtitleFull: '{total} шт · {bags} пачек (по {ppb})',
   whStockLinePacked: '{bags} пачек упаковано (по {ppb} шт)',

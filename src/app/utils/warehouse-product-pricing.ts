@@ -98,30 +98,159 @@ export function priceAmountInUzs(
   return amount * fx;
 }
 
-export function formatProductPricingHint(
+export type ProductCatalogDetailRow = {
+  id: string;
+  label: string;
+  value: string;
+  subValue?: string;
+};
+
+export type ProductCatalogDetailLabels = {
+  packLabel: string;
+  packValue: string;
+  weightGram: string;
+  composition: string;
+  semiLinked: string;
+  volume: string;
+  itemsCount: string;
+  unit: string;
+  defaultBagWeight: string;
+  unitKg: string;
+  purchasePrice: string;
+  salePrice: string;
+  priceInUzs: string;
+  fxLabel: string;
+  fxValue: string;
+};
+
+function currencyDisplay(cur: SaleCurrency): string {
+  return cur === 'USD' ? 'USD (USDT)' : cur;
+}
+
+function pricingDetailRows(
   product: {
     purchasePrice?: number;
     salePrice?: number;
     priceCurrency?: SaleCurrency;
     fxRateToUzs?: number;
   },
-  labels: {
-    purchase: string;
-    sale: string;
-    fx: string;
-  },
+  labels: Pick<
+    ProductCatalogDetailLabels,
+    'purchasePrice' | 'salePrice' | 'priceInUzs' | 'fxLabel' | 'fxValue'
+  >,
   formatNumber: (n: number) => string,
-): string | null {
-  const parts: string[] = [];
+): ProductCatalogDetailRow[] {
+  const rows: ProductCatalogDetailRow[] = [];
   const cur = product.priceCurrency ?? 'UZS';
-  if (product.purchasePrice != null && product.purchasePrice > 0) {
-    parts.push(`${labels.purchase}: ${formatNumber(product.purchasePrice)} ${cur}`);
+  const fx = product.fxRateToUzs ?? 0;
+
+  const pushPrice = (id: string, label: string, amount: number | undefined) => {
+    if (amount == null || amount <= 0) return;
+    const value = `${formatNumber(amount)} ${currencyDisplay(cur)}`;
+    let subValue: string | undefined;
+    if (cur !== 'UZS' && fx > 0) {
+      const uzs = priceAmountInUzs(String(amount), String(fx));
+      if (uzs != null) {
+        subValue = labels.priceInUzs.replace('{amount}', formatNumber(uzs));
+      }
+    }
+    rows.push({ id, label, value, subValue });
+  };
+
+  pushPrice('purchase', labels.purchasePrice, product.purchasePrice);
+  pushPrice('sale', labels.salePrice, product.salePrice);
+
+  if (cur !== 'UZS' && fx > 0) {
+    rows.push({
+      id: 'fx',
+      label: labels.fxLabel,
+      value: labels.fxValue
+        .replace('{currency}', currencyDisplay(cur))
+        .replace('{rate}', formatNumber(fx)),
+    });
   }
-  if (product.salePrice != null && product.salePrice > 0) {
-    parts.push(`${labels.sale}: ${formatNumber(product.salePrice)} ${cur}`);
+
+  return rows;
+}
+
+export type CatalogProductForDetails = {
+  itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+  piecesPerBag?: number | null;
+  weightGram?: number;
+  rawMaterials?: unknown[];
+  machines?: unknown[];
+  volumeLiter?: number;
+  semiProducts?: unknown[];
+  unit?: string;
+  defaultBagWeightKg?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  priceCurrency?: SaleCurrency;
+  fxRateToUzs?: number;
+};
+
+export function getProductCatalogDetailRows(
+  product: CatalogProductForDetails,
+  labels: ProductCatalogDetailLabels,
+  formatNumber: (n: number) => string,
+): ProductCatalogDetailRow[] {
+  const rows: ProductCatalogDetailRow[] = [];
+
+  if (product.itemType === 'SEMI_PRODUCT') {
+    const ppb = product.piecesPerBag ?? 0;
+    if (ppb > 0) {
+      rows.push({
+        id: 'pack',
+        label: labels.packLabel,
+        value: labels.packValue.replace('{count}', formatNumber(ppb)),
+      });
+    }
+    rows.push({
+      id: 'weight',
+      label: labels.weightGram,
+      value: `${formatNumber(product.weightGram ?? 0)} g`,
+    });
+    const recipeCount = product.rawMaterials?.length ?? 0;
+    rows.push({
+      id: 'recipe',
+      label: labels.composition,
+      value: labels.itemsCount.replace('{count}', String(recipeCount)),
+    });
+  } else if (product.itemType === 'FINISHED_PRODUCT') {
+    const ppb = product.piecesPerBag ?? 0;
+    if (ppb > 0) {
+      rows.push({
+        id: 'pack',
+        label: labels.packLabel,
+        value: labels.packValue.replace('{count}', formatNumber(ppb)),
+      });
+    }
+    rows.push({
+      id: 'volume',
+      label: labels.volume,
+      value: `${formatNumber(product.volumeLiter ?? 0)} L`,
+    });
+    const semiCount = product.semiProducts?.length ?? 0;
+    rows.push({
+      id: 'semi',
+      label: labels.semiLinked,
+      value: labels.itemsCount.replace('{count}', String(semiCount)),
+    });
+  } else if (product.itemType === 'RAW_MATERIAL') {
+    rows.push({
+      id: 'unit',
+      label: labels.unit,
+      value: product.unit ?? '—',
+    });
+    if (product.defaultBagWeightKg != null && product.defaultBagWeightKg > 0) {
+      rows.push({
+        id: 'bag',
+        label: labels.defaultBagWeight,
+        value: `${formatNumber(product.defaultBagWeightKg)} ${labels.unitKg}`,
+      });
+    }
   }
-  if (cur !== 'UZS' && product.fxRateToUzs != null && product.fxRateToUzs > 0) {
-    parts.push(`${labels.fx}: ${formatNumber(product.fxRateToUzs)}`);
-  }
-  return parts.length > 0 ? parts.join(' · ') : null;
+
+  rows.push(...pricingDetailRows(product, labels, formatNumber));
+  return rows;
 }
