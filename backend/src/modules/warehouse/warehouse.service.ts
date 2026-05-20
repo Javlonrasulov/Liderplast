@@ -10,6 +10,7 @@ import {
   Prisma,
   ProductAuditActionType,
   ProductAuditEntityType,
+  PurchaseOrderCurrency,
   RawMaterialKind,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -48,6 +49,10 @@ type ProductSnapshot = {
   weightGram?: number;
   volumeLiter?: number;
   piecesPerBag?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  priceCurrency?: PurchaseOrderCurrency;
+  fxRateToUzs?: number;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -84,6 +89,10 @@ type ResolvedProductInput = {
   weightGram?: number;
   volumeLiter?: number;
   piecesPerBag?: number;
+  purchasePrice?: number | null;
+  salePrice?: number | null;
+  priceCurrency?: PurchaseOrderCurrency | null;
+  fxRateToUzs?: number | null;
   relations: {
     rawMaterials?: SemiProductRawMaterialInputDto[];
     semiProductIds?: string[];
@@ -453,6 +462,29 @@ export class WarehouseService {
     return { movement, updatedBalance };
   }
 
+  private pricingDbFields(input: ResolvedProductInput) {
+    return {
+      purchasePrice: input.purchasePrice ?? null,
+      salePrice: input.salePrice ?? null,
+      priceCurrency: input.priceCurrency ?? null,
+      fxRateToUzs: input.fxRateToUzs ?? null,
+    };
+  }
+
+  private pricingSnapshotFields(item: {
+    purchasePrice: number | null;
+    salePrice: number | null;
+    priceCurrency: PurchaseOrderCurrency | null;
+    fxRateToUzs: number | null;
+  }) {
+    return {
+      purchasePrice: item.purchasePrice ?? undefined,
+      salePrice: item.salePrice ?? undefined,
+      priceCurrency: item.priceCurrency ?? undefined,
+      fxRateToUzs: item.fxRateToUzs ?? undefined,
+    };
+  }
+
   private resolveCreateInput(dto: CreateProductDto): ResolvedProductInput {
     const input: ResolvedProductInput = {
       itemType: dto.itemType,
@@ -467,6 +499,10 @@ export class WarehouseService {
       weightGram: dto.weightGram,
       volumeLiter: dto.volumeLiter,
       piecesPerBag: dto.piecesPerBag,
+      purchasePrice: dto.purchasePrice,
+      salePrice: dto.salePrice,
+      priceCurrency: dto.priceCurrency,
+      fxRateToUzs: dto.fxRateToUzs,
       relations: this.normalizeRelations(dto.relations),
     };
 
@@ -506,6 +542,20 @@ export class WarehouseService {
         dto.volumeLiter !== undefined ? dto.volumeLiter : current.volumeLiter,
       piecesPerBag:
         dto.piecesPerBag !== undefined ? dto.piecesPerBag : current.piecesPerBag,
+      purchasePrice:
+        dto.purchasePrice !== undefined
+          ? dto.purchasePrice
+          : (current.purchasePrice ?? null),
+      salePrice:
+        dto.salePrice !== undefined ? dto.salePrice : (current.salePrice ?? null),
+      priceCurrency:
+        dto.priceCurrency !== undefined
+          ? dto.priceCurrency
+          : (current.priceCurrency ?? null),
+      fxRateToUzs:
+        dto.fxRateToUzs !== undefined
+          ? dto.fxRateToUzs
+          : (current.fxRateToUzs ?? null),
       relations: {
         rawMaterials:
           nextRelations.rawMaterials ??
@@ -721,6 +771,7 @@ export class WarehouseService {
           kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
           defaultBagWeightKg: input.defaultBagWeightKg ?? null,
           description: input.description ?? null,
+          ...this.pricingDbFields(input),
         };
         return tx.rawMaterial.create({
           data,
@@ -733,6 +784,7 @@ export class WarehouseService {
             description: input.description,
             weightGram: input.weightGram!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceSemiProductRelations(tx, item.id, input.relations);
@@ -745,6 +797,7 @@ export class WarehouseService {
             description: input.description,
             volumeLiter: input.volumeLiter!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceFinishedProductRelations(tx, item.id, input.relations);
@@ -770,6 +823,7 @@ export class WarehouseService {
             kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
             defaultBagWeightKg: input.defaultBagWeightKg ?? null,
             description: input.description ?? null,
+            ...this.pricingDbFields(input),
           };
         await tx.rawMaterial.update({
           where: { id },
@@ -785,6 +839,7 @@ export class WarehouseService {
             description: input.description,
             weightGram: input.weightGram!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceSemiProductRelations(tx, id, input.relations);
@@ -797,6 +852,7 @@ export class WarehouseService {
             description: input.description,
             volumeLiter: input.volumeLiter!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceFinishedProductRelations(tx, id, input.relations);
@@ -822,6 +878,7 @@ export class WarehouseService {
             kind: input.rawMaterialKind ?? RawMaterialKind.SIRO,
             defaultBagWeightKg: input.defaultBagWeightKg ?? null,
             description: input.description ?? null,
+            ...this.pricingDbFields(input),
           };
           await tx.rawMaterial.create({ data });
         }
@@ -834,6 +891,7 @@ export class WarehouseService {
             description: input.description,
             weightGram: input.weightGram!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceSemiProductRelations(tx, id, input.relations);
@@ -846,6 +904,7 @@ export class WarehouseService {
             description: input.description,
             volumeLiter: input.volumeLiter!,
             piecesPerBag: input.piecesPerBag ?? null,
+            ...this.pricingDbFields(input),
           },
         });
         await this.replaceFinishedProductRelations(tx, id, input.relations);
@@ -1253,6 +1312,10 @@ export class WarehouseService {
     kind?: RawMaterialKind;
     defaultBagWeightKg?: number | null;
     description: string | null;
+    purchasePrice: number | null;
+    salePrice: number | null;
+    priceCurrency: PurchaseOrderCurrency | null;
+    fxRateToUzs: number | null;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -1270,6 +1333,7 @@ export class WarehouseService {
       rawMaterialKind: item.kind ?? RawMaterialKind.SIRO,
       defaultBagWeightKg: item.defaultBagWeightKg ?? undefined,
       description: item.description ?? undefined,
+      ...this.pricingSnapshotFields(item),
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
@@ -1283,6 +1347,10 @@ export class WarehouseService {
     weightGram: number;
     piecesPerBag: number | null;
     description: string | null;
+    purchasePrice: number | null;
+    salePrice: number | null;
+    priceCurrency: PurchaseOrderCurrency | null;
+    fxRateToUzs: number | null;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -1319,6 +1387,7 @@ export class WarehouseService {
       weightGram: item.weightGram,
       piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
+      ...this.pricingSnapshotFields(item),
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
@@ -1346,6 +1415,10 @@ export class WarehouseService {
     volumeLiter: number;
     piecesPerBag: number | null;
     description: string | null;
+    purchasePrice: number | null;
+    salePrice: number | null;
+    priceCurrency: PurchaseOrderCurrency | null;
+    fxRateToUzs: number | null;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -1381,6 +1454,7 @@ export class WarehouseService {
       volumeLiter: item.volumeLiter,
       piecesPerBag: item.piecesPerBag ?? undefined,
       description: item.description ?? undefined,
+      ...this.pricingSnapshotFields(item),
       isDeleted: item.isDeleted,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),

@@ -680,10 +680,6 @@ export type RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput 
   update?: Prisma.XOR<Prisma.XOR<Prisma.RawMaterialPurchaseOrderUpdateToOneWithWhereWithoutExpenseInput, Prisma.RawMaterialPurchaseOrderUpdateWithoutExpenseInput>, Prisma.RawMaterialPurchaseOrderUncheckedUpdateWithoutExpenseInput>
 }
 
-export type EnumPurchaseOrderCurrencyFieldUpdateOperationsInput = {
-  set?: $Enums.PurchaseOrderCurrency
-}
-
 export type EnumRawMaterialOrderStatusFieldUpdateOperationsInput = {
   set?: $Enums.RawMaterialOrderStatus
 }

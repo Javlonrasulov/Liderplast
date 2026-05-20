@@ -212,6 +212,10 @@ model RawMaterial {
   kind         RawMaterialKind         @default(SIRO)
   defaultBagWeightKg Float?
   description  String?
+  purchasePrice    Float?
+  salePrice        Float?
+  priceCurrency    PurchaseOrderCurrency?
+  fxRateToUzs      Float?
   isDeleted    Boolean                 @default(false)
   status       EntityStatus            @default(COMPLETED)
   createdAt    DateTime                @default(now())
@@ -236,6 +240,10 @@ model SemiProduct {
   /** 1 qop/pachkada necha dona (qadoqlash) */
   piecesPerBag   Int?
   description    String?
+  purchasePrice    Float?
+  salePrice        Float?
+  priceCurrency    PurchaseOrderCurrency?
+  fxRateToUzs      Float?
   isDeleted      Boolean                 @default(false)
   status         EntityStatus            @default(COMPLETED)
   createdAt      DateTime                @default(now())
@@ -258,6 +266,10 @@ model FinishedProduct {
   volumeLiter   Float
   piecesPerBag  Int?
   description   String?
+  purchasePrice    Float?
+  salePrice        Float?
+  priceCurrency    PurchaseOrderCurrency?
+  fxRateToUzs      Float?
   isDeleted     Boolean              @default(false)
   status        EntityStatus         @default(COMPLETED)
   createdAt     DateTime             @default(now())
@@ -593,6 +605,7 @@ model OrderItem {
   finishedProduct   FinishedProduct? @relation("OrderFinishedProduct", fields: [finishedProductId], references: [id], onDelete: SetNull)
   quantity          Int
   price             Float
+  currency          PurchaseOrderCurrency @default(UZS)
   total             Float
 }
 

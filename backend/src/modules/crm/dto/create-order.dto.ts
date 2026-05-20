@@ -12,6 +12,7 @@ import { Type } from 'class-transformer';
 import {
   OrderProductType,
   OrderStatus,
+  PurchaseOrderCurrency,
 } from '../../../generated/prisma/enums.js';
 
 class CreateOrderItemDto {
@@ -33,6 +34,16 @@ class CreateOrderItemDto {
   @IsNumber()
   @Min(0)
   price!: number;
+
+  @IsOptional()
+  @IsEnum(PurchaseOrderCurrency)
+  currency?: PurchaseOrderCurrency;
+
+  /** UZS bo‘lmagan valyuta uchun MB kursi */
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fxRateToUzs?: number;
 }
 
 export class CreateOrderDto {

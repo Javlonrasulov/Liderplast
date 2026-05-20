@@ -28,6 +28,8 @@ import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
 import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
+import { CreateSupplierPurchaseBatchDto } from './dto/create-supplier-purchase-batch.dto.js';
+import { SupplierPurchaseBatchItemDto } from './dto/supplier-purchase-batch-item.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
@@ -598,7 +600,40 @@ export class FinanceService {
     });
   }
 
-  private async resolveSupplierPurchaseProduct(dto: CreateSupplierPurchaseOrderDto) {
+  private allocateBatchPaidAmounts(
+    amountUzsList: number[],
+    paymentType: PurchasePaymentType,
+    paidAmountUzs?: number,
+  ): number[] {
+    const total = amountUzsList.reduce((sum, amount) => sum + amount, 0);
+    if (paymentType === PurchasePaymentType.CASH) {
+      return amountUzsList.map((amount) => amount);
+    }
+    const totalPaid = paidAmountUzs ?? 0;
+    if (!Number.isFinite(totalPaid) || totalPaid < 0 || totalPaid > total) {
+      throw new BadRequestException('Invalid paid amount');
+    }
+    if (totalPaid >= total) {
+      throw new BadRequestException('Credit purchase requires remaining debt');
+    }
+    if (amountUzsList.length === 1) {
+      return [totalPaid];
+    }
+    let remaining = totalPaid;
+    return amountUzsList.map((amount, idx) => {
+      if (idx === amountUzsList.length - 1) {
+        return Math.min(amount, remaining);
+      }
+      const share = Math.round((amount / total) * totalPaid);
+      const paid = Math.min(amount, Math.max(0, share));
+      remaining -= paid;
+      return paid;
+    });
+  }
+
+  private async resolveSupplierPurchaseProduct(
+    dto: CreateSupplierPurchaseOrderDto | SupplierPurchaseBatchItemDto,
+  ) {
     if (dto.itemType === InventoryItemType.RAW_MATERIAL) {
       const id = dto.rawMaterialId?.trim();
       if (!id) throw new BadRequestException('rawMaterialId is required');
@@ -793,6 +828,171 @@ export class FinanceService {
 
     this.warehouseService.emitWarehouseMovement(movementResult.wh);
     return movementResult.order;
+  }
+
+  async createSupplierPurchaseBatch(
+    dto: CreateSupplierPurchaseBatchDto,
+    createdById?: string,
+  ) {
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { id: dto.supplierId, isDeleted: false },
+    });
+    if (!supplier) {
+      throw new BadRequestException('Supplier not found');
+    }
+
+    const category = await this.ensureRawMaterialOrderExpenseCategory();
+    const batchNotes = dto.notes?.trim() || null;
+
+    const resolvedLines: Array<{
+      item: SupplierPurchaseBatchItemDto;
+      product: {
+        name: string;
+        rawMaterialId: string | null;
+        semiProductId: string | null;
+        finishedProductId: string | null;
+      };
+      fx: number;
+      amountUzs: number;
+    }> = [];
+
+    for (const item of dto.items) {
+      const product = await this.resolveSupplierPurchaseProduct(item);
+
+      let fx = item.fxRateToUzs;
+      if (item.currency === PurchaseOrderCurrency.UZS) {
+        fx = 1;
+      }
+      if (!Number.isFinite(fx) || fx <= 0) {
+        throw new BadRequestException('Invalid CBU / exchange rate');
+      }
+
+      const amountUzs =
+        item.currency === PurchaseOrderCurrency.UZS
+          ? item.amountOriginal
+          : item.amountOriginal * fx;
+
+      if (!Number.isFinite(amountUzs) || amountUzs < 0) {
+        throw new BadRequestException('Invalid amounts');
+      }
+
+      resolvedLines.push({ item, product, fx, amountUzs });
+    }
+
+    const amountUzsList = resolvedLines.map((line) => line.amountUzs);
+    const cartTotal = amountUzsList.reduce((sum, amount) => sum + amount, 0);
+
+    let totalPaid = dto.paidAmountUzs ?? cartTotal;
+    if (dto.paymentType === PurchasePaymentType.CASH) {
+      totalPaid = cartTotal;
+    }
+    if (
+      !Number.isFinite(totalPaid) ||
+      totalPaid < 0 ||
+      totalPaid > cartTotal
+    ) {
+      throw new BadRequestException('Invalid paid amount');
+    }
+    if (dto.paymentType === PurchasePaymentType.CREDIT && totalPaid >= cartTotal) {
+      throw new BadRequestException('Credit purchase requires remaining debt');
+    }
+
+    const paidPerLine = this.allocateBatchPaidAmounts(
+      amountUzsList,
+      dto.paymentType,
+      dto.paymentType === PurchasePaymentType.CREDIT ? totalPaid : undefined,
+    );
+
+    const movementResult = await this.prisma.$transaction(async (tx) => {
+      const orders: Awaited<ReturnType<typeof tx.supplierPurchaseOrder.create>>[] =
+        [];
+      const whMovements: Awaited<
+        ReturnType<WarehouseService['applyIncomingMovementTx']>
+      >[] = [];
+
+      for (let i = 0; i < resolvedLines.length; i++) {
+        const { item, product, fx, amountUzs } = resolvedLines[i];
+        const paidAmountUzs = paidPerLine[i];
+        const debtAmountUzs = Math.max(0, amountUzs - paidAmountUzs);
+
+        const unitLbl = this.quantityUnitLabel(item.quantityUnit);
+        const paymentLbl =
+          dto.paymentType === PurchasePaymentType.CREDIT
+            ? `qarz ${Math.round(debtAmountUzs)} UZS`
+            : 'naqd';
+
+        const expense = await tx.expense.create({
+          data: {
+            title: `Sotib olish: ${product.name} (${supplier.name})`,
+            type: category.legacyExpenseType,
+            categoryId: category.id,
+            amount: amountUzs,
+            description: [
+              `${item.quantity} ${unitLbl}`,
+              `${item.currency} ${item.amountOriginal}`,
+              `kurs ${fx}`,
+              `→ ${Math.round(amountUzs)} UZS`,
+              paymentLbl,
+              batchNotes,
+            ]
+              .filter(Boolean)
+              .join(' · '),
+            incurredAt: new Date(),
+            createdById,
+          },
+        });
+
+        const order = await tx.supplierPurchaseOrder.create({
+          data: {
+            supplierId: supplier.id,
+            itemType: item.itemType,
+            rawMaterialId: product.rawMaterialId,
+            semiProductId: product.semiProductId,
+            finishedProductId: product.finishedProductId,
+            quantity: item.quantity,
+            quantityUnit: item.quantityUnit,
+            currency: item.currency,
+            fxRateToUzs: fx,
+            amountOriginal: item.amountOriginal,
+            amountUzs,
+            paymentType: dto.paymentType,
+            paidAmountUzs,
+            debtAmountUzs,
+            debtDueDate: null,
+            expenseId: expense.id,
+            status: RawMaterialOrderStatus.FULFILLED,
+            fulfilledAt: new Date(),
+            notes: batchNotes,
+            createdById: createdById ?? null,
+          },
+          include: this.supplierPurchaseOrderInclude(),
+        });
+
+        const incomingDto = this.buildSupplierPurchaseIncomingDto(
+          item.itemType,
+          product,
+          supplier.name,
+          item.quantity,
+          item.quantityUnit,
+          order.id,
+        );
+        const wh = await this.warehouseService.applyIncomingMovementTx(
+          tx,
+          incomingDto,
+          createdById,
+        );
+
+        orders.push(order);
+        whMovements.push(wh);
+      }
+
+      return { orders, whMovements };
+    });
+
+    for (const wh of movementResult.whMovements) {
+      this.warehouseService.emitWarehouseMovement(wh);
+    }
+    return movementResult.orders;
   }
 
   private supplierPurchaseOrderInclude() {

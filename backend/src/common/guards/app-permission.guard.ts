@@ -187,6 +187,11 @@ function requiredPermissionGroups(
       anyOf: ['manage_suppliers', 'view_expenses'],
     },
     {
+      test: /^\/finance\/supplier-purchase-orders\/batch$/,
+      method: 'POST',
+      anyOf: ['manage_suppliers', 'view_expenses'],
+    },
+    {
       test: /^\/finance\/supplier-purchase-orders\/[^/]+\/fulfill$/,
       method: 'PATCH',
       anyOf: ['manage_suppliers', 'view_expenses', 'view_raw_material'],

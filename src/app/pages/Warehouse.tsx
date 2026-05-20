@@ -37,6 +37,14 @@ import {
 } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
+import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
+import {
+  EMPTY_WAREHOUSE_PRICING,
+  formatProductPricingHint,
+  parseWarehousePricingPayload,
+  pricingFieldsFromProduct,
+  type WarehouseProductPricingFields,
+} from '../utils/warehouse-product-pricing';
 import { Button } from '../components/ui/button';
 import {
   AlertDialog,
@@ -116,14 +124,14 @@ type ProductFormState = {
   }>;
   semiProductIds: string[];
   machineIds: string[];
-};
+} & WarehouseProductPricingFields;
 
 type RawMaterialEditState = {
   name: string;
   description: string;
   defaultBagWeightKg: string;
   rawMaterialKind: RawMaterialKind;
-};
+} & WarehouseProductPricingFields;
 
 const DEFAULT_FORM: ProductFormState = {
   itemType: 'SEMI_PRODUCT',
@@ -134,6 +142,7 @@ const DEFAULT_FORM: ProductFormState = {
   rawMaterials: [{ rawMaterialId: '', amountGram: '' }],
   semiProductIds: [],
   machineIds: [],
+  ...EMPTY_WAREHOUSE_PRICING,
 };
 
 function StockItem({
@@ -237,6 +246,14 @@ function useIsMobile() {
 }
 
 function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['t']) {
+  const pricingHint = formatProductPricingHint(
+    product,
+    { purchase: t.whPurchasePrice, sale: t.whSalePrice, fx: t.whFxRateToUzs },
+    formatNumber,
+  );
+  const withPricing = (base: string) =>
+    pricingHint ? `${base}\n${pricingHint}` : base;
+
   if (product.itemType === 'SEMI_PRODUCT') {
     const ppb = product.piecesPerBag ?? 0;
     const ppbPart =
@@ -245,9 +262,11 @@ function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['
         : '';
     const recipeCount = product.rawMaterials.length;
     const machineCount = product.machines.length;
-    return `${ppbPart}${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
-      machineCount > 0 ? `, ${machineCount} ${t.whMachinesShort}` : ''
-    }`;
+    return withPricing(
+      `${ppbPart}${t.whWeightGram}: ${formatNumber(product.weightGram)} g, ${recipeCount} ${t.whIngredientsShort}${
+        machineCount > 0 ? `, ${machineCount} ${t.whMachinesShort}` : ''
+      }`,
+    );
   }
   if (product.itemType === 'FINISHED_PRODUCT') {
     const ppb = product.piecesPerBag ?? 0;
@@ -255,7 +274,9 @@ function productMetric(product: WarehouseProduct, t: ReturnType<typeof useApp>['
       ppb > 0
         ? `${t.whCatalogPiecesPerBag.replace('{count}', formatNumber(ppb))} · `
         : '';
-    return `${ppbPart}${product.volumeLiter} L · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`;
+    return withPricing(
+      `${ppbPart}${product.volumeLiter} L · ${product.semiProducts.length} ${t.whSemiShort}, ${product.machines.length} ${t.whMachinesShort}`,
+    );
   }
   return product.defaultBagWeightKg
     ? `${t.whUnit}: ${product.unit}, ${t.rmDefaultBagWeight}: ${formatNumber(product.defaultBagWeightKg)} ${t.unitKg}`
@@ -814,6 +835,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         product.itemType === 'SEMI_PRODUCT' || product.itemType === 'FINISHED_PRODUCT'
           ? product.machines.map((item) => item.machineId)
           : [],
+      ...pricingFieldsFromProduct(product),
     });
     setIsEditorOpen(true);
   };
@@ -874,6 +896,16 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       throw new Error(t.whNameRequired);
     }
 
+    const pricing = parseWarehousePricingPayload({
+      purchasePrice: form.purchasePrice,
+      salePrice: form.salePrice,
+      priceCurrency: form.priceCurrency,
+      fxRateToUzs: form.fxRateToUzs,
+    });
+    if (pricing === undefined) {
+      throw new Error(t.whPricingInvalid);
+    }
+
     if (form.itemType === 'SEMI_PRODUCT') {
       const weightGram = Number(form.weightGram);
       if (!Number.isFinite(weightGram) || weightGram <= 0) {
@@ -912,6 +944,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         description: form.description.trim() || undefined,
         weightGram,
         piecesPerBag,
+        ...pricing,
         relations: {
           rawMaterials: rawMaterialsPayload,
           machineIds: form.machineIds,
@@ -942,6 +975,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       description: form.description.trim() || undefined,
       volumeLiter,
       piecesPerBag,
+      ...pricing,
       relations: {
         semiProductIds: form.semiProductIds,
         machineIds: form.machineIds,
@@ -1039,6 +1073,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           ? String(rawMaterial.defaultBagWeightKg)
           : '',
       rawMaterialKind: rawMaterial.rawMaterialKind ?? 'SIRO',
+      ...pricingFieldsFromProduct(rawMaterial),
     });
     setError('');
     setSuccess('');
@@ -1051,6 +1086,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       description: '',
       defaultBagWeightKg: '',
       rawMaterialKind: 'SIRO',
+      ...EMPTY_WAREHOUSE_PRICING,
     });
   };
 
@@ -1073,6 +1109,17 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       return;
     }
 
+    const pricing = parseWarehousePricingPayload({
+      purchasePrice: rawMaterialForm.purchasePrice,
+      salePrice: rawMaterialForm.salePrice,
+      priceCurrency: rawMaterialForm.priceCurrency,
+      fxRateToUzs: rawMaterialForm.fxRateToUzs,
+    });
+    if (pricing === undefined) {
+      setError(t.whPricingInvalid);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await dispatch({
@@ -1086,6 +1133,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           unit: editingRawMaterial.unit,
           rawMaterialKind: rawMaterialForm.rawMaterialKind,
           defaultBagWeightKg,
+          ...pricing,
         },
       });
       setSuccess(t.whProductUpdated);
@@ -1226,6 +1274,30 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           </div>
         </div>
       )}
+
+      <WarehouseProductPricingFieldsBlock
+        value={{
+          purchasePrice: form.purchasePrice,
+          salePrice: form.salePrice,
+          priceCurrency: form.priceCurrency,
+          fxRateToUzs: form.fxRateToUzs,
+        }}
+        onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
+        labels={{
+          section: t.whPricingSection,
+          optional: t.whPricingOptional,
+          purchasePrice: t.whPurchasePrice,
+          salePrice: t.whSalePrice,
+          currency: t.labelCurrency,
+          fxRate: t.whFxRateToUzs,
+          fxHint: t.whFxRateHint,
+          fxApplyCbu: t.whFxApplyCbu,
+          currencyUzs: 'UZS',
+          currencyUsd: 'USD',
+          currencyEur: 'EUR',
+          priceInUzs: t.whPriceInUzs,
+        }}
+      />
 
       {form.itemType === 'SEMI_PRODUCT' ? (
         <>
@@ -2016,7 +2088,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                       {product.itemType === 'SEMI_PRODUCT' ? t.whSemi : t.whFinal}
                     </span>
                   </div>
-                  <p className="mt-3 text-xs font-medium text-slate-600 dark:text-slate-300">
+                  <p className="mt-3 whitespace-pre-line text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
                     {productMetric(product, t)}
                   </p>
                   <p className="mt-1 text-[11px] text-slate-400">{auditLine(product, t)}</p>
@@ -2175,6 +2247,31 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 />
                 <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
               </div>
+              <WarehouseProductPricingFieldsBlock
+                value={{
+                  purchasePrice: rawMaterialForm.purchasePrice,
+                  salePrice: rawMaterialForm.salePrice,
+                  priceCurrency: rawMaterialForm.priceCurrency,
+                  fxRateToUzs: rawMaterialForm.fxRateToUzs,
+                }}
+                onChange={(next) =>
+                  setRawMaterialForm((prev) => ({ ...prev, ...next }))
+                }
+                labels={{
+                  section: t.whPricingSection,
+                  optional: t.whPricingOptional,
+                  purchasePrice: t.whPurchasePrice,
+                  salePrice: t.whSalePrice,
+                  currency: t.labelCurrency,
+                  fxRate: t.whFxRateToUzs,
+                  fxHint: t.whFxRateHint,
+                  fxApplyCbu: t.whFxApplyCbu,
+                  currencyUzs: 'UZS',
+                  currencyUsd: 'USD',
+                  currencyEur: 'EUR',
+                  priceInUzs: t.whPriceInUzs,
+                }}
+              />
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                   {t.labelDesc}
@@ -2283,6 +2380,31 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 />
                 <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
               </div>
+              <WarehouseProductPricingFieldsBlock
+                value={{
+                  purchasePrice: rawMaterialForm.purchasePrice,
+                  salePrice: rawMaterialForm.salePrice,
+                  priceCurrency: rawMaterialForm.priceCurrency,
+                  fxRateToUzs: rawMaterialForm.fxRateToUzs,
+                }}
+                onChange={(next) =>
+                  setRawMaterialForm((prev) => ({ ...prev, ...next }))
+                }
+                labels={{
+                  section: t.whPricingSection,
+                  optional: t.whPricingOptional,
+                  purchasePrice: t.whPurchasePrice,
+                  salePrice: t.whSalePrice,
+                  currency: t.labelCurrency,
+                  fxRate: t.whFxRateToUzs,
+                  fxHint: t.whFxRateHint,
+                  fxApplyCbu: t.whFxApplyCbu,
+                  currencyUzs: 'UZS',
+                  currencyUsd: 'USD',
+                  currencyEur: 'EUR',
+                  priceInUzs: t.whPriceInUzs,
+                }}
+              />
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                   {t.labelDesc}

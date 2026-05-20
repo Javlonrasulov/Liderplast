@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import {
   InventoryItemType,
+  PurchaseOrderCurrency,
   type RawMaterialKind,
 } from '../../../generated/prisma/enums.js';
 import { ProductRelationsDto } from './product-relations.dto.js';
@@ -60,6 +61,28 @@ export class CreateProductDto {
   @IsOptional()
   @IsIn(['SIRO', 'PAINT'])
   rawMaterialKind?: RawMaterialKind;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  purchasePrice?: number | null;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  salePrice?: number | null;
+
+  @IsOptional()
+  @IsEnum(PurchaseOrderCurrency)
+  priceCurrency?: PurchaseOrderCurrency | null;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  fxRateToUzs?: number | null;
 
   @IsOptional()
   @ValidateNested()

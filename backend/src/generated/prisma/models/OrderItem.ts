@@ -46,6 +46,7 @@ export type OrderItemMinAggregateOutputType = {
   finishedProductId: string | null
   quantity: number | null
   price: number | null
+  currency: $Enums.PurchaseOrderCurrency | null
   total: number | null
 }
 
@@ -57,6 +58,7 @@ export type OrderItemMaxAggregateOutputType = {
   finishedProductId: string | null
   quantity: number | null
   price: number | null
+  currency: $Enums.PurchaseOrderCurrency | null
   total: number | null
 }
 
@@ -68,6 +70,7 @@ export type OrderItemCountAggregateOutputType = {
   finishedProductId: number
   quantity: number
   price: number
+  currency: number
   total: number
   _all: number
 }
@@ -93,6 +96,7 @@ export type OrderItemMinAggregateInputType = {
   finishedProductId?: true
   quantity?: true
   price?: true
+  currency?: true
   total?: true
 }
 
@@ -104,6 +108,7 @@ export type OrderItemMaxAggregateInputType = {
   finishedProductId?: true
   quantity?: true
   price?: true
+  currency?: true
   total?: true
 }
 
@@ -115,6 +120,7 @@ export type OrderItemCountAggregateInputType = {
   finishedProductId?: true
   quantity?: true
   price?: true
+  currency?: true
   total?: true
   _all?: true
 }
@@ -213,6 +219,7 @@ export type OrderItemGroupByOutputType = {
   finishedProductId: string | null
   quantity: number
   price: number
+  currency: $Enums.PurchaseOrderCurrency
   total: number
   _count: OrderItemCountAggregateOutputType | null
   _avg: OrderItemAvgAggregateOutputType | null
@@ -247,6 +254,7 @@ export type OrderItemWhereInput = {
   finishedProductId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   quantity?: Prisma.IntFilter<"OrderItem"> | number
   price?: Prisma.FloatFilter<"OrderItem"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"OrderItem"> | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFilter<"OrderItem"> | number
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   semiProduct?: Prisma.XOR<Prisma.SemiProductNullableScalarRelationFilter, Prisma.SemiProductWhereInput> | null
@@ -261,6 +269,7 @@ export type OrderItemOrderByWithRelationInput = {
   finishedProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   total?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
   semiProduct?: Prisma.SemiProductOrderByWithRelationInput
@@ -278,6 +287,7 @@ export type OrderItemWhereUniqueInput = Prisma.AtLeast<{
   finishedProductId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   quantity?: Prisma.IntFilter<"OrderItem"> | number
   price?: Prisma.FloatFilter<"OrderItem"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"OrderItem"> | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFilter<"OrderItem"> | number
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   semiProduct?: Prisma.XOR<Prisma.SemiProductNullableScalarRelationFilter, Prisma.SemiProductWhereInput> | null
@@ -292,6 +302,7 @@ export type OrderItemOrderByWithAggregationInput = {
   finishedProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   total?: Prisma.SortOrder
   _count?: Prisma.OrderItemCountOrderByAggregateInput
   _avg?: Prisma.OrderItemAvgOrderByAggregateInput
@@ -311,6 +322,7 @@ export type OrderItemScalarWhereWithAggregatesInput = {
   finishedProductId?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   quantity?: Prisma.IntWithAggregatesFilter<"OrderItem"> | number
   price?: Prisma.FloatWithAggregatesFilter<"OrderItem"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyWithAggregatesFilter<"OrderItem"> | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatWithAggregatesFilter<"OrderItem"> | number
 }
 
@@ -319,6 +331,7 @@ export type OrderItemCreateInput = {
   productType: $Enums.OrderProductType
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   semiProduct?: Prisma.SemiProductCreateNestedOneWithoutOrderItemsInput
@@ -333,6 +346,7 @@ export type OrderItemUncheckedCreateInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -341,6 +355,7 @@ export type OrderItemUpdateInput = {
   productType?: Prisma.EnumOrderProductTypeFieldUpdateOperationsInput | $Enums.OrderProductType
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   semiProduct?: Prisma.SemiProductUpdateOneWithoutOrderItemsNestedInput
@@ -355,6 +370,7 @@ export type OrderItemUncheckedUpdateInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -366,6 +382,7 @@ export type OrderItemCreateManyInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -374,6 +391,7 @@ export type OrderItemUpdateManyMutationInput = {
   productType?: Prisma.EnumOrderProductTypeFieldUpdateOperationsInput | $Enums.OrderProductType
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -385,6 +403,7 @@ export type OrderItemUncheckedUpdateManyInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -406,6 +425,7 @@ export type OrderItemCountOrderByAggregateInput = {
   finishedProductId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   total?: Prisma.SortOrder
 }
 
@@ -423,6 +443,7 @@ export type OrderItemMaxOrderByAggregateInput = {
   finishedProductId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   total?: Prisma.SortOrder
 }
 
@@ -434,6 +455,7 @@ export type OrderItemMinOrderByAggregateInput = {
   finishedProductId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   total?: Prisma.SortOrder
 }
 
@@ -573,11 +595,16 @@ export type EnumOrderProductTypeFieldUpdateOperationsInput = {
   set?: $Enums.OrderProductType
 }
 
+export type EnumPurchaseOrderCurrencyFieldUpdateOperationsInput = {
+  set?: $Enums.PurchaseOrderCurrency
+}
+
 export type OrderItemCreateWithoutSemiProductInput = {
   id?: string
   productType: $Enums.OrderProductType
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   finishedProduct?: Prisma.FinishedProductCreateNestedOneWithoutOrderItemsInput
@@ -590,6 +617,7 @@ export type OrderItemUncheckedCreateWithoutSemiProductInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -630,6 +658,7 @@ export type OrderItemScalarWhereInput = {
   finishedProductId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   quantity?: Prisma.IntFilter<"OrderItem"> | number
   price?: Prisma.FloatFilter<"OrderItem"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"OrderItem"> | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFilter<"OrderItem"> | number
 }
 
@@ -638,6 +667,7 @@ export type OrderItemCreateWithoutFinishedProductInput = {
   productType: $Enums.OrderProductType
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   semiProduct?: Prisma.SemiProductCreateNestedOneWithoutOrderItemsInput
@@ -650,6 +680,7 @@ export type OrderItemUncheckedCreateWithoutFinishedProductInput = {
   semiProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -684,6 +715,7 @@ export type OrderItemCreateWithoutOrderInput = {
   productType: $Enums.OrderProductType
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
   semiProduct?: Prisma.SemiProductCreateNestedOneWithoutOrderItemsInput
   finishedProduct?: Prisma.FinishedProductCreateNestedOneWithoutOrderItemsInput
@@ -696,6 +728,7 @@ export type OrderItemUncheckedCreateWithoutOrderInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -732,6 +765,7 @@ export type OrderItemCreateManySemiProductInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -740,6 +774,7 @@ export type OrderItemUpdateWithoutSemiProductInput = {
   productType?: Prisma.EnumOrderProductTypeFieldUpdateOperationsInput | $Enums.OrderProductType
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   finishedProduct?: Prisma.FinishedProductUpdateOneWithoutOrderItemsNestedInput
@@ -752,6 +787,7 @@ export type OrderItemUncheckedUpdateWithoutSemiProductInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -762,6 +798,7 @@ export type OrderItemUncheckedUpdateManyWithoutSemiProductInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -772,6 +809,7 @@ export type OrderItemCreateManyFinishedProductInput = {
   semiProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -780,6 +818,7 @@ export type OrderItemUpdateWithoutFinishedProductInput = {
   productType?: Prisma.EnumOrderProductTypeFieldUpdateOperationsInput | $Enums.OrderProductType
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   semiProduct?: Prisma.SemiProductUpdateOneWithoutOrderItemsNestedInput
@@ -792,6 +831,7 @@ export type OrderItemUncheckedUpdateWithoutFinishedProductInput = {
   semiProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -802,6 +842,7 @@ export type OrderItemUncheckedUpdateManyWithoutFinishedProductInput = {
   semiProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -812,6 +853,7 @@ export type OrderItemCreateManyOrderInput = {
   finishedProductId?: string | null
   quantity: number
   price: number
+  currency?: $Enums.PurchaseOrderCurrency
   total: number
 }
 
@@ -820,6 +862,7 @@ export type OrderItemUpdateWithoutOrderInput = {
   productType?: Prisma.EnumOrderProductTypeFieldUpdateOperationsInput | $Enums.OrderProductType
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   semiProduct?: Prisma.SemiProductUpdateOneWithoutOrderItemsNestedInput
   finishedProduct?: Prisma.FinishedProductUpdateOneWithoutOrderItemsNestedInput
@@ -832,6 +875,7 @@ export type OrderItemUncheckedUpdateWithoutOrderInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -842,6 +886,7 @@ export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
   finishedProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
   total?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
@@ -855,6 +900,7 @@ export type OrderItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   finishedProductId?: boolean
   quantity?: boolean
   price?: boolean
+  currency?: boolean
   total?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   semiProduct?: boolean | Prisma.OrderItem$semiProductArgs<ExtArgs>
@@ -869,6 +915,7 @@ export type OrderItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   finishedProductId?: boolean
   quantity?: boolean
   price?: boolean
+  currency?: boolean
   total?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   semiProduct?: boolean | Prisma.OrderItem$semiProductArgs<ExtArgs>
@@ -883,6 +930,7 @@ export type OrderItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   finishedProductId?: boolean
   quantity?: boolean
   price?: boolean
+  currency?: boolean
   total?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   semiProduct?: boolean | Prisma.OrderItem$semiProductArgs<ExtArgs>
@@ -897,10 +945,11 @@ export type OrderItemSelectScalar = {
   finishedProductId?: boolean
   quantity?: boolean
   price?: boolean
+  currency?: boolean
   total?: boolean
 }
 
-export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "productType" | "semiProductId" | "finishedProductId" | "quantity" | "price" | "total", ExtArgs["result"]["orderItem"]>
+export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "productType" | "semiProductId" | "finishedProductId" | "quantity" | "price" | "currency" | "total", ExtArgs["result"]["orderItem"]>
 export type OrderItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   semiProduct?: boolean | Prisma.OrderItem$semiProductArgs<ExtArgs>
@@ -932,6 +981,7 @@ export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     finishedProductId: string | null
     quantity: number
     price: number
+    currency: $Enums.PurchaseOrderCurrency
     total: number
   }, ExtArgs["result"]["orderItem"]>
   composites: {}
@@ -1366,6 +1416,7 @@ export interface OrderItemFieldRefs {
   readonly finishedProductId: Prisma.FieldRef<"OrderItem", 'String'>
   readonly quantity: Prisma.FieldRef<"OrderItem", 'Int'>
   readonly price: Prisma.FieldRef<"OrderItem", 'Float'>
+  readonly currency: Prisma.FieldRef<"OrderItem", 'PurchaseOrderCurrency'>
   readonly total: Prisma.FieldRef<"OrderItem", 'Float'>
 }
     

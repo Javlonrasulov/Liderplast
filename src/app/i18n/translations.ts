@@ -65,6 +65,13 @@ export interface T {
   supDebtRemaining: string;
   supPendingTpl: string;
   supSubmitPurchase: string;
+  supAddLine: string;
+  supLinesTitle: string;
+  supNoLinesHint: string;
+  supLineColAmount: string;
+  supRemoveLine: string;
+  supLinesCount: string;
+  supLinePreview: string;
   supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
@@ -200,6 +207,7 @@ export interface T {
   labelDate: string;
   labelAmount: string;
   labelPrice: string;
+  labelCurrency: string;
   labelTotal: string;
   labelPaid: string;
   labelDebt: string;
@@ -219,6 +227,15 @@ export interface T {
   unitSum: string;
   whPiecesPerBag: string;
   whPiecesPerBagRequired: string;
+  whPricingSection: string;
+  whPricingOptional: string;
+  whPurchasePrice: string;
+  whSalePrice: string;
+  whFxRateToUzs: string;
+  whFxRateHint: string;
+  whFxApplyCbu: string;
+  whPricingInvalid: string;
+  whPriceInUzs: string;
   whCatalogPiecesPerBag: string;
   whStockPackSubtitle: string;
   whStockPackSubtitleFull: string;
@@ -1043,7 +1060,7 @@ const uz_cyrillic: T = {
   navSuppliers: 'Етказиб берувчи',
   supTitle: 'Етказиб берувчи',
   supSubtitle: 'Ташқи етказиб берувчидан хомашё сотиб олиш ва буюртмалар',
-  supFormTitle: 'Янги буюртма',
+  supFormTitle: 'Сотиб олиш',
   supReadOnlyHint: 'Буюртма яратиш учун харажатлар бўлимига рухсат керак. Сиз фақат кутилаётган буюртмаларни кўриш ва «омборга келди» белгилашингиз мумкин.',
   supTabOrders: 'Буюртмалар',
   supTabPurchase: 'Сотиб олиш',
@@ -1083,6 +1100,13 @@ const uz_cyrillic: T = {
   supDebtRemaining: 'Қолган қарз',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} кун)',
   supSubmitPurchase: 'Сотиб олиш',
+  supAddLine: 'Қатор қўшиш',
+  supLinesTitle: 'Сотиб олинадиган маҳсулотлар',
+  supNoLinesHint: 'Қатор йўқ — + тугмаси билан қўшинг.',
+  supLineColAmount: 'Сумма (UZS)',
+  supRemoveLine: 'Ўчириш',
+  supLinesCount: '{n} та қатор',
+  supLinePreview: 'Қатор жами',
   supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
@@ -1218,6 +1242,7 @@ const uz_cyrillic: T = {
   labelDate: 'Сана',
   labelAmount: 'Миқдор',
   labelPrice: 'Нарх (дона)',
+  labelCurrency: 'Валюта',
   labelTotal: 'Жами',
   labelPaid: 'Тўланди',
   labelDebt: 'Қарз',
@@ -1513,6 +1538,15 @@ const uz_cyrillic: T = {
   whVolumeLiter: 'Ҳажми (литр)',
   whPiecesPerBag: '1 қопда (дона)',
   whPiecesPerBagRequired: '1 қопда неча дона эканини киритинг',
+  whPricingSection: 'Нархлар',
+  whPricingOptional: 'Ихтиёрий — бўш қолдириш мумкин',
+  whPurchasePrice: 'Сотиб олиш нархи',
+  whSalePrice: 'Сотиш нархи',
+  whFxRateToUzs: 'Курс (1 valyuta = so‘m)',
+  whFxRateHint: 'Qo‘lda o‘zgartirish mumkin',
+  whFxApplyCbu: 'MB kursi',
+  whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
+  whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 пачкада: {count} дона',
   whStockPackSubtitle:
     '{total} дона · {bags} пачка қадоқланган ({ppb} тадан) · {rem} дона қадоқланмаган',
@@ -1597,10 +1631,10 @@ const uz_cyrillic: T = {
   slClientList: 'Клиентлар Рўйхати',
   slDebtPaid: 'Ҳисоб-китоб қилинган',
   slBtn: 'Сотувни Тасдиқлаш',
-  slAddToCart: 'Саватга қўшиш',
-  slCart: 'Сават',
-  slCartEmpty: 'Сават бош',
-  slAddItem: 'Маҳсулот қўшиш',
+  slAddToCart: 'Қўшиш',
+  slCart: 'Реализация таркиби',
+  slCartEmpty: 'Маҳсулот қўшилмаган',
+  slAddItem: 'Қатор қўшиш',
   slOrderItems: 'Буюртма маҳсулотлари',
   slMixedProducts: 'Микс маҳсулотлар',
   slRemoveItem: 'Маҳсулотни ўчириш',
@@ -2030,7 +2064,7 @@ const uz_latin: T = {
   navSuppliers: 'Yetkazib beruvchi',
   supTitle: 'Yetkazib beruvchi',
   supSubtitle: 'Tashqi yetkazib beruvchidan xomashyo sotib olish va buyurtmalar',
-  supFormTitle: 'Yangi buyurtma',
+  supFormTitle: 'Sotib olish',
   supReadOnlyHint: 'Buyurtma yaratish uchun xarajatlar bo‘limiga ruxsat kerak. Siz faqat kutilayotgan buyurtmalarni ko‘rish va «omborxona keldi» belgilashingiz mumkin.',
   supTabOrders: 'Buyurtmalar',
   supTabPurchase: 'Sotib olish',
@@ -2070,6 +2104,13 @@ const uz_latin: T = {
   supDebtRemaining: 'Qolgan qarz',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} kun)',
   supSubmitPurchase: 'Sotib olish',
+  supAddLine: 'Qator qo‘shish',
+  supLinesTitle: 'Sotib olinadigan mahsulotlar',
+  supNoLinesHint: 'Qator yo‘q — + tugmasi bilan qo‘shing.',
+  supLineColAmount: 'Summa (UZS)',
+  supRemoveLine: 'O‘chirish',
+  supLinesCount: '{n} ta qator',
+  supLinePreview: 'Qator jami',
   supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
@@ -2205,6 +2246,7 @@ const uz_latin: T = {
   labelDate: 'Sana',
   labelAmount: 'Miqdor',
   labelPrice: 'Narx (dona)',
+  labelCurrency: 'Valyuta',
   labelTotal: 'Jami',
   labelPaid: "To'landi",
   labelDebt: 'Qarz',
@@ -2500,6 +2542,15 @@ const uz_latin: T = {
   whVolumeLiter: 'Hajmi (litr)',
   whPiecesPerBag: '1 qopda (dona)',
   whPiecesPerBagRequired: '1 qopda nechta dona ekanini kiriting',
+  whPricingSection: 'Narxlar',
+  whPricingOptional: 'Ixtiyoriy — bo‘sh qoldirish mumkin',
+  whPurchasePrice: 'Sotib olish narxi',
+  whSalePrice: 'Sotish narxi',
+  whFxRateToUzs: 'Kurs (1 valyuta = so‘m)',
+  whFxRateHint: 'Qo‘lda o‘zgartirish mumkin',
+  whFxApplyCbu: 'MB kursi',
+  whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
+  whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 pachkada: {count} dona',
   whStockPackSubtitle:
     '{total} dona · {bags} pachka qadoqlangan ({ppb} tadan) · {rem} dona qadoqlanmagan',
@@ -2584,10 +2635,10 @@ const uz_latin: T = {
   slClientList: "Klientlar Ro'yxati",
   slDebtPaid: 'Hisob-kitob qilingan',
   slBtn: 'Sotuvni Tasdiqlash',
-  slAddToCart: 'Savatga qo\'shish',
-  slCart: 'Savat',
-  slCartEmpty: 'Savat bo\'sh',
-  slAddItem: 'Mahsulot qo\'shish',
+  slAddToCart: 'Qo\'shish',
+  slCart: 'Sotuv tarkibi',
+  slCartEmpty: 'Mahsulot qo\'shilmagan',
+  slAddItem: 'Qator qo\'shish',
   slOrderItems: 'Buyurtma mahsulotlari',
   slMixedProducts: 'Miks mahsulotlar',
   slRemoveItem: 'Mahsulotni o\'chirish',
@@ -3017,7 +3068,7 @@ const ru: T = {
   navSuppliers: 'Поставщик',
   supTitle: 'Поставщик',
   supSubtitle: 'Закупка сырья у внешнего поставщика и заказы',
-  supFormTitle: 'Новый заказ',
+  supFormTitle: 'Закупка',
   supReadOnlyHint: 'Для создания заказа нужен доступ к расходам. Вы можете просматривать ожидающие заказы и отмечать «поступило на склад».',
   supTabOrders: 'Заказы',
   supTabPurchase: 'Купить',
@@ -3057,6 +3108,13 @@ const ru: T = {
   supDebtRemaining: 'Остаток долга',
   supPendingTpl: '{supplier}: {name} — {qty} ({days} дн.)',
   supSubmitPurchase: 'Купить',
+  supAddLine: 'Добавить строку',
+  supLinesTitle: 'Закупаемые позиции',
+  supNoLinesHint: 'Нет строк — нажмите +.',
+  supLineColAmount: 'Сумма (UZS)',
+  supRemoveLine: 'Удалить',
+  supLinesCount: '{n} строк',
+  supLinePreview: 'Итого по строке',
   supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',
@@ -3192,6 +3250,7 @@ const ru: T = {
   labelDate: 'Дата',
   labelAmount: 'Количество',
   labelPrice: 'Цена (шт)',
+  labelCurrency: 'Валюта',
   labelTotal: 'Итого',
   labelPaid: 'Оплачено',
   labelDebt: 'Долг',
@@ -3487,6 +3546,15 @@ const ru: T = {
   whVolumeLiter: 'Объём (литр)',
   whPiecesPerBag: 'В мешке (шт)',
   whPiecesPerBagRequired: 'Укажите количество штук в мешке',
+  whPricingSection: 'Цены',
+  whPricingOptional: 'Необязательно — можно оставить пустым',
+  whPurchasePrice: 'Закупочная цена',
+  whSalePrice: 'Цена продажи',
+  whFxRateToUzs: 'Курс (1 валюта = сум)',
+  whFxRateHint: 'Можно изменить вручную',
+  whFxApplyCbu: 'Курс ЦБ',
+  whPricingInvalid: 'Неверная цена или курс',
+  whPriceInUzs: '≈ {amount} сум',
   whCatalogPiecesPerBag: 'В пачке: {count} шт',
   whStockPackSubtitle: '{total} шт · {bags} пачек (по {ppb}) · {rem} шт не упаковано',
   whStockPackSubtitleFull: '{total} шт · {bags} пачек (по {ppb})',
@@ -3570,10 +3638,10 @@ const ru: T = {
   slClientList: 'Список киентов',
   slDebtPaid: 'Расчёт произведён',
   slBtn: 'Подтвердить продажу',
-  slAddToCart: 'Добавить в корзину',
-  slCart: 'Корзина',
-  slCartEmpty: 'Корзина пуста',
-  slAddItem: 'Добавить товар',
+  slAddToCart: 'Добавить',
+  slCart: 'Состав реализации',
+  slCartEmpty: 'Позиции не добавлены',
+  slAddItem: 'Добавить строку',
   slOrderItems: 'Товары в заказе',
   slMixedProducts: 'Смешанные товары',
   slRemoveItem: 'Удалить товар',

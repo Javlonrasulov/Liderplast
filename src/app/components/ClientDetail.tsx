@@ -7,6 +7,7 @@ import {
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { formatCurrency, formatDate, formatNumber, TODAY } from '../utils/format';
+import { formatSalePriceLabel } from '../utils/sales-currency';
 import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
 import { PhoneInput } from './PhoneInput';
 import {
@@ -568,7 +569,9 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                                 }`}>{item.productType}</span>
                               </td>
                               <td className="px-4 py-2 text-xs text-slate-600 dark:text-slate-400">{formatNumber(item.quantity)}</td>
-                              <td className="px-4 py-2 text-xs text-slate-500">{formatNumber(item.pricePerUnit)}</td>
+                              <td className="px-4 py-2 text-xs text-slate-500">
+                                {formatSalePriceLabel(item.pricePerUnit, item.currency ?? 'UZS', formatNumber)}
+                              </td>
                               <td className="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300">{formatCurrency(item.total)}</td>
                               <td colSpan={3} />
                             </tr>

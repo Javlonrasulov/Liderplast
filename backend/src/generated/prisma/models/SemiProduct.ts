@@ -29,11 +29,17 @@ export type AggregateSemiProduct = {
 export type SemiProductAvgAggregateOutputType = {
   weightGram: number | null
   piecesPerBag: number | null
+  purchasePrice: number | null
+  salePrice: number | null
+  fxRateToUzs: number | null
 }
 
 export type SemiProductSumAggregateOutputType = {
   weightGram: number | null
   piecesPerBag: number | null
+  purchasePrice: number | null
+  salePrice: number | null
+  fxRateToUzs: number | null
 }
 
 export type SemiProductMinAggregateOutputType = {
@@ -42,6 +48,10 @@ export type SemiProductMinAggregateOutputType = {
   weightGram: number | null
   piecesPerBag: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
@@ -54,6 +64,10 @@ export type SemiProductMaxAggregateOutputType = {
   weightGram: number | null
   piecesPerBag: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
@@ -66,6 +80,10 @@ export type SemiProductCountAggregateOutputType = {
   weightGram: number
   piecesPerBag: number
   description: number
+  purchasePrice: number
+  salePrice: number
+  priceCurrency: number
+  fxRateToUzs: number
   isDeleted: number
   status: number
   createdAt: number
@@ -77,11 +95,17 @@ export type SemiProductCountAggregateOutputType = {
 export type SemiProductAvgAggregateInputType = {
   weightGram?: true
   piecesPerBag?: true
+  purchasePrice?: true
+  salePrice?: true
+  fxRateToUzs?: true
 }
 
 export type SemiProductSumAggregateInputType = {
   weightGram?: true
   piecesPerBag?: true
+  purchasePrice?: true
+  salePrice?: true
+  fxRateToUzs?: true
 }
 
 export type SemiProductMinAggregateInputType = {
@@ -90,6 +114,10 @@ export type SemiProductMinAggregateInputType = {
   weightGram?: true
   piecesPerBag?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -102,6 +130,10 @@ export type SemiProductMaxAggregateInputType = {
   weightGram?: true
   piecesPerBag?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -114,6 +146,10 @@ export type SemiProductCountAggregateInputType = {
   weightGram?: true
   piecesPerBag?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -213,6 +249,10 @@ export type SemiProductGroupByOutputType = {
   weightGram: number
   piecesPerBag: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean
   status: $Enums.EntityStatus
   createdAt: Date
@@ -248,6 +288,10 @@ export type SemiProductWhereInput = {
   weightGram?: Prisma.FloatFilter<"SemiProduct"> | number
   piecesPerBag?: Prisma.IntNullableFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableFilter<"SemiProduct"> | string | null
+  purchasePrice?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
+  salePrice?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableFilter<"SemiProduct"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
   isDeleted?: Prisma.BoolFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"SemiProduct"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"SemiProduct"> | Date | string
@@ -270,6 +314,10 @@ export type SemiProductOrderByWithRelationInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -295,6 +343,10 @@ export type SemiProductWhereUniqueInput = Prisma.AtLeast<{
   weightGram?: Prisma.FloatFilter<"SemiProduct"> | number
   piecesPerBag?: Prisma.IntNullableFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableFilter<"SemiProduct"> | string | null
+  purchasePrice?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
+  salePrice?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableFilter<"SemiProduct"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableFilter<"SemiProduct"> | number | null
   isDeleted?: Prisma.BoolFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"SemiProduct"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"SemiProduct"> | Date | string
@@ -317,6 +369,10 @@ export type SemiProductOrderByWithAggregationInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -337,6 +393,10 @@ export type SemiProductScalarWhereWithAggregatesInput = {
   weightGram?: Prisma.FloatWithAggregatesFilter<"SemiProduct"> | number
   piecesPerBag?: Prisma.IntNullableWithAggregatesFilter<"SemiProduct"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"SemiProduct"> | string | null
+  purchasePrice?: Prisma.FloatNullableWithAggregatesFilter<"SemiProduct"> | number | null
+  salePrice?: Prisma.FloatNullableWithAggregatesFilter<"SemiProduct"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableWithAggregatesFilter<"SemiProduct"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableWithAggregatesFilter<"SemiProduct"> | number | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"SemiProduct"> | boolean
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"SemiProduct"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SemiProduct"> | Date | string
@@ -349,6 +409,10 @@ export type SemiProductCreateInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -371,6 +435,10 @@ export type SemiProductUncheckedCreateInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -393,6 +461,10 @@ export type SemiProductUpdateInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +487,10 @@ export type SemiProductUncheckedUpdateInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -437,6 +513,10 @@ export type SemiProductCreateManyInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -449,6 +529,10 @@ export type SemiProductUpdateManyMutationInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,6 +545,10 @@ export type SemiProductUncheckedUpdateManyInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -473,6 +561,10 @@ export type SemiProductCountOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -482,6 +574,9 @@ export type SemiProductCountOrderByAggregateInput = {
 export type SemiProductAvgOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
 }
 
 export type SemiProductMaxOrderByAggregateInput = {
@@ -490,6 +585,10 @@ export type SemiProductMaxOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -502,6 +601,10 @@ export type SemiProductMinOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -511,6 +614,9 @@ export type SemiProductMinOrderByAggregateInput = {
 export type SemiProductSumOrderByAggregateInput = {
   weightGram?: Prisma.SortOrder
   piecesPerBag?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
 }
 
 export type SemiProductNullableScalarRelationFilter = {
@@ -683,6 +789,10 @@ export type SemiProductCreateWithoutBalanceInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -704,6 +814,10 @@ export type SemiProductUncheckedCreateWithoutBalanceInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -741,6 +855,10 @@ export type SemiProductUpdateWithoutBalanceInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -762,6 +880,10 @@ export type SemiProductUncheckedUpdateWithoutBalanceInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -783,6 +905,10 @@ export type SemiProductCreateWithoutMovementsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -804,6 +930,10 @@ export type SemiProductUncheckedCreateWithoutMovementsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -841,6 +971,10 @@ export type SemiProductUpdateWithoutMovementsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -862,6 +996,10 @@ export type SemiProductUncheckedUpdateWithoutMovementsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -883,6 +1021,10 @@ export type SemiProductCreateWithoutRawMaterialLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -904,6 +1046,10 @@ export type SemiProductUncheckedCreateWithoutRawMaterialLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -941,6 +1087,10 @@ export type SemiProductUpdateWithoutRawMaterialLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -962,6 +1112,10 @@ export type SemiProductUncheckedUpdateWithoutRawMaterialLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -983,6 +1137,10 @@ export type SemiProductCreateWithoutMachineLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1004,6 +1162,10 @@ export type SemiProductUncheckedCreateWithoutMachineLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1041,6 +1203,10 @@ export type SemiProductUpdateWithoutMachineLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1062,6 +1228,10 @@ export type SemiProductUncheckedUpdateWithoutMachineLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1083,6 +1253,10 @@ export type SemiProductCreateWithoutFinishedProductLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1104,6 +1278,10 @@ export type SemiProductUncheckedCreateWithoutFinishedProductLinksInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1141,6 +1319,10 @@ export type SemiProductUpdateWithoutFinishedProductLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1162,6 +1344,10 @@ export type SemiProductUncheckedUpdateWithoutFinishedProductLinksInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1183,6 +1369,10 @@ export type SemiProductCreateWithoutProductAuditLogsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1204,6 +1394,10 @@ export type SemiProductUncheckedCreateWithoutProductAuditLogsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1241,6 +1435,10 @@ export type SemiProductUpdateWithoutProductAuditLogsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1262,6 +1460,10 @@ export type SemiProductUncheckedUpdateWithoutProductAuditLogsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1283,6 +1485,10 @@ export type SemiProductCreateWithoutOutputBatchesInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1304,6 +1510,10 @@ export type SemiProductUncheckedCreateWithoutOutputBatchesInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1341,6 +1551,10 @@ export type SemiProductUpdateWithoutOutputBatchesInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1362,6 +1576,10 @@ export type SemiProductUncheckedUpdateWithoutOutputBatchesInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1383,6 +1601,10 @@ export type SemiProductCreateWithoutConsumptionsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1404,6 +1626,10 @@ export type SemiProductUncheckedCreateWithoutConsumptionsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1441,6 +1667,10 @@ export type SemiProductUpdateWithoutConsumptionsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1462,6 +1692,10 @@ export type SemiProductUncheckedUpdateWithoutConsumptionsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1483,6 +1717,10 @@ export type SemiProductCreateWithoutOrderItemsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1504,6 +1742,10 @@ export type SemiProductUncheckedCreateWithoutOrderItemsInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1541,6 +1783,10 @@ export type SemiProductUpdateWithoutOrderItemsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1562,6 +1808,10 @@ export type SemiProductUncheckedUpdateWithoutOrderItemsInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1583,6 +1833,10 @@ export type SemiProductCreateWithoutSupplierPurchaseOrdersInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1604,6 +1858,10 @@ export type SemiProductUncheckedCreateWithoutSupplierPurchaseOrdersInput = {
   weightGram: number
   piecesPerBag?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1641,6 +1899,10 @@ export type SemiProductUpdateWithoutSupplierPurchaseOrdersInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1662,6 +1924,10 @@ export type SemiProductUncheckedUpdateWithoutSupplierPurchaseOrdersInput = {
   weightGram?: Prisma.FloatFieldUpdateOperationsInput | number
   piecesPerBag?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1786,6 +2052,10 @@ export type SemiProductSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   weightGram?: boolean
   piecesPerBag?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -1809,6 +2079,10 @@ export type SemiProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   weightGram?: boolean
   piecesPerBag?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -1821,6 +2095,10 @@ export type SemiProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   weightGram?: boolean
   piecesPerBag?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -1833,13 +2111,17 @@ export type SemiProductSelectScalar = {
   weightGram?: boolean
   piecesPerBag?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SemiProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "weightGram" | "piecesPerBag" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["semiProduct"]>
+export type SemiProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "weightGram" | "piecesPerBag" | "description" | "purchasePrice" | "salePrice" | "priceCurrency" | "fxRateToUzs" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["semiProduct"]>
 export type SemiProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balance?: boolean | Prisma.SemiProduct$balanceArgs<ExtArgs>
   movements?: boolean | Prisma.SemiProduct$movementsArgs<ExtArgs>
@@ -1879,6 +2161,10 @@ export type $SemiProductPayload<ExtArgs extends runtime.Types.Extensions.Interna
      */
     piecesPerBag: number | null
     description: string | null
+    purchasePrice: number | null
+    salePrice: number | null
+    priceCurrency: $Enums.PurchaseOrderCurrency | null
+    fxRateToUzs: number | null
     isDeleted: boolean
     status: $Enums.EntityStatus
     createdAt: Date
@@ -2321,6 +2607,10 @@ export interface SemiProductFieldRefs {
   readonly weightGram: Prisma.FieldRef<"SemiProduct", 'Float'>
   readonly piecesPerBag: Prisma.FieldRef<"SemiProduct", 'Int'>
   readonly description: Prisma.FieldRef<"SemiProduct", 'String'>
+  readonly purchasePrice: Prisma.FieldRef<"SemiProduct", 'Float'>
+  readonly salePrice: Prisma.FieldRef<"SemiProduct", 'Float'>
+  readonly priceCurrency: Prisma.FieldRef<"SemiProduct", 'PurchaseOrderCurrency'>
+  readonly fxRateToUzs: Prisma.FieldRef<"SemiProduct", 'Float'>
   readonly isDeleted: Prisma.FieldRef<"SemiProduct", 'Boolean'>
   readonly status: Prisma.FieldRef<"SemiProduct", 'EntityStatus'>
   readonly createdAt: Prisma.FieldRef<"SemiProduct", 'DateTime'>

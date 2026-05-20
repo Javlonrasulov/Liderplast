@@ -3262,6 +3262,10 @@ export const RawMaterialScalarFieldEnum = {
   kind: 'kind',
   defaultBagWeightKg: 'defaultBagWeightKg',
   description: 'description',
+  purchasePrice: 'purchasePrice',
+  salePrice: 'salePrice',
+  priceCurrency: 'priceCurrency',
+  fxRateToUzs: 'fxRateToUzs',
   isDeleted: 'isDeleted',
   status: 'status',
   createdAt: 'createdAt',
@@ -3277,6 +3281,10 @@ export const SemiProductScalarFieldEnum = {
   weightGram: 'weightGram',
   piecesPerBag: 'piecesPerBag',
   description: 'description',
+  purchasePrice: 'purchasePrice',
+  salePrice: 'salePrice',
+  priceCurrency: 'priceCurrency',
+  fxRateToUzs: 'fxRateToUzs',
   isDeleted: 'isDeleted',
   status: 'status',
   createdAt: 'createdAt',
@@ -3292,6 +3300,10 @@ export const FinishedProductScalarFieldEnum = {
   volumeLiter: 'volumeLiter',
   piecesPerBag: 'piecesPerBag',
   description: 'description',
+  purchasePrice: 'purchasePrice',
+  salePrice: 'salePrice',
+  priceCurrency: 'priceCurrency',
+  fxRateToUzs: 'fxRateToUzs',
   isDeleted: 'isDeleted',
   status: 'status',
   createdAt: 'createdAt',
@@ -3581,6 +3593,7 @@ export const OrderItemScalarFieldEnum = {
   finishedProductId: 'finishedProductId',
   quantity: 'quantity',
   price: 'price',
+  currency: 'currency',
   total: 'total'
 } as const
 
@@ -3979,6 +3992,20 @@ export type ListEnumRawMaterialKindFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'PurchaseOrderCurrency'
+ */
+export type EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchaseOrderCurrency[]'
+ */
+export type ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency[]'>
+    
+
+
+/**
  * Reference to a field of type 'EntityStatus'
  */
 export type EnumEntityStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntityStatus'>
@@ -4157,20 +4184,6 @@ export type EnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'ExpenseType[]'
  */
 export type ListEnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseType[]'>
-    
-
-
-/**
- * Reference to a field of type 'PurchaseOrderCurrency'
- */
-export type EnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency'>
-    
-
-
-/**
- * Reference to a field of type 'PurchaseOrderCurrency[]'
- */
-export type ListEnumPurchaseOrderCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseOrderCurrency[]'>
     
 
 

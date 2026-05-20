@@ -27,6 +27,7 @@ import { UpdateSalaryRecordDto } from './dto/update-salary-record.dto.js';
 import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
 import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
+import { CreateSupplierPurchaseBatchDto } from './dto/create-supplier-purchase-batch.dto.js';
 import { FinanceService } from './finance.service.js';
 
 @Controller('finance')
@@ -121,6 +122,15 @@ export class FinanceController {
     @CurrentUser('sub') userId?: string,
   ) {
     return this.financeService.createSupplierPurchaseOrder(dto, userId);
+  }
+
+  @Post('supplier-purchase-orders/batch')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createSupplierPurchaseBatch(
+    @Body() dto: CreateSupplierPurchaseBatchDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.createSupplierPurchaseBatch(dto, userId);
   }
 
   @Get('supplier-purchase-orders')

@@ -1,12 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil, Receipt, ListOrdered } from 'lucide-react';
 import {
   useERP,
   type FinishedProductCatalogItem,
   type SaleOrderItem,
+  type SaleCurrency,
   type SemiProductCatalogItem,
   type Sale,
 } from '../store/erp-store';
+import { useCbuRates } from '../hooks/use-cbu-rates';
+import {
+  saleLineTotalUzs,
+  saleFxRate,
+  formatSalePriceLabel,
+  cbuUsdRate,
+  cbuEurRate,
+  warehouseSaleDefaults,
+  warehouseFxForProduct,
+  unitPriceInUzs,
+} from '../utils/sales-currency';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
 import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
@@ -72,6 +84,11 @@ export function Sales() {
   const [addType, setAddType] = useState<string>('');
   const [addQty, setAddQty] = useState('');
   const [addPrice, setAddPrice] = useState('');
+  const [addCurrency, setAddCurrency] = useState<SaleCurrency>('UZS');
+
+  const { usd: cbuUsd, eur: cbuEur } = useCbuRates();
+  const usdRate = cbuUsdRate(cbuUsd);
+  const eurRate = cbuEurRate(cbuEur);
 
   const saleSemiCatalog = useMemo(
     () =>
@@ -98,6 +115,32 @@ export function Sales() {
     if (addType && opts.some((p) => p.name === addType)) return addType;
     return opts[0].name;
   }, [currentCatalogOptions, addType]);
+
+  const selectedWarehouseProduct = useMemo(() => {
+    if (!selectedProductName) return undefined;
+    return currentCatalogOptions.find((p) => p.name === selectedProductName);
+  }, [currentCatalogOptions, selectedProductName]);
+
+  const addWarehouseFx = useMemo(
+    () => warehouseFxForProduct(selectedWarehouseProduct, addCurrency),
+    [selectedWarehouseProduct, addCurrency],
+  );
+
+  const applyWarehousePricing = (product = selectedWarehouseProduct) => {
+    const { price, currency } = warehouseSaleDefaults(product);
+    setAddPrice(price);
+    setAddCurrency(currency);
+  };
+
+  useEffect(() => {
+    applyWarehousePricing();
+  }, [selectedProductName, addCat, selectedWarehouseProduct?.id, selectedWarehouseProduct?.salePrice, selectedWarehouseProduct?.priceCurrency, selectedWarehouseProduct?.fxRateToUzs]);
+
+  const addUnitPriceUzs = useMemo(() => {
+    const price = parseFloat(addPrice);
+    if (!addPrice || !Number.isFinite(price) || price <= 0) return null;
+    return unitPriceInUzs(price, addCurrency, usdRate, eurRate, addWarehouseFx);
+  }, [addPrice, addCurrency, usdRate, eurRate, addWarehouseFx]);
 
   const handleCatChange = (cat: 'semi' | 'final') => {
     setAddCat(cat);
@@ -177,6 +220,12 @@ export function Sales() {
     const price = parseFloat(addPrice) || 0;
     if (!selectedProductName.trim() || qty <= 0 || price <= 0) return;
 
+    const fx = saleFxRate(addCurrency, addWarehouseFx, usdRate, eurRate);
+    if (addCurrency !== 'UZS' && !fx) {
+      setError('Valyuta kursi yuklanmadi. Biroz kuting yoki UZS tanlang.');
+      return;
+    }
+
     const key = `${addCat}__${selectedProductName}`;
     const alreadyInCart = cartUsed[key] || 0;
     const stockOk = qty + alreadyInCart <= getStock(addCat, selectedProductName);
@@ -187,12 +236,15 @@ export function Sales() {
       productType: selectedProductName,
       quantity: qty,
       pricePerUnit: price,
-      total: qty * price,
+      currency: addCurrency,
+      fxRateToUzs: fx,
+      total: saleLineTotalUzs(qty, price, addCurrency, usdRate, eurRate, addWarehouseFx),
       _stockOk: stockOk,
     };
     setCartItems(prev => [...prev, newItem]);
     setAddQty('');
-    setAddPrice('');
+    applyWarehousePricing();
+    setError('');
   };
 
   const handleRemoveItem = (id: string) => {
@@ -224,9 +276,17 @@ export function Sales() {
     if (!allStockOk) { setError(t.slAvailableStock + '!'); return; }
 
     const client = state.clients.find(c => c.id === clientId);
-    const items: SaleOrderItem[] = cartItems.map(({ productCategory, productType, quantity, pricePerUnit, total }) => ({
-      productCategory, productType, quantity, pricePerUnit, total,
-    }));
+    const items: SaleOrderItem[] = cartItems.map(
+      ({ productCategory, productType, quantity, pricePerUnit, currency, fxRateToUzs, total }) => ({
+        productCategory,
+        productType,
+        quantity,
+        pricePerUnit,
+        currency,
+        fxRateToUzs,
+        total,
+      }),
+    );
 
     dispatch({
       type: 'ADD_SALE_ORDER',
@@ -264,7 +324,7 @@ export function Sales() {
   const totalDebt = state.clients.reduce((s, c) => s + c.debt, 0);
 
   const tabs = [
-    { key: 'sale', label: t.slTabNew, icon: ShoppingCart },
+    { key: 'sale', label: t.slTabNew, icon: Receipt },
     { key: 'clients', label: t.slTabClients, icon: UserPlus },
     { key: 'history', label: t.slTabHistory, icon: CheckCircle2 },
   ];
@@ -401,11 +461,11 @@ export function Sales() {
               </div>
             </div>
 
-            {/* Cart items */}
+            {/* Order lines */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
                 <h3 className="text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center gap-2">
-                  <ShoppingCart size={15} className="text-emerald-500" />
+                  <ListOrdered size={15} className="text-emerald-500" />
                   {t.slCart}
                   {cartItems.length > 0 && (
                     <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-semibold">
@@ -415,10 +475,9 @@ export function Sales() {
                 </h3>
               </div>
 
-              {/* Cart table */}
               {cartItems.length === 0 ? (
                 <div className="flex items-center justify-center h-24 text-slate-400 text-sm gap-2">
-                  <ShoppingCart size={16} className="opacity-40" />
+                  <ListOrdered size={16} className="opacity-40" />
                   <span>{t.slCartEmpty}</span>
                 </div>
               ) : (
@@ -449,7 +508,14 @@ export function Sales() {
                               </div>
                             </td>
                             <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 font-medium">{formatNumber(item.quantity)}</td>
-                            <td className="px-4 py-3 text-xs text-slate-500">{formatNumber(item.pricePerUnit)}</td>
+                            <td className="px-4 py-3 text-xs text-slate-500">
+                              {formatSalePriceLabel(item.pricePerUnit, item.currency, formatNumber)}
+                              {item.currency !== 'UZS' && item.fxRateToUzs != null && item.fxRateToUzs > 0 && (
+                                <span className="mt-0.5 block text-[10px] text-indigo-600 dark:text-indigo-400">
+                                  ≈ {formatCurrency(item.pricePerUnit * item.fxRateToUzs)} / {t.unitPiece}
+                                </span>
+                              )}
+                            </td>
                             <td className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-white whitespace-nowrap">{formatCurrency(item.total)}</td>
                             <td className="px-4 py-3">
                               <button onClick={() => handleRemoveItem(item._id)}
@@ -465,12 +531,8 @@ export function Sales() {
                 </div>
               )}
 
-              {/* Add item row */}
               <div className="px-4 py-4 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5">
-                  <Plus size={12} className="text-indigo-400" /> {t.slAddItem}
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
                   {/* Category */}
                   <div>
                     <label className="block text-slate-400 text-xs mb-1">{t.slCategory}</label>
@@ -536,13 +598,59 @@ export function Sales() {
                       placeholder="0" min="1" className={INPUT_CLS} />
                   </div>
                   {/* Price */}
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-slate-400 text-xs mb-1">{t.labelPrice}</label>
                     <input type="number" value={addPrice} onChange={e => setAddPrice(e.target.value)}
-                      placeholder="0" min="1" className={INPUT_CLS} />
+                      placeholder="0" min="0" step="any" className={INPUT_CLS} />
+                    {selectedWarehouseProduct?.salePrice != null &&
+                      selectedWarehouseProduct.salePrice > 0 && (
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                        {t.whSalePrice}:{' '}
+                        {formatSalePriceLabel(
+                          selectedWarehouseProduct.salePrice,
+                          selectedWarehouseProduct.priceCurrency ?? 'UZS',
+                          formatNumber,
+                        )}
+                      </p>
+                    )}
+                    {addCurrency !== 'UZS' && addUnitPriceUzs != null && (
+                      <p className="mt-0.5 text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
+                        ≈ {formatCurrency(addUnitPriceUzs)} / {t.unitPiece}
+                        {addWarehouseFx != null && addWarehouseFx > 0 && (
+                          <span className="ml-1 font-normal text-slate-500">
+                            (1 {addCurrency} = {formatNumber(addWarehouseFx)} {t.unitSum})
+                          </span>
+                        )}
+                      </p>
+                    )}
                   </div>
-                  {/* Add button */}
-                  <button onClick={handleAddToCart}
+                  <div>
+                    <label className="block text-slate-400 text-xs mb-1">{t.labelCurrency}</label>
+                    <Select value={addCurrency} onValueChange={(v) => setAddCurrency(v as SaleCurrency)}>
+                      <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        className="z-[120] min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                      >
+                        {(['UZS', 'USD', 'EUR'] as const).map((c) => (
+                          <SelectItem
+                            key={c}
+                            value={c}
+                            className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800"
+                          >
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    title={t.slAddToCart}
+                    aria-label={t.slAddToCart}
                     disabled={
                       !selectedProductName.trim() ||
                       currentCatalogOptions.length === 0 ||
@@ -551,9 +659,9 @@ export function Sales() {
                       parseInt(addQty, 10) <= 0 ||
                       parseFloat(addPrice) <= 0
                     }
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center self-end rounded-xl bg-indigo-600 text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-600"
                   >
-                    <Plus size={14} /> {t.slAddToCart}
+                    <Plus size={22} strokeWidth={2.5} />
                   </button>
                 </div>
                 {addQty && parseInt(addQty) > 0 && (
@@ -561,7 +669,23 @@ export function Sales() {
                     {t.slAvailableStock}: {formatNumber(availableForAdd)} {t.unitPiece}
                     {parseInt(addQty) > availableForAdd && <span className="ml-2">⚠ {t.statusLow}</span>}
                     {addQty && addPrice && parseInt(addQty) > 0 && parseFloat(addPrice) > 0 && (
-                      <span className="ml-2 text-slate-500">→ {formatCurrency(parseInt(addQty) * parseFloat(addPrice))}</span>
+                      <span className="ml-2 text-slate-500">
+                        → {formatCurrency(
+                          saleLineTotalUzs(
+                            parseInt(addQty, 10),
+                            parseFloat(addPrice),
+                            addCurrency,
+                            usdRate,
+                            eurRate,
+                            addWarehouseFx,
+                          ),
+                        )}
+                        {addCurrency !== 'UZS' && addUnitPriceUzs != null && (
+                          <span className="ml-1">
+                            ({formatSalePriceLabel(parseFloat(addPrice), addCurrency, formatNumber)} / {t.unitPiece})
+                          </span>
+                        )}
+                      </span>
                     )}
                   </p>
                 )}
@@ -594,7 +718,7 @@ export function Sales() {
               )}
               <button type="submit" disabled={cartItems.length === 0 || !allStockOk}
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
-                <ShoppingCart size={16} /> {t.slBtn}
+                <CheckCircle2 size={16} /> {t.slBtn}
                 {cartItems.length > 0 && <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">{cartItems.length} та</span>}
               </button>
             </form>
@@ -884,7 +1008,9 @@ export function Sales() {
                             </td>
                             <td className="px-4 py-2 text-xs text-slate-600 dark:text-slate-400">{formatNumber(item.quantity)}</td>
                             <td className="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300">{formatCurrency(item.total)}</td>
-                            <td className="px-4 py-2 text-xs text-slate-400">{formatNumber(item.pricePerUnit)} so'm/dona</td>
+                            <td className="px-4 py-2 text-xs text-slate-400">
+                              {formatSalePriceLabel(item.pricePerUnit, item.currency ?? 'UZS', formatNumber)}/dona
+                            </td>
                             <td colSpan={2} />
                           </tr>
                         ))}

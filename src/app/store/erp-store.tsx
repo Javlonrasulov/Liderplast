@@ -122,11 +122,17 @@ export interface ProductAuditInfo {
   deletedByName?: string;
 }
 
+export type SaleCurrency = 'UZS' | 'USD' | 'EUR';
+
 interface WarehouseProductBase {
   id: string;
   itemType: WarehouseItemType;
   name: string;
   description?: string;
+  purchasePrice?: number;
+  salePrice?: number;
+  priceCurrency?: SaleCurrency;
+  fxRateToUzs?: number;
   createdAt?: string;
   updatedAt?: string;
   audit?: ProductAuditInfo;
@@ -199,6 +205,9 @@ export interface SaleOrderItem {
   productType: string;
   quantity: number;
   pricePerUnit: number;
+  currency: SaleCurrency;
+  /** MB kursi — faqat USD/EUR; API ga yuboriladi */
+  fxRateToUzs?: number;
   total: number;
 }
 
@@ -564,6 +573,11 @@ type ERPAction =
         defaultBagWeightKg?: number;
         weightGram?: number;
         volumeLiter?: number;
+        piecesPerBag?: number;
+        purchasePrice?: number | null;
+        salePrice?: number | null;
+        priceCurrency?: SaleCurrency | null;
+        fxRateToUzs?: number | null;
         relations?: {
           rawMaterials?: Array<{
             rawMaterialId: string;
@@ -587,6 +601,11 @@ type ERPAction =
         rawMaterialKind?: RawMaterialKind;
         weightGram?: number;
         volumeLiter?: number;
+        piecesPerBag?: number;
+        purchasePrice?: number | null;
+        salePrice?: number | null;
+        priceCurrency?: SaleCurrency | null;
+        fxRateToUzs?: number | null;
         relations?: {
           rawMaterials?: Array<{
             rawMaterialId: string;
@@ -763,6 +782,26 @@ type ERPAction =
         notes?: string;
       };
     }
+  | {
+      type: 'CREATE_SUPPLIER_PURCHASE_BATCH';
+      payload: {
+        supplierId: string;
+        paymentType: 'CASH' | 'CREDIT';
+        paidAmountUzs?: number;
+        notes?: string;
+        items: Array<{
+          itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
+          rawMaterialId?: string;
+          semiProductId?: string;
+          finishedProductId?: string;
+          quantity: number;
+          quantityUnit: 'KG' | 'TON' | 'PIECES';
+          currency: 'UZS' | 'USD' | 'EUR';
+          fxRateToUzs: number;
+          amountOriginal: number;
+        }>;
+      };
+    }
   | { type: 'FULFILL_SUPPLIER_PURCHASE_ORDER'; payload: string };
 
 interface ERPContextValue {
@@ -827,6 +866,10 @@ type CatalogResponse = {
     unit: string;
     rawMaterialKind?: RawMaterialKind;
     defaultBagWeightKg?: number;
+    purchasePrice?: number;
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -837,6 +880,10 @@ type CatalogResponse = {
     name: string;
     weightGram: number;
     piecesPerBag?: number;
+    purchasePrice?: number;
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -848,6 +895,11 @@ type CatalogResponse = {
     id: string;
     name: string;
     volumeLiter: number;
+    piecesPerBag?: number;
+    purchasePrice?: number;
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -1176,6 +1228,7 @@ type BackendOrder = {
     productType: 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
     quantity: number;
     price: number;
+    currency?: 'UZS' | 'USD' | 'EUR';
     total: number;
     semiProduct?: { id: string; name: string } | null;
     finishedProduct?: { id: string; name: string } | null;
@@ -2054,6 +2107,10 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       unit: item.unit,
       rawMaterialKind: item.rawMaterialKind ?? 'SIRO',
       defaultBagWeightKg: item.defaultBagWeightKg,
+      purchasePrice: item.purchasePrice ?? undefined,
+      salePrice: item.salePrice ?? undefined,
+      priceCurrency: item.priceCurrency ?? undefined,
+      fxRateToUzs: item.fxRateToUzs ?? undefined,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
@@ -2065,6 +2122,10 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       name: item.name,
       weightGram: item.weightGram,
       piecesPerBag: item.piecesPerBag ?? undefined,
+      purchasePrice: item.purchasePrice ?? undefined,
+      salePrice: item.salePrice ?? undefined,
+      priceCurrency: item.priceCurrency ?? undefined,
+      fxRateToUzs: item.fxRateToUzs ?? undefined,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
@@ -2078,6 +2139,10 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       name: item.name,
       volumeLiter: item.volumeLiter,
       piecesPerBag: item.piecesPerBag ?? undefined,
+      purchasePrice: item.purchasePrice ?? undefined,
+      salePrice: item.salePrice ?? undefined,
+      priceCurrency: item.priceCurrency ?? undefined,
+      fxRateToUzs: item.fxRateToUzs ?? undefined,
       description: item.description ?? undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
@@ -2128,6 +2193,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       productType: item.semiProduct?.name ?? item.finishedProduct?.name ?? 'Mahsulot',
       quantity: item.quantity,
       pricePerUnit: item.price,
+      currency: item.currency ?? 'UZS',
       total: item.total,
     }));
 
@@ -2519,6 +2585,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
                     : undefined,
                 quantity: item.quantity,
                 price: item.pricePerUnit,
+                currency: item.currency,
+                fxRateToUzs: item.fxRateToUzs,
               })),
             }),
           });
@@ -2557,6 +2625,12 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         case 'CREATE_SUPPLIER_PURCHASE_ORDER':
           await apiRequest('/finance/supplier-purchase-orders', {
+            method: 'POST',
+            body: JSON.stringify(action.payload),
+          });
+          break;
+        case 'CREATE_SUPPLIER_PURCHASE_BATCH':
+          await apiRequest('/finance/supplier-purchase-orders/batch', {
             method: 'POST',
             body: JSON.stringify(action.payload),
           });

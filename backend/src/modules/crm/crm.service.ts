@@ -11,6 +11,7 @@ import {
   MovementType,
   OrderProductType,
   OrderStatus,
+  PurchaseOrderCurrency,
 } from '../../generated/prisma/enums.js';
 import { RealtimeGateway } from '../../socket/realtime.gateway.js';
 import { CreateClientDto } from './dto/create-client.dto.js';
@@ -44,6 +45,23 @@ export class CrmService {
       return null;
     }
     return `+998${national}`;
+  }
+
+  private orderItemTotalUzs(item: {
+    quantity: number;
+    price: number;
+    currency?: PurchaseOrderCurrency;
+    fxRateToUzs?: number;
+  }): number {
+    const currency = item.currency ?? PurchaseOrderCurrency.UZS;
+    if (currency === PurchaseOrderCurrency.UZS) {
+      return item.quantity * item.price;
+    }
+    const fx = item.fxRateToUzs ?? 0;
+    if (fx <= 0) {
+      throw new BadRequestException('Exchange rate is required for foreign currency items');
+    }
+    return item.quantity * item.price * fx;
   }
 
   private async allocatePlaceholderPhone(): Promise<string> {
@@ -261,7 +279,7 @@ export class CrmService {
       }
 
       const totalAmount = dto.items.reduce(
-        (sum, item) => sum + item.quantity * item.price,
+        (sum, item) => sum + this.orderItemTotalUzs(item),
         0,
       );
       const paidAmount = dto.paidAmount ?? 0;
@@ -276,14 +294,18 @@ export class CrmService {
           paidAmount,
           debtAmount,
           items: {
-            create: dto.items.map((item) => ({
-              productType: item.productType,
-              semiProductId: item.semiProductId,
-              finishedProductId: item.finishedProductId,
-              quantity: item.quantity,
-              price: item.price,
-              total: item.quantity * item.price,
-            })),
+            create: dto.items.map((item) => {
+              const total = this.orderItemTotalUzs(item);
+              return {
+                productType: item.productType,
+                semiProductId: item.semiProductId,
+                finishedProductId: item.finishedProductId,
+                quantity: item.quantity,
+                price: item.price,
+                currency: item.currency ?? PurchaseOrderCurrency.UZS,
+                total,
+              };
+            }),
           },
         },
         include: { items: true, client: true },

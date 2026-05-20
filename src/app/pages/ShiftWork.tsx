@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import {
   Users, Plus, Trash2, CheckCircle2, Clock, Zap,
   AlertTriangle, BarChart3, UserPlus, ChevronDown, Cpu,
-  Pencil, Layers, X, Maximize2, Minimize2, Droplets, Package,
+  Pencil, Layers, X, Maximize2, Minimize2, Droplets, Package, Printer,
 } from 'lucide-react';
 import { ShiftPackagingForm } from './ShiftPackagingForm';
 import {
@@ -14,6 +14,7 @@ import {
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatDate, formatKgAmount, TODAY } from '../utils/format';
+import { printShiftHistory } from '../utils/shift-history-print';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { getPlannedSemiRawRows } from '../utils/shift-semi-raw-planned';
@@ -129,6 +130,12 @@ const TR = {
     total: 'Жами',
     records: 'ёзув',
     noData: 'Маълумот йўқ',
+    printHistory: 'Чоп этиш',
+    printHistoryPeriod: 'Давр',
+    printHistoryPrintedAt: 'Чоп этилган сана',
+    printHistoryRecordCount: 'Ёзувлар сони',
+    historyColKind: 'Тури',
+    kindProduction: 'Ишлаб чиқариш',
     placeholderWorker: 'Ишчи танланг ёки киритинг...',
     placeholderReading: 'м: 43,069 / 41,203',
     placeholderNotes: 'Ихтиёрий изоҳ...',
@@ -279,6 +286,12 @@ const TR = {
     total: 'Jami',
     records: 'yozuv',
     noData: 'Ma\'lumot yo\'q',
+    printHistory: 'Chop etish',
+    printHistoryPeriod: 'Davr',
+    printHistoryPrintedAt: 'Chop etilgan sana',
+    printHistoryRecordCount: 'Yozuvlar soni',
+    historyColKind: 'Turi',
+    kindProduction: 'Ishlab chiqarish',
     placeholderWorker: 'Ishchi tanlang yoki kiriting...',
     placeholderReading: 'm: 43,069 / 41,203',
     placeholderNotes: 'Ixtiyoriy izoh...',
@@ -429,6 +442,12 @@ const TR = {
     total: 'Итого',
     records: 'записей',
     noData: 'Нет данных',
+    printHistory: 'Печать',
+    printHistoryPeriod: 'Период',
+    printHistoryPrintedAt: 'Дата печати',
+    printHistoryRecordCount: 'Записей',
+    historyColKind: 'Тип',
+    kindProduction: 'Производство',
     placeholderWorker: 'Выберите или введите имя...',
     placeholderReading: 'пр: 43,069 / 41,203',
     placeholderNotes: 'Примечание (необязательно)...',
@@ -678,7 +697,7 @@ function normalizeNonNegativeIntInput(raw: string): string {
 // ── Component ─────────────────────────────────────────────────────────────────
 export function ShiftWork() {
   const { state, dispatch, refresh } = useERP();
-  const { lang, filterData, t: appT } = useApp();
+  const { lang, filterData, filterLabel, t: appT } = useApp();
   const t = TR[lang];
 
   const todayPreviewPanelRef = useRef<HTMLDivElement>(null);
@@ -1492,6 +1511,65 @@ export function ShiftWork() {
     const arr = filterData([...state.shiftRecords]);
     return arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [state.shiftRecords, filterData]);
+
+  const handlePrintHistory = useCallback(() => {
+    const rows = [...filteredRecords].sort((a, b) => {
+      const byDate = a.date.localeCompare(b.date);
+      if (byDate !== 0) return byDate;
+      if (a.shift !== b.shift) return a.shift - b.shift;
+      return a.workerName.localeCompare(b.workerName);
+    });
+
+    printShiftHistory({
+      periodLabel: filterLabel,
+      printedAtIso: TODAY,
+      rows: rows.map((r) => {
+        const machine = state.machines.find((m) => m.id === r.machineId);
+        const brakPct =
+          r.producedQty + r.defectCount > 0
+            ? ((r.defectCount / (r.producedQty + r.defectCount)) * 100).toFixed(1)
+            : '0';
+        return {
+          date: r.date,
+          shiftLabel: getShiftLabel(shiftDefinitions, r.shift, t),
+          workerName: r.workerName,
+          kindLabel:
+            r.recordKind === 'PACKAGING' ? t.packagingKindBadge : t.kindProduction,
+          productType: r.productType,
+          machineName: machine?.name?.split('#')[0]?.trim() || '—',
+          hoursWorked: r.hoursWorked,
+          reading: formatShiftReadingDisplay(r, t),
+          defectCount: r.defectCount,
+          defectPct: brakPct,
+          producedQty: r.producedQty,
+          electricityKwh: r.recordKind === 'PACKAGING' ? 0 : r.electricityKwh,
+          notes: r.notes?.trim() || '',
+        };
+      }),
+      labels: {
+        title: t.tab2,
+        period: t.printHistoryPeriod,
+        printedAt: t.printHistoryPrintedAt,
+        recordCount: t.printHistoryRecordCount,
+        colNum: t.colNum,
+        colDate: t.colDate,
+        colShift: t.colShift,
+        colWorker: t.colWorker,
+        colKind: t.historyColKind,
+        colProduct: t.colProduct,
+        colMachine: t.colMachine,
+        colHours: t.colHours,
+        colReading: t.colReading,
+        colDefect: t.colDefect,
+        colProduced: t.colProduced,
+        colKwh: t.colKwh,
+        colNotes: t.labelNotes,
+        total: t.total,
+        unitPieces: t.unitPiecesAbbr,
+        noDefect: t.shiftNoDefect,
+      },
+    });
+  }, [filteredRecords, filterLabel, state.machines, shiftDefinitions, t]);
 
   const recordEditShiftOptions = useMemo((): UiDropdownOption[] => {
     if (!recordEditId) return [];
@@ -2476,6 +2554,16 @@ export function ShiftWork() {
             <h3 className="text-slate-800 dark:text-white font-semibold text-xs min-[400px]:text-sm">{t.tab2}</h3>
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-xs text-slate-400">{filteredRecords.length} {t.records}</span>
+              <button
+                type="button"
+                onClick={handlePrintHistory}
+                disabled={filteredRecords.length === 0}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                title={t.printHistory}
+              >
+                <Printer size={16} />
+                <span className="hidden sm:inline">{t.printHistory}</span>
+              </button>
               <button
                 type="button"
                 onClick={() => void toggleHistoryFullscreen()}

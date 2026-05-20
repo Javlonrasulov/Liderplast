@@ -28,10 +28,16 @@ export type AggregateRawMaterial = {
 
 export type RawMaterialAvgAggregateOutputType = {
   defaultBagWeightKg: number | null
+  purchasePrice: number | null
+  salePrice: number | null
+  fxRateToUzs: number | null
 }
 
 export type RawMaterialSumAggregateOutputType = {
   defaultBagWeightKg: number | null
+  purchasePrice: number | null
+  salePrice: number | null
+  fxRateToUzs: number | null
 }
 
 export type RawMaterialMinAggregateOutputType = {
@@ -41,6 +47,10 @@ export type RawMaterialMinAggregateOutputType = {
   kind: $Enums.RawMaterialKind | null
   defaultBagWeightKg: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
@@ -54,6 +64,10 @@ export type RawMaterialMaxAggregateOutputType = {
   kind: $Enums.RawMaterialKind | null
   defaultBagWeightKg: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean | null
   status: $Enums.EntityStatus | null
   createdAt: Date | null
@@ -67,6 +81,10 @@ export type RawMaterialCountAggregateOutputType = {
   kind: number
   defaultBagWeightKg: number
   description: number
+  purchasePrice: number
+  salePrice: number
+  priceCurrency: number
+  fxRateToUzs: number
   isDeleted: number
   status: number
   createdAt: number
@@ -77,10 +95,16 @@ export type RawMaterialCountAggregateOutputType = {
 
 export type RawMaterialAvgAggregateInputType = {
   defaultBagWeightKg?: true
+  purchasePrice?: true
+  salePrice?: true
+  fxRateToUzs?: true
 }
 
 export type RawMaterialSumAggregateInputType = {
   defaultBagWeightKg?: true
+  purchasePrice?: true
+  salePrice?: true
+  fxRateToUzs?: true
 }
 
 export type RawMaterialMinAggregateInputType = {
@@ -90,6 +114,10 @@ export type RawMaterialMinAggregateInputType = {
   kind?: true
   defaultBagWeightKg?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -103,6 +131,10 @@ export type RawMaterialMaxAggregateInputType = {
   kind?: true
   defaultBagWeightKg?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -116,6 +148,10 @@ export type RawMaterialCountAggregateInputType = {
   kind?: true
   defaultBagWeightKg?: true
   description?: true
+  purchasePrice?: true
+  salePrice?: true
+  priceCurrency?: true
+  fxRateToUzs?: true
   isDeleted?: true
   status?: true
   createdAt?: true
@@ -216,6 +252,10 @@ export type RawMaterialGroupByOutputType = {
   kind: $Enums.RawMaterialKind
   defaultBagWeightKg: number | null
   description: string | null
+  purchasePrice: number | null
+  salePrice: number | null
+  priceCurrency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
   isDeleted: boolean
   status: $Enums.EntityStatus
   createdAt: Date
@@ -252,6 +292,10 @@ export type RawMaterialWhereInput = {
   kind?: Prisma.EnumRawMaterialKindFilter<"RawMaterial"> | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableFilter<"RawMaterial"> | string | null
+  purchasePrice?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
+  salePrice?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableFilter<"RawMaterial"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   isDeleted?: Prisma.BoolFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"RawMaterial"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"RawMaterial"> | Date | string
@@ -276,6 +320,10 @@ export type RawMaterialOrderByWithRelationInput = {
   kind?: Prisma.SortOrder
   defaultBagWeightKg?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -303,6 +351,10 @@ export type RawMaterialWhereUniqueInput = Prisma.AtLeast<{
   kind?: Prisma.EnumRawMaterialKindFilter<"RawMaterial"> | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableFilter<"RawMaterial"> | string | null
+  purchasePrice?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
+  salePrice?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableFilter<"RawMaterial"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableFilter<"RawMaterial"> | number | null
   isDeleted?: Prisma.BoolFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusFilter<"RawMaterial"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFilter<"RawMaterial"> | Date | string
@@ -327,6 +379,10 @@ export type RawMaterialOrderByWithAggregationInput = {
   kind?: Prisma.SortOrder
   defaultBagWeightKg?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -348,6 +404,10 @@ export type RawMaterialScalarWhereWithAggregatesInput = {
   kind?: Prisma.EnumRawMaterialKindWithAggregatesFilter<"RawMaterial"> | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.FloatNullableWithAggregatesFilter<"RawMaterial"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"RawMaterial"> | string | null
+  purchasePrice?: Prisma.FloatNullableWithAggregatesFilter<"RawMaterial"> | number | null
+  salePrice?: Prisma.FloatNullableWithAggregatesFilter<"RawMaterial"> | number | null
+  priceCurrency?: Prisma.EnumPurchaseOrderCurrencyNullableWithAggregatesFilter<"RawMaterial"> | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.FloatNullableWithAggregatesFilter<"RawMaterial"> | number | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"RawMaterial"> | boolean
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"RawMaterial"> | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RawMaterial"> | Date | string
@@ -361,6 +421,10 @@ export type RawMaterialCreateInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -385,6 +449,10 @@ export type RawMaterialUncheckedCreateInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -409,6 +477,10 @@ export type RawMaterialUpdateInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -433,6 +505,10 @@ export type RawMaterialUncheckedUpdateInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -457,6 +533,10 @@ export type RawMaterialCreateManyInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -470,6 +550,10 @@ export type RawMaterialUpdateManyMutationInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -483,6 +567,10 @@ export type RawMaterialUncheckedUpdateManyInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -496,6 +584,10 @@ export type RawMaterialCountOrderByAggregateInput = {
   kind?: Prisma.SortOrder
   defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -504,6 +596,9 @@ export type RawMaterialCountOrderByAggregateInput = {
 
 export type RawMaterialAvgOrderByAggregateInput = {
   defaultBagWeightKg?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
 }
 
 export type RawMaterialMaxOrderByAggregateInput = {
@@ -513,6 +608,10 @@ export type RawMaterialMaxOrderByAggregateInput = {
   kind?: Prisma.SortOrder
   defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -526,6 +625,10 @@ export type RawMaterialMinOrderByAggregateInput = {
   kind?: Prisma.SortOrder
   defaultBagWeightKg?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  priceCurrency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -534,6 +637,9 @@ export type RawMaterialMinOrderByAggregateInput = {
 
 export type RawMaterialSumOrderByAggregateInput = {
   defaultBagWeightKg?: Prisma.SortOrder
+  purchasePrice?: Prisma.SortOrder
+  salePrice?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
 }
 
 export type RawMaterialNullableScalarRelationFilter = {
@@ -556,6 +662,10 @@ export type NullableFloatFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput = {
+  set?: $Enums.PurchaseOrderCurrency | null
 }
 
 export type EnumEntityStatusFieldUpdateOperationsInput = {
@@ -735,6 +845,10 @@ export type RawMaterialCreateWithoutBalanceInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -758,6 +872,10 @@ export type RawMaterialUncheckedCreateWithoutBalanceInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -797,6 +915,10 @@ export type RawMaterialUpdateWithoutBalanceInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -820,6 +942,10 @@ export type RawMaterialUncheckedUpdateWithoutBalanceInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -843,6 +969,10 @@ export type RawMaterialCreateWithoutMovementsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -866,6 +996,10 @@ export type RawMaterialUncheckedCreateWithoutMovementsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -905,6 +1039,10 @@ export type RawMaterialUpdateWithoutMovementsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -928,6 +1066,10 @@ export type RawMaterialUncheckedUpdateWithoutMovementsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -951,6 +1093,10 @@ export type RawMaterialCreateWithoutSemiProductLinksInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -974,6 +1120,10 @@ export type RawMaterialUncheckedCreateWithoutSemiProductLinksInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1013,6 +1163,10 @@ export type RawMaterialUpdateWithoutSemiProductLinksInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1036,6 +1190,10 @@ export type RawMaterialUncheckedUpdateWithoutSemiProductLinksInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1059,6 +1217,10 @@ export type RawMaterialCreateWithoutProductAuditLogsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1082,6 +1244,10 @@ export type RawMaterialUncheckedCreateWithoutProductAuditLogsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1121,6 +1287,10 @@ export type RawMaterialUpdateWithoutProductAuditLogsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1144,6 +1314,10 @@ export type RawMaterialUncheckedUpdateWithoutProductAuditLogsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1167,6 +1341,10 @@ export type RawMaterialCreateWithoutBagsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1190,6 +1368,10 @@ export type RawMaterialUncheckedCreateWithoutBagsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1229,6 +1411,10 @@ export type RawMaterialUpdateWithoutBagsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1252,6 +1438,10 @@ export type RawMaterialUncheckedUpdateWithoutBagsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1275,6 +1465,10 @@ export type RawMaterialCreateWithoutBagAuditLogsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1298,6 +1492,10 @@ export type RawMaterialUncheckedCreateWithoutBagAuditLogsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1337,6 +1535,10 @@ export type RawMaterialUpdateWithoutBagAuditLogsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1360,6 +1562,10 @@ export type RawMaterialUncheckedUpdateWithoutBagAuditLogsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1383,6 +1589,10 @@ export type RawMaterialCreateWithoutConsumptionsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1406,6 +1616,10 @@ export type RawMaterialUncheckedCreateWithoutConsumptionsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1445,6 +1659,10 @@ export type RawMaterialUpdateWithoutConsumptionsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1468,6 +1686,10 @@ export type RawMaterialUncheckedUpdateWithoutConsumptionsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1491,6 +1713,10 @@ export type RawMaterialCreateWithoutPaintShiftRecordsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1514,6 +1740,10 @@ export type RawMaterialUncheckedCreateWithoutPaintShiftRecordsInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1553,6 +1783,10 @@ export type RawMaterialUpdateWithoutPaintShiftRecordsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1576,6 +1810,10 @@ export type RawMaterialUncheckedUpdateWithoutPaintShiftRecordsInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1599,6 +1837,10 @@ export type RawMaterialCreateWithoutShiftMaterialUsagesInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1622,6 +1864,10 @@ export type RawMaterialUncheckedCreateWithoutShiftMaterialUsagesInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1661,6 +1907,10 @@ export type RawMaterialUpdateWithoutShiftMaterialUsagesInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1684,6 +1934,10 @@ export type RawMaterialUncheckedUpdateWithoutShiftMaterialUsagesInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1707,6 +1961,10 @@ export type RawMaterialCreateWithoutPurchaseOrdersInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1730,6 +1988,10 @@ export type RawMaterialUncheckedCreateWithoutPurchaseOrdersInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1769,6 +2031,10 @@ export type RawMaterialUpdateWithoutPurchaseOrdersInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1792,6 +2058,10 @@ export type RawMaterialUncheckedUpdateWithoutPurchaseOrdersInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1815,6 +2085,10 @@ export type RawMaterialCreateWithoutSupplierPurchaseOrdersInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1838,6 +2112,10 @@ export type RawMaterialUncheckedCreateWithoutSupplierPurchaseOrdersInput = {
   kind?: $Enums.RawMaterialKind
   defaultBagWeightKg?: number | null
   description?: string | null
+  purchasePrice?: number | null
+  salePrice?: number | null
+  priceCurrency?: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: number | null
   isDeleted?: boolean
   status?: $Enums.EntityStatus
   createdAt?: Date | string
@@ -1877,6 +2155,10 @@ export type RawMaterialUpdateWithoutSupplierPurchaseOrdersInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1900,6 +2182,10 @@ export type RawMaterialUncheckedUpdateWithoutSupplierPurchaseOrdersInput = {
   kind?: Prisma.EnumRawMaterialKindFieldUpdateOperationsInput | $Enums.RawMaterialKind
   defaultBagWeightKg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  priceCurrency?: Prisma.NullableEnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2035,6 +2321,10 @@ export type RawMaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   kind?: boolean
   defaultBagWeightKg?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -2060,6 +2350,10 @@ export type RawMaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   kind?: boolean
   defaultBagWeightKg?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -2073,6 +2367,10 @@ export type RawMaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   kind?: boolean
   defaultBagWeightKg?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
@@ -2086,13 +2384,17 @@ export type RawMaterialSelectScalar = {
   kind?: boolean
   defaultBagWeightKg?: boolean
   description?: boolean
+  purchasePrice?: boolean
+  salePrice?: boolean
+  priceCurrency?: boolean
+  fxRateToUzs?: boolean
   isDeleted?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RawMaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "unit" | "kind" | "defaultBagWeightKg" | "description" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["rawMaterial"]>
+export type RawMaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "unit" | "kind" | "defaultBagWeightKg" | "description" | "purchasePrice" | "salePrice" | "priceCurrency" | "fxRateToUzs" | "isDeleted" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["rawMaterial"]>
 export type RawMaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balance?: boolean | Prisma.RawMaterial$balanceArgs<ExtArgs>
   movements?: boolean | Prisma.RawMaterial$movementsArgs<ExtArgs>
@@ -2132,6 +2434,10 @@ export type $RawMaterialPayload<ExtArgs extends runtime.Types.Extensions.Interna
     kind: $Enums.RawMaterialKind
     defaultBagWeightKg: number | null
     description: string | null
+    purchasePrice: number | null
+    salePrice: number | null
+    priceCurrency: $Enums.PurchaseOrderCurrency | null
+    fxRateToUzs: number | null
     isDeleted: boolean
     status: $Enums.EntityStatus
     createdAt: Date
@@ -2576,6 +2882,10 @@ export interface RawMaterialFieldRefs {
   readonly kind: Prisma.FieldRef<"RawMaterial", 'RawMaterialKind'>
   readonly defaultBagWeightKg: Prisma.FieldRef<"RawMaterial", 'Float'>
   readonly description: Prisma.FieldRef<"RawMaterial", 'String'>
+  readonly purchasePrice: Prisma.FieldRef<"RawMaterial", 'Float'>
+  readonly salePrice: Prisma.FieldRef<"RawMaterial", 'Float'>
+  readonly priceCurrency: Prisma.FieldRef<"RawMaterial", 'PurchaseOrderCurrency'>
+  readonly fxRateToUzs: Prisma.FieldRef<"RawMaterial", 'Float'>
   readonly isDeleted: Prisma.FieldRef<"RawMaterial", 'Boolean'>
   readonly status: Prisma.FieldRef<"RawMaterial", 'EntityStatus'>
   readonly createdAt: Prisma.FieldRef<"RawMaterial", 'DateTime'>

@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
-import { ShoppingCart, RefreshCw, Package, Plus, Check } from 'lucide-react';
+import { RefreshCw, Package, Plus, Check, Trash2, ClipboardList } from 'lucide-react';
 import { useCbuRates, parseCbuRate } from '../hooks/use-cbu-rates';
 import {
   useERP,
@@ -17,8 +17,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+
 type ProductCat = 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
 type QtyUnit = 'KG' | 'TON' | 'PIECES';
+
+type PurchaseLine = {
+  id: string;
+  itemType: ProductCat;
+  rawMaterialId?: string;
+  semiProductId?: string;
+  finishedProductId?: string;
+  productName: string;
+  quantity: number;
+  quantityUnit: QtyUnit;
+  currency: 'UZS' | 'USD' | 'EUR';
+  fxRateToUzs: number;
+  amountOriginal: number;
+  amountUzs: number;
+};
 
 function daysSinceOrder(orderedAtIso: string) {
   const t0 = new Date(orderedAtIso).getTime();
@@ -42,6 +58,10 @@ function productIdForCat(
   if (cat === 'RAW_MATERIAL') return rawId;
   if (cat === 'SEMI_PRODUCT') return semiId;
   return finalId;
+}
+
+function newLineId() {
+  return `line-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -129,6 +149,7 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const [cur, setCur] = useState<'UZS' | 'USD' | 'EUR'>('UZS');
   const [fxMan, setFxMan] = useState('1');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [lines, setLines] = useState<PurchaseLine[]>([]);
   const [paymentType, setPaymentType] = useState<'CASH' | 'CREDIT'>('CASH');
   const [paidNow, setPaidNow] = useState('');
   const [debtNow, setDebtNow] = useState('');
@@ -171,6 +192,11 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
     semiProductId,
     finishedProductId,
   );
+
+  const selectedProductName = useMemo(() => {
+    const hit = productOptions.find((o) => o.value === selectedProductId);
+    return hit?.label ?? '';
+  }, [productOptions, selectedProductId]);
 
   useEffect(() => {
     if (productOptions.length === 0) return;
@@ -235,56 +261,96 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
     return Number.isFinite(a) && a >= 0 ? a : 0;
   }, [pricePerUnit]);
 
-  const totalOriginal = useMemo(
+  const lineTotalOriginal = useMemo(
     () => (quantityNum > 0 && priceNum > 0 ? priceNum * quantityNum : 0),
     [priceNum, quantityNum],
   );
 
-  const amountUzs = useMemo(() => {
-    if (totalOriginal <= 0) return 0;
-    return cur === 'UZS' ? totalOriginal : totalOriginal * fx;
-  }, [totalOriginal, cur, fx]);
+  const lineAmountUzs = useMemo(() => {
+    if (lineTotalOriginal <= 0) return 0;
+    return cur === 'UZS' ? lineTotalOriginal : lineTotalOriginal * fx;
+  }, [lineTotalOriginal, cur, fx]);
+
+  const linesTotalUzs = useMemo(
+    () => lines.reduce((sum, line) => sum + line.amountUzs, 0),
+    [lines],
+  );
 
   const paidUzs = useMemo(() => {
-    if (paymentType === 'CASH') return amountUzs;
+    if (paymentType === 'CASH') return linesTotalUzs;
     const p = parseFloat(String(paidNow).replace(',', '.'));
     return Number.isFinite(p) && p >= 0 ? p : 0;
-  }, [paymentType, paidNow, amountUzs]);
+  }, [paymentType, paidNow, linesTotalUzs]);
 
-  const debtUzs = Math.max(0, amountUzs - paidUzs);
+  const debtUzs = Math.max(0, linesTotalUzs - paidUzs);
+
+  const canAddLine =
+    canCreate &&
+    !!selectedProductId &&
+    quantityNum > 0 &&
+    priceNum > 0 &&
+    lineTotalOriginal > 0 &&
+    (cur === 'UZS' || fx > 0) &&
+    productOptions.length > 0;
 
   const unitPriceLabel =
     qtyUnit === 'PIECES' ? t.supPricePerPieceLabel : t.supPricePerKgLabel;
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const addLine = () => {
+    if (!canAddLine) return;
+
+    const line: PurchaseLine = {
+      id: newLineId(),
+      itemType: productCat,
+      rawMaterialId: productCat === 'RAW_MATERIAL' ? selectedProductId : undefined,
+      semiProductId: productCat === 'SEMI_PRODUCT' ? selectedProductId : undefined,
+      finishedProductId: productCat === 'FINISHED_PRODUCT' ? selectedProductId : undefined,
+      productName: selectedProductName,
+      quantity: quantityNum,
+      quantityUnit: qtyUnit,
+      currency: cur,
+      fxRateToUzs: fx,
+      amountOriginal: lineTotalOriginal,
+      amountUzs: lineAmountUzs,
+    };
+    setLines((prev) => [...prev, line]);
+    setPricePerUnit('');
+    setQty('');
+  };
+
+  const removeLine = (id: string) => {
+    setLines((prev) => prev.filter((line) => line.id !== id));
+  };
+
+  const onSubmitBatch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canCreate || !supplierId || !selectedProductId || quantityNum <= 0) return;
-    if (priceNum <= 0 || totalOriginal <= 0) return;
-    if (cur !== 'UZS' && fx <= 0) return;
+    if (!canCreate || !supplierId || lines.length === 0) return;
+    if (linesTotalUzs <= 0) return;
     if (paymentType === 'CREDIT' && debtUzs <= 0) return;
 
     setBusy(true);
     try {
       await dispatch({
-        type: 'CREATE_SUPPLIER_PURCHASE_ORDER',
+        type: 'CREATE_SUPPLIER_PURCHASE_BATCH',
         payload: {
           supplierId,
-          itemType: productCat,
-          rawMaterialId: productCat === 'RAW_MATERIAL' ? selectedProductId : undefined,
-          semiProductId: productCat === 'SEMI_PRODUCT' ? selectedProductId : undefined,
-          finishedProductId: productCat === 'FINISHED_PRODUCT' ? selectedProductId : undefined,
-          quantity: quantityNum,
-          quantityUnit: qtyUnit,
-          currency: cur,
-          fxRateToUzs: fx,
-          amountOriginal: totalOriginal,
           paymentType,
           paidAmountUzs: paymentType === 'CREDIT' ? paidUzs : undefined,
           notes: notes.trim() || undefined,
+          items: lines.map((line) => ({
+            itemType: line.itemType,
+            rawMaterialId: line.rawMaterialId,
+            semiProductId: line.semiProductId,
+            finishedProductId: line.finishedProductId,
+            quantity: line.quantity,
+            quantityUnit: line.quantityUnit,
+            currency: line.currency,
+            fxRateToUzs: line.fxRateToUzs,
+            amountOriginal: line.amountOriginal,
+          })),
         },
       });
-      setPricePerUnit('');
-      setQty('');
+      setLines([]);
       setNotes('');
       setPaidNow('');
       setDebtNow('');
@@ -296,8 +362,8 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const onPaidNowChange = (value: string) => {
     setPaidNow(value);
     const p = parseFloat(String(value).replace(',', '.'));
-    if (Number.isFinite(p) && amountUzs > 0) {
-      setDebtNow(String(Math.max(0, Math.round(amountUzs - p))));
+    if (Number.isFinite(p) && linesTotalUzs > 0) {
+      setDebtNow(String(Math.max(0, Math.round(linesTotalUzs - p))));
     } else if (value.trim() === '') {
       setDebtNow('');
     }
@@ -306,8 +372,8 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const onDebtNowChange = (value: string) => {
     setDebtNow(value);
     const d = parseFloat(String(value).replace(',', '.'));
-    if (Number.isFinite(d) && amountUzs > 0) {
-      setPaidNow(String(Math.max(0, Math.round(amountUzs - d))));
+    if (Number.isFinite(d) && linesTotalUzs > 0) {
+      setPaidNow(String(Math.max(0, Math.round(linesTotalUzs - d))));
     } else if (value.trim() === '') {
       setPaidNow('');
     }
@@ -317,6 +383,16 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
     if (u === 'TON') return t.prRmWeightUnitTon;
     if (u === 'PIECES') return t.supUnitPieces;
     return t.prRmWeightUnitKg;
+  };
+
+  const lineQtyLabel = (line: PurchaseLine) => {
+    if (line.quantityUnit === 'PIECES') {
+      return `${formatNumber(line.quantity)} ${t.supUnitPieces}`;
+    }
+    if (line.quantityUnit === 'TON') {
+      return `${formatNumber(line.quantity)} ${t.prRmWeightUnitTon}`;
+    }
+    return `${formatNumber(line.quantity)} ${t.prRmWeightUnitKg}`;
   };
 
   const catLabel = (c: ProductCat) => {
@@ -330,341 +406,421 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Package size={16} className="text-amber-700 dark:text-amber-400" />
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t.prRmPendingAlert}</p>
-            </div>
-            {pending.length === 0 ? (
-              <p className="text-xs text-amber-800/80 dark:text-amber-300/90">{t.prRmNoPendingOrders}</p>
-            ) : (
-              <ul className="flex flex-wrap gap-2">
-                {pending.map((o) => {
-                  const d = daysSinceOrder(o.orderedAt);
-                  const qLbl =
-                    o.quantityUnit === 'PIECES'
-                      ? `${formatNumber(o.quantity)} ${t.supUnitPieces}`
-                      : o.quantityUnit === 'TON'
-                        ? `${formatNumber(o.quantity)} ${t.prRmWeightUnitTon}`
-                        : `${formatNumber(o.quantityKg ?? o.quantity)} ${t.prRmWeightUnitKg}`;
-                  return (
-                    <li
-                      key={o.id}
-                      className="text-xs rounded-xl border border-amber-300/60 bg-white/80 px-3 py-2 dark:border-amber-700 dark:bg-slate-900/40"
-                    >
-                      {t.supPendingTpl
-                        .replace('{supplier}', o.supplierName ?? emptyCell)
-                        .replace('{name}', o.productName)
-                        .replace('{qty}', qLbl)
-                        .replace('{days}', String(d))}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-              {canCreate ? (
-                <form
-                  onSubmit={onSubmit}
-                  className="xl:col-span-3 space-y-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm"
+        <div className="flex items-center gap-2 mb-2">
+          <Package size={16} className="text-amber-700 dark:text-amber-400" />
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t.prRmPendingAlert}</p>
+        </div>
+        {pending.length === 0 ? (
+          <p className="text-xs text-amber-800/80 dark:text-amber-300/90">{t.prRmNoPendingOrders}</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {pending.map((o) => {
+              const d = daysSinceOrder(o.orderedAt);
+              const qLbl =
+                o.quantityUnit === 'PIECES'
+                  ? `${formatNumber(o.quantity)} ${t.supUnitPieces}`
+                  : o.quantityUnit === 'TON'
+                    ? `${formatNumber(o.quantity)} ${t.prRmWeightUnitTon}`
+                    : `${formatNumber(o.quantityKg ?? o.quantity)} ${t.prRmWeightUnitKg}`;
+              return (
+                <li
+                  key={o.id}
+                  className="text-xs rounded-xl border border-amber-300/60 bg-white/80 px-3 py-2 dark:border-amber-700 dark:bg-slate-900/40"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                      <ShoppingCart size={16} className="text-teal-600 dark:text-teal-400" />
-                    </div>
-                    <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.supFormTitle}</h3>
-                  </div>
+                  {t.supPendingTpl
+                    .replace('{supplier}', o.supplierName ?? emptyCell)
+                    .replace('{name}', o.productName)
+                    .replace('{qty}', qLbl)
+                    .replace('{days}', String(d))}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
-                  <div>
-                    <Label>{t.supSelectSupplier}</Label>
-                    <div className="flex gap-2">
-                      <div className="flex-1 min-w-0">
-                        <StyledSelect
-                          value={supplierId}
-                          onValueChange={setSupplierId}
-                          options={supplierOptions}
-                          placeholder={
-                            supplierOptions.length === 0 ? t.supNoSuppliers : t.supSelectSupplier
-                          }
-                          disabled={supplierOptions.length === 0}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={onAddSupplier}
-                        className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                        title={t.supAddSupplier}
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                  </div>
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {canCreate ? (
+          <form
+            onSubmit={onSubmitBatch}
+            className="xl:col-span-3 space-y-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                <ClipboardList size={16} className="text-teal-600 dark:text-teal-400" />
+              </div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.supFormTitle}</h3>
+            </div>
 
-                  <div>
-                    <Label>{t.supProductCategory}</Label>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {(['SEMI_PRODUCT', 'FINISHED_PRODUCT', 'RAW_MATERIAL'] as const).map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => {
-                            setProductCat(c);
-                            if (c === 'SEMI_PRODUCT' || c === 'FINISHED_PRODUCT') {
-                              setQtyUnit('PIECES');
-                            }
-                          }}
-                          className={`px-3 h-9 rounded-xl text-xs font-medium border ${
-                            productCat === c
-                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                              : 'border-slate-200 dark:border-slate-600'
-                          }`}
-                        >
-                          {catLabel(c)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>{t.supProductName}</Label>
-                    {productOptions.length === 0 ? (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 py-2">
-                        {t.supNoProductsInCategory}
-                      </p>
-                    ) : (
-                      <StyledSelect
-                        value={selectedProductId}
-                        onValueChange={(v) => {
-                          if (productCat === 'RAW_MATERIAL') setRawMaterialId(v);
-                          else if (productCat === 'SEMI_PRODUCT') setSemiProductId(v);
-                          else setFinishedProductId(v);
-                        }}
-                        options={productOptions}
-                        placeholder={t.supChooseProduct}
-                      />
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label>{t.supQuantityLabel}</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step="0.001"
-                        value={qty}
-                        onChange={(e) => setQty(e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <Label>{t.supQtyUnitLabel}</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {(
-                          productCat === 'RAW_MATERIAL'
-                            ? (['PIECES', 'KG', 'TON'] as const)
-                            : (['PIECES', 'KG'] as const)
-                        ).map((u) => (
-                          <button
-                            key={u}
-                            type="button"
-                            onClick={() => setQtyUnit(u)}
-                            className={`flex-1 min-w-[4rem] h-9 rounded-xl text-xs font-medium border ${
-                              qtyUnit === u
-                                ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                : 'border-slate-200 dark:border-slate-600'
-                            }`}
-                          >
-                            {qtyUnitLabel(u)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>{t.prRmCurrencyLabel}</Label>
-                    <StyledSelect
-                      value={cur}
-                      onValueChange={(v) => setCur(v as 'UZS' | 'USD' | 'EUR')}
-                      options={[
-                        { value: 'UZS', label: 'UZS' },
-                        { value: 'USD', label: 'USD' },
-                        { value: 'EUR', label: 'EUR' },
-                      ]}
-                    />
-                  </div>
-                  {cur !== 'UZS' && (
-                    <div>
-                      <Label>{t.prRmFxRateLabel}</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={fxMan}
-                        onChange={(e) => setFxMan(e.target.value)}
-                      />
-                      <p className="text-xs text-slate-400 mt-1">{t.prRmFxCbuHint}</p>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label>{unitPriceLabel}</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.0001"
-                      value={pricePerUnit}
-                      onChange={(e) => setPricePerUnit(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>{t.supPaymentType}</Label>
-                    <div className="flex gap-2 mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentType('CASH')}
-                        className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
-                          paymentType === 'CASH'
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                            : 'border-slate-200 dark:border-slate-600'
-                        }`}
-                      >
-                        {t.supPaymentCash}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentType('CREDIT')}
-                        className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
-                          paymentType === 'CREDIT'
-                            ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                            : 'border-slate-200 dark:border-slate-600'
-                        }`}
-                      >
-                        {t.supPaymentCredit}
-                      </button>
-                    </div>
-                  </div>
-
-                  {paymentType === 'CREDIT' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-amber-50/80 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800">
-                      <div>
-                        <Label>{t.supPaidNowLabel}</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={paidNow}
-                          onChange={(e) => onPaidNowChange(e.target.value)}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <Label>{t.supDebtAmountLabel}</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={debtNow}
-                          onChange={(e) => onDebtNowChange(e.target.value)}
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs space-y-1">
-                    <p className="text-slate-600 dark:text-slate-300">
-                      {t.prRmTotalOrderInCurrency}:{' '}
-                      <strong>{formatAmountInCurrency(totalOriginal, cur)}</strong>
-                    </p>
-                    <p className="text-slate-600 dark:text-slate-300">
-                      {t.prRmAmountUzsEst}: <strong>{formatCurrency(amountUzs)}</strong>
-                    </p>
-                    {paymentType === 'CREDIT' && (
-                      <>
-                        <p className="text-slate-600 dark:text-slate-300">
-                          {t.supPaidNowLabel}: <strong>{formatCurrency(paidUzs)}</strong>
-                        </p>
-                        <p className="text-slate-600 dark:text-slate-300">
-                          {t.supDebtRemaining}: <strong>{formatCurrency(debtUzs)}</strong>
-                        </p>
-                      </>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>{t.labelDesc}</Label>
-                    <textarea
-                      rows={2}
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="w-full min-h-[4rem] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={
-                      busy ||
-                      productOptions.length === 0 ||
-                      !supplierId ||
-                      state.suppliers.length === 0
+            <div>
+              <Label>{t.supSelectSupplier}</Label>
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0">
+                  <StyledSelect
+                    value={supplierId}
+                    onValueChange={setSupplierId}
+                    options={supplierOptions}
+                    placeholder={
+                      supplierOptions.length === 0 ? t.supNoSuppliers : t.supSelectSupplier
                     }
-                    className="w-full h-10 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium"
+                    disabled={supplierOptions.length === 0}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={onAddSupplier}
+                  className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  title={t.supAddSupplier}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-3">
+              <Label>{t.supProductCategory}</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(['SEMI_PRODUCT', 'FINISHED_PRODUCT', 'RAW_MATERIAL'] as const).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      setProductCat(c);
+                      if (c === 'SEMI_PRODUCT' || c === 'FINISHED_PRODUCT') {
+                        setQtyUnit('PIECES');
+                      }
+                    }}
+                    className={`px-3 h-9 rounded-xl text-xs font-medium border ${
+                      productCat === c
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-slate-200 dark:border-slate-600'
+                    }`}
                   >
-                    {busy ? '...' : t.supSubmitPurchase}
+                    {catLabel(c)}
                   </button>
-                </form>
-              ) : (
-                <div className="xl:col-span-3 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  {t.supReadOnlyHint}
+                ))}
+              </div>
+
+              <div>
+                <Label>{t.supProductName}</Label>
+                {productOptions.length === 0 ? (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 py-2">
+                    {t.supNoProductsInCategory}
+                  </p>
+                ) : (
+                  <StyledSelect
+                    value={selectedProductId}
+                    onValueChange={(v) => {
+                      if (productCat === 'RAW_MATERIAL') setRawMaterialId(v);
+                      else if (productCat === 'SEMI_PRODUCT') setSemiProductId(v);
+                      else setFinishedProductId(v);
+                    }}
+                    options={productOptions}
+                    placeholder={t.supChooseProduct}
+                  />
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{t.supQuantityLabel}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.001"
+                    value={qty}
+                    onChange={(e) => setQty(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label>{t.supQtyUnitLabel}</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {(
+                      productCat === 'RAW_MATERIAL'
+                        ? (['KG', 'TON'] as const)
+                        : (['PIECES', 'KG'] as const)
+                    ).map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        onClick={() => setQtyUnit(u)}
+                        className={`flex-1 min-w-[4rem] h-9 rounded-xl text-xs font-medium border ${
+                          qtyUnit === u
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                            : 'border-slate-200 dark:border-slate-600'
+                        }`}
+                      >
+                        {qtyUnitLabel(u)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>{t.prRmCurrencyLabel}</Label>
+                <StyledSelect
+                  value={cur}
+                  onValueChange={(v) => setCur(v as 'UZS' | 'USD' | 'EUR')}
+                  options={[
+                    { value: 'UZS', label: 'UZS' },
+                    { value: 'USD', label: 'USD' },
+                    { value: 'EUR', label: 'EUR' },
+                  ]}
+                />
+              </div>
+              {cur !== 'UZS' && (
+                <div>
+                  <Label>{t.prRmFxRateLabel}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={fxMan}
+                    onChange={(e) => setFxMan(e.target.value)}
+                  />
+                  <p className="text-xs text-slate-400 mt-1">{t.prRmFxCbuHint}</p>
                 </div>
               )}
 
-              <div className="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t.dashCbuTitle}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{t.dashCbuSource}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={onRefreshFx}
-                    disabled={fxLoading}
-                    title={fxJustUpdated ? t.dashCbuUpdatedOk : t.dashCbuRefresh}
-                    className={`p-1.5 rounded-lg transition-colors shrink-0 disabled:opacity-50 ${
-                      fxJustUpdated
-                        ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    {fxJustUpdated ? (
-                      <Check size={14} strokeWidth={2.5} />
-                    ) : (
-                      <RefreshCw size={14} className={fxLoading ? 'animate-spin' : ''} />
-                    )}
-                  </button>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 min-w-0">
+                  <Label>{unitPriceLabel}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.0001"
+                    value={pricePerUnit}
+                    onChange={(e) => setPricePerUnit(e.target.value)}
+                  />
+                  {lineTotalOriginal > 0 && (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {t.supLinePreview}: {formatAmountInCurrency(lineTotalOriginal, cur)} ·{' '}
+                      {formatCurrency(lineAmountUzs)}
+                    </p>
+                  )}
                 </div>
-                {fxErr ? (
-                  <p className="text-xs text-amber-600">{t.dashCbuFetchError}</p>
-                ) : (
-                  <div className="space-y-2 text-xs">
-                    {usd && (
-                      <p className="text-slate-600 dark:text-slate-300">
-                        USD: <strong>{parseCbuRate(usd.Rate)}</strong> {t.labelDate}:{' '}
-                        {updatedAt || usd.Date}
-                      </p>
-                    )}
-                    {eur && (
-                      <p className="text-slate-600 dark:text-slate-300">
-                        EUR: <strong>{parseCbuRate(eur.Rate)}</strong>
-                      </p>
-                    )}
-                  </div>
-                )}
-                <p className="text-xs text-slate-400 mt-3">{t.supPurchaseStockHint}</p>
+                <button
+                  type="button"
+                  onClick={addLine}
+                  disabled={busy || !canAddLine}
+                  title={t.supAddLine}
+                  className="h-9 w-9 shrink-0 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white flex items-center justify-center"
+                >
+                  <Plus size={18} strokeWidth={2.5} />
+                </button>
               </div>
             </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{t.supLinesTitle}</span>
+                {lines.length > 0 && (
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {t.supLinesCount.replace('{n}', String(lines.length))}
+                  </span>
+                )}
+              </div>
+              {lines.length === 0 ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t.supNoLinesHint}</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-600">
+                        <th className="pb-2 pr-3 font-medium">{t.supProductName}</th>
+                        <th className="pb-2 pr-3 font-medium">{t.supColQty}</th>
+                        <th className="pb-2 pr-3 font-medium">{t.supLineColAmount}</th>
+                        <th className="pb-2 w-10" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lines.map((line) => (
+                        <tr
+                          key={line.id}
+                          className="border-b border-slate-100 dark:border-slate-700/80 last:border-0"
+                        >
+                          <td className="py-2 pr-3 text-slate-800 dark:text-slate-100">
+                            <span className="block font-medium">{line.productName}</span>
+                            <span className="text-[10px] text-slate-400">{catLabel(line.itemType)}</span>
+                          </td>
+                          <td className="py-2 pr-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {lineQtyLabel(line)}
+                          </td>
+                          <td className="py-2 pr-3 text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                            {formatCurrency(line.amountUzs)}
+                          </td>
+                          <td className="py-2">
+                            <button
+                              type="button"
+                              onClick={() => removeLine(line.id)}
+                              className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              title={t.supRemoveLine}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan={2} className="pt-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                          {t.prRmAmountUzsEst}
+                        </td>
+                        <td colSpan={2} className="pt-3 font-semibold text-slate-800 dark:text-white">
+                          {formatCurrency(linesTotalUzs)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-3">
+              <Label>{t.supPaymentType}</Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentType('CASH')}
+                  className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
+                    paymentType === 'CASH'
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'border-slate-200 dark:border-slate-600'
+                  }`}
+                >
+                  {t.supPaymentCash}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentType('CREDIT')}
+                  className={`flex-1 h-9 rounded-xl text-xs font-medium border ${
+                    paymentType === 'CREDIT'
+                      ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                      : 'border-slate-200 dark:border-slate-600'
+                  }`}
+                >
+                  {t.supPaymentCredit}
+                </button>
+              </div>
+
+              {paymentType === 'CREDIT' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-amber-50/80 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800">
+                  <div>
+                    <Label>{t.supPaidNowLabel}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={paidNow}
+                      onChange={(e) => onPaidNowChange(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label>{t.supDebtAmountLabel}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={debtNow}
+                      onChange={(e) => onDebtNowChange(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs space-y-1">
+                <p className="text-slate-600 dark:text-slate-300">
+                  {t.prRmAmountUzsEst}: <strong>{formatCurrency(linesTotalUzs)}</strong>
+                </p>
+                {paymentType === 'CREDIT' && linesTotalUzs > 0 && (
+                  <>
+                    <p className="text-slate-600 dark:text-slate-300">
+                      {t.supPaidNowLabel}: <strong>{formatCurrency(paidUzs)}</strong>
+                    </p>
+                    <p className="text-slate-600 dark:text-slate-300">
+                      {t.supDebtRemaining}: <strong>{formatCurrency(debtUzs)}</strong>
+                    </p>
+                  </>
+                )}
+              </div>
+
+              <div>
+                <Label>{t.labelDesc}</Label>
+                <textarea
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full min-h-[4rem] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={
+                  busy ||
+                  lines.length === 0 ||
+                  !supplierId ||
+                  state.suppliers.length === 0
+                }
+                className="w-full h-10 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium"
+              >
+                {busy ? '...' : t.supSubmitPurchase}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="xl:col-span-3 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            {t.supReadOnlyHint}
+          </div>
+        )}
+
+        <div className="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t.dashCbuTitle}</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{t.dashCbuSource}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onRefreshFx}
+              disabled={fxLoading}
+              title={fxJustUpdated ? t.dashCbuUpdatedOk : t.dashCbuRefresh}
+              className={`p-1.5 rounded-lg transition-colors shrink-0 disabled:opacity-50 ${
+                fxJustUpdated
+                  ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400'
+                  : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              {fxJustUpdated ? (
+                <Check size={14} strokeWidth={2.5} />
+              ) : (
+                <RefreshCw size={14} className={fxLoading ? 'animate-spin' : ''} />
+              )}
+            </button>
+          </div>
+          {fxErr ? (
+            <p className="text-xs text-amber-600">{t.dashCbuFetchError}</p>
+          ) : (
+            <div className="space-y-2 text-xs">
+              {usd && (
+                <p className="text-slate-600 dark:text-slate-300">
+                  USD: <strong>{parseCbuRate(usd.Rate)}</strong> {t.labelDate}:{' '}
+                  {updatedAt || usd.Date}
+                </p>
+              )}
+              {eur && (
+                <p className="text-slate-600 dark:text-slate-300">
+                  EUR: <strong>{parseCbuRate(eur.Rate)}</strong>
+                </p>
+              )}
+            </div>
+          )}
+          <p className="text-xs text-slate-400 mt-3">{t.supPurchaseStockHint}</p>
+        </div>
+      </div>
     </div>
   );
 }
