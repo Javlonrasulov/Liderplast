@@ -620,6 +620,8 @@ export interface T {
   slAddToCart: string;
   slCart: string;
   slCartEmpty: string;
+  slHistoryIgnoresDateFilter: string;
+  slHistoryDebtHint: string;
   slAddItem: string;
   slOrderItems: string;
   slMixedProducts: string;
@@ -1649,6 +1651,8 @@ const uz_cyrillic: T = {
   slAddToCart: 'Қўшиш',
   slCart: 'Реализация таркиби',
   slCartEmpty: 'Маҳсулот қўшилмаган',
+  slHistoryIgnoresDateFilter: 'Сотув тарихи юқоридаги сана фильтрига боғлиқ эмас',
+  slHistoryDebtHint: 'Қарзлар бор, лекин сотувлар юкланмади — саҳифани янгиланг ёки рухсатни текширинг',
   slAddItem: 'Қатор қўшиш',
   slOrderItems: 'Буюртма маҳсулотлари',
   slMixedProducts: 'Микс маҳсулотлар',
@@ -2661,6 +2665,8 @@ const uz_latin: T = {
   slAddToCart: 'Qo\'shish',
   slCart: 'Sotuv tarkibi',
   slCartEmpty: 'Mahsulot qo\'shilmagan',
+  slHistoryIgnoresDateFilter: 'Sotuv tarixi yuqoridagi sana filtriga bog\'liq emas',
+  slHistoryDebtHint: 'Qarzlar bor, lekin sotuvlar yuklanmagan — sahifani yangilang yoki ruxsatni tekshiring',
   slAddItem: 'Qator qo\'shish',
   slOrderItems: 'Buyurtma mahsulotlari',
   slMixedProducts: 'Miks mahsulotlar',
@@ -3672,6 +3678,8 @@ const ru: T = {
   slAddToCart: 'Добавить',
   slCart: 'Состав реализации',
   slCartEmpty: 'Позиции не добавлены',
+  slHistoryIgnoresDateFilter: 'История продаж не зависит от фильтра дат в шапке',
+  slHistoryDebtHint: 'Есть долги, но продажи не загрузились — обновите страницу или проверьте права',
   slAddItem: 'Добавить строку',
   slOrderItems: 'Товары в заказе',
   slMixedProducts: 'Смешанные товары',

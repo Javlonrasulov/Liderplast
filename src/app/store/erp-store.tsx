@@ -2188,7 +2188,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
   }));
 
   const sales: Sale[] = orders.map((order) => {
-    const items: SaleOrderItem[] = order.items.map((item) => ({
+    const items: SaleOrderItem[] = (order.items ?? []).map((item) => ({
       productCategory: item.productType === 'SEMI_PRODUCT' ? 'semi' : 'final',
       productType: item.semiProduct?.name ?? item.finishedProduct?.name ?? 'Mahsulot',
       quantity: item.quantity,
@@ -2201,7 +2201,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       id: order.id,
       date: order.createdAt.slice(0, 10),
       clientId: order.clientId,
-      clientName: order.client.name,
+      clientName: order.client?.name ?? '—',
       productCategory: items[0]?.productCategory ?? 'final',
       productType: items.length > 1 ? 'aralash' : items[0]?.productType ?? '',
       quantity: items.reduce((sum, item) => sum + item.quantity, 0),

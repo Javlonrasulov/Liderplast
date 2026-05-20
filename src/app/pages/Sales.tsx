@@ -67,7 +67,7 @@ export function Sales() {
     finalStockByProductName,
     isLoading,
   } = useERP();
-  const { t, filterData } = useApp();
+  const { t, dateFilter, filterLabel } = useApp();
 
   const [activeTab, setActiveTab] = useState<'sale' | 'clients' | 'history'>('sale');
 
@@ -317,8 +317,16 @@ export function Sales() {
     setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
   };
 
-  // ---- History ----
-  const filteredSales = filterData([...state.sales]).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // ---- History (barcha sotuvlar — global sana filtri qarz/tarixda aralashmasin) ----
+  const historySales = useMemo(
+    () =>
+      [...state.sales].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+    [state.sales],
+  );
+  const historyFilteredByHeader =
+    dateFilter.preset !== 'all' && (dateFilter.from || dateFilter.to);
   const totalRevenue = state.sales.reduce((s, sale) => s + sale.total, 0);
   const totalPaidAll = state.sales.reduce((s, sale) => s + sale.paid, 0);
   const totalDebt = state.clients.reduce((s, c) => s + c.debt, 0);
@@ -936,10 +944,20 @@ export function Sales() {
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.slTabHistory}</h3>
-            <span className="text-xs text-slate-400">{filteredSales.length} {t.slOperations}</span>
+            <span className="text-xs text-slate-400">{historySales.length} {t.slOperations}</span>
           </div>
-          {filteredSales.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
+          {historyFilteredByHeader && (
+            <p className="px-5 py-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/40">
+              {t.slHistoryIgnoresDateFilter} ({filterLabel})
+            </p>
+          )}
+          {historySales.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 px-6 text-center text-slate-400 text-sm gap-2">
+              <span>{t.noData}</span>
+              {totalDebt > 0 && (
+                <span className="text-xs text-amber-600 dark:text-amber-400">{t.slHistoryDebtHint}</span>
+              )}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -951,7 +969,7 @@ export function Sales() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSales.map((sale, idx) => {
+                  {historySales.map((sale, idx) => {
                     const isMulti = sale.items && sale.items.length > 1;
                     const isExpanded = expandedSale === sale.id;
                     return (
