@@ -158,7 +158,10 @@ export function WarehouseProductPricingFieldsBlock({
           <SelectTrigger className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 text-sm dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent position="popper">
+          <SelectContent
+            position="popper"
+            className="z-[2000] max-h-72 rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          >
             <SelectItem value="USD">{labels.currencyUsd}</SelectItem>
             <SelectItem value="EUR">{labels.currencyEur}</SelectItem>
             <SelectItem value="UZS">{labels.currencyUzs}</SelectItem>
