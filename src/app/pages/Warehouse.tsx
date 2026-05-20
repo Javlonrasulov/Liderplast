@@ -366,6 +366,30 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
 
+  const pricingFormLabels = useMemo(
+    () => ({
+      section: t.whPricingSection,
+      optional: t.whPricingOptional,
+      purchasePrice: t.whPurchasePrice,
+      salePrice: t.whSalePrice,
+      currency: t.labelCurrency,
+      fxRate: t.whFxRateToUzs,
+      fxHint: t.whFxRateHint,
+      fxApplyCbu: t.whFxApplyCbu,
+      cbuTitle: t.whCbuRatesTitle,
+      cbuLoading: t.whCbuRatesLoading,
+      cbuUsdLine: t.whCbuRatesUsd,
+      cbuEurLine: t.whCbuRatesEur,
+      cbuError: t.whCbuRatesError,
+      cbuRetry: t.whCbuRatesRetry,
+      currencyUzs: 'UZS',
+      currencyUsd: 'USD (USDT)',
+      currencyEur: 'EUR',
+      priceInUzs: t.whPriceInUzs,
+    }),
+    [t],
+  );
+
   const [form, setForm] = useState<ProductFormState>(DEFAULT_FORM);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<
@@ -1283,20 +1307,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           fxRateToUzs: form.fxRateToUzs,
         }}
         onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
-        labels={{
-          section: t.whPricingSection,
-          optional: t.whPricingOptional,
-          purchasePrice: t.whPurchasePrice,
-          salePrice: t.whSalePrice,
-          currency: t.labelCurrency,
-          fxRate: t.whFxRateToUzs,
-          fxHint: t.whFxRateHint,
-          fxApplyCbu: t.whFxApplyCbu,
-          currencyUzs: 'UZS',
-          currencyUsd: 'USD',
-          currencyEur: 'EUR',
-          priceInUzs: t.whPriceInUzs,
-        }}
+        labels={pricingFormLabels}
       />
 
       {form.itemType === 'SEMI_PRODUCT' ? (
@@ -2257,20 +2268,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 onChange={(next) =>
                   setRawMaterialForm((prev) => ({ ...prev, ...next }))
                 }
-                labels={{
-                  section: t.whPricingSection,
-                  optional: t.whPricingOptional,
-                  purchasePrice: t.whPurchasePrice,
-                  salePrice: t.whSalePrice,
-                  currency: t.labelCurrency,
-                  fxRate: t.whFxRateToUzs,
-                  fxHint: t.whFxRateHint,
-                  fxApplyCbu: t.whFxApplyCbu,
-                  currencyUzs: 'UZS',
-                  currencyUsd: 'USD',
-                  currencyEur: 'EUR',
-                  priceInUzs: t.whPriceInUzs,
-                }}
+                labels={pricingFormLabels}
               />
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
@@ -2390,20 +2388,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 onChange={(next) =>
                   setRawMaterialForm((prev) => ({ ...prev, ...next }))
                 }
-                labels={{
-                  section: t.whPricingSection,
-                  optional: t.whPricingOptional,
-                  purchasePrice: t.whPurchasePrice,
-                  salePrice: t.whSalePrice,
-                  currency: t.labelCurrency,
-                  fxRate: t.whFxRateToUzs,
-                  fxHint: t.whFxRateHint,
-                  fxApplyCbu: t.whFxApplyCbu,
-                  currencyUzs: 'UZS',
-                  currencyUsd: 'USD',
-                  currencyEur: 'EUR',
-                  priceInUzs: t.whPriceInUzs,
-                }}
+                labels={pricingFormLabels}
               />
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">

@@ -234,6 +234,12 @@ export interface T {
   whFxRateToUzs: string;
   whFxRateHint: string;
   whFxApplyCbu: string;
+  whCbuRatesTitle: string;
+  whCbuRatesLoading: string;
+  whCbuRatesUsd: string;
+  whCbuRatesEur: string;
+  whCbuRatesError: string;
+  whCbuRatesRetry: string;
   whPricingInvalid: string;
   whPriceInUzs: string;
   whCatalogPiecesPerBag: string;
@@ -1545,6 +1551,12 @@ const uz_cyrillic: T = {
   whFxRateToUzs: 'Курс (1 valyuta = so‘m)',
   whFxRateHint: 'Qo‘lda o‘zgartirish mumkin',
   whFxApplyCbu: 'MB kursi',
+  whCbuRatesTitle: 'Марказий банк курси',
+  whCbuRatesLoading: 'Курс юкланмоқда…',
+  whCbuRatesUsd: '1 USD = {rate} so‘m',
+  whCbuRatesEur: '1 EUR = {rate} so‘m',
+  whCbuRatesError: 'Курс юкланмади',
+  whCbuRatesRetry: 'Қайта',
   whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
   whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 пачкада: {count} дона',
@@ -2549,6 +2561,12 @@ const uz_latin: T = {
   whFxRateToUzs: 'Kurs (1 valyuta = so‘m)',
   whFxRateHint: 'Qo‘lda o‘zgartirish mumkin',
   whFxApplyCbu: 'MB kursi',
+  whCbuRatesTitle: 'Markaziy bank kursi',
+  whCbuRatesLoading: 'Kurs yuklanmoqda…',
+  whCbuRatesUsd: '1 USD = {rate} so‘m',
+  whCbuRatesEur: '1 EUR = {rate} so‘m',
+  whCbuRatesError: 'Kurs yuklanmadi',
+  whCbuRatesRetry: 'Qayta',
   whPricingInvalid: 'Narx yoki kurs noto‘g‘ri',
   whPriceInUzs: '≈ {amount} so‘m',
   whCatalogPiecesPerBag: '1 pachkada: {count} dona',
@@ -3553,6 +3571,12 @@ const ru: T = {
   whFxRateToUzs: 'Курс (1 валюта = сум)',
   whFxRateHint: 'Можно изменить вручную',
   whFxApplyCbu: 'Курс ЦБ',
+  whCbuRatesTitle: 'Курс Центробанка',
+  whCbuRatesLoading: 'Загрузка курса…',
+  whCbuRatesUsd: '1 USD = {rate} сум',
+  whCbuRatesEur: '1 EUR = {rate} сум',
+  whCbuRatesError: 'Не удалось загрузить курс',
+  whCbuRatesRetry: 'Повторить',
   whPricingInvalid: 'Неверная цена или курс',
   whPriceInUzs: '≈ {amount} сум',
   whCatalogPiecesPerBag: 'В пачке: {count} шт',

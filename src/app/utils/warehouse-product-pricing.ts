@@ -10,7 +10,7 @@ export type WarehouseProductPricingFields = {
 export const EMPTY_WAREHOUSE_PRICING: WarehouseProductPricingFields = {
   purchasePrice: '',
   salePrice: '',
-  priceCurrency: 'UZS',
+  priceCurrency: 'USD',
   fxRateToUzs: '',
 };
 
@@ -39,7 +39,7 @@ export function pricingFieldsFromProduct(product: {
     purchasePrice:
       product.purchasePrice != null ? String(product.purchasePrice) : '',
     salePrice: product.salePrice != null ? String(product.salePrice) : '',
-    priceCurrency: product.priceCurrency ?? 'UZS',
+    priceCurrency: product.priceCurrency ?? 'USD',
     fxRateToUzs:
       product.fxRateToUzs != null ? String(product.fxRateToUzs) : '',
   };

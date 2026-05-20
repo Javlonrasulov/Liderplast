@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { RefreshCw } from 'lucide-react';
 import type { SaleCurrency } from '../store/erp-store';
 import type { WarehouseProductPricingFields } from '../utils/warehouse-product-pricing';
 import { useCbuRates } from '../hooks/use-cbu-rates';
@@ -22,10 +23,15 @@ type Labels = {
   fxRate: string;
   fxHint: string;
   fxApplyCbu: string;
+  cbuTitle: string;
+  cbuLoading: string;
+  cbuUsdLine: string;
+  cbuEurLine: string;
+  cbuError: string;
+  cbuRetry: string;
   currencyUzs: string;
   currencyUsd: string;
   currencyEur: string;
-  /** ≈ {amount} so‘m */
   priceInUzs: string;
 };
 
@@ -40,9 +46,10 @@ export function WarehouseProductPricingFieldsBlock({
   onChange,
   labels,
 }: Props) {
-  const { usd: cbuUsd, eur: cbuEur } = useCbuRates();
+  const { usd: cbuUsd, eur: cbuEur, loading, error, refetch } = useCbuRates();
   const usdRate = cbuUsdRate(cbuUsd);
   const eurRate = cbuEurRate(cbuEur);
+  const didAutoFillFx = useRef(false);
 
   const cbuRateForCurrency = (currency: SaleCurrency): number => {
     if (currency === 'USD') return usdRate;
@@ -61,8 +68,22 @@ export function WarehouseProductPricingFieldsBlock({
     }
   };
 
+  useEffect(() => {
+    if (value.priceCurrency === 'UZS') return;
+    if (value.fxRateToUzs.trim()) {
+      didAutoFillFx.current = true;
+      return;
+    }
+    const cbu = cbuRateForCurrency(value.priceCurrency);
+    if (cbu > 0 && !didAutoFillFx.current) {
+      didAutoFillFx.current = true;
+      onChange({ ...value, fxRateToUzs: String(cbu) });
+    }
+  }, [value.priceCurrency, usdRate, eurRate]);
+
   const showUzsEquivalent = value.priceCurrency !== 'UZS';
   const fxRate = value.fxRateToUzs;
+  const showFxField = value.priceCurrency !== 'UZS';
 
   const renderUzsHint = (amountRaw: string) => {
     if (!showUzsEquivalent) return null;
@@ -76,11 +97,102 @@ export function WarehouseProductPricingFieldsBlock({
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+    <div className="space-y-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
       <div>
         <p className="text-sm font-semibold text-slate-900 dark:text-white">{labels.section}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400">{labels.optional}</p>
       </div>
+
+      <div className="rounded-xl border border-indigo-100 bg-indigo-50/80 px-3 py-2.5 dark:border-indigo-900/50 dark:bg-indigo-950/30">
+        <p className="text-xs font-semibold text-indigo-900 dark:text-indigo-200">
+          {labels.cbuTitle}
+        </p>
+        {loading ? (
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <RefreshCw size={12} className="animate-spin" />
+            {labels.cbuLoading}
+          </p>
+        ) : error ? (
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+            {labels.cbuError}
+            <button
+              type="button"
+              onClick={refetch}
+              className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+            >
+              {labels.cbuRetry}
+            </button>
+          </p>
+        ) : (
+          <div className="mt-1 space-y-0.5 text-xs text-slate-700 dark:text-slate-300">
+            {usdRate > 0 ? (
+              <p>{labels.cbuUsdLine.replace('{rate}', formatNumber(usdRate))}</p>
+            ) : null}
+            {eurRate > 0 ? (
+              <p>{labels.cbuEurLine.replace('{rate}', formatNumber(eurRate))}</p>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+          {labels.currency}
+        </label>
+        <Select
+          value={value.priceCurrency}
+          onValueChange={(v) => {
+            const currency = v as SaleCurrency;
+            didAutoFillFx.current = false;
+            const cbu = cbuRateForCurrency(currency);
+            patch({
+              priceCurrency: currency,
+              fxRateToUzs:
+                currency === 'UZS' ? '' : cbu > 0 ? String(cbu) : value.fxRateToUzs,
+            });
+            if (currency !== 'UZS' && cbu > 0) {
+              didAutoFillFx.current = true;
+            }
+          }}
+        >
+          <SelectTrigger className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 text-sm dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value="USD">{labels.currencyUsd}</SelectItem>
+            <SelectItem value="EUR">{labels.currencyEur}</SelectItem>
+            <SelectItem value="UZS">{labels.currencyUzs}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {showFxField ? (
+        <div>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <label className="block text-sm text-slate-600 dark:text-slate-400">
+              {labels.fxRate}
+            </label>
+            <button
+              type="button"
+              onClick={applyCbuRate}
+              disabled={cbuRateForCurrency(value.priceCurrency) <= 0}
+              className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-40 dark:text-indigo-400"
+            >
+              {labels.fxApplyCbu}
+            </button>
+          </div>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={value.fxRateToUzs}
+            onChange={(e) => patch({ fxRateToUzs: e.target.value })}
+            placeholder="—"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+          />
+          <p className="mt-1 text-xs text-slate-400">{labels.fxHint}</p>
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
@@ -110,58 +222,6 @@ export function WarehouseProductPricingFieldsBlock({
           />
           {renderUzsHint(value.salePrice)}
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
-            {labels.currency}
-          </label>
-          <Select
-            value={value.priceCurrency}
-            onValueChange={(v) => {
-              const currency = v as SaleCurrency;
-              const cbu = cbuRateForCurrency(currency);
-              patch({
-                priceCurrency: currency,
-                fxRateToUzs:
-                  currency === 'UZS' ? '' : cbu > 0 ? String(cbu) : value.fxRateToUzs,
-              });
-            }}
-          >
-            <SelectTrigger className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 text-sm dark:border-slate-600 dark:bg-slate-700/80 dark:text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              <SelectItem value="UZS">{labels.currencyUzs}</SelectItem>
-              <SelectItem value="USD">{labels.currencyUsd}</SelectItem>
-              <SelectItem value="EUR">{labels.currencyEur}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {value.priceCurrency !== 'UZS' ? (
-          <div>
-            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-              <label className="block text-sm text-slate-600 dark:text-slate-400">
-                {labels.fxRate}
-              </label>
-              <button
-                type="button"
-                onClick={applyCbuRate}
-                disabled={cbuRateForCurrency(value.priceCurrency) <= 0}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-40 dark:text-indigo-400 dark:hover:text-indigo-300"
-              >
-                {labels.fxApplyCbu}
-              </button>
-            </div>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={value.fxRateToUzs}
-              onChange={(e) => patch({ fxRateToUzs: e.target.value })}
-              placeholder="—"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
-            />
-            <p className="mt-1 text-xs text-slate-400">{labels.fxHint}</p>
-          </div>
-        ) : null}
       </div>
     </div>
   );
