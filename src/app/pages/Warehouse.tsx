@@ -369,7 +369,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       weightGram: t.whWeightGram,
       composition: t.whCatalogComposition,
       semiLinked: t.whCatalogSemiLinked,
-      volume: t.whCatalogVolume,
       itemsCount: t.whCatalogItemsCount,
       unit: t.whUnit,
       defaultBagWeight: t.rmDefaultBagWeight,

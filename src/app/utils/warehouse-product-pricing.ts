@@ -111,7 +111,6 @@ export type ProductCatalogDetailLabels = {
   weightGram: string;
   composition: string;
   semiLinked: string;
-  volume: string;
   itemsCount: string;
   unit: string;
   defaultBagWeight: string;
@@ -225,11 +224,6 @@ export function getProductCatalogDetailRows(
         value: labels.packValue.replace('{count}', formatNumber(ppb)),
       });
     }
-    rows.push({
-      id: 'volume',
-      label: labels.volume,
-      value: `${formatNumber(product.volumeLiter ?? 0)} L`,
-    });
     const semiCount = product.semiProducts?.length ?? 0;
     rows.push({
       id: 'semi',
