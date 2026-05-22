@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useApp } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
-import { toLocalDateString } from '../utils/format';
+import { getAppCalendarParts, todayYmd } from '../utils/format';
 
 // ─── Localized data ───────────────────────────────────────────────────────────
 const DAY_HEADERS: Record<Language, string[]> = {
@@ -82,7 +82,7 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
   });
 
   const ref = useRef<HTMLDivElement>(null);
-  const maxDateStr = toLocalDateString(new Date());
+  const maxDateStr = todayYmd();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -108,17 +108,16 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
   };
 
   const handleToday = () => {
-    const d = new Date();
-    setViewYear(d.getFullYear());
-    setViewMonth(d.getMonth());
-    onChange(maxDateStr);
+    const { year, month } = getAppCalendarParts();
+    setViewYear(year);
+    setViewMonth(month);
+    onChange(todayYmd());
     setOpen(false);
   };
 
-  const now = new Date();
+  const { year: appYear, month: appMonth } = getAppCalendarParts();
   const atOrBeyondCurrentMonth =
-    viewYear > now.getFullYear() ||
-    (viewYear === now.getFullYear() && viewMonth >= now.getMonth());
+    viewYear > appYear || (viewYear === appYear && viewMonth >= appMonth);
 
   const cells = buildCells(viewYear, viewMonth);
   const dayHeaders = DAY_HEADERS[lang];

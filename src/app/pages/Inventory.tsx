@@ -14,7 +14,7 @@ import {
 import { useERP, type WarehouseProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { apiRequest } from '../api/http';
-import { TODAY, formatDate } from '../utils/format';
+import { todayYmd, formatDate } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
   Dialog,
@@ -305,7 +305,7 @@ export function Inventory() {
             categoryId: inventoryExpenseCategoryId,
             amount,
             description: `${row.productName} • ${qty} ${row.unit === 'kg' ? 'kg' : 'pcs'} × ${unitPrice}`,
-            incurredAt: current.dateTo || current.dateFrom || TODAY,
+            incurredAt: current.dateTo || current.dateFrom || todayYmd(),
           }),
         });
       }
@@ -910,15 +910,15 @@ function CreateInventoryDialog({
   const { t } = useApp();
   const [docNumber, setDocNumber] = useState('');
   const [warehouseId, setWarehouseId] = useState(warehouses[0]?.id ?? 'main');
-  const [dateFrom, setDateFrom] = useState(TODAY);
-  const [dateTo, setDateTo] = useState(TODAY);
+  const [dateFrom, setDateFrom] = useState(todayYmd());
+  const [dateTo, setDateTo] = useState(todayYmd());
 
   useEffect(() => {
     if (open) {
       setDocNumber(nextNumber);
       setWarehouseId(warehouses[0]?.id ?? 'main');
-      setDateFrom(TODAY);
-      setDateTo(TODAY);
+      setDateFrom(todayYmd());
+      setDateTo(todayYmd());
     }
   }, [nextNumber, open, warehouses]);
 

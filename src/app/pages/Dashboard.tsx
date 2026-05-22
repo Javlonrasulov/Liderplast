@@ -7,7 +7,7 @@ import {
   type SemiProductCatalogItem,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatCurrency, getLast7Days, getInclusiveDateRange, shortDate, TODAY, formatDateTime } from '../utils/format';
+import { formatNumber, formatCurrency, getLast7Days, getInclusiveDateRange, shortDate, todayYmd, formatDateTime } from '../utils/format';
 
 // ======================== KPI CARD ========================
 function KpiCard({ title, value, unit, icon: Icon, color, trend, trendVal, warning }: {
@@ -249,12 +249,13 @@ export function Dashboard() {
   );
 
   const todayProduction = useMemo(() => {
-    const semiB = state.semiProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
-    const finalB = state.finalProductBatches.filter(b => b.date === TODAY).reduce((s, b) => s + b.quantity, 0);
+    const today = todayYmd();
+    const semiB = state.semiProductBatches.filter(b => b.date === today).reduce((s, b) => s + b.quantity, 0);
+    const finalB = state.finalProductBatches.filter(b => b.date === today).reduce((s, b) => s + b.quantity, 0);
     let semiS = 0;
     let finalS = 0;
     for (const r of state.shiftRecords) {
-      if (r.date !== TODAY) continue;
+      if (r.date !== today) continue;
       const mt = machineTypeById.get(r.machineId);
       if (mt === 'semi') semiS += r.producedQty;
       else if (mt === 'final') finalS += r.producedQty;
@@ -264,7 +265,7 @@ export function Dashboard() {
     return { semi, final, total: semi + final };
   }, [state, machineTypeById]);
 
-  const todaySales = useMemo(() => state.sales.filter(s => s.date === TODAY).reduce((sum, s) => sum + s.total, 0), [state]);
+  const todaySales = useMemo(() => state.sales.filter(s => s.date === todayYmd()).reduce((sum, s) => sum + s.total, 0), [state]);
 
   const chartDayKeys = useMemo(() => {
     if (dateFilter.preset === 'all' || (!dateFilter.from && !dateFilter.to)) {

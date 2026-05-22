@@ -20,7 +20,7 @@ import {
   unitPriceInUzs,
 } from '../utils/sales-currency';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatCurrency, formatDate, TODAY } from '../utils/format';
+import { formatNumber, formatCurrency, formatDate, todayYmd } from '../utils/format';
 import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
 import { PhoneInput } from '../components/PhoneInput';
@@ -73,7 +73,7 @@ export function Sales() {
 
   // ---- Order form ----
   const [clientId, setClientId] = useState(state.clients[0]?.id || '');
-  const [orderDate, setOrderDate] = useState(TODAY);
+  const [orderDate, setOrderDate] = useState(todayYmd());
   const [paid, setPaid] = useState('');
   const [cartItems, setCartItems] = useState<CartItemRow[]>([]);
   const [error, setError] = useState('');

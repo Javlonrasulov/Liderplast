@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { startServerTodaySync, subscribeServerToday } from '../api/server-date';
 import { Language, T, translations } from './translations';
-import { TODAY, parseYmdLocal, toLocalDateString } from '../utils/format';
+import { parseYmdLocal, todayYmd, toLocalDateString } from '../utils/format';
 
 // ======================== DATE FILTER ========================
 
@@ -13,10 +14,11 @@ export interface DateFilter {
 }
 
 function getPresetRange(preset: DatePreset): { from: string; to: string } {
-  const anchor = parseYmdLocal(TODAY) ?? new Date();
+  const today = todayYmd();
+  const anchor = parseYmdLocal(today) ?? new Date();
 
   if (preset === 'today') {
-    return { from: TODAY, to: TODAY };
+    return { from: today, to: today };
   }
 
   if (preset === 'week') {
@@ -27,7 +29,7 @@ function getPresetRange(preset: DatePreset): { from: string; to: string } {
     const from = toLocalDateString(monday);
     const to = toLocalDateString(sunday);
     /** Hafta/oy — to‘liq kalendar oralig‘i; kelajak sanali xarajatlar ham ko‘rinsin (masalan qop chiqimi). */
-    if (from > TODAY) return { from: TODAY, to: TODAY };
+    if (from > today) return { from: today, to: today };
     return { from, to };
   }
 
@@ -131,6 +133,8 @@ function readStoredLang(): Language {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  /** Re-render when server `today` syncs from API (navbar calendar max date). */
+  const [, setServerTodayRevision] = useState(0);
   const [lang, setLangState] = useState<Language>(readStoredLang);
 
   const setLang = (l: Language) => {
@@ -156,6 +160,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const t = useMemo(() => withRawMaterialFallbacks(translations[lang]), [lang]);
 
+  useEffect(() => {
+    const unsubListener = subscribeServerToday(() => {
+      setServerTodayRevision((n) => n + 1);
+    });
+    const stopSync = startServerTodaySync();
+    return () => {
+      unsubListener();
+      stopSync();
+    };
+  }, []);
+
   // Apply font size to <html> on mount and change
   useEffect(() => {
     try {
@@ -178,7 +193,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setCustomRange = (from: string, to: string) => {
-    const max = toLocalDateString(new Date());
+    const max = todayYmd();
     let f = from <= to ? from : to;
     let t = from <= to ? to : from;
     if (f > max) f = max;

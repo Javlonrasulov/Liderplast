@@ -22,7 +22,7 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import { formatNumber, formatDate, TODAY } from '../utils/format';
+import { formatNumber, formatDate, todayYmd } from '../utils/format';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
   Select,
@@ -69,7 +69,7 @@ const SELECT_ITEM_CLS =
 export function RawMaterial() {
   const { state, dispatch } = useERP();
   const { t, filterData } = useApp();
-  const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: TODAY });
+  const [form, setForm] = useState({ amount: '', unit: 'kg', description: '', date: todayYmd() });
   const [createForm, setCreateForm] = useState<{
     name: string;
     description: string;
@@ -247,7 +247,7 @@ export function RawMaterial() {
       type: 'ADD_RAW_MATERIAL',
       payload: { rawMaterialId, amount: amountKg, description, date },
     });
-    setForm({ amount: '', unit: 'kg', description: '', date: TODAY });
+    setForm({ amount: '', unit: 'kg', description: '', date: todayYmd() });
     setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
     setTimeout(() => setSuccess(''), 3000);
   };

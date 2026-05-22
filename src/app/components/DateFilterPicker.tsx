@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp, DatePreset } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
-import { toLocalDateString } from '../utils/format';
+import { getAppCalendarParts, todayYmd } from '../utils/format';
 
 // ─── Localized data ──────────────────────────────────────────────────────────
 const DAY_HEADERS: Record<Language, string[]> = {
@@ -80,7 +80,7 @@ export function DateFilterPicker() {
   const [hoverDate, setHoverDate] = useState('');
 
   const ref = useRef<HTMLDivElement>(null);
-  const maxDateStr = toLocalDateString(new Date());
+  const maxDateStr = todayYmd();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -136,8 +136,13 @@ export function DateFilterPicker() {
   };
 
   const handleToday = () => {
-    setViewYear(new Date().getFullYear());
-    setViewMonth(new Date().getMonth());
+    const { year, month } = getAppCalendarParts();
+    setViewYear(year);
+    setViewMonth(month);
+    setPreset('today');
+    setPickPhase('idle');
+    setHoverDate('');
+    setOpen(false);
   };
 
   // ── Month navigation ──────────────────────────────────────────────────────
@@ -150,10 +155,9 @@ export function DateFilterPicker() {
     else setViewMonth(m => m + 1);
   };
 
-  const now = new Date();
+  const { year: appYear, month: appMonth } = getAppCalendarParts();
   const atOrBeyondCurrentMonth =
-    viewYear > now.getFullYear() ||
-    (viewYear === now.getFullYear() && viewMonth >= now.getMonth());
+    viewYear > appYear || (viewYear === appYear && viewMonth >= appMonth);
 
   const cells = buildCells(viewYear, viewMonth);
   const dayHeaders = DAY_HEADERS[lang];

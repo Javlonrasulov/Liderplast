@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useERP, type ShiftRecordKind } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, TODAY } from '../utils/format';
+import { formatNumber, todayYmd } from '../utils/format';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import type { ShiftDefinition } from './ShiftWork';
@@ -109,7 +109,7 @@ export function ShiftPackagingForm({
   const { t: appT } = useApp();
 
   const [form, setForm] = useState({
-    date: TODAY,
+    date: todayYmd(),
     shift: 1,
     workerName: '',
   });
@@ -376,7 +376,7 @@ export function ShiftPackagingForm({
           </label>
           <SingleDatePicker
             value={form.date}
-            onChange={(iso) => setForm({ ...form, date: iso || TODAY })}
+            onChange={(iso) => setForm({ ...form, date: iso || todayYmd() })}
           />
         </div>
         <div className="min-w-0">

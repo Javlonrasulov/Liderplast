@@ -22,7 +22,7 @@ import {
   formatCurrency,
   formatDate,
   parseDigitsFromAmountInput,
-  TODAY,
+  todayYmd,
 } from '../utils/format';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
 import { formatExpenseHistoryNote } from '../utils/expense-history-note';
@@ -230,7 +230,7 @@ export function Expenses() {
     powerKw: '',
     amount: '',
     description: '',
-    date: TODAY,
+    date: todayYmd(),
   });
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -390,7 +390,7 @@ export function Expenses() {
       powerKw: '',
       amount: '',
       description: '',
-      date: TODAY,
+      date: todayYmd(),
     });
     setSuccess(`${t.successAdded}: ${formatCurrency(amount)}`);
     setTimeout(() => setSuccess(''), 4000);

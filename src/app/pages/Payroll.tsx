@@ -14,7 +14,7 @@ import {
   formatDateTime,
   formatNumber,
   formatKgAmount,
-  TODAY,
+  todayYmd,
   displayGroupedIntInput,
   parseDigitsFromAmountInput,
 } from '../utils/format';
@@ -48,7 +48,7 @@ import {
 // ======================== HELPERS ========================
 
 function currentMonth() {
-  return TODAY.slice(0, 7);
+  return todayYmd().slice(0, 7);
 }
 
 function monthLabel(m: string) {

@@ -13,7 +13,7 @@ import {
 } from '../store/erp-store';
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatDate, formatKgAmount, TODAY } from '../utils/format';
+import { formatNumber, formatDate, formatKgAmount, todayYmd } from '../utils/format';
 import { printShiftHistory } from '../utils/shift-history-print';
 import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
@@ -867,7 +867,7 @@ export function ShiftWork() {
 
   const [recordEditId, setRecordEditId] = useState<string | null>(null);
   const [recordEditForm, setRecordEditForm] = useState({
-    date: TODAY,
+    date: todayYmd(),
     shift: 1,
     workerName: '',
     machineId: '',
@@ -944,7 +944,7 @@ export function ShiftWork() {
 
   const timelineShiftNumbers = useMemo(() => {
     const set = new Set(shiftPickerDefs.map((d) => d.number));
-    state.shiftRecords.filter((r) => r.date === TODAY).forEach((r) => set.add(r.shift));
+    state.shiftRecords.filter((r) => r.date === todayYmd()).forEach((r) => set.add(r.shift));
     return [...set].sort((a, b) => a - b);
   }, [shiftPickerDefs, state.shiftRecords]);
 
@@ -994,7 +994,7 @@ export function ShiftWork() {
   }, [shiftPickerDefs, newWorkerShift]);
 
   const [form, setForm] = useState({
-    date: TODAY,
+    date: todayYmd(),
     shift: 1,
     workerName: '',
   });
@@ -1522,7 +1522,7 @@ export function ShiftWork() {
 
     printShiftHistory({
       periodLabel: filterLabel,
-      printedAtIso: TODAY,
+      printedAtIso: todayYmd(),
       rows: rows.map((r) => {
         const machine = state.machines.find((m) => m.id === r.machineId);
         const brakPct =
@@ -1589,7 +1589,7 @@ export function ShiftWork() {
   }, [recordEditId, recordEditForm.shift, shiftPickerDefs, shiftDefinitions, t]);
 
   // Today's stats (always from full state)
-  const todayRecords = state.shiftRecords.filter(r => r.date === TODAY);
+  const todayRecords = state.shiftRecords.filter(r => r.date === todayYmd());
   const todayWorkers = new Set(todayRecords.map(r => r.workerName)).size;
   const todayProduced = todayRecords.reduce((s, r) => s + r.producedQty, 0);
   const todayBrak = todayRecords.reduce((s, r) => s + r.defectCount, 0);
@@ -1720,7 +1720,7 @@ export function ShiftWork() {
       {/* Shift timeline — today */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 min-[400px]:gap-4">
         {timelineShiftNumbers.map((s) => {
-          const sRecs = state.shiftRecords.filter(r => r.date === TODAY && r.shift === s);
+          const sRecs = state.shiftRecords.filter(r => r.date === todayYmd() && r.shift === s);
           const sc = shiftStyleFor(s);
           const label = getShiftLabel(shiftDefinitions, s, t);
           const timeDisp = getShiftTimeDisplay(shiftDefinitions, s, t);
@@ -1884,7 +1884,7 @@ export function ShiftWork() {
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelDate}</label>
                   <SingleDatePicker
                     value={form.date}
-                    onChange={(iso) => setForm({ ...form, date: iso || TODAY })}
+                    onChange={(iso) => setForm({ ...form, date: iso || todayYmd() })}
                   />
                 </div>
                 <div className="min-w-0">
@@ -2449,7 +2449,7 @@ export function ShiftWork() {
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2 px-3 min-[400px]:px-5 py-3 min-[400px]:py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
-              <h3 className="text-slate-800 dark:text-white font-semibold text-xs min-[400px]:text-sm break-all">{t.todayPreviewTitle}: {TODAY}</h3>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-xs min-[400px]:text-sm break-all">{t.todayPreviewTitle}: {todayYmd()}</h3>
               <div className="flex items-center gap-2 sm:gap-3">
                 <span className="text-xs text-slate-400">{todayRecords.length} {t.records}</span>
                 <button
@@ -3243,7 +3243,7 @@ export function ShiftWork() {
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelDate}</label>
                   <SingleDatePicker
                     value={recordEditForm.date}
-                    onChange={(iso) => setRecordEditForm({ ...recordEditForm, date: iso || TODAY })}
+                    onChange={(iso) => setRecordEditForm({ ...recordEditForm, date: iso || todayYmd() })}
                   />
                 </div>
                 <div>

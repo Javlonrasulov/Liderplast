@@ -1,3 +1,6 @@
+/** Business calendar timezone (Uzbekistan, UTC+5, no DST). */
+export const APP_TIME_ZONE = 'Asia/Tashkent';
+
 /** YYYY-MM-DD in the user's local calendar (matches `<input type="date">` and wall-clock "today"). */
 export function toLocalDateString(iso: string | number | Date): string {
   const d = iso instanceof Date ? iso : new Date(iso);
@@ -8,7 +11,64 @@ export function toLocalDateString(iso: string | number | Date): string {
   return `${y}-${m}-${day}`;
 }
 
-export const TODAY = toLocalDateString(new Date());
+let serverTodayCache: string | null = null;
+
+/** Set after {@link refreshServerToday} from API; `null` clears server override. */
+export function setServerTodayYmd(ymd: string | null) {
+  serverTodayCache = ymd && /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : null;
+}
+
+function calendarPartsInAppTz(now: Date): {
+  year: number;
+  month: number;
+  day: number;
+} {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: APP_TIME_ZONE,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(now);
+  const pick = (type: string) =>
+    Number(parts.find((p) => p.type === type)?.value ?? 0);
+  return { year: pick('year'), month: pick('month') - 1, day: pick('day') };
+}
+
+/** Year/month/day for calendar UI; prefers server `today` when synced. */
+export function getAppCalendarParts(now: Date = new Date()): {
+  year: number;
+  month: number;
+  day: number;
+} {
+  if (serverTodayCache) {
+    const p = parseYmdLocal(serverTodayCache);
+    if (p) {
+      return {
+        year: p.getFullYear(),
+        month: p.getMonth(),
+        day: p.getDate(),
+      };
+    }
+  }
+  return calendarPartsInAppTz(now);
+}
+
+/** Local fallback (business TZ) when API is unavailable. */
+export function localTodayYmd(now: Date = new Date()): string {
+  const { year, month, day } = calendarPartsInAppTz(now);
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+/**
+ * Today's date (`YYYY-MM-DD`).
+ * Uses server health `today` when synced over the network; otherwise {@link localTodayYmd}.
+ */
+export function todayYmd(now: Date = new Date()): string {
+  return serverTodayCache ?? localTodayYmd(now);
+}
+
+/** @deprecated Use {@link todayYmd}() instead. */
+export const TODAY = localTodayYmd();
 
 export function formatNumber(num: number): string {
   return new Intl.NumberFormat('ru-RU').format(Math.round(num));

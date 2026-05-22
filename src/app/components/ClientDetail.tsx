@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatCurrency, formatDate, formatNumber, TODAY } from '../utils/format';
+import { formatCurrency, formatDate, formatNumber, todayYmd } from '../utils/format';
 import { formatSalePriceLabel } from '../utils/sales-currency';
 import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
 import { PhoneInput } from './PhoneInput';
@@ -57,7 +57,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   // Payment form
   const [pmAmount, setPmAmount] = useState('');
   const [pmDesc, setPmDesc] = useState('');
-  const [pmDate, setPmDate] = useState(TODAY);
+  const [pmDate, setPmDate] = useState(todayYmd());
   const [pmSuccess, setPmSuccess] = useState('');
   const [pmError, setPmError] = useState('');
 
