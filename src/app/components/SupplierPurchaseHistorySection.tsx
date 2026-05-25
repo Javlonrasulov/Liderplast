@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Download, Printer } from 'lucide-react';
 import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -23,6 +23,9 @@ export function SupplierPurchaseHistorySection() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
   const { hasPermission } = useAuth();
+  const [downloadError, setDownloadError] = useState('');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   const canFulfill =
     hasPermission('manage_suppliers') ||
     hasPermission('view_expenses') ||
@@ -46,16 +49,24 @@ export function SupplierPurchaseHistorySection() {
   };
 
   const handleDownloadPdf = async (order: SupplierPurchaseOrder) => {
+    setDownloadError('');
+    setDownloadingId(order.id);
     try {
       await downloadSupplierPurchasePdf(order, state.supplierPurchaseOrders);
     } catch {
-      /* xuddi sotuv tarixida — toast yo‘q */
+      setDownloadError(t.slPdfDownloadFailed);
+      window.setTimeout(() => setDownloadError(''), 5000);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
+      {downloadError && (
+        <p className="text-xs text-red-600 dark:text-red-400">{downloadError}</p>
+      )}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
         <table className="w-full text-xs min-w-[960px]">
           <thead>
@@ -129,10 +140,11 @@ export function SupplierPurchaseHistorySection() {
                       <button
                         type="button"
                         onClick={() => void handleDownloadPdf(o)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                        disabled={downloadingId === o.id}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors disabled:opacity-40"
                         title={t.aktDownloadPdf}
                       >
-                        <Download size={14} />
+                        <Download size={14} className={downloadingId === o.id ? 'animate-pulse' : ''} />
                       </button>
                       {o.status === 'PENDING' && canFulfill && (
                         <button

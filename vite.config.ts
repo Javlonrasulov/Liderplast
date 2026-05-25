@@ -32,6 +32,10 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
 
+  optimizeDeps: {
+    include: ['html2pdf.js'],
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })

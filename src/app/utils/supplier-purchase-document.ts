@@ -1,5 +1,6 @@
 import type { SupplierPurchaseOrder } from '../store/erp-store';
 import { formatCurrency, formatDate, formatNumber } from './format';
+import { createOffscreenPdfHost, downloadElementAsPdf } from './html2pdf-download';
 
 const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
 
@@ -152,7 +153,7 @@ function buildCopyHtml(order: SupplierPurchaseOrder, documentNumber: string) {
             <td class="r">${formatNumber(order.quantity)}</td>
             <td class="r">${formatNumber(unitPrice)}</td>
             <td class="r">${formatNumber(order.amountOriginal)}</td>
-            <td class="r">${formatCurrency(order.amountUzs)}</td>
+            <td class="r">${formatNumber(order.amountUzs)} UZS</td>
           </tr>
         </tbody>
       </table>
@@ -220,7 +221,7 @@ function buildPrintWindowHtml(order: SupplierPurchaseOrder, allOrders: SupplierP
 
 function pdfFilename(order: SupplierPurchaseOrder, documentNumber: string) {
   const safeSupplier = (order.supplierName ?? 'postavshik')
-    .replace(/[^\p{L}\p{N}\s_-]+/gu, '')
+    .replace(/[^a-zA-Z0-9\u0400-\u04FF\s_-]+/g, '')
     .trim()
     .replace(/\s+/g, '_')
     .slice(0, 40);
@@ -247,29 +248,17 @@ export async function downloadSupplierPurchasePdf(
     order,
     allOrders.length > 0 ? allOrders : [order],
   );
-  const host = document.createElement('div');
-  host.style.cssText =
-    'position:fixed;left:-10000px;top:0;width:210mm;background:#fff;z-index:-1';
-  host.innerHTML = `<style>${PRINT_STYLES}</style>${buildNoteBodyHtml(order, documentNumber, 1)}`;
-  document.body.appendChild(host);
+  const host = createOffscreenPdfHost(
+    `<style>${PRINT_STYLES}</style>${buildNoteBodyHtml(order, documentNumber, 1)}`,
+  );
 
   try {
-    const root = host.querySelector('.purchase-note-root') as HTMLElement | null;
-    if (!root) return;
-
-    const { default: html2pdf } = await import('html2pdf.js');
-    await html2pdf()
-      .set({
-        margin: [8, 8, 8, 8],
-        filename: pdfFilename(order, documentNumber),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-      })
-      .from(root)
-      .save();
+    const root = host.querySelector('.purchase-note-root');
+    if (!root || !(root instanceof HTMLElement)) {
+      throw new Error('PDF mazmun topilmadi');
+    }
+    await downloadElementAsPdf(root, pdfFilename(order, documentNumber));
   } finally {
-    document.body.removeChild(host);
+    host.remove();
   }
 }

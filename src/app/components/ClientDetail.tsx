@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import {
   ArrowLeft, User, Phone, Building2, CreditCard, ShoppingCart, Wallet,
   Plus, Trash2, CheckCircle2, AlertTriangle, Scale, Calendar, ChevronDown,
@@ -64,6 +65,20 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [pmDate, setPmDate] = useState(todayYmd());
   const [pmSuccess, setPmSuccess] = useState('');
   const [pmError, setPmError] = useState('');
+
+  const handleDownloadSalePdf = useCallback(
+    async (sale: (typeof state.sales)[number]) => {
+      const toastId = toast.loading(`${t.aktDownloadPdf}…`);
+      try {
+        await downloadSaleDeliveryNotePdf(sale, state.sales);
+        toast.success(t.aktDownloadPdf, { id: toastId });
+      } catch (err) {
+        console.error('[client] PDF download failed', err);
+        toast.error(t.slPdfDownloadFailed, { id: toastId });
+      }
+    },
+    [state.sales, t.aktDownloadPdf, t.slPdfDownloadFailed],
+  );
 
   const client = state.clients.find(c => c.id === clientId);
 
@@ -565,7 +580,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => void downloadSaleDeliveryNotePdf(sale, state.sales)}
+                                  onClick={() => void handleDownloadSalePdf(sale)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
                                   title={t.aktDownloadPdf}
                                 >
@@ -639,7 +654,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                             </button>
                             <button
                               type="button"
-                              onClick={() => void downloadSaleDeliveryNotePdf(sale, state.sales)}
+                              onClick={() => void handleDownloadSalePdf(sale)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                               title={t.aktDownloadPdf}
                             >

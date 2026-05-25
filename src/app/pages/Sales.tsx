@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil, Receipt, ListOrdered, Download } from 'lucide-react';
 import {
   useERP,
@@ -373,10 +374,13 @@ export function Sales() {
   };
 
   const handleDownloadSalePdf = async (sale: Sale) => {
+    const toastId = toast.loading(`${t.aktDownloadPdf}…`);
     try {
       await downloadSaleDeliveryNotePdf(sale, state.sales);
-    } catch {
-      setError(t.slPdfDownloadFailed);
+      toast.success(t.aktDownloadPdf, { id: toastId });
+    } catch (err) {
+      console.error('[sales] PDF download failed', err);
+      toast.error(t.slPdfDownloadFailed, { id: toastId });
     }
   };
 
