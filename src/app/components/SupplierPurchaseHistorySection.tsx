@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Download, Printer } from 'lucide-react';
 import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { formatCurrency, formatNumber } from '../utils/format';
 import {
-  downloadSupplierPurchasePdf,
+  downloadSupplierPurchaseExcel,
   printSupplierPurchaseOrder,
 } from '../utils/supplier-purchase-document';
 
@@ -23,8 +23,6 @@ export function SupplierPurchaseHistorySection() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
   const { hasPermission } = useAuth();
-  const [downloadError, setDownloadError] = useState('');
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const canFulfill =
     hasPermission('manage_suppliers') ||
@@ -48,25 +46,40 @@ export function SupplierPurchaseHistorySection() {
     printSupplierPurchaseOrder(order, state.supplierPurchaseOrders);
   };
 
-  const handleDownloadPdf = async (order: SupplierPurchaseOrder) => {
-    setDownloadError('');
-    setDownloadingId(order.id);
-    try {
-      await downloadSupplierPurchasePdf(order, state.supplierPurchaseOrders);
-    } catch {
-      setDownloadError(t.slPdfDownloadFailed);
-      window.setTimeout(() => setDownloadError(''), 5000);
-    } finally {
-      setDownloadingId(null);
-    }
+  const handleDownload = (order: SupplierPurchaseOrder) => {
+    const qtyLbl = `${formatNumber(order.quantity)} ${qtyUnitLabel(order.quantityUnit, t)}`;
+    const paymentLbl =
+      order.paymentType === 'CREDIT' ? t.supPaymentCredit : t.supPaymentCash;
+    const statusLbl =
+      order.status === 'PENDING' ? t.prRmStatusPending : t.prRmStatusFulfilled;
+    downloadSupplierPurchaseExcel(
+      order,
+      state.supplierPurchaseOrders,
+      {
+        docNumber: '№',
+        date: t.prRmColOrderedAt,
+        supplier: t.supColSupplier,
+        product: t.supProductName,
+        quantity: t.supColQty,
+        amount: t.labelAmount,
+        amountUzs: 'UZS',
+        payment: t.supPaymentType,
+        debt: t.supDebtRemaining,
+        status: t.prStatusLabel,
+        notes: t.labelDesc,
+      },
+      qtyLbl,
+      paymentLbl,
+      statusLbl,
+    );
   };
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
-      {downloadError && (
-        <p className="text-xs text-red-600 dark:text-red-400">{downloadError}</p>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
+        <p className="text-[10px] text-slate-400 max-w-md text-right">{t.supHistoryPdfHint}</p>
+      </div>
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
         <table className="w-full text-xs min-w-[960px]">
           <thead>
@@ -139,12 +152,11 @@ export function SupplierPurchaseHistorySection() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => void handleDownloadPdf(o)}
-                        disabled={downloadingId === o.id}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors disabled:opacity-40"
-                        title={t.aktDownloadPdf}
+                        onClick={() => handleDownload(o)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                        title={t.supHistoryDownload}
                       >
-                        <Download size={14} className={downloadingId === o.id ? 'animate-pulse' : ''} />
+                        <Download size={14} />
                       </button>
                       {o.status === 'PENDING' && canFulfill && (
                         <button

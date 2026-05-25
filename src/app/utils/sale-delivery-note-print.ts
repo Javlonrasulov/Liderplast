@@ -1,8 +1,12 @@
-import type { Sale, SaleOrderItem } from '../store/erp-store';
+import type { Sale } from '../store/erp-store';
 import { formatDate, formatNumber } from './format';
-import { createOffscreenPdfHost, downloadElementAsPdf } from './html2pdf-download';
+import {
+  computeSaleDocumentNumber,
+  saleItemsForDocument,
+  SALE_NOTE_ORG_NAME,
+} from './sale-delivery-note-shared';
 
-const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
+export { computeSaleDocumentNumber, SALE_NOTE_ORG_NAME, saleItemsForDocument } from './sale-delivery-note-shared';
 
 const PRINT_STYLES = `
   * { box-sizing: border-box; }
@@ -119,36 +123,8 @@ function esc(value: string) {
     .replace(/"/g, '&quot;');
 }
 
-function saleItems(sale: Sale): SaleOrderItem[] {
-  if (sale.items && sale.items.length > 0) {
-    return sale.items;
-  }
-  return [
-    {
-      productCategory: sale.productCategory,
-      productType: sale.productType,
-      quantity: sale.quantity,
-      pricePerUnit: sale.pricePerUnit,
-      currency: 'UZS',
-      total: sale.total,
-    },
-  ];
-}
-
-/** Barcha sotuvlar bo‘yicha ketma-ket hujjat raqami (000000001 …) */
-export function computeSaleDocumentNumber(sale: Sale, allSales: Sale[]): string {
-  const sorted = [...allSales].sort((a, b) => {
-    const byDate = a.createdAt.localeCompare(b.createdAt);
-    if (byDate !== 0) return byDate;
-    return a.id.localeCompare(b.id);
-  });
-  const index = sorted.findIndex((s) => s.id === sale.id);
-  const seq = index >= 0 ? index + 1 : sorted.length + 1;
-  return String(seq).padStart(9, '0');
-}
-
 function buildCopyHtml(sale: Sale, documentNumber: string) {
-  const items = saleItems(sale);
+  const items = saleItemsForDocument(sale);
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const docDate = formatDate(sale.date);
 
@@ -169,10 +145,10 @@ function buildCopyHtml(sale: Sale, documentNumber: string) {
 
   return `
     <div class="copy">
-      <div class="company">${esc(PRINT_ORG_NAME)}</div>
+      <div class="company">${esc(SALE_NOTE_ORG_NAME)}</div>
       <div class="title">Реализация номенклатуры № ${esc(documentNumber)} от ${esc(docDate)}</div>
       <table class="meta">
-        <tr><td class="k">Отправитель:</td><td>${esc(PRINT_ORG_NAME)}</td></tr>
+        <tr><td class="k">Отправитель:</td><td>${esc(SALE_NOTE_ORG_NAME)}</td></tr>
         <tr><td class="k">Покупатель:</td><td>${esc(sale.clientName)}</td></tr>
       </table>
       <table class="items">
@@ -270,15 +246,6 @@ function buildPrintWindowHtml(sale: Sale, allSales: Sale[]) {
 </html>`;
 }
 
-function pdfFilename(sale: Sale, documentNumber: string) {
-  const safeClient = sale.clientName
-    .replace(/[^a-zA-Z0-9\u0400-\u04FF\s_-]/g, '')
-    .trim()
-    .replace(/\s+/g, '_')
-    .slice(0, 40) || 'mijoz';
-  return `realizatsiya_${documentNumber}_${safeClient}.pdf`;
-}
-
 export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
   const html = buildPrintWindowHtml(sale, allSales);
   const w = window.open('', '_blank', 'width=820,height=1100');
@@ -288,23 +255,11 @@ export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
   w.document.close();
 }
 
-/** PDF — bitta nusxa */
+/** PDF — bitta nusxa (pdfmake) */
 export async function downloadSaleDeliveryNotePdf(
   sale: Sale,
   allSales: Sale[] = [],
 ): Promise<void> {
-  const documentNumber = computeSaleDocumentNumber(sale, allSales.length > 0 ? allSales : [sale]);
-  const host = createOffscreenPdfHost(
-    `<style>${PRINT_STYLES}</style>${buildNoteBodyHtml(sale, documentNumber, 1)}`,
-  );
-
-  try {
-    const root = host.querySelector('.sale-note-root');
-    if (!root || !(root instanceof HTMLElement)) {
-      throw new Error('PDF mazmun topilmadi');
-    }
-    await downloadElementAsPdf(root, pdfFilename(sale, documentNumber));
-  } finally {
-    host.remove();
-  }
+  const { downloadSaleDeliveryNotePdfMake } = await import('./sale-delivery-note-pdfmake');
+  await downloadSaleDeliveryNotePdfMake(sale, allSales);
 }

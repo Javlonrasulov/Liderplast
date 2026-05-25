@@ -73,6 +73,8 @@ export interface T {
   supLinesCount: string;
   supLinePreview: string;
   supNoWarehousePurchasePrice: string;
+  supHistoryDownload: string;
+  supHistoryPdfHint: string;
   supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
@@ -1129,6 +1131,8 @@ const uz_cyrillic: T = {
   supLinePreview: 'Қатор жами',
   supNoWarehousePurchasePrice:
     'Сотиб олиш нархи омборда йўқ — аввал омборда маҳсулот нархини киритинг.',
+  supHistoryDownload: 'Excel юклаш',
+  supHistoryPdfHint: 'PDF учун «Чоп этиш» → браузерда «PDF сифатида сақлаш».',
   supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
@@ -2154,6 +2158,8 @@ const uz_latin: T = {
   supLinePreview: 'Qator jami',
   supNoWarehousePurchasePrice:
     'Sotib olish narxi omborda yo‘q — avval omborda mahsulot narxini kiriting.',
+  supHistoryDownload: 'Excel yuklash',
+  supHistoryPdfHint: 'PDF uchun «Chop etish» → brauzerda «PDF sifatida saqlash».',
   supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
@@ -3179,6 +3185,8 @@ const ru: T = {
   supLinePreview: 'Итого по строке',
   supNoWarehousePurchasePrice:
     'Закупочная цена не задана на складе — сначала укажите её в карточке товара.',
+  supHistoryDownload: 'Скачать Excel',
+  supHistoryPdfHint: 'Для PDF: «Печать» → «Сохранить как PDF» в браузере.',
   supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',

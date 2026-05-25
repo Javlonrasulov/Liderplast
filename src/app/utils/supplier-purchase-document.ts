@@ -1,6 +1,6 @@
+import * as XLSX from 'xlsx';
 import type { SupplierPurchaseOrder } from '../store/erp-store';
 import { formatCurrency, formatDate, formatNumber } from './format';
-import { createOffscreenPdfHost, downloadElementAsPdf } from './html2pdf-download';
 
 const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
 
@@ -219,14 +219,28 @@ function buildPrintWindowHtml(order: SupplierPurchaseOrder, allOrders: SupplierP
 </html>`;
 }
 
-function pdfFilename(order: SupplierPurchaseOrder, documentNumber: string) {
+function exportFilename(order: SupplierPurchaseOrder, documentNumber: string, ext: string) {
   const safeSupplier = (order.supplierName ?? 'postavshik')
     .replace(/[^a-zA-Z0-9\u0400-\u04FF\s_-]+/g, '')
     .trim()
     .replace(/\s+/g, '_')
     .slice(0, 40);
-  return `sotib_olish_${documentNumber}_${safeSupplier}.pdf`;
+  return `sotib_olish_${documentNumber}_${safeSupplier}.${ext}`;
 }
+
+export type SupplierPurchaseExportLabels = {
+  date: string;
+  supplier: string;
+  product: string;
+  quantity: string;
+  amount: string;
+  amountUzs: string;
+  payment: string;
+  debt: string;
+  status: string;
+  notes: string;
+  docNumber: string;
+};
 
 export function printSupplierPurchaseOrder(
   order: SupplierPurchaseOrder,
@@ -240,25 +254,36 @@ export function printSupplierPurchaseOrder(
   w.document.close();
 }
 
-export async function downloadSupplierPurchasePdf(
+/** Tez yuklash — html2pdf UI ni qotirmaydi */
+export function downloadSupplierPurchaseExcel(
   order: SupplierPurchaseOrder,
-  allOrders: SupplierPurchaseOrder[] = [],
-): Promise<void> {
+  allOrders: SupplierPurchaseOrder[],
+  labels: SupplierPurchaseExportLabels,
+  qtyLabel: string,
+  paymentLabel: string,
+  statusLabel: string,
+): void {
   const documentNumber = computeSupplierPurchaseDocumentNumber(
     order,
     allOrders.length > 0 ? allOrders : [order],
   );
-  const host = createOffscreenPdfHost(
-    `<style>${PRINT_STYLES}</style>${buildNoteBodyHtml(order, documentNumber, 1)}`,
-  );
 
-  try {
-    const root = host.querySelector('.purchase-note-root');
-    if (!root || !(root instanceof HTMLElement)) {
-      throw new Error('PDF mazmun topilmadi');
-    }
-    await downloadElementAsPdf(root, pdfFilename(order, documentNumber));
-  } finally {
-    host.remove();
-  }
+  const row: Record<string, string | number> = {
+    [labels.docNumber]: documentNumber,
+    [labels.date]: formatDate(order.orderedAt) || order.orderedAt.slice(0, 10),
+    [labels.supplier]: order.supplierName ?? '',
+    [labels.product]: order.productName,
+    [labels.quantity]: qtyLabel,
+    [labels.amount]: `${formatNumber(order.amountOriginal)} ${order.currency}`,
+    [labels.amountUzs]: formatCurrency(order.amountUzs),
+    [labels.payment]: paymentLabel,
+    [labels.debt]: order.debtAmountUzs > 0 ? formatCurrency(order.debtAmountUzs) : '',
+    [labels.status]: statusLabel,
+    [labels.notes]: order.notes ?? '',
+  };
+
+  const ws = XLSX.utils.json_to_sheet([row]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Purchase');
+  XLSX.writeFile(wb, exportFilename(order, documentNumber, 'xlsx'));
 }

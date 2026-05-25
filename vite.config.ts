@@ -33,7 +33,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: ['html2pdf.js'],
+    include: ['pdfmake/build/pdfmake.min.js', 'pdfmake/build/vfs_fonts.js'],
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
