@@ -296,13 +296,18 @@ export class CrmService {
           items: {
             create: dto.items.map((item) => {
               const total = this.orderItemTotalUzs(item);
+              const currency = item.currency ?? PurchaseOrderCurrency.UZS;
               return {
                 productType: item.productType,
                 semiProductId: item.semiProductId,
                 finishedProductId: item.finishedProductId,
                 quantity: item.quantity,
                 price: item.price,
-                currency: item.currency ?? PurchaseOrderCurrency.UZS,
+                currency,
+                fxRateToUzs:
+                  currency === PurchaseOrderCurrency.UZS
+                    ? null
+                    : (item.fxRateToUzs ?? null),
                 total,
               };
             }),

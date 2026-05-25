@@ -3,6 +3,113 @@ import { formatDate, formatNumber } from './format';
 
 const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
 
+const PRINT_STYLES = `
+  * { box-sizing: border-box; }
+  .sale-note-root {
+    font-family: "Times New Roman", Times, serif;
+    color: #000;
+    background: #fff;
+    font-size: 8.5pt;
+    line-height: 1.3;
+    padding: 2mm;
+  }
+  .page-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6mm;
+    width: 100%;
+  }
+  .copy {
+    width: 100%;
+    padding: 2mm 0;
+    page-break-inside: avoid;
+  }
+  .copy + .copy {
+    padding-top: 5mm;
+    border-top: 1px dashed #999;
+  }
+  .company {
+    font-weight: 700;
+    font-size: 12pt;
+    margin-bottom: 1mm;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 10pt;
+    margin-bottom: 2.5mm;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .meta td {
+    padding: 0.5mm 0;
+    vertical-align: top;
+    font-size: 8pt;
+  }
+  .meta .k {
+    white-space: nowrap;
+    padding-right: 2mm;
+    width: 30%;
+    font-weight: 700;
+  }
+  .items {
+    margin-top: 2.5mm;
+    font-size: 7.5pt;
+  }
+  .items th,
+  .items td {
+    border: 1px solid #000;
+    padding: 0.9mm 1mm;
+    vertical-align: top;
+  }
+  .items th {
+    font-weight: 700;
+    text-align: center;
+    background: #f5f5f5;
+  }
+  .items .c { text-align: center; }
+  .items .r { text-align: right; white-space: nowrap; }
+  .items .l { text-align: left; }
+  .items tfoot .total-label {
+    font-weight: 700;
+    text-align: right;
+  }
+  .items tfoot .total-qty {
+    font-weight: 700;
+  }
+  .sign {
+    margin-top: 4mm;
+    width: 100%;
+    border: none;
+  }
+  .sign td {
+    border: none;
+    padding: 0 2mm 0 0;
+    vertical-align: top;
+    width: 33.33%;
+  }
+  .sign-mid {
+    text-align: center;
+  }
+  .sign-label {
+    font-weight: 700;
+    font-size: 8pt;
+    margin-bottom: 1mm;
+  }
+  .sign-line {
+    border-bottom: 1px solid #000;
+    height: 10mm;
+    min-height: 10mm;
+    width: 100%;
+  }
+  .sign-line-tall {
+    height: 22mm;
+    min-height: 22mm;
+  }
+`;
+
 function esc(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -21,6 +128,7 @@ function saleItems(sale: Sale): SaleOrderItem[] {
       productType: sale.productType,
       quantity: sale.quantity,
       pricePerUnit: sale.pricePerUnit,
+      currency: 'UZS',
       total: sale.total,
     },
   ];
@@ -119,9 +227,16 @@ function buildCopyHtml(sale: Sale, documentNumber: string) {
     </div>`;
 }
 
-export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []) {
-  const documentNumber = computeSaleDocumentNumber(sale, allSales.length > 0 ? allSales : [sale]);
+function buildNoteBodyHtml(sale: Sale, documentNumber: string, copyCount: 1 | 2) {
   const copy = buildCopyHtml(sale, documentNumber);
+  const copies = copyCount === 2 ? `${copy}${copy}` : copy;
+  return `<div class="sale-note-root"><div class="page-row">${copies}</div></div>`;
+}
+
+/** Print window uchun to‘liq HTML (2 nusxa + avto chop) */
+function buildPrintWindowHtml(sale: Sale, allSales: Sale[]) {
+  const documentNumber = computeSaleDocumentNumber(sale, allSales.length > 0 ? allSales : [sale]);
+  const body = buildNoteBodyHtml(sale, documentNumber, 2);
 
   return `<!doctype html>
 <html>
@@ -137,107 +252,8 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
         color: #000;
         background: #fff;
       }
-      .page-row {
-        display: flex;
-        flex-direction: column;
-        gap: 6mm;
-        width: 100%;
-      }
-      .copy {
-        width: 100%;
-        padding: 2mm 0;
-        font-size: 8.5pt;
-        line-height: 1.3;
-        page-break-inside: avoid;
-      }
-      .copy + .copy {
-        padding-top: 5mm;
-        border-top: 1px dashed #999;
-      }
-      .company {
-        font-weight: 700;
-        font-size: 12pt;
-        margin-bottom: 1mm;
-      }
-      .title {
-        font-weight: 700;
-        font-size: 10pt;
-        margin-bottom: 2.5mm;
-        text-align: center;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .meta td {
-        padding: 0.5mm 0;
-        vertical-align: top;
-        font-size: 8pt;
-      }
-      .meta .k {
-        white-space: nowrap;
-        padding-right: 2mm;
-        width: 30%;
-        font-weight: 700;
-      }
-      .items {
-        margin-top: 2.5mm;
-        font-size: 7.5pt;
-      }
-      .items th,
-      .items td {
-        border: 1px solid #000;
-        padding: 0.9mm 1mm;
-        vertical-align: top;
-      }
-      .items th {
-        font-weight: 700;
-        text-align: center;
-        background: #f5f5f5;
-      }
-      .items .c { text-align: center; }
-      .items .r { text-align: right; white-space: nowrap; }
-      .items .l { text-align: left; }
-      .items tfoot .total-label {
-        font-weight: 700;
-        text-align: right;
-      }
-      .items tfoot .total-qty {
-        font-weight: 700;
-      }
-      .sign {
-        margin-top: 4mm;
-        width: 100%;
-        border: none;
-      }
-      .sign td {
-        border: none;
-        padding: 0 2mm 0 0;
-        vertical-align: top;
-        width: 33.33%;
-      }
-      .sign-mid {
-        text-align: center;
-      }
-      .sign-label {
-        font-weight: 700;
-        font-size: 8pt;
-        margin-bottom: 1mm;
-      }
-      .sign-line {
-        border-bottom: 1px solid #000;
-        height: 10mm;
-        min-height: 10mm;
-        width: 100%;
-      }
-      .sign-line-tall {
-        height: 22mm;
-        min-height: 22mm;
-      }
-      @page {
-        size: A4 portrait;
-        margin: 8mm;
-      }
+      ${PRINT_STYLES}
+      @page { size: A4 portrait; margin: 8mm; }
       @media print {
         body { padding: 0; }
         .page-row { gap: 5mm; }
@@ -245,10 +261,7 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
     </style>
   </head>
   <body>
-    <div class="page-row">
-      ${copy}
-      ${copy}
-    </div>
+    ${body}
     <script>
       window.addEventListener('load', () => setTimeout(() => window.print(), 200));
     </script>
@@ -256,11 +269,53 @@ export function buildSaleDeliveryNotePrintHtml(sale: Sale, allSales: Sale[] = []
 </html>`;
 }
 
+function pdfFilename(sale: Sale, documentNumber: string) {
+  const safeClient = sale.clientName
+    .replace(/[^\p{L}\p{N}\s_-]+/gu, '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .slice(0, 40) || 'mijoz';
+  return `realizatsiya_${documentNumber}_${safeClient}.pdf`;
+}
+
 export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
-  const html = buildSaleDeliveryNotePrintHtml(sale, allSales);
+  const html = buildPrintWindowHtml(sale, allSales);
   const w = window.open('', '_blank', 'width=820,height=1100');
   if (!w) return;
   w.document.open();
   w.document.write(html);
   w.document.close();
+}
+
+/** PDF — bitta nusxa */
+export async function downloadSaleDeliveryNotePdf(
+  sale: Sale,
+  allSales: Sale[] = [],
+): Promise<void> {
+  const documentNumber = computeSaleDocumentNumber(sale, allSales.length > 0 ? allSales : [sale]);
+  const host = document.createElement('div');
+  host.style.cssText =
+    'position:fixed;left:-10000px;top:0;width:210mm;background:#fff;z-index:-1';
+  host.innerHTML = `<style>${PRINT_STYLES}</style>${buildNoteBodyHtml(sale, documentNumber, 1)}`;
+  document.body.appendChild(host);
+
+  try {
+    const root = host.querySelector('.sale-note-root') as HTMLElement | null;
+    if (!root) return;
+
+    const { default: html2pdf } = await import('html2pdf.js');
+    await html2pdf()
+      .set({
+        margin: [8, 8, 8, 8],
+        filename: pdfFilename(sale, documentNumber),
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+      })
+      .from(root)
+      .save();
+  } finally {
+    document.body.removeChild(host);
+  }
 }

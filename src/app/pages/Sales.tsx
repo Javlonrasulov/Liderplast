@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil, Receipt, ListOrdered } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle2, UserPlus, Trash2, Package, ChevronDown, ChevronUp, Building2, CreditCard, Copy, Check, ExternalLink, Printer, Pencil, Receipt, ListOrdered, Download } from 'lucide-react';
 import {
   useERP,
   type FinishedProductCatalogItem,
@@ -19,9 +19,14 @@ import {
   warehouseFxForProduct,
   unitPriceInUzs,
 } from '../utils/sales-currency';
+import {
+  SaleHistoryPriceDetail,
+  saleLineFromItem,
+  saleLineFromSale,
+} from '../components/SaleHistoryPriceDetail';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, todayYmd } from '../utils/format';
-import { printSaleDeliveryNote } from '../utils/sale-delivery-note-print';
+import { printSaleDeliveryNote, downloadSaleDeliveryNotePdf } from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
 import { PhoneInput } from '../components/PhoneInput';
 import { emptyUzPhoneInput, formatUzPhoneDisplay, normalizeUzPhoneForApi } from '../utils/phone';
@@ -365,6 +370,14 @@ export function Sales() {
 
   const handlePrintSale = (sale: Sale) => {
     printSaleDeliveryNote(sale, state.sales);
+  };
+
+  const handleDownloadSalePdf = async (sale: Sale) => {
+    try {
+      await downloadSaleDeliveryNotePdf(sale, state.sales);
+    } catch {
+      setError(t.slPdfDownloadFailed);
+    }
   };
 
   const handleCopyAccount = (accountNum: string, clientId: string) => {
@@ -963,7 +976,7 @@ export function Sales() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    {[t.colDate, t.colClient, t.colProduct, t.colQty, t.colTotal, t.colPaid, t.colDebt, ''].map((h, i) => (
+                    {[t.colDate, t.colClient, t.colProduct, t.colQty, t.labelPrice, t.colTotal, t.colPaid, t.colDebt, ''].map((h, i) => (
                       <th key={i} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -989,6 +1002,17 @@ export function Sales() {
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{formatNumber(sale.quantity)}</td>
+                          <td className="px-4 py-3 max-w-[14rem]">
+                            {!isMulti ? (
+                              <SaleHistoryPriceDetail
+                                line={saleLineFromSale(sale)}
+                                unitPiece={t.unitPiece}
+                                fxRateLabel={t.slSaleFxRate}
+                              />
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-white whitespace-nowrap">{formatCurrency(sale.total)}</td>
                           <td className="px-4 py-3 text-sm text-emerald-600 font-medium whitespace-nowrap">{formatCurrency(sale.paid)}</td>
                           <td className="px-4 py-3">{sale.total - sale.paid > 0 ? <span className="text-xs font-semibold text-red-600">{formatCurrency(sale.total - sale.paid)}</span> : <span className="text-xs text-emerald-600">✓</span>}</td>
@@ -1001,6 +1025,14 @@ export function Sales() {
                                 title={t.prPrint}
                               >
                                 <Printer size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void handleDownloadSalePdf(sale)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                title={t.aktDownloadPdf}
+                              >
+                                <Download size={14} />
                               </button>
                               {isMulti && (
                                 <button
@@ -1025,11 +1057,15 @@ export function Sales() {
                               </span>
                             </td>
                             <td className="px-4 py-2 text-xs text-slate-600 dark:text-slate-400">{formatNumber(item.quantity)}</td>
-                            <td className="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300">{formatCurrency(item.total)}</td>
-                            <td className="px-4 py-2 text-xs text-slate-400">
-                              {formatSalePriceLabel(item.pricePerUnit, item.currency ?? 'UZS', formatNumber)}/dona
+                            <td className="px-4 py-2 max-w-[14rem]">
+                              <SaleHistoryPriceDetail
+                                line={saleLineFromItem(item)}
+                                unitPiece={t.unitPiece}
+                                fxRateLabel={t.slSaleFxRate}
+                              />
                             </td>
-                            <td colSpan={2} />
+                            <td className="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300">{formatCurrency(item.total)}</td>
+                            <td colSpan={3} />
                           </tr>
                         ))}
                       </React.Fragment>

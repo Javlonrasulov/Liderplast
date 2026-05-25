@@ -1,8 +1,13 @@
 import React, { useMemo } from 'react';
-import { useERP } from '../store/erp-store';
+import { Download, Printer } from 'lucide-react';
+import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { formatCurrency, formatNumber } from '../utils/format';
+import {
+  downloadSupplierPurchasePdf,
+  printSupplierPurchaseOrder,
+} from '../utils/supplier-purchase-document';
 
 const emptyCell = '\u2014';
 
@@ -34,6 +39,18 @@ export function SupplierPurchaseHistorySection() {
   const onFulfill = async (id: string) => {
     if (!canFulfill) return;
     await dispatch({ type: 'FULFILL_SUPPLIER_PURCHASE_ORDER', payload: id });
+  };
+
+  const handlePrint = (order: SupplierPurchaseOrder) => {
+    printSupplierPurchaseOrder(order, state.supplierPurchaseOrders);
+  };
+
+  const handleDownloadPdf = async (order: SupplierPurchaseOrder) => {
+    try {
+      await downloadSupplierPurchasePdf(order, state.supplierPurchaseOrders);
+    } catch {
+      /* xuddi sotuv tarixida — toast yo‘q */
+    }
   };
 
   return (
@@ -100,15 +117,33 @@ export function SupplierPurchaseHistorySection() {
                     )}
                   </td>
                   <td className="px-3 py-2 text-right">
-                    {o.status === 'PENDING' && canFulfill && (
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
-                        onClick={() => onFulfill(o.id)}
-                        className="text-indigo-600 hover:underline text-xs font-medium"
+                        onClick={() => handlePrint(o)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
+                        title={t.prPrint}
                       >
-                        {t.prRmMarkFulfilled}
+                        <Printer size={14} />
                       </button>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => void handleDownloadPdf(o)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                        title={t.aktDownloadPdf}
+                      >
+                        <Download size={14} />
+                      </button>
+                      {o.status === 'PENDING' && canFulfill && (
+                        <button
+                          type="button"
+                          onClick={() => onFulfill(o.id)}
+                          className="text-indigo-600 hover:underline text-xs font-medium whitespace-nowrap"
+                        >
+                          {t.prRmMarkFulfilled}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

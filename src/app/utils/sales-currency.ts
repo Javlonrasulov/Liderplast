@@ -115,3 +115,41 @@ export function formatSalePriceLabel(
 ): string {
   return `${formatNumber(price)} ${currency}`;
 }
+
+export type SaleLineForDisplay = {
+  pricePerUnit: number;
+  quantity: number;
+  currency: SaleCurrency;
+  fxRateToUzs?: number;
+  total: number;
+};
+
+/** Saqlangan yoki jami/qty dan tiklangan sotuv payti kursi */
+export function effectiveSaleFxRate(line: SaleLineForDisplay): number | undefined {
+  if (line.currency === 'UZS') return undefined;
+  if (line.fxRateToUzs != null && line.fxRateToUzs > 0) return line.fxRateToUzs;
+  const denom = line.quantity * line.pricePerUnit;
+  if (denom > 0 && line.total > 0) {
+    const inferred = line.total / denom;
+    return Number.isFinite(inferred) && inferred > 0 ? inferred : undefined;
+  }
+  return undefined;
+}
+
+/** Tarix: 80 USD × 10 ta · kurs 12 000 → 9 600 000 so'm */
+export function formatSaleHistoryPriceDetail(
+  line: SaleLineForDisplay,
+  formatNumber: (n: number) => string,
+  formatCurrency: (n: number) => string,
+  labels: { unitPiece: string; fxRate: string },
+): string {
+  if (line.currency === 'UZS') {
+    return `${formatNumber(line.pricePerUnit)} so'm × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
+  }
+  const fx = effectiveSaleFxRate(line);
+  const head = `${formatNumber(line.pricePerUnit)} ${line.currency} × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
+  if (fx != null) {
+    return `${head} · ${labels.fxRate} ${formatNumber(fx)} → ${formatCurrency(line.total)}`;
+  }
+  return `${head} → ${formatCurrency(line.total)}`;
+}

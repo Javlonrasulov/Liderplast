@@ -1240,6 +1240,7 @@ type BackendOrder = {
     quantity: number;
     price: number;
     currency?: 'UZS' | 'USD' | 'EUR';
+    fxRateToUzs?: number | null;
     total: number;
     semiProduct?: { id: string; name: string } | null;
     finishedProduct?: { id: string; name: string } | null;
@@ -1830,6 +1831,7 @@ function mapBackendOrdersToSales(orders: BackendOrder[]): Sale[] {
       quantity: item.quantity,
       pricePerUnit: item.price,
       currency: item.currency ?? 'UZS',
+      fxRateToUzs: item.fxRateToUzs ?? undefined,
       total: item.total,
     }));
 

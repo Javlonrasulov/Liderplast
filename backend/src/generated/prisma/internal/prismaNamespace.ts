@@ -3594,6 +3594,7 @@ export const OrderItemScalarFieldEnum = {
   quantity: 'quantity',
   price: 'price',
   currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
   total: 'total'
 } as const
 

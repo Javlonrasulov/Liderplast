@@ -606,6 +606,8 @@ model OrderItem {
   quantity          Int
   price             Float
   currency          PurchaseOrderCurrency @default(UZS)
+  /// Sotuv paytidagi MB kursi (1 USD/EUR = necha so‘m); UZS uchun null
+  fxRateToUzs       Float?
   total             Float
 }
 
