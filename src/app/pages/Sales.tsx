@@ -27,8 +27,14 @@ import {
 } from '../components/SaleHistoryPriceDetail';
 import { useApp } from '../i18n/app-context';
 import { formatNumber, formatCurrency, formatDate, todayYmd } from '../utils/format';
-import { printSaleDeliveryNote, downloadSaleDeliveryNotePdf } from '../utils/sale-delivery-note-print';
+import {
+  printSaleDeliveryNote,
+  downloadSaleDeliveryNotePdf,
+  downloadSalesDeliveryNotesPdf,
+} from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
+import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
+import { Checkbox } from '../components/ui/checkbox';
 import { PhoneInput } from '../components/PhoneInput';
 import { emptyUzPhoneInput, formatUzPhoneDisplay, normalizeUzPhoneForApi } from '../utils/phone';
 import {
@@ -76,6 +82,9 @@ export function Sales() {
   const { t, dateFilter, filterLabel } = useApp();
 
   const [activeTab, setActiveTab] = useState<'sale' | 'clients' | 'history'>('sale');
+  const [expandedSale, setExpandedSale] = useState<string | null>(null);
+  const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
+  const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
 
   // ---- Order form ----
   const [clientId, setClientId] = useState(state.clients[0]?.id || '');
@@ -333,6 +342,18 @@ export function Sales() {
   );
   const historyFilteredByHeader =
     dateFilter.preset !== 'all' && (dateFilter.from || dateFilter.to);
+  const historySaleIds = useMemo(() => historySales.map((s) => s.id), [historySales]);
+  const allHistorySelected =
+    historySales.length > 0 && selectedSaleIds.size === historySales.length;
+
+  useEffect(() => {
+    setSelectedSaleIds((prev) => {
+      const next = new Set([...prev].filter((id) => historySaleIds.includes(id)));
+      if (next.size === prev.size && [...next].every((id) => prev.has(id))) return prev;
+      return next;
+    });
+  }, [historySaleIds]);
+
   const totalRevenue = state.sales.reduce((s, sale) => s + sale.total, 0);
   const totalPaidAll = state.sales.reduce((s, sale) => s + sale.paid, 0);
   const totalDebt = state.clients.reduce((s, c) => s + c.debt, 0);
@@ -343,7 +364,6 @@ export function Sales() {
     { key: 'history', label: t.slTabHistory, icon: CheckCircle2 },
   ];
 
-  const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedClientDetail, setSelectedClientDetail] = useState<string | null>(null);
   const [clientDetailEditing, setClientDetailEditing] = useState(false);
@@ -381,6 +401,42 @@ export function Sales() {
     } catch (err) {
       console.error('[sales] PDF download failed', err);
       toast.error(t.slPdfDownloadFailed, { id: toastId });
+    }
+  };
+
+  const toggleHistorySaleSelection = (saleId: string, checked: boolean) => {
+    setSelectedSaleIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(saleId);
+      else next.delete(saleId);
+      return next;
+    });
+  };
+
+  const toggleAllHistorySales = () => {
+    if (allHistorySelected) {
+      setSelectedSaleIds(new Set());
+    } else {
+      setSelectedSaleIds(new Set(historySaleIds));
+    }
+  };
+
+  const handleBulkDownloadSalesPdf = async () => {
+    const selected = historySales.filter((s) => selectedSaleIds.has(s.id));
+    if (selected.length === 0) {
+      toast.error(t.slSelectSalesForPdf);
+      return;
+    }
+    setPdfBulkLoading(true);
+    const toastId = toast.loading(`${t.slDownloadSelectedPdf}…`);
+    try {
+      await downloadSalesDeliveryNotesPdf(selected, state.sales, t.slBulkPdfSummaryTitle);
+      toast.success(t.slDownloadSelectedPdf, { id: toastId });
+    } catch (err) {
+      console.error('[sales] bulk PDF download failed', err);
+      toast.error(t.slPdfDownloadFailed, { id: toastId });
+    } finally {
+      setPdfBulkLoading(false);
     }
   };
 
@@ -968,6 +1024,15 @@ export function Sales() {
               {t.slHistoryIgnoresDateFilter} ({filterLabel})
             </p>
           )}
+          {historySales.length > 0 && (
+            <SaleHistoryBulkToolbar
+              allSelected={allHistorySelected}
+              onToggleAll={toggleAllHistorySales}
+              selectedCount={selectedSaleIds.size}
+              onBulkDownload={() => void handleBulkDownloadSalesPdf()}
+              downloading={pdfBulkLoading}
+            />
+          )}
           {historySales.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 px-6 text-center text-slate-400 text-sm gap-2">
               <span>{t.noData}</span>
@@ -980,6 +1045,13 @@ export function Sales() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">
+                    <th className="w-10 px-3 py-3">
+                      <Checkbox
+                        checked={allHistorySelected}
+                        onCheckedChange={toggleAllHistorySales}
+                        aria-label={t.slSelectAll}
+                      />
+                    </th>
                     {[t.colDate, t.colClient, t.colProduct, t.colQty, t.labelPrice, t.colTotal, t.colPaid, t.colDebt, ''].map((h, i) => (
                       <th key={i} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                     ))}
@@ -991,7 +1063,14 @@ export function Sales() {
                     const isExpanded = expandedSale === sale.id;
                     return (
                       <React.Fragment key={sale.id}>
-                        <tr className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''}`}>
+                        <tr className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''} ${selectedSaleIds.has(sale.id) ? 'bg-indigo-50/60 dark:bg-indigo-900/15' : ''}`}>
+                          <td className="px-3 py-3">
+                            <Checkbox
+                              checked={selectedSaleIds.has(sale.id)}
+                              onCheckedChange={(c) => toggleHistorySaleSelection(sale.id, c === true)}
+                              aria-label={sale.clientName}
+                            />
+                          </td>
                           <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{formatDate(sale.date)}</td>
                           <td className="px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{sale.clientName}</td>
                           <td className="px-4 py-3">
@@ -1053,6 +1132,7 @@ export function Sales() {
                         {/* Expanded items */}
                         {isMulti && isExpanded && sale.items!.map((item, ii) => (
                           <tr key={`${sale.id}_item_${ii}`} className="bg-indigo-50/50 dark:bg-indigo-900/10 border-t border-indigo-100 dark:border-indigo-800/30">
+                            <td className="px-3 py-2" />
                             <td className="px-4 py-2 text-xs text-slate-400 pl-8">↳</td>
                             <td className="px-4 py-2 text-xs text-slate-500">—</td>
                             <td className="px-4 py-2">

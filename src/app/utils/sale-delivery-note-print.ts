@@ -263,3 +263,13 @@ export async function downloadSaleDeliveryNotePdf(
   const { downloadSaleDeliveryNotePdfMake } = await import('./sale-delivery-note-pdfmake');
   await downloadSaleDeliveryNotePdfMake(sale, allSales);
 }
+
+/** PDF — tanlangan sotuvlar xulosasi + har biri uchun hujjat */
+export async function downloadSalesDeliveryNotesPdf(
+  sales: Sale[],
+  allSales: Sale[] = [],
+  summaryTitle?: string,
+): Promise<void> {
+  const { downloadSalesDeliveryNotesPdfMake } = await import('./sale-delivery-note-pdfmake');
+  await downloadSalesDeliveryNotesPdfMake(sales, allSales, summaryTitle);
+}

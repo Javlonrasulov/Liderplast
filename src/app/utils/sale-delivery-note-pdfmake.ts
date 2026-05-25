@@ -1,11 +1,15 @@
 import type { Sale } from '../store/erp-store';
-import { formatDate, formatNumber } from './format';
+import { saleLineFromItem } from '../components/SaleHistoryPriceDetail';
+import { formatDate, formatCurrency, formatNumber, todayYmd } from './format';
 import { downloadPdfDefinition } from './pdfmake-download';
 import {
   computeSaleDocumentNumber,
   saleItemsForDocument,
   SALE_NOTE_ORG_NAME,
 } from './sale-delivery-note-shared';
+import { formatSaleHistoryPriceDetail } from './sales-currency';
+
+const PDF_PRICE_LABELS = { unitPiece: 'шт', fxRate: 'курс' };
 
 function signCell(label: string, lineHeight = 28) {
   return {
@@ -125,7 +129,7 @@ function buildCopyContent(sale: Sale, documentNumber: string) {
   ];
 }
 
-function buildDocDefinition(sale: Sale, documentNumber: string) {
+function defaultDocDefinition(content: object[]) {
   return {
     pageSize: 'A4' as const,
     pageMargins: [22, 22, 22, 22] as [number, number, number, number],
@@ -134,8 +138,157 @@ function buildDocDefinition(sale: Sale, documentNumber: string) {
       fontSize: 8.5,
       lineHeight: 1.25,
     },
-    content: buildCopyContent(sale, documentNumber),
+    content,
   };
+}
+
+function buildDocDefinition(sale: Sale, documentNumber: string) {
+  return defaultDocDefinition(buildCopyContent(sale, documentNumber));
+}
+
+function sortSalesChronologically(sales: Sale[]) {
+  return [...sales].sort((a, b) => {
+    const byDate = a.date.localeCompare(b.date);
+    if (byDate !== 0) return byDate;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: string) {
+  const sorted = sortSalesChronologically(sales);
+  const header = [
+    { text: '№', bold: true, alignment: 'center', fillColor: '#e8eef5' },
+    { text: 'Дата', bold: true, fillColor: '#e8eef5' },
+    { text: 'Покупатель', bold: true, fillColor: '#e8eef5' },
+    { text: 'Док. №', bold: true, fillColor: '#e8eef5' },
+    { text: 'Наименование', bold: true, fillColor: '#e8eef5' },
+    { text: 'Кол-во', bold: true, alignment: 'right', fillColor: '#e8eef5' },
+    { text: 'Цена', bold: true, fillColor: '#e8eef5' },
+    { text: 'Сумма', bold: true, alignment: 'right', fillColor: '#e8eef5' },
+    { text: 'Оплачено', bold: true, alignment: 'right', fillColor: '#e8eef5' },
+    { text: 'Долг', bold: true, alignment: 'right', fillColor: '#e8eef5' },
+  ];
+
+  const body: object[][] = [header];
+  let rowNum = 0;
+  let grandTotal = 0;
+  let grandPaid = 0;
+
+  for (const sale of sorted) {
+    const docNum = computeSaleDocumentNumber(sale, allSales);
+    const items = saleItemsForDocument(sale);
+    const debt = sale.total - sale.paid;
+    grandTotal += sale.total;
+    grandPaid += sale.paid;
+
+    items.forEach((item, itemIdx) => {
+      rowNum += 1;
+      const priceText = formatSaleHistoryPriceDetail(
+        saleLineFromItem(item),
+        formatNumber,
+        formatCurrency,
+        PDF_PRICE_LABELS,
+      );
+      const isFirst = itemIdx === 0;
+      body.push([
+        { text: String(rowNum), alignment: 'center' },
+        isFirst ? { text: formatDate(sale.date) } : { text: '' },
+        isFirst ? { text: sale.clientName } : { text: '' },
+        isFirst ? { text: docNum } : { text: '' },
+        { text: item.productType },
+        { text: formatNumber(item.quantity), alignment: 'right' },
+        { text: priceText, fontSize: 7 },
+        isFirst ? { text: formatCurrency(sale.total), alignment: 'right', bold: true } : { text: '' },
+        isFirst ? { text: formatCurrency(sale.paid), alignment: 'right' } : { text: '' },
+        isFirst
+          ? {
+              text: debt > 0 ? formatCurrency(debt) : '✓',
+              alignment: 'right',
+              color: debt > 0 ? '#b91c1c' : '#15803d',
+            }
+          : { text: '' },
+      ]);
+    });
+  }
+
+  const grandDebt = grandTotal - grandPaid;
+  body.push([
+    { text: 'Итого', colSpan: 7, alignment: 'right', bold: true },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    { text: formatCurrency(grandTotal), alignment: 'right', bold: true },
+    { text: formatCurrency(grandPaid), alignment: 'right', bold: true },
+    {
+      text: grandDebt > 0 ? formatCurrency(grandDebt) : '✓',
+      alignment: 'right',
+      bold: true,
+      color: grandDebt > 0 ? '#b91c1c' : '#15803d',
+    },
+  ]);
+
+  return [
+    { text: SALE_NOTE_ORG_NAME, bold: true, fontSize: 12, margin: [0, 0, 0, 4] },
+    {
+      text: summaryTitle,
+      bold: true,
+      fontSize: 11,
+      alignment: 'center',
+      margin: [0, 0, 0, 4],
+    },
+    {
+      text: `Записей: ${sorted.length} · Позиций: ${rowNum}`,
+      fontSize: 8,
+      alignment: 'center',
+      color: '#555555',
+      margin: [0, 0, 0, 10],
+    },
+    {
+      table: {
+        headerRows: 1,
+        widths: [16, 48, '*', 52, '*', 32, 78, 52, 52, 44],
+        body,
+      },
+      layout: {
+        hLineWidth: () => 0.5,
+        vLineWidth: () => 0.5,
+        hLineColor: () => '#000000',
+        vLineColor: () => '#000000',
+        paddingLeft: () => 2,
+        paddingRight: () => 2,
+        paddingTop: () => 2,
+        paddingBottom: () => 2,
+      },
+      fontSize: 7.5,
+      margin: [0, 0, 0, 12],
+    },
+  ];
+}
+
+function buildBulkDocDefinition(sales: Sale[], allSales: Sale[], summaryTitle: string) {
+  const sorted = sortSalesChronologically(sales);
+  const content: object[] = [...buildSummarySection(sorted, allSales, summaryTitle)];
+
+  if (sorted.length > 0) {
+    content.push({ text: '', pageBreak: 'after' });
+  }
+
+  sorted.forEach((sale, index) => {
+    if (index > 0) {
+      content.push({ text: '', pageBreak: 'before' });
+    }
+    const docNum = computeSaleDocumentNumber(sale, allSales);
+    content.push(...buildCopyContent(sale, docNum));
+  });
+
+  return defaultDocDefinition(content);
+}
+
+function bulkPdfFilename(count: number) {
+  return `realizatsiya_xulosa_${count}ta_${todayYmd()}.pdf`;
 }
 
 function pdfFilename(sale: Sale, documentNumber: string) {
@@ -152,10 +305,26 @@ export async function downloadSaleDeliveryNotePdfMake(
   sale: Sale,
   allSales: Sale[] = [],
 ): Promise<void> {
-  const documentNumber = computeSaleDocumentNumber(
-    sale,
-    allSales.length > 0 ? allSales : [sale],
-  );
+  const base = allSales.length > 0 ? allSales : [sale];
+  const documentNumber = computeSaleDocumentNumber(sale, base);
   const doc = buildDocDefinition(sale, documentNumber);
   await downloadPdfDefinition(doc, pdfFilename(sale, documentNumber));
+}
+
+/** PDF — xulosa + har bir tanlangan sotuv uchun bitta nusxa */
+export async function downloadSalesDeliveryNotesPdfMake(
+  sales: Sale[],
+  allSales: Sale[] = [],
+  summaryTitle = 'Сводка реализаций',
+): Promise<void> {
+  if (sales.length === 0) {
+    throw new Error('Hech qanday sotuv tanlanmagan');
+  }
+  const base = allSales.length > 0 ? allSales : sales;
+  if (sales.length === 1) {
+    await downloadSaleDeliveryNotePdfMake(sales[0], base);
+    return;
+  }
+  const doc = buildBulkDocDefinition(sales, base, summaryTitle);
+  await downloadPdfDefinition(doc, bulkPdfFilename(sales.length));
 }

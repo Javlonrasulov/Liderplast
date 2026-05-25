@@ -13,7 +13,13 @@ import {
   saleLineFromItem,
   saleLineFromSale,
 } from './SaleHistoryPriceDetail';
-import { printSaleDeliveryNote, downloadSaleDeliveryNotePdf } from '../utils/sale-delivery-note-print';
+import {
+  printSaleDeliveryNote,
+  downloadSaleDeliveryNotePdf,
+  downloadSalesDeliveryNotesPdf,
+} from '../utils/sale-delivery-note-print';
+import { SaleHistoryBulkToolbar } from './SaleHistoryBulkToolbar';
+import { Checkbox } from './ui/checkbox';
 import { PhoneInput } from './PhoneInput';
 import {
   emptyUzPhoneInput,
@@ -49,6 +55,8 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [activeTab, setActiveTab] = useState<Tab>('info');
   const [copiedAccount, setCopiedAccount] = useState(false);
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
+  const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
+  const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(initialEditing);
   const [editForm, setEditForm] = useState<ClientEditForm>({
     name: '',
@@ -80,12 +88,71 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
     [state.sales, t.aktDownloadPdf, t.slPdfDownloadFailed],
   );
 
+  const toggleClientSaleSelection = (saleId: string, checked: boolean) => {
+    setSelectedSaleIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(saleId);
+      else next.delete(saleId);
+      return next;
+    });
+  };
+
+  const toggleAllClientSales = () => {
+    if (allClientSalesSelected) {
+      setSelectedSaleIds(new Set());
+    } else {
+      setSelectedSaleIds(new Set(clientSaleIds));
+    }
+  };
+
+  const handleBulkDownloadClientSalesPdf = useCallback(async () => {
+    const selected = clientSales.filter((s) => selectedSaleIds.has(s.id));
+    if (selected.length === 0) {
+      toast.error(t.slSelectSalesForPdf);
+      return;
+    }
+    setPdfBulkLoading(true);
+    const toastId = toast.loading(`${t.slDownloadSelectedPdf}…`);
+    try {
+      await downloadSalesDeliveryNotesPdf(selected, state.sales, t.slBulkPdfSummaryTitle);
+      toast.success(t.slDownloadSelectedPdf, { id: toastId });
+    } catch (err) {
+      console.error('[client] bulk PDF download failed', err);
+      toast.error(t.slPdfDownloadFailed, { id: toastId });
+    } finally {
+      setPdfBulkLoading(false);
+    }
+  }, [
+    clientSales,
+    selectedSaleIds,
+    state.sales,
+    t.slBulkPdfSummaryTitle,
+    t.slDownloadSelectedPdf,
+    t.slPdfDownloadFailed,
+    t.slSelectSalesForPdf,
+  ]);
+
   const client = state.clients.find(c => c.id === clientId);
 
   const clientSales = useMemo(
     () => [...state.sales].filter(s => s.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [state.sales, clientId]
   );
+  const clientSaleIds = useMemo(() => clientSales.map((s) => s.id), [clientSales]);
+  const allClientSalesSelected =
+    clientSales.length > 0 && selectedSaleIds.size === clientSales.length;
+
+  useEffect(() => {
+    setSelectedSaleIds((prev) => {
+      const next = new Set([...prev].filter((id) => clientSaleIds.includes(id)));
+      if (next.size === prev.size && [...next].every((id) => prev.has(id))) return prev;
+      return next;
+    });
+  }, [clientSaleIds]);
+
+  useEffect(() => {
+    setSelectedSaleIds(new Set());
+  }, [clientId]);
   const clientPayments = useMemo(
     () => [...state.payments].filter(p => p.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [state.payments, clientId]
@@ -516,11 +583,25 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
             </div>
           ) : (
             <>
+              <SaleHistoryBulkToolbar
+                allSelected={allClientSalesSelected}
+                onToggleAll={toggleAllClientSales}
+                selectedCount={selectedSaleIds.size}
+                onBulkDownload={() => void handleBulkDownloadClientSalesPdf()}
+                downloading={pdfBulkLoading}
+              />
               {/* Desktop table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-700/50">
+                      <th className="w-10 px-3 py-3">
+                        <Checkbox
+                          checked={allClientSalesSelected}
+                          onCheckedChange={toggleAllClientSales}
+                          aria-label={t.slSelectAll}
+                        />
+                      </th>
                       {[t.colDate, t.colProduct, t.colQty, t.labelPrice, t.colTotal, t.colPaid, t.colDebt, t.prPrint].map((h, i) => (
                         <th key={i} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                       ))}
@@ -533,7 +614,13 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                       const saleDebt = sale.total - sale.paid;
                       return (
                         <React.Fragment key={sale.id}>
-                          <tr className="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
+                          <tr className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors ${selectedSaleIds.has(sale.id) ? 'bg-indigo-50/60 dark:bg-indigo-900/15' : ''}`}>
+                            <td className="px-3 py-3">
+                              <Checkbox
+                                checked={selectedSaleIds.has(sale.id)}
+                                onCheckedChange={(c) => toggleClientSaleSelection(sale.id, c === true)}
+                              />
+                            </td>
                             <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap font-mono">{formatDate(sale.date)}</td>
                             <td className="px-4 py-3">
                               {isMulti ? (
@@ -597,6 +684,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                           </tr>
                           {isMulti && isExpanded && sale.items!.map((item, ii) => (
                             <tr key={`${sale.id}_i${ii}`} className="bg-indigo-50/50 dark:bg-indigo-900/5 border-t border-indigo-100 dark:border-indigo-800/30">
+                              <td className="px-3 py-2" />
                               <td className="px-4 py-2 text-xs text-slate-400 pl-8">↳</td>
                               <td className="px-4 py-2">
                                 <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${

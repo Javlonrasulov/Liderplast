@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import type { SupplierPurchaseOrder } from '../store/erp-store';
 import { formatCurrency, formatDate, formatNumber } from './format';
 
@@ -219,29 +218,6 @@ function buildPrintWindowHtml(order: SupplierPurchaseOrder, allOrders: SupplierP
 </html>`;
 }
 
-function exportFilename(order: SupplierPurchaseOrder, documentNumber: string, ext: string) {
-  const safeSupplier = (order.supplierName ?? 'postavshik')
-    .replace(/[^a-zA-Z0-9\u0400-\u04FF\s_-]+/g, '')
-    .trim()
-    .replace(/\s+/g, '_')
-    .slice(0, 40);
-  return `sotib_olish_${documentNumber}_${safeSupplier}.${ext}`;
-}
-
-export type SupplierPurchaseExportLabels = {
-  date: string;
-  supplier: string;
-  product: string;
-  quantity: string;
-  amount: string;
-  amountUzs: string;
-  payment: string;
-  debt: string;
-  status: string;
-  notes: string;
-  docNumber: string;
-};
-
 export function printSupplierPurchaseOrder(
   order: SupplierPurchaseOrder,
   allOrders: SupplierPurchaseOrder[] = [],
@@ -254,36 +230,21 @@ export function printSupplierPurchaseOrder(
   w.document.close();
 }
 
-/** Tez yuklash — html2pdf UI ni qotirmaydi */
-export function downloadSupplierPurchaseExcel(
+/** PDF — pdfmake (html2canvas ishlatilmaydi) */
+export async function downloadSupplierPurchasePdf(
   order: SupplierPurchaseOrder,
   allOrders: SupplierPurchaseOrder[],
-  labels: SupplierPurchaseExportLabels,
-  qtyLabel: string,
-  paymentLabel: string,
-  statusLabel: string,
-): void {
-  const documentNumber = computeSupplierPurchaseDocumentNumber(
-    order,
-    allOrders.length > 0 ? allOrders : [order],
-  );
+  labels: import('./supplier-purchase-pdfmake').SupplierPurchasePdfLabels,
+): Promise<void> {
+  const { downloadSupplierPurchasePdfMake } = await import('./supplier-purchase-pdfmake');
+  await downloadSupplierPurchasePdfMake(order, allOrders, labels);
+}
 
-  const row: Record<string, string | number> = {
-    [labels.docNumber]: documentNumber,
-    [labels.date]: formatDate(order.orderedAt) || order.orderedAt.slice(0, 10),
-    [labels.supplier]: order.supplierName ?? '',
-    [labels.product]: order.productName,
-    [labels.quantity]: qtyLabel,
-    [labels.amount]: `${formatNumber(order.amountOriginal)} ${order.currency}`,
-    [labels.amountUzs]: formatCurrency(order.amountUzs),
-    [labels.payment]: paymentLabel,
-    [labels.debt]: order.debtAmountUzs > 0 ? formatCurrency(order.debtAmountUzs) : '',
-    [labels.status]: statusLabel,
-    [labels.notes]: order.notes ?? '',
-  };
-
-  const ws = XLSX.utils.json_to_sheet([row]);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Purchase');
-  XLSX.writeFile(wb, exportFilename(order, documentNumber, 'xlsx'));
+export async function downloadSupplierPurchasesBulkPdf(
+  orders: SupplierPurchaseOrder[],
+  allOrders: SupplierPurchaseOrder[],
+  labels: import('./supplier-purchase-pdfmake').SupplierPurchasePdfLabels,
+): Promise<void> {
+  const { downloadSupplierPurchasesBulkPdfMake } = await import('./supplier-purchase-pdfmake');
+  await downloadSupplierPurchasesBulkPdfMake(orders, allOrders, labels);
 }

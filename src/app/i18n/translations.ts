@@ -74,7 +74,16 @@ export interface T {
   supLinePreview: string;
   supNoWarehousePurchasePrice: string;
   supHistoryDownload: string;
-  supHistoryPdfHint: string;
+  supDownloadAllPdf: string;
+  supBulkPdfTitle: string;
+  supSinglePdfTitle: string;
+  supPdfDocFrom: string;
+  supPdfGenerated: string;
+  supSelectForPdf: string;
+  supSelectedCount: string;
+  supPdfAccountant: string;
+  supPdfWarehouse: string;
+  supPdfSupplierSign: string;
   supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
@@ -634,6 +643,12 @@ export interface T {
   slHistoryIgnoresDateFilter: string;
   slHistoryDebtHint: string;
   slPdfDownloadFailed: string;
+  slSelectAll: string;
+  slDeselectAll: string;
+  slSelectedCount: string;
+  slDownloadSelectedPdf: string;
+  slBulkPdfSummaryTitle: string;
+  slSelectSalesForPdf: string;
   slSaleFxRate: string;
   slAddItem: string;
   slOrderItems: string;
@@ -1131,8 +1146,17 @@ const uz_cyrillic: T = {
   supLinePreview: 'Қатор жами',
   supNoWarehousePurchasePrice:
     'Сотиб олиш нархи омборда йўқ — аввал омборда маҳсулот нархини киритинг.',
-  supHistoryDownload: 'Excel юклаш',
-  supHistoryPdfHint: 'PDF учун «Чоп этиш» → браузерда «PDF сифатида сақлаш».',
+  supHistoryDownload: 'PDF юклаш',
+  supDownloadAllPdf: 'Ҳаммасини PDF',
+  supBulkPdfTitle: 'Сотиб олиш тарихи',
+  supSinglePdfTitle: 'Поступление от поставщика',
+  supPdfDocFrom: 'дан',
+  supPdfGenerated: 'Тайёрланган сана',
+  supSelectForPdf: 'PDF учун камида битта ёзувни танланг',
+  supSelectedCount: '{n} та танланди',
+  supPdfAccountant: 'Бухгалтер',
+  supPdfWarehouse: 'Омбор (қабул)',
+  supPdfSupplierSign: 'Етказиб берувчи',
   supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
@@ -1678,6 +1702,12 @@ const uz_cyrillic: T = {
   slHistoryIgnoresDateFilter: 'Сотув тарихи юқоридаги сана фильтрига боғлиқ эмас',
   slHistoryDebtHint: 'Қарзлар бор, лекин сотувлар юкланмади — саҳифани янгиланг ёки рухсатни текширинг',
   slPdfDownloadFailed: 'PDF юклаб бўлмади',
+  slSelectAll: 'Ҳаммасини танлаш',
+  slDeselectAll: 'Танловни бекор қилиш',
+  slSelectedCount: '{n} та танланди',
+  slDownloadSelectedPdf: 'Танланганларни PDF',
+  slBulkPdfSummaryTitle: 'Сотувлар хулосаси',
+  slSelectSalesForPdf: 'PDF учун камида битта сотувни танланг',
   slSaleFxRate: 'курс',
   slAddItem: 'Қатор қўшиш',
   slOrderItems: 'Буюртма маҳсулотлари',
@@ -2158,8 +2188,17 @@ const uz_latin: T = {
   supLinePreview: 'Qator jami',
   supNoWarehousePurchasePrice:
     'Sotib olish narxi omborda yo‘q — avval omborda mahsulot narxini kiriting.',
-  supHistoryDownload: 'Excel yuklash',
-  supHistoryPdfHint: 'PDF uchun «Chop etish» → brauzerda «PDF sifatida saqlash».',
+  supHistoryDownload: 'PDF yuklash',
+  supDownloadAllPdf: 'Hammasini PDF',
+  supBulkPdfTitle: 'Sotib olish tarixi',
+  supSinglePdfTitle: 'Yetkazib beruvchidan kirim',
+  supPdfDocFrom: 'dan',
+  supPdfGenerated: 'Tayyorlangan sana',
+  supSelectForPdf: 'PDF uchun kamida bitta yozuvni tanlang',
+  supSelectedCount: '{n} ta tanlandi',
+  supPdfAccountant: 'Buxgalter',
+  supPdfWarehouse: 'Ombor (qabul)',
+  supPdfSupplierSign: 'Yetkazib beruvchi',
   supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
@@ -2705,6 +2744,12 @@ const uz_latin: T = {
   slHistoryIgnoresDateFilter: 'Sotuv tarixi yuqoridagi sana filtriga bog\'liq emas',
   slHistoryDebtHint: 'Qarzlar bor, lekin sotuvlar yuklanmagan — sahifani yangilang yoki ruxsatni tekshiring',
   slPdfDownloadFailed: 'PDF yuklab bo\'lmadi',
+  slSelectAll: 'Hammasini tanlash',
+  slDeselectAll: 'Tanlovni bekor qilish',
+  slSelectedCount: '{n} ta tanlandi',
+  slDownloadSelectedPdf: 'Tanlanganlarni PDF',
+  slBulkPdfSummaryTitle: 'Sotuvlar xulosasi',
+  slSelectSalesForPdf: 'PDF uchun kamida bitta sotuvni tanlang',
   slSaleFxRate: 'kurs',
   slAddItem: 'Qator qo\'shish',
   slOrderItems: 'Buyurtma mahsulotlari',
@@ -3185,8 +3230,17 @@ const ru: T = {
   supLinePreview: 'Итого по строке',
   supNoWarehousePurchasePrice:
     'Закупочная цена не задана на складе — сначала укажите её в карточке товара.',
-  supHistoryDownload: 'Скачать Excel',
-  supHistoryPdfHint: 'Для PDF: «Печать» → «Сохранить как PDF» в браузере.',
+  supHistoryDownload: 'Скачать PDF',
+  supDownloadAllPdf: 'Всё в PDF',
+  supBulkPdfTitle: 'История закупок',
+  supSinglePdfTitle: 'Поступление от поставщика',
+  supPdfDocFrom: 'от',
+  supPdfGenerated: 'Дата формирования',
+  supSelectForPdf: 'Выберите хотя бы одну запись для PDF',
+  supSelectedCount: 'Выбрано: {n}',
+  supPdfAccountant: 'Бухгалтер',
+  supPdfWarehouse: 'Склад (принял)',
+  supPdfSupplierSign: 'Поставщик',
   supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',
@@ -3731,6 +3785,12 @@ const ru: T = {
   slHistoryIgnoresDateFilter: 'История продаж не зависит от фильтра дат в шапке',
   slHistoryDebtHint: 'Есть долги, но продажи не загрузились — обновите страницу или проверьте права',
   slPdfDownloadFailed: 'Не удалось скачать PDF',
+  slSelectAll: 'Выбрать все',
+  slDeselectAll: 'Снять выбор',
+  slSelectedCount: 'Выбрано: {n}',
+  slDownloadSelectedPdf: 'Скачать PDF выбранных',
+  slBulkPdfSummaryTitle: 'Сводка продаж',
+  slSelectSalesForPdf: 'Выберите хотя бы одну продажу для PDF',
   slSaleFxRate: 'курс',
   slAddItem: 'Добавить строку',
   slOrderItems: 'Товары в заказе',

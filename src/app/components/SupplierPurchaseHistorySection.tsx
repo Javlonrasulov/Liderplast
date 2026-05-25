@@ -1,13 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Download, Printer } from 'lucide-react';
+import { toast } from 'sonner';
 import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { formatCurrency, formatNumber } from '../utils/format';
 import {
-  downloadSupplierPurchaseExcel,
+  downloadSupplierPurchasePdf,
+  downloadSupplierPurchasesBulkPdf,
   printSupplierPurchaseOrder,
 } from '../utils/supplier-purchase-document';
+import type { SupplierPurchasePdfLabels } from '../utils/supplier-purchase-pdfmake';
 
 const emptyCell = '\u2014';
 
@@ -24,6 +27,9 @@ export function SupplierPurchaseHistorySection() {
   const { t } = useApp();
   const { hasPermission } = useAuth();
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [downloading, setDownloading] = useState(false);
+
   const canFulfill =
     hasPermission('manage_suppliers') ||
     hasPermission('view_expenses') ||
@@ -37,6 +43,100 @@ export function SupplierPurchaseHistorySection() {
     [state.supplierPurchaseOrders],
   );
 
+  const pdfLabels = useMemo<SupplierPurchasePdfLabels>(
+    () => ({
+      singleTitle: t.supSinglePdfTitle,
+      bulkTitle: t.supBulkPdfTitle,
+      pdfDocFrom: t.supPdfDocFrom,
+      pdfGenerated: t.supPdfGenerated,
+      supplier: t.supColSupplier,
+      payment: t.supPaymentType,
+      notes: t.labelDesc,
+      colNo: '№',
+      colName: t.prProductType,
+      colUnit: t.supQtyUnitLabel,
+      colQty: t.supColQty,
+      colPrice: t.supPdfColPrice,
+      colAmount: t.labelAmount,
+      colUzs: 'UZS',
+      colDate: t.prRmColOrderedAt,
+      colSupplier: t.supColSupplier,
+      colProduct: t.prProductType,
+      colPayment: t.supPaymentType,
+      colDebt: t.supDebtRemaining,
+      colStatus: t.prStatusLabel,
+      colNotes: t.labelDesc,
+      paymentCash: t.supPaymentCash,
+      paymentCredit: t.supPaymentCredit,
+      statusPending: t.prRmStatusPending,
+      statusFulfilled: t.prRmStatusFulfilled,
+      totalUzs: t.supPdfTotalUzs,
+      recordsCount: t.supPdfRecordsCount,
+      accountant: t.supPdfAccountant,
+      warehouse: t.supPdfWarehouse,
+      supplierSign: t.supPdfSupplierSign,
+    }),
+    [t],
+  );
+
+  const allVisibleSelected =
+    historySorted.length > 0 && historySorted.every((o) => selectedIds.has(o.id));
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllVisible = () => {
+    if (allVisibleSelected) {
+      setSelectedIds(new Set());
+      return;
+    }
+    setSelectedIds(new Set(historySorted.map((o) => o.id)));
+  };
+
+  const selectedOrders = useMemo(
+    () => historySorted.filter((o) => selectedIds.has(o.id)),
+    [historySorted, selectedIds],
+  );
+
+  const runPdfDownload = useCallback(
+    async (orders: SupplierPurchaseOrder[], toastLabel: string) => {
+      if (orders.length === 0) {
+        toast.error(t.supSelectForPdf);
+        return;
+      }
+      const toastId = toast.loading(`${toastLabel}…`);
+      setDownloading(true);
+      try {
+        if (orders.length === 1) {
+          await downloadSupplierPurchasePdf(
+            orders[0],
+            state.supplierPurchaseOrders,
+            pdfLabels,
+          );
+        } else {
+          await downloadSupplierPurchasesBulkPdf(
+            orders,
+            state.supplierPurchaseOrders,
+            pdfLabels,
+          );
+        }
+        toast.success(toastLabel, { id: toastId });
+      } catch (err) {
+        console.error('[suppliers] PDF download failed', err);
+        toast.error(t.slPdfDownloadFailed, { id: toastId });
+      } finally {
+        setDownloading(false);
+      }
+    },
+    [pdfLabels, state.supplierPurchaseOrders, t.slPdfDownloadFailed, t.supSelectForPdf],
+  );
+
   const onFulfill = async (id: string) => {
     if (!canFulfill) return;
     await dispatch({ type: 'FULFILL_SUPPLIER_PURCHASE_ORDER', payload: id });
@@ -46,44 +146,73 @@ export function SupplierPurchaseHistorySection() {
     printSupplierPurchaseOrder(order, state.supplierPurchaseOrders);
   };
 
-  const handleDownload = (order: SupplierPurchaseOrder) => {
-    const qtyLbl = `${formatNumber(order.quantity)} ${qtyUnitLabel(order.quantityUnit, t)}`;
-    const paymentLbl =
-      order.paymentType === 'CREDIT' ? t.supPaymentCredit : t.supPaymentCash;
-    const statusLbl =
-      order.status === 'PENDING' ? t.prRmStatusPending : t.prRmStatusFulfilled;
-    downloadSupplierPurchaseExcel(
-      order,
-      state.supplierPurchaseOrders,
-      {
-        docNumber: '№',
-        date: t.prRmColOrderedAt,
-        supplier: t.supColSupplier,
-        product: t.supProductName,
-        quantity: t.supColQty,
-        amount: t.labelAmount,
-        amountUzs: 'UZS',
-        payment: t.supPaymentType,
-        debt: t.supDebtRemaining,
-        status: t.prStatusLabel,
-        notes: t.labelDesc,
-      },
-      qtyLbl,
-      paymentLbl,
-      statusLbl,
+  const handleDownloadOne = (order: SupplierPurchaseOrder) => {
+    void runPdfDownload([order], t.supHistoryDownload);
+  };
+
+  const handleDownloadSelected = () => {
+    void runPdfDownload(
+      selectedOrders,
+      selectedOrders.length === 1 ? t.supHistoryDownload : t.slDownloadSelectedPdf,
     );
   };
+
+  const handleDownloadAll = () => {
+    void runPdfDownload(historySorted, t.supDownloadAllPdf);
+  };
+
+  const selectedCountLabel = t.supSelectedCount.replace('{n}', String(selectedIds.size));
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
-        <p className="text-[10px] text-slate-400 max-w-md text-right">{t.supHistoryPdfHint}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <span className="text-[11px] text-slate-500">{selectedCountLabel}</span>
+          )}
+          <button
+            type="button"
+            onClick={toggleAllVisible}
+            disabled={historySorted.length === 0 || downloading}
+            className="text-[11px] font-medium text-indigo-600 hover:underline disabled:opacity-40"
+          >
+            {allVisibleSelected ? t.slDeselectAll : t.slSelectAll}
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadSelected}
+            disabled={selectedIds.size === 0 || downloading}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"
+          >
+            <Download size={12} />
+            {t.slDownloadSelectedPdf}
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadAll}
+            disabled={historySorted.length === 0 || downloading}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900/30 disabled:opacity-40"
+          >
+            <Download size={12} />
+            {t.supDownloadAllPdf}
+          </button>
+        </div>
       </div>
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
-        <table className="w-full text-xs min-w-[960px]">
+        <table className="w-full text-xs min-w-[1000px]">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+              <th className="w-9 px-2 py-2.5">
+                <input
+                  type="checkbox"
+                  checked={allVisibleSelected}
+                  onChange={toggleAllVisible}
+                  disabled={historySorted.length === 0 || downloading}
+                  className="rounded border-slate-300"
+                  aria-label={t.slSelectAll}
+                />
+              </th>
               <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prRmColOrderedAt}</th>
               <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.supColSupplier}</th>
               <th className="text-left px-3 py-2.5 font-semibold text-slate-500">{t.prProductType}</th>
@@ -99,7 +228,7 @@ export function SupplierPurchaseHistorySection() {
           <tbody>
             {historySorted.length === 0 ? (
               <tr>
-                <td colSpan={10} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
                   {t.prRmNoOrders}
                 </td>
               </tr>
@@ -108,9 +237,23 @@ export function SupplierPurchaseHistorySection() {
                 <tr
                   key={o.id}
                   className={`border-t border-slate-100 dark:border-slate-700 ${
-                    idx % 2 ? 'bg-slate-50/50 dark:bg-slate-800/40' : ''
+                    selectedIds.has(o.id)
+                      ? 'bg-indigo-50/60 dark:bg-indigo-900/20'
+                      : idx % 2
+                        ? 'bg-slate-50/50 dark:bg-slate-800/40'
+                        : ''
                   }`}
                 >
+                  <td className="px-2 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(o.id)}
+                      onChange={() => toggleOne(o.id)}
+                      disabled={downloading}
+                      className="rounded border-slate-300"
+                      aria-label={o.productName}
+                    />
+                  </td>
                   <td className="px-3 py-2 text-slate-500 font-mono whitespace-nowrap">
                     {o.orderedAt.slice(0, 10)}
                   </td>
@@ -152,8 +295,9 @@ export function SupplierPurchaseHistorySection() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDownload(o)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                        onClick={() => handleDownloadOne(o)}
+                        disabled={downloading}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors disabled:opacity-40"
                         title={t.supHistoryDownload}
                       >
                         <Download size={14} />
