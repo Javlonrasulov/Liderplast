@@ -7,6 +7,7 @@ import {
   saleItemsForDocument,
   SALE_NOTE_ORG_NAME,
 } from './sale-delivery-note-shared';
+import { deliveryMetaPdfRows, type SaleDeliveryPrintMeta } from './sale-delivery-print-meta';
 import { formatSaleHistoryPriceDetail } from './sales-currency';
 
 const PDF_PRICE_LABELS = { unitPiece: 'шт', fxRate: 'курс' };
@@ -32,7 +33,7 @@ function signCell(label: string, lineHeight = 28) {
   };
 }
 
-function buildCopyContent(sale: Sale, documentNumber: string) {
+function buildCopyContent(sale: Sale, documentNumber: string, delivery?: SaleDeliveryPrintMeta) {
   const items = saleItemsForDocument(sale);
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const docDate = formatDate(sale.date);
@@ -68,6 +69,7 @@ function buildCopyContent(sale: Sale, documentNumber: string) {
             { text: 'Покупатель:', bold: true },
             { text: sale.clientName },
           ],
+          ...deliveryMetaPdfRows(delivery),
         ],
       },
       layout: 'noBorders',
@@ -142,8 +144,12 @@ function defaultDocDefinition(content: object[]) {
   };
 }
 
-function buildDocDefinition(sale: Sale, documentNumber: string) {
-  return defaultDocDefinition(buildCopyContent(sale, documentNumber));
+function buildDocDefinition(
+  sale: Sale,
+  documentNumber: string,
+  delivery?: SaleDeliveryPrintMeta,
+) {
+  return defaultDocDefinition(buildCopyContent(sale, documentNumber, delivery));
 }
 
 function sortSalesChronologically(sales: Sale[]) {
@@ -304,10 +310,11 @@ function pdfFilename(sale: Sale, documentNumber: string) {
 export async function downloadSaleDeliveryNotePdfMake(
   sale: Sale,
   allSales: Sale[] = [],
+  delivery?: SaleDeliveryPrintMeta,
 ): Promise<void> {
   const base = allSales.length > 0 ? allSales : [sale];
   const documentNumber = computeSaleDocumentNumber(sale, base);
-  const doc = buildDocDefinition(sale, documentNumber);
+  const doc = buildDocDefinition(sale, documentNumber, delivery);
   await downloadPdfDefinition(doc, pdfFilename(sale, documentNumber));
 }
 

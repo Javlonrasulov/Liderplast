@@ -573,6 +573,9 @@ model Client {
   address   String?
   bankAccount String?
   bankName  String?
+  /// Chop etish uchun — mijoz bo‘yicha default
+  deliveryVehiclePlate String?
+  deliveryDriverName   String?
   status    EntityStatus @default(COMPLETED)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt

@@ -198,6 +198,10 @@ export interface Client {
   createdAt: string;
   bankAccount?: string;
   bankName?: string;
+  /** Chop etish — mijoz uchun saqlangan mashina raqami */
+  deliveryVehiclePlate?: string;
+  /** Chop etish — mijoz uchun saqlangan haydovchi */
+  deliveryDriverName?: string;
 }
 
 export interface SaleOrderItem {
@@ -692,6 +696,14 @@ type ERPAction =
         phone?: string;
         bankAccount?: string;
         bankName?: string;
+      };
+    }
+  | {
+      type: 'UPDATE_CLIENT_DELIVERY_DEFAULTS';
+      payload: {
+        id: string;
+        deliveryVehiclePlate?: string;
+        deliveryDriverName?: string;
       };
     }
   | { type: 'DELETE_CLIENT'; payload: string }
@@ -1234,6 +1246,8 @@ type BackendClient = {
   createdAt: string;
   bankAccount?: string | null;
   bankName?: string | null;
+  deliveryVehiclePlate?: string | null;
+  deliveryDriverName?: string | null;
   orders?: BackendClientOrderStub[];
 };
 
@@ -2275,6 +2289,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     createdAt: client.createdAt,
     bankAccount: client.bankAccount ?? undefined,
     bankName: client.bankName ?? undefined,
+    deliveryVehiclePlate: client.deliveryVehiclePlate ?? undefined,
+    deliveryDriverName: client.deliveryDriverName ?? undefined,
   }));
 
   const mergedOrders = mergeOrdersFromClients(orders, clients);
@@ -2632,6 +2648,15 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               phone: action.payload.phone || undefined,
               bankAccount: action.payload.bankAccount,
               bankName: action.payload.bankName,
+            }),
+          });
+          break;
+        case 'UPDATE_CLIENT_DELIVERY_DEFAULTS':
+          await apiRequest(`/clients/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              deliveryVehiclePlate: action.payload.deliveryVehiclePlate ?? '',
+              deliveryDriverName: action.payload.deliveryDriverName ?? '',
             }),
           });
           break;

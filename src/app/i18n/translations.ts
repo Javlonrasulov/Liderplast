@@ -645,6 +645,12 @@ export interface T {
   slHistoryIgnoresDateFilter: string;
   slHistoryDebtHint: string;
   slPdfDownloadFailed: string;
+  slPrintDeliveryTitle: string;
+  slVehiclePlate: string;
+  slVehiclePlatePlaceholder: string;
+  slDriverName: string;
+  slDriverNamePlaceholder: string;
+  slDeliveryDefaultsHint: string;
   slSelectAll: string;
   slDeselectAll: string;
   slSelectedCount: string;
@@ -1729,6 +1735,12 @@ const uz_cyrillic: T = {
   slHistoryIgnoresDateFilter: 'Сотув тарихи юқоридаги сана фильтрига боғлиқ эмас',
   slHistoryDebtHint: 'Қарзлар бор, лекин сотувлар юкланмади — саҳифани янгиланг ёки рухсатни текширинг',
   slPdfDownloadFailed: 'PDF юклаб бўлмади',
+  slPrintDeliveryTitle: 'Чоп этиш — транспорт',
+  slVehiclePlate: 'Машина рақами',
+  slVehiclePlatePlaceholder: '01 A 123 BC',
+  slDriverName: 'Ҳайдовчи исми',
+  slDriverNamePlaceholder: 'Исм фамилия',
+  slDeliveryDefaultsHint: 'Маълумотлар клиент учун сақланади, кейинги сафарда автоматик тўлдирилади',
   slSelectAll: 'Ҳаммасини танлаш',
   slDeselectAll: 'Танловни бекор қилиш',
   slSelectedCount: '{n} та танланди',
@@ -2796,6 +2808,12 @@ const uz_latin: T = {
   slHistoryIgnoresDateFilter: 'Sotuv tarixi yuqoridagi sana filtriga bog\'liq emas',
   slHistoryDebtHint: 'Qarzlar bor, lekin sotuvlar yuklanmagan — sahifani yangilang yoki ruxsatni tekshiring',
   slPdfDownloadFailed: 'PDF yuklab bo\'lmadi',
+  slPrintDeliveryTitle: 'Chop etish — transport',
+  slVehiclePlate: 'Mashina raqami',
+  slVehiclePlatePlaceholder: '01 A 123 BC',
+  slDriverName: 'Haydovchi ismi',
+  slDriverNamePlaceholder: 'Ism familiya',
+  slDeliveryDefaultsHint: 'Ma\'lumotlar mijoz uchun saqlanadi, keyingi safarda avtomatik to\'ldiriladi',
   slSelectAll: 'Hammasini tanlash',
   slDeselectAll: 'Tanlovni bekor qilish',
   slSelectedCount: '{n} ta tanlandi',
@@ -3862,6 +3880,12 @@ const ru: T = {
   slHistoryIgnoresDateFilter: 'История продаж не зависит от фильтра дат в шапке',
   slHistoryDebtHint: 'Есть долги, но продажи не загрузились — обновите страницу или проверьте права',
   slPdfDownloadFailed: 'Не удалось скачать PDF',
+  slPrintDeliveryTitle: 'Печать — транспорт',
+  slVehiclePlate: 'Номер автомобиля',
+  slVehiclePlatePlaceholder: '01 A 123 BC',
+  slDriverName: 'Водитель',
+  slDriverNamePlaceholder: 'ФИО',
+  slDeliveryDefaultsHint: 'Данные сохраняются для клиента и подставляются при следующей печати',
   slSelectAll: 'Выбрать все',
   slDeselectAll: 'Снять выбор',
   slSelectedCount: 'Выбрано: {n}',

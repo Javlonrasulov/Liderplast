@@ -162,6 +162,8 @@ export class CrmService {
       address?: string | null;
       bankAccount?: string | null;
       bankName?: string | null;
+      deliveryVehiclePlate?: string | null;
+      deliveryDriverName?: string | null;
     } = {};
 
     if (dto.name !== undefined) {
@@ -189,6 +191,14 @@ export class CrmService {
 
     if (dto.bankName !== undefined) {
       data.bankName = dto.bankName.trim() || null;
+    }
+
+    if (dto.deliveryVehiclePlate !== undefined) {
+      data.deliveryVehiclePlate = dto.deliveryVehiclePlate.trim() || null;
+    }
+
+    if (dto.deliveryDriverName !== undefined) {
+      data.deliveryDriverName = dto.deliveryDriverName.trim() || null;
     }
 
     if (Object.keys(data).length === 0) {

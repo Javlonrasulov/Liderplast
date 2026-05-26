@@ -29,6 +29,11 @@ import {
 } from '../utils/phone';
 import { AktSverka } from './AktSverka';
 import { EditSaleDialog } from './EditSaleDialog';
+import {
+  SalePrintDeliveryDialog,
+  clientDeliveryMeta,
+} from './SalePrintDeliveryDialog';
+import type { SaleDeliveryPrintMeta } from '../utils/sale-delivery-print-meta';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const INPUT_CLS =
@@ -59,6 +64,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
   const [editingSale, setEditingSale] = useState<(typeof state.sales)[number] | null>(null);
+  const [saleToPrint, setSaleToPrint] = useState<(typeof state.sales)[number] | null>(null);
   const [isEditing, setIsEditing] = useState(initialEditing);
   const [editForm, setEditForm] = useState<ClientEditForm>({
     name: '',
@@ -78,16 +84,34 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
 
   const handleDownloadSalePdf = useCallback(
     async (sale: (typeof state.sales)[number]) => {
+      const client = state.clients.find((c) => c.id === sale.clientId);
       const toastId = toast.loading(`${t.aktDownloadPdf}…`);
       try {
-        await downloadSaleDeliveryNotePdf(sale, state.sales);
+        await downloadSaleDeliveryNotePdf(sale, state.sales, clientDeliveryMeta(client));
         toast.success(t.aktDownloadPdf, { id: toastId });
       } catch (err) {
         console.error('[client] PDF download failed', err);
         toast.error(t.slPdfDownloadFailed, { id: toastId });
       }
     },
-    [state.sales, t.aktDownloadPdf, t.slPdfDownloadFailed],
+    [state.clients, state.sales, t.aktDownloadPdf, t.slPdfDownloadFailed],
+  );
+
+  const confirmSalePrint = useCallback(
+    async (sale: (typeof state.sales)[number], meta: SaleDeliveryPrintMeta) => {
+      if (sale.clientId) {
+        await dispatch({
+          type: 'UPDATE_CLIENT_DELIVERY_DEFAULTS',
+          payload: {
+            id: sale.clientId,
+            deliveryVehiclePlate: meta.vehiclePlate ?? '',
+            deliveryDriverName: meta.driverName ?? '',
+          },
+        });
+      }
+      printSaleDeliveryNote(sale, state.sales, meta);
+    },
+    [dispatch, state.sales],
   );
 
   const toggleClientSaleSelection = (saleId: string, checked: boolean) => {
@@ -669,7 +693,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => printSaleDeliveryNote(sale, state.sales)}
+                                  onClick={() => setSaleToPrint(sale)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
                                   title={t.prPrint}
                                 >
@@ -752,7 +776,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                             </button>
                             <button
                               type="button"
-                              onClick={() => printSaleDeliveryNote(sale, state.sales)}
+                              onClick={() => setSaleToPrint(sale)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40"
                               title={t.prPrint}
                             >
@@ -917,6 +941,17 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
         open={editingSale !== null}
         onOpenChange={(open) => {
           if (!open) setEditingSale(null);
+        }}
+      />
+
+      <SalePrintDeliveryDialog
+        sale={saleToPrint}
+        open={saleToPrint !== null}
+        onOpenChange={(open) => {
+          if (!open) setSaleToPrint(null);
+        }}
+        onPrint={async (meta) => {
+          if (saleToPrint) await confirmSalePrint(saleToPrint, meta);
         }}
       />
     </div>

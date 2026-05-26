@@ -21,4 +21,12 @@ export class UpdateClientDto {
   @IsOptional()
   @IsString()
   bankName?: string;
+
+  @IsOptional()
+  @IsString()
+  deliveryVehiclePlate?: string;
+
+  @IsOptional()
+  @IsString()
+  deliveryDriverName?: string;
 }

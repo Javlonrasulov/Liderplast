@@ -5,6 +5,9 @@ import {
   saleItemsForDocument,
   SALE_NOTE_ORG_NAME,
 } from './sale-delivery-note-shared';
+import { deliveryMetaRowsHtml, type SaleDeliveryPrintMeta } from './sale-delivery-print-meta';
+
+export type { SaleDeliveryPrintMeta } from './sale-delivery-print-meta';
 
 export { computeSaleDocumentNumber, SALE_NOTE_ORG_NAME, saleItemsForDocument } from './sale-delivery-note-shared';
 
@@ -123,7 +126,7 @@ function esc(value: string) {
     .replace(/"/g, '&quot;');
 }
 
-function buildCopyHtml(sale: Sale, documentNumber: string) {
+function buildCopyHtml(sale: Sale, documentNumber: string, delivery?: SaleDeliveryPrintMeta) {
   const items = saleItemsForDocument(sale);
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const docDate = formatDate(sale.date);
@@ -150,6 +153,7 @@ function buildCopyHtml(sale: Sale, documentNumber: string) {
       <table class="meta">
         <tr><td class="k">Отправитель:</td><td>${esc(SALE_NOTE_ORG_NAME)}</td></tr>
         <tr><td class="k">Покупатель:</td><td>${esc(sale.clientName)}</td></tr>
+        ${deliveryMetaRowsHtml(delivery)}
       </table>
       <table class="items">
         <thead>
@@ -204,16 +208,25 @@ function buildCopyHtml(sale: Sale, documentNumber: string) {
     </div>`;
 }
 
-function buildNoteBodyHtml(sale: Sale, documentNumber: string, copyCount: 1 | 2) {
-  const copy = buildCopyHtml(sale, documentNumber);
+function buildNoteBodyHtml(
+  sale: Sale,
+  documentNumber: string,
+  copyCount: 1 | 2,
+  delivery?: SaleDeliveryPrintMeta,
+) {
+  const copy = buildCopyHtml(sale, documentNumber, delivery);
   const copies = copyCount === 2 ? `${copy}${copy}` : copy;
   return `<div class="sale-note-root"><div class="page-row">${copies}</div></div>`;
 }
 
 /** Print window uchun to‘liq HTML (2 nusxa + avto chop) */
-function buildPrintWindowHtml(sale: Sale, allSales: Sale[]) {
+function buildPrintWindowHtml(
+  sale: Sale,
+  allSales: Sale[],
+  delivery?: SaleDeliveryPrintMeta,
+) {
   const documentNumber = computeSaleDocumentNumber(sale, allSales.length > 0 ? allSales : [sale]);
-  const body = buildNoteBodyHtml(sale, documentNumber, 2);
+  const body = buildNoteBodyHtml(sale, documentNumber, 2, delivery);
 
   return `<!doctype html>
 <html>
@@ -246,8 +259,12 @@ function buildPrintWindowHtml(sale: Sale, allSales: Sale[]) {
 </html>`;
 }
 
-export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
-  const html = buildPrintWindowHtml(sale, allSales);
+export function printSaleDeliveryNote(
+  sale: Sale,
+  allSales: Sale[] = [],
+  delivery?: SaleDeliveryPrintMeta,
+) {
+  const html = buildPrintWindowHtml(sale, allSales, delivery);
   const w = window.open('', '_blank', 'width=820,height=1100');
   if (!w) return;
   w.document.open();
@@ -259,9 +276,10 @@ export function printSaleDeliveryNote(sale: Sale, allSales: Sale[] = []) {
 export async function downloadSaleDeliveryNotePdf(
   sale: Sale,
   allSales: Sale[] = [],
+  delivery?: SaleDeliveryPrintMeta,
 ): Promise<void> {
   const { downloadSaleDeliveryNotePdfMake } = await import('./sale-delivery-note-pdfmake');
-  await downloadSaleDeliveryNotePdfMake(sale, allSales);
+  await downloadSaleDeliveryNotePdfMake(sale, allSales, delivery);
 }
 
 /** PDF — tanlangan sotuvlar xulosasi + har biri uchun hujjat */

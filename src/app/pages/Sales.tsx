@@ -35,6 +35,11 @@ import {
 import { ClientDetail } from '../components/ClientDetail';
 import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
 import { EditSaleDialog } from '../components/EditSaleDialog';
+import {
+  SalePrintDeliveryDialog,
+  clientDeliveryMeta,
+} from '../components/SalePrintDeliveryDialog';
+import type { SaleDeliveryPrintMeta } from '../utils/sale-delivery-print-meta';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { Checkbox } from '../components/ui/checkbox';
 import { PhoneInput } from '../components/PhoneInput';
@@ -88,6 +93,7 @@ export function Sales() {
   const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [saleToPrint, setSaleToPrint] = useState<Sale | null>(null);
 
   // ---- Order form ----
   const [clientId, setClientId] = useState(state.clients[0]?.id || '');
@@ -393,13 +399,28 @@ export function Sales() {
   };
 
   const handlePrintSale = (sale: Sale) => {
-    printSaleDeliveryNote(sale, state.sales);
+    setSaleToPrint(sale);
+  };
+
+  const confirmSalePrint = async (sale: Sale, meta: SaleDeliveryPrintMeta) => {
+    if (sale.clientId) {
+      await dispatch({
+        type: 'UPDATE_CLIENT_DELIVERY_DEFAULTS',
+        payload: {
+          id: sale.clientId,
+          deliveryVehiclePlate: meta.vehiclePlate ?? '',
+          deliveryDriverName: meta.driverName ?? '',
+        },
+      });
+    }
+    printSaleDeliveryNote(sale, state.sales, meta);
   };
 
   const handleDownloadSalePdf = async (sale: Sale) => {
+    const client = state.clients.find((c) => c.id === sale.clientId);
     const toastId = toast.loading(`${t.aktDownloadPdf}…`);
     try {
-      await downloadSaleDeliveryNotePdf(sale, state.sales);
+      await downloadSaleDeliveryNotePdf(sale, state.sales, clientDeliveryMeta(client));
       toast.success(t.aktDownloadPdf, { id: toastId });
     } catch (err) {
       console.error('[sales] PDF download failed', err);
@@ -1201,6 +1222,17 @@ export function Sales() {
         open={editingSale !== null}
         onOpenChange={(open) => {
           if (!open) setEditingSale(null);
+        }}
+      />
+
+      <SalePrintDeliveryDialog
+        sale={saleToPrint}
+        open={saleToPrint !== null}
+        onOpenChange={(open) => {
+          if (!open) setSaleToPrint(null);
+        }}
+        onPrint={async (meta) => {
+          if (saleToPrint) await confirmSalePrint(saleToPrint, meta);
         }}
       />
     </div>
