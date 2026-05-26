@@ -593,6 +593,14 @@ function formatShiftReadingDisplay(
   return r.machineReading?.trim() || '—';
 }
 
+/** Smena sanasi bo‘yicha: eng yangisi birinchi (23.05 → 22.05 → …) */
+function compareShiftRecordsByDateDesc(a: ShiftRecord, b: ShiftRecord): number {
+  const byDate = b.date.localeCompare(a.date);
+  if (byDate !== 0) return byDate;
+  if (a.shift !== b.shift) return b.shift - a.shift;
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
 function getShiftTimeDisplay(defs: ShiftDefinition[], number: number, t: (typeof TR)['ru']) {
   const d = defs.find((x) => x.number === number);
   if (d?.timeFrom && d?.timeTo) return `${d.timeFrom} – ${d.timeTo}`;
@@ -1625,16 +1633,11 @@ export function ShiftWork() {
   // Filter by date
   const filteredRecords = useMemo(() => {
     const arr = filterData([...state.shiftRecords]);
-    return arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return arr.sort(compareShiftRecordsByDateDesc);
   }, [state.shiftRecords, filterData]);
 
   const handlePrintHistory = useCallback(() => {
-    const rows = [...filteredRecords].sort((a, b) => {
-      const byDate = a.date.localeCompare(b.date);
-      if (byDate !== 0) return byDate;
-      if (a.shift !== b.shift) return a.shift - b.shift;
-      return a.workerName.localeCompare(b.workerName);
-    });
+    const rows = [...filteredRecords].sort(compareShiftRecordsByDateDesc);
 
     printShiftHistory({
       periodLabel: filterLabel,
