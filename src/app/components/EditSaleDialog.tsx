@@ -38,6 +38,7 @@ import {
 import { finalBucketFromCatalog } from '../utils/warehouse-catalog-buckets';
 import { translateCrmApiError } from '../utils/crm-api-errors';
 import { ApiError } from '../api/http';
+import { SingleDatePicker } from './SingleDatePicker';
 
 const INPUT_CLS =
   'w-full px-2.5 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400';
@@ -367,11 +368,10 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-slate-500 mb-1">{t.labelDate}</label>
-              <input
-                type="date"
+              <SingleDatePicker
                 value={orderDate}
-                onChange={(e) => setOrderDate(e.target.value)}
-                className={INPUT_CLS}
+                onChange={setOrderDate}
+                menuZClassName="z-[150]"
               />
             </div>
             <div>

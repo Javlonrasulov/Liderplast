@@ -6,6 +6,7 @@ import type { ShiftDefinition } from './ShiftWork';
 import {
   type PackagingLine,
   createEmptyPackagingLine,
+  warehouseStockBreakdownForProduct,
 } from '../utils/shift-packaging-utils';
 
 export type { PackagingLine } from '../utils/shift-packaging-utils';
@@ -75,6 +76,7 @@ export type ShiftPackagingTranslations = {
   packagingStockAvailable: string;
   packagingStockInsufficient: string;
   packagingMaxPacks: string;
+  packagingAllPackaged: string;
 };
 
 type Props = {
@@ -154,24 +156,14 @@ export function ShiftPackagingForm({
     return m;
   }, [state.warehouseProducts]);
 
-  const unpackagedStockForProduct = useCallback(
-    (productName: string): number => {
-      const key = productName.trim().toLowerCase();
-      const kind = productKindByName.get(key);
-      if (!kind) return 0;
-      const itemType =
-        kind === 'FINISHED' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
-      let total = 0;
-      let packaged = 0;
-      for (const row of state.warehouseStock) {
-        if (row.itemType !== itemType || !row.itemName) continue;
-        if (row.itemName.trim().toLowerCase() !== key) continue;
-        total += row.quantity;
-        packaged += row.packagedQuantity ?? 0;
-      }
-      return Math.max(0, total - packaged);
-    },
-    [state.warehouseStock, productKindByName],
+  const stockBreakdownForProduct = useCallback(
+    (productName: string) =>
+      warehouseStockBreakdownForProduct(
+        productName,
+        state.warehouseProducts,
+        state.warehouseStock,
+      ),
+    [state.warehouseProducts, state.warehouseStock],
   );
 
   const createEmptyLine = useCallback(
@@ -269,7 +261,10 @@ export function ShiftPackagingForm({
           const ppb = isFinished
             ? (piecesPerBagByProduct.get(productKey) ?? 1)
             : (semiPiecesPerBagByName.get(productKey) ?? 1);
-          const unpackagedAvailable = unpackagedStockForProduct(ln.productType);
+          const stock = stockBreakdownForProduct(ln.productType);
+          const unpackagedAvailable = stock.unpackaged;
+          const allPackaged =
+            Boolean(ln.productType.trim()) && stock.total > 0 && stock.unpackaged <= 0;
           const maxPacks = ppb > 0 ? Math.floor(unpackagedAvailable / ppb) : 0;
           const stockInsufficient = packs > 0 && pieces > unpackagedAvailable;
 
@@ -395,15 +390,26 @@ export function ShiftPackagingForm({
                               String(pieces),
                             )}
                       </p>
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                        {t.packagingStockAvailable.replace(
-                          '{available}',
-                          String(unpackagedAvailable),
-                        )}
-                        {maxPacks > 0
-                          ? ` · ${t.packagingMaxPacks.replace('{max}', String(maxPacks))}`
-                          : ''}
-                      </p>
+                      {ln.productType.trim() ? (
+                        <p
+                          className={`mt-1 text-[11px] ${
+                            allPackaged
+                              ? 'font-medium text-emerald-700 dark:text-emerald-400'
+                              : 'text-slate-500 dark:text-slate-400'
+                          }`}
+                        >
+                          {allPackaged
+                            ? t.packagingAllPackaged
+                            : `${t.packagingStockAvailable.replace(
+                                '{available}',
+                                String(unpackagedAvailable),
+                              )}${
+                                maxPacks > 0
+                                  ? ` · ${t.packagingMaxPacks.replace('{max}', String(maxPacks))}`
+                                  : ''
+                              }`}
+                        </p>
+                      ) : null}
                       {stockInsufficient ? (
                         <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
                           {t.packagingStockInsufficient

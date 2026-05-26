@@ -35,6 +35,7 @@ import {
 import { ClientDetail } from '../components/ClientDetail';
 import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
 import { EditSaleDialog } from '../components/EditSaleDialog';
+import { SingleDatePicker } from '../components/SingleDatePicker';
 import { Checkbox } from '../components/ui/checkbox';
 import { PhoneInput } from '../components/PhoneInput';
 import { emptyUzPhoneInput, formatUzPhoneDisplay, normalizeUzPhoneForApi } from '../utils/phone';
@@ -539,7 +540,7 @@ export function Sales() {
                 </div>
                 <div>
                   <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.labelDate}</label>
-                  <input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} className={INPUT_CLS} />
+                  <SingleDatePicker value={orderDate} onChange={setOrderDate} />
                 </div>
               </div>
             </div>

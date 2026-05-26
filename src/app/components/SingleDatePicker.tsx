@@ -67,9 +67,16 @@ interface SingleDatePickerProps {
   value: string;
   onChange: (date: string) => void;
   placeholder?: string;
+  /** Modal ichida — dropdown ustida qolishi uchun */
+  menuZClassName?: string;
 }
 
-export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePickerProps) {
+export function SingleDatePicker({
+  value,
+  onChange,
+  placeholder,
+  menuZClassName = 'z-50',
+}: SingleDatePickerProps) {
   const { lang } = useApp();
   const [open, setOpen] = useState(false);
   const [viewYear, setViewYear] = useState(() => {
@@ -146,7 +153,9 @@ export function SingleDatePicker({ value, onChange, placeholder }: SingleDatePic
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-[min(18rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/50 overflow-hidden">
+        <div
+          className={`absolute top-full left-0 mt-2 w-[min(18rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-slate-300/40 dark:shadow-black/50 overflow-hidden ${menuZClassName}`}
+        >
 
           {/* Calendar */}
           <div className="p-3">

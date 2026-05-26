@@ -91,12 +91,26 @@ function getWarehousePackBreakdownLines(
   ppb: number,
   t: Pick<
     ReturnType<typeof useApp>['t'],
-    'whStockLinePacked' | 'whStockLineUnpackaged'
+    'whStockLinePacked' | 'whStockLineUnpackaged' | 'whStockLineAllPackaged'
   >,
 ): string[] {
-  if (ppb <= 0 || totalQty <= 0) return [];
-  const packedBags = Math.floor(Math.max(0, packagedPieces) / ppb);
-  const unpackaged = Math.max(0, totalQty - packagedPieces);
+  if (totalQty <= 0) return [];
+
+  const packaged = Math.max(0, packagedPieces);
+  const unpackaged = Math.max(0, totalQty - packaged);
+
+  if (unpackaged === 0 && packaged > 0) {
+    return [t.whStockLineAllPackaged];
+  }
+
+  if (ppb <= 0) {
+    if (unpackaged > 0) {
+      return [t.whStockLineUnpackaged.replace('{rem}', formatNumber(unpackaged))];
+    }
+    return [];
+  }
+
+  const packedBags = Math.floor(packaged / ppb);
   const lines: string[] = [];
   if (packedBags > 0) {
     lines.push(

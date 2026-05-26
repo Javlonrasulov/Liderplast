@@ -35,11 +35,11 @@ export function createEmptyPackagingLine(defaultProduct = ''): PackagingLine {
 export function isPackagingLineDraft(ln: PackagingLine): boolean {
   const packs = parseNonNegativeInt(ln.packCount);
   const hasQty = !Number.isNaN(packs) && packs > 0;
+  const hours = parseDecimalInput(ln.hoursWorked);
   return (
     hasQty ||
-    Boolean(ln.hoursWorked.trim()) ||
-    Boolean(ln.notes.trim()) ||
-    Boolean(ln.productType.trim())
+    (Boolean(ln.hoursWorked.trim()) && hours > 0) ||
+    Boolean(ln.notes.trim())
   );
 }
 
@@ -92,15 +92,21 @@ export function estimatePackagingPieces(
   return packs * (semiFromFinished.get(key) ?? 1);
 }
 
-export function unpackagedStockForProduct(
+export type WarehouseStockBreakdown = {
+  total: number;
+  packaged: number;
+  unpackaged: number;
+};
+
+export function warehouseStockBreakdownForProduct(
   productName: string,
   warehouseProducts: WarehouseProduct[],
   warehouseStock: { itemType: string; itemName?: string; quantity: number; packagedQuantity?: number }[],
-): number {
+): WarehouseStockBreakdown {
   const key = productName.trim().toLowerCase();
   const kinds = productKindByName(warehouseProducts);
   const kind = kinds.get(key);
-  if (!kind) return 0;
+  if (!kind) return { total: 0, packaged: 0, unpackaged: 0 };
   const itemType = kind === 'FINISHED' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
   let total = 0;
   let packaged = 0;
@@ -110,7 +116,16 @@ export function unpackagedStockForProduct(
     total += row.quantity;
     packaged += row.packagedQuantity ?? 0;
   }
-  return Math.max(0, total - packaged);
+  const unpackaged = Math.max(0, total - packaged);
+  return { total, packaged, unpackaged };
+}
+
+export function unpackagedStockForProduct(
+  productName: string,
+  warehouseProducts: WarehouseProduct[],
+  warehouseStock: { itemType: string; itemName?: string; quantity: number; packagedQuantity?: number }[],
+): number {
+  return warehouseStockBreakdownForProduct(productName, warehouseProducts, warehouseStock).unpackaged;
 }
 
 export type PackagingValidationLabels = {
@@ -121,6 +136,7 @@ export type PackagingValidationLabels = {
   labelProduct: string;
   packagingNoPiecesPerBag: string;
   packagingStockInsufficient: string;
+  packagingAllPackaged: string;
 };
 
 export function validatePackagingLines(
@@ -149,17 +165,20 @@ export function validatePackagingLines(
     if (pieces <= 0) {
       return { ok: false, error: labels.packagingNoPiecesPerBag };
     }
-    const available = unpackagedStockForProduct(
+    const stock = warehouseStockBreakdownForProduct(
       ln.productType,
       warehouseProducts,
       warehouseStock,
     );
-    if (pieces > available) {
+    if (stock.total > 0 && stock.unpackaged <= 0) {
+      return { ok: false, error: labels.packagingAllPackaged };
+    }
+    if (pieces > stock.unpackaged) {
       return {
         ok: false,
         error: labels.packagingStockInsufficient
           .replace('{needed}', String(pieces))
-          .replace('{available}', String(available)),
+          .replace('{available}', String(stock.unpackaged)),
       };
     }
   }

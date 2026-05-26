@@ -110,6 +110,7 @@ const TR = {
     packagingStockAvailable: 'Қадоқланмаган: {available} дона',
     packagingStockInsufficient: 'Етарли эмас: керак {needed} дона, омборда {available}',
     packagingMaxPacks: 'Энг кўпи: {max} пачка',
+    packagingAllPackaged: 'Барчаси қадоқланган',
     labelDate: 'Сана',
     labelShift: 'Смена',
     labelWorker: 'Ишчи исми',
@@ -269,6 +270,7 @@ const TR = {
     packagingStockAvailable: 'Qadoqlanmagan: {available} dona',
     packagingStockInsufficient: 'Yetarli emas: kerak {needed} dona, omborda {available}',
     packagingMaxPacks: 'Eng ko‘pi: {max} pachka',
+    packagingAllPackaged: 'Barchasi qadoqlangan',
     labelDate: 'Sana',
     labelShift: 'Smena',
     labelWorker: 'Ishchi ismi',
@@ -428,6 +430,7 @@ const TR = {
     packagingStockAvailable: 'Не упаковано: {available} шт',
     packagingStockInsufficient: 'Недостаточно: нужно {needed} шт, на складе {available}',
     packagingMaxPacks: 'Максимум: {max} пачек',
+    packagingAllPackaged: 'Всё упаковано',
     labelDate: 'Дата',
     labelShift: 'Смена',
     labelWorker: 'Имя рабочего',
@@ -1090,12 +1093,18 @@ export function ShiftWork() {
   }, [packagingLines]);
 
   const isProductionLineDraft = useCallback((ln: ShiftLine) => {
+    const produced = parseNonNegativeInt(ln.producedQty);
+    const hasProduced = !Number.isNaN(produced) && produced > 0;
+    const defect = parseNonNegativeInt(ln.defectCount);
+    const hasDefect = !Number.isNaN(defect) && defect > 0;
+    const hours = parseDecimalInput(ln.hoursWorked);
     return (
-      Boolean(ln.machineId) ||
-      Boolean(ln.hoursWorked.trim()) ||
-      Boolean(ln.producedQty.trim()) ||
+      (Boolean(ln.hoursWorked.trim()) && hours > 0) ||
+      hasProduced ||
+      hasDefect ||
       Boolean(ln.machineReading.trim()) ||
-      Boolean(ln.notes.trim())
+      Boolean(ln.notes.trim()) ||
+      ln.paintUsed
     );
   }, []);
 
@@ -1426,6 +1435,7 @@ export function ShiftWork() {
           labelProduct: t.labelProduct,
           packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
           packagingStockInsufficient: t.packagingStockInsufficient,
+          packagingAllPackaged: t.packagingAllPackaged,
         },
       );
       if (!pkgCheck.ok) {
@@ -2058,7 +2068,11 @@ export function ShiftWork() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => removeLine(ln.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeLine(ln.id);
+                            }}
                             className="shrink-0 p-0.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                             title={t.shiftDefDelete}
                           >
@@ -2097,7 +2111,11 @@ export function ShiftWork() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => removePackagingLine(ln.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removePackagingLine(ln.id);
+                            }}
                             className="shrink-0 p-0.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                             title={t.shiftDefDelete}
                           >
@@ -2455,6 +2473,7 @@ export function ShiftWork() {
                     packagingStockAvailable: t.packagingStockAvailable,
                     packagingStockInsufficient: t.packagingStockInsufficient,
                     packagingMaxPacks: t.packagingMaxPacks,
+                    packagingAllPackaged: t.packagingAllPackaged,
                   }}
                   shiftPickerDefs={shiftPickerDefs}
                   productOptions={shiftLineProductOptions}

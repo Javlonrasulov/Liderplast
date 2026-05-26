@@ -268,6 +268,7 @@ export interface T {
   whStockPackSubtitleFull: string;
   whStockLinePacked: string;
   whStockLineUnpackaged: string;
+  whStockLineAllPackaged: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1636,6 +1637,7 @@ const uz_cyrillic: T = {
   whStockPackSubtitleFull: '{total} дона · {bags} пачка ({ppb} тадан)',
   whStockLinePacked: '{bags} пачка қадоқланган ({ppb} тадан)',
   whStockLineUnpackaged: '{rem} дона қадоқланмаган',
+  whStockLineAllPackaged: 'Ҳаммаси қадоқланган',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2696,6 +2698,7 @@ const uz_latin: T = {
   whStockPackSubtitleFull: '{total} dona · {bags} pachka ({ppb} tadan)',
   whStockLinePacked: '{bags} pachka qadoqlangan ({ppb} tadan)',
   whStockLineUnpackaged: '{rem} dona qadoqlanmagan',
+  whStockLineAllPackaged: 'Hammasi qadoqlangan',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -3755,6 +3758,7 @@ const ru: T = {
   whStockPackSubtitleFull: '{total} шт · {bags} пачек (по {ppb})',
   whStockLinePacked: '{bags} пачек упаковано (по {ppb} шт)',
   whStockLineUnpackaged: '{rem} шт не упаковано',
+  whStockLineAllPackaged: 'Всё упаковано',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',
