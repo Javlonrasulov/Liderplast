@@ -643,8 +643,8 @@ export function RawMaterial() {
             </div>
           )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
                 <Droplets size={16} className="text-white" />
@@ -828,15 +828,14 @@ export function RawMaterial() {
                   {incomingKind === 'PAINT' ? t.rmIncomingHintPaint : t.rmIncomingHint}
                 </p>
                 {incomingKind === 'SIRO' &&
-                  (incomingRawMaterial?.itemType === 'RAW_MATERIAL' && incomingRawMaterial.defaultBagWeightKg ? (
+                  incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
+                  incomingRawMaterial.defaultBagWeightKg && (
                     <p className="text-xs text-indigo-500 mt-1">
                       {t.rmIncomingBagWeightHint
                         .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg))
                         .replace('{unit}', t.unitKg)}
                     </p>
-                  ) : (
-                    <p className="text-xs text-amber-500 mt-1">{t.rmAutoBagMissingHint}</p>
-                  ))}
+                  )}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
