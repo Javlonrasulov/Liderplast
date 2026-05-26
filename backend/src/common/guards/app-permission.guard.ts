@@ -253,6 +253,11 @@ function requiredPermissionGroups(
     },
     { test: /^\/finance\/salary\/generate$/, method: 'POST', anyOf: ['create_vedemost'] },
     {
+      test: /^\/finance\/salary\/delete-month$/,
+      method: 'POST',
+      anyOf: ['create_vedemost'],
+    },
+    {
       test: /^\/finance\/salary\/month-status$/,
       method: 'POST',
       anyOf: ['create_vedemost'],

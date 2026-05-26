@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsInt,
   IsNumber,
@@ -58,6 +59,11 @@ export class CreateOrderDto {
   @IsNumber()
   @Min(0)
   paidAmount?: number;
+
+  /** YYYY-MM-DD — sotuv sanasi */
+  @IsOptional()
+  @IsDateString()
+  orderedAt?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

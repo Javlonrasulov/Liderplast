@@ -46,6 +46,7 @@ export type OrderMinAggregateOutputType = {
   totalAmount: number | null
   paidAmount: number | null
   debtAmount: number | null
+  orderedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +59,7 @@ export type OrderMaxAggregateOutputType = {
   totalAmount: number | null
   paidAmount: number | null
   debtAmount: number | null
+  orderedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +72,7 @@ export type OrderCountAggregateOutputType = {
   totalAmount: number
   paidAmount: number
   debtAmount: number
+  orderedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -96,6 +99,7 @@ export type OrderMinAggregateInputType = {
   totalAmount?: true
   paidAmount?: true
   debtAmount?: true
+  orderedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -108,6 +112,7 @@ export type OrderMaxAggregateInputType = {
   totalAmount?: true
   paidAmount?: true
   debtAmount?: true
+  orderedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -120,6 +125,7 @@ export type OrderCountAggregateInputType = {
   totalAmount?: true
   paidAmount?: true
   debtAmount?: true
+  orderedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -219,6 +225,7 @@ export type OrderGroupByOutputType = {
   totalAmount: number
   paidAmount: number
   debtAmount: number
+  orderedAt: Date
   createdAt: Date
   updatedAt: Date
   _count: OrderCountAggregateOutputType | null
@@ -254,6 +261,7 @@ export type OrderWhereInput = {
   totalAmount?: Prisma.FloatFilter<"Order"> | number
   paidAmount?: Prisma.FloatFilter<"Order"> | number
   debtAmount?: Prisma.FloatFilter<"Order"> | number
+  orderedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
@@ -270,6 +278,7 @@ export type OrderOrderByWithRelationInput = {
   totalAmount?: Prisma.SortOrder
   paidAmount?: Prisma.SortOrder
   debtAmount?: Prisma.SortOrder
+  orderedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   client?: Prisma.ClientOrderByWithRelationInput
@@ -289,6 +298,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   totalAmount?: Prisma.FloatFilter<"Order"> | number
   paidAmount?: Prisma.FloatFilter<"Order"> | number
   debtAmount?: Prisma.FloatFilter<"Order"> | number
+  orderedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
@@ -305,6 +315,7 @@ export type OrderOrderByWithAggregationInput = {
   totalAmount?: Prisma.SortOrder
   paidAmount?: Prisma.SortOrder
   debtAmount?: Prisma.SortOrder
+  orderedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -325,6 +336,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   totalAmount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
   paidAmount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
   debtAmount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
+  orderedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
 }
@@ -335,6 +347,7 @@ export type OrderCreateInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutOrdersInput
@@ -351,6 +364,7 @@ export type OrderUncheckedCreateInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -363,6 +377,7 @@ export type OrderUpdateInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput
@@ -379,6 +394,7 @@ export type OrderUncheckedUpdateInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -393,6 +409,7 @@ export type OrderCreateManyInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -403,6 +420,7 @@ export type OrderUpdateManyMutationInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -415,6 +433,7 @@ export type OrderUncheckedUpdateManyInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -437,6 +456,7 @@ export type OrderCountOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paidAmount?: Prisma.SortOrder
   debtAmount?: Prisma.SortOrder
+  orderedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -455,6 +475,7 @@ export type OrderMaxOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paidAmount?: Prisma.SortOrder
   debtAmount?: Prisma.SortOrder
+  orderedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -467,6 +488,7 @@ export type OrderMinOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paidAmount?: Prisma.SortOrder
   debtAmount?: Prisma.SortOrder
+  orderedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -611,6 +633,7 @@ export type OrderCreateWithoutCreatedByInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutOrdersInput
@@ -625,6 +648,7 @@ export type OrderUncheckedCreateWithoutCreatedByInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -668,6 +692,7 @@ export type OrderScalarWhereInput = {
   totalAmount?: Prisma.FloatFilter<"Order"> | number
   paidAmount?: Prisma.FloatFilter<"Order"> | number
   debtAmount?: Prisma.FloatFilter<"Order"> | number
+  orderedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
 }
@@ -678,6 +703,7 @@ export type OrderCreateWithoutClientInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
@@ -692,6 +718,7 @@ export type OrderUncheckedCreateWithoutClientInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -730,6 +757,7 @@ export type OrderCreateWithoutItemsInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutOrdersInput
@@ -745,6 +773,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
@@ -772,6 +801,7 @@ export type OrderUpdateWithoutItemsInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput
@@ -787,6 +817,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
@@ -798,6 +829,7 @@ export type OrderCreateWithoutPaymentsInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutOrdersInput
@@ -813,6 +845,7 @@ export type OrderUncheckedCreateWithoutPaymentsInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -840,6 +873,7 @@ export type OrderUpdateWithoutPaymentsInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput
@@ -855,6 +889,7 @@ export type OrderUncheckedUpdateWithoutPaymentsInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -867,6 +902,7 @@ export type OrderCreateManyCreatedByInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -877,6 +913,7 @@ export type OrderUpdateWithoutCreatedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput
@@ -891,6 +928,7 @@ export type OrderUncheckedUpdateWithoutCreatedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -904,6 +942,7 @@ export type OrderUncheckedUpdateManyWithoutCreatedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -915,6 +954,7 @@ export type OrderCreateManyClientInput = {
   totalAmount?: number
   paidAmount?: number
   debtAmount?: number
+  orderedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -925,6 +965,7 @@ export type OrderUpdateWithoutClientInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
@@ -939,6 +980,7 @@ export type OrderUncheckedUpdateWithoutClientInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -952,6 +994,7 @@ export type OrderUncheckedUpdateManyWithoutClientInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paidAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   debtAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  orderedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1004,6 +1047,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   totalAmount?: boolean
   paidAmount?: boolean
   debtAmount?: boolean
+  orderedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1021,6 +1065,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   totalAmount?: boolean
   paidAmount?: boolean
   debtAmount?: boolean
+  orderedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1035,6 +1080,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   totalAmount?: boolean
   paidAmount?: boolean
   debtAmount?: boolean
+  orderedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1049,11 +1095,12 @@ export type OrderSelectScalar = {
   totalAmount?: boolean
   paidAmount?: boolean
   debtAmount?: boolean
+  orderedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "createdById" | "status" | "totalAmount" | "paidAmount" | "debtAmount" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "createdById" | "status" | "totalAmount" | "paidAmount" | "debtAmount" | "orderedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Order$createdByArgs<ExtArgs>
@@ -1086,6 +1133,10 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     totalAmount: number
     paidAmount: number
     debtAmount: number
+    /**
+     * Sotuv sanasi (UI dagi sana)
+     */
+    orderedAt: Date
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["order"]>
@@ -1522,6 +1573,7 @@ export interface OrderFieldRefs {
   readonly totalAmount: Prisma.FieldRef<"Order", 'Float'>
   readonly paidAmount: Prisma.FieldRef<"Order", 'Float'>
   readonly debtAmount: Prisma.FieldRef<"Order", 'Float'>
+  readonly orderedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
 }

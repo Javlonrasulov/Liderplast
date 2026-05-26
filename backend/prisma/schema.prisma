@@ -588,10 +588,14 @@ model Order {
   totalAmount Float       @default(0)
   paidAmount Float        @default(0)
   debtAmount Float        @default(0)
+  /// Sotuv sanasi (UI dagi sana)
+  orderedAt  DateTime     @default(now())
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   items      OrderItem[]
   payments   Payment[]
+
+  @@index([orderedAt])
 }
 
 model OrderItem {

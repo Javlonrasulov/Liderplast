@@ -10,6 +10,7 @@ import {
   type Employee,
   type RawMaterialProduct,
   type ShiftRecord,
+  type ShiftRecordKind,
 } from '../store/erp-store';
 import { apiRequest } from '../api/http';
 import { useApp } from '../i18n/app-context';
@@ -19,6 +20,15 @@ import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { getPlannedSemiRawRows } from '../utils/shift-semi-raw-planned';
 import { ShiftRawMaterialHistoryTab } from './ShiftRawMaterialHistoryTab';
+import {
+  type PackagingLine,
+  createEmptyPackagingLine,
+  isPackagingLineDraft,
+  estimatePackagingPieces,
+  validatePackagingLines,
+  parsePackagingLineHours,
+  parsePackagingLinePacks,
+} from '../utils/shift-packaging-utils';
 
 const SHIFT_DEFS_KEY = 'liderplast_shift_definitions_v1';
 
@@ -112,6 +122,9 @@ const TR = {
     labelNotes: 'Изоҳ',
     autoKwh: '⚡ Автоматик ток ҳисоби:',
     btn: 'Смена ёзувини сақлаш',
+    btnSaveAll: 'Барчасини сақлаш',
+    draftProductionTitle: 'Ишлаб чиқариш (сақланмаган)',
+    draftPackagingTitle: 'Қадоқлаш (сақланмаган)',
     formAddRow: '+ қатор',
     colNum: '№',
     colDate: 'Сана',
@@ -268,6 +281,9 @@ const TR = {
     labelNotes: 'Izoh',
     autoKwh: "⚡ Avtomatik tok hisobi:",
     btn: 'Smena yozuvini saqlash',
+    btnSaveAll: 'Barchasini saqlash',
+    draftProductionTitle: 'Ishlab chiqarish (saqlanmagan)',
+    draftPackagingTitle: 'Qadoqlash (saqlanmagan)',
     formAddRow: '+ qator',
     colNum: '№',
     colDate: 'Sana',
@@ -424,6 +440,9 @@ const TR = {
     labelNotes: 'Примечание',
     autoKwh: '⚡ Автоматический расчёт тока:',
     btn: 'Сохранить запись смены',
+    btnSaveAll: 'Сохранить всё',
+    draftProductionTitle: 'Производство (не сохранено)',
+    draftPackagingTitle: 'Упаковка (не сохранено)',
     formAddRow: '+ строка',
     colNum: '№',
     colDate: 'Дата',
@@ -855,7 +874,7 @@ export function ShiftWork() {
   const [workerEditorError, setWorkerEditorError] = useState('');
   const [deleteMachineConfirm, setDeleteMachineConfirm] = useState<string | null>(null);
   const [machineForm, setMachineForm] = useState({
-    name: '', description: '', powerKw: '', maxCapacityPerHour: '', type: 'semi' as 'semi' | 'final',
+    name: '', description: '', maxCapacityPerHour: '', type: 'semi' as 'semi' | 'final',
   });
   const [machineError, setMachineError] = useState('');
   const [machineSuccess, setMachineSuccess] = useState('');
@@ -1043,10 +1062,51 @@ export function ShiftWork() {
   const [lines, setLines] = useState<ShiftLine[]>(() => []);
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
 
+  const createEmptyPackagingLineCb = useCallback(
+    () => createEmptyPackagingLine(shiftLineProductOptions[0] || ''),
+    [shiftLineProductOptions],
+  );
+  const [packagingLines, setPackagingLines] = useState<PackagingLine[]>([]);
+  const [packagingExpandedLineId, setPackagingExpandedLineId] = useState<string | null>(
+    null,
+  );
+
   useEffect(() => {
     if (lines.length > 0) return;
     setLines([createEmptyLine()]);
   }, [lines.length, createEmptyLine]);
+
+  useEffect(() => {
+    if (packagingLines.length > 0) return;
+    setPackagingLines([createEmptyPackagingLineCb()]);
+  }, [packagingLines.length, createEmptyPackagingLineCb]);
+
+  useEffect(() => {
+    if (packagingLines.length === 0) return;
+    setPackagingExpandedLineId((prev) => {
+      if (prev && packagingLines.some((l) => l.id === prev)) return prev;
+      return packagingLines[packagingLines.length - 1]?.id ?? null;
+    });
+  }, [packagingLines]);
+
+  const isProductionLineDraft = useCallback((ln: ShiftLine) => {
+    return (
+      Boolean(ln.machineId) ||
+      Boolean(ln.hoursWorked.trim()) ||
+      Boolean(ln.producedQty.trim()) ||
+      Boolean(ln.machineReading.trim()) ||
+      Boolean(ln.notes.trim())
+    );
+  }, []);
+
+  const productionDraftLines = useMemo(
+    () => lines.filter(isProductionLineDraft),
+    [lines, isProductionLineDraft],
+  );
+  const packagingDraftLines = useMemo(
+    () => packagingLines.filter(isPackagingLineDraft),
+    [packagingLines],
+  );
 
   useEffect(() => {
     if (lines.length === 0) return;
@@ -1162,12 +1222,6 @@ export function ShiftWork() {
       setRecordEditError(t.labelProduct + '!');
       return;
     }
-    const sel = state.machines.find((m) => m.id === recordEditForm.machineId);
-    if (sel && (!Number.isFinite(sel.powerKw) || sel.powerKw <= 0)) {
-      setRecordEditError(t.machinePowerKwZeroHint);
-      return;
-    }
-    const kwhEdit = hours * (sel?.powerKw || 0);
     const selEdit = state.machines.find((m) => m.id === recordEditForm.machineId);
     const defectEdit = Math.max(0, parseNonNegativeInt(recordEditForm.defectCount) || 0);
     const materialUnitsEdit = produced + defectEdit;
@@ -1211,7 +1265,7 @@ export function ShiftWork() {
           machineReading: recordEditForm.machineReading,
           producedQty: produced,
           defectCount: defectEdit,
-          electricityKwh: parseFloat(kwhEdit.toFixed(1)),
+          electricityKwh: 0,
           notes: recordEditForm.notes,
           ...(rawMaterialActualKg != null ? { rawMaterialActualKg } : {}),
         },
@@ -1273,81 +1327,100 @@ export function ShiftWork() {
     });
   }, [createEmptyLine]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (shiftPickerDefs.length === 0 || !shiftPickerDefs.some((d) => d.number === form.shift)) {
       setError(t.shiftNoDefsHint);
       return;
     }
-    if (shiftLineProductOptions.length === 0) {
-      setError(t.productTypesEmptyHint);
-      return;
-    }
-    if (!form.workerName.trim()) { setError(t.labelWorker + '!'); return; }
 
-    const meaningfulLines = lines.filter((ln) => {
-      const any =
-        Boolean(ln.machineId) ||
-        Boolean(ln.hoursWorked.trim()) ||
-        Boolean(ln.producedQty.trim()) ||
-        Boolean(ln.machineReading.trim()) ||
-        Boolean(ln.notes.trim());
-      return any;
-    });
+    const meaningfulProduction = productionDraftLines;
+    const meaningfulPackaging = packagingDraftLines;
 
-    if (meaningfulLines.length === 0) {
-      setError(t.labelMachine + ' / ' + t.labelHours + '!');
+    if (meaningfulProduction.length === 0 && meaningfulPackaging.length === 0) {
+      setError(t.labelMachine + ' / ' + t.labelPackCount + '!');
       return;
     }
 
-    for (const ln of meaningfulLines) {
-      const produced = parseNonNegativeInt(ln.producedQty);
-      if (Number.isNaN(produced) || produced < 0) { setError(t.labelProduced + '!'); return; }
-      if (!ln.machineId) { setError(t.labelMachine + '!'); return; }
-      if (!ln.productType) { setError(t.labelProduct + '!'); return; }
-      const machine = state.machines.find((m) => m.id === ln.machineId);
-      if (machine?.type === 'semi' && ln.paintUsed) {
-        if (!ln.paintRawMaterialId) {
-          setError(t.shiftPaintError);
-          return;
-        }
-        const pq = parseDecimalInput(ln.paintQuantity);
-        if (!pq || pq <= 0) {
-          setError(t.shiftPaintError);
-          return;
-        }
-      }
+    if (!form.workerName.trim()) {
+      setError(t.labelWorker + '!');
+      return;
     }
 
-    for (const ln of meaningfulLines) {
-      const hours = parseDecimalInput(ln.hoursWorked);
-      const sel = state.machines.find((m) => m.id === ln.machineId);
-      if (hours > 0 && sel && (!Number.isFinite(sel.powerKw) || sel.powerKw <= 0)) {
-        setError(t.machinePowerKwZeroHint);
+    if (meaningfulProduction.length > 0) {
+      if (shiftLineProductOptions.length === 0) {
+        setError(t.productTypesEmptyHint);
         return;
       }
-    }
-
-    for (const ln of meaningfulLines) {
-      const machine = state.machines.find((m) => m.id === ln.machineId);
-      if (machine?.type !== 'semi') continue;
-      const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
-      const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
-      const materialUnits = produced + defect;
-      const rows = getPlannedSemiRawRows(
-        state.warehouseProducts,
-        ln.productType,
-        materialUnits,
-      );
-      for (const row of rows) {
-        const s = ln.rawKgOverrides[row.rawMaterialId]?.trim();
-        if (!s) continue;
-        const kg = parseDecimalInput(s);
-        if (!Number.isFinite(kg) || kg <= 0) {
-          setError(`${t.shiftMaterialInvalidKg}: ${row.name}`);
+      for (const ln of meaningfulProduction) {
+        const produced = parseNonNegativeInt(ln.producedQty);
+        if (Number.isNaN(produced) || produced < 0) {
+          setError(t.labelProduced + '!');
           return;
         }
+        if (!ln.machineId) {
+          setError(t.labelMachine + '!');
+          return;
+        }
+        if (!ln.productType) {
+          setError(t.labelProduct + '!');
+          return;
+        }
+        const machine = state.machines.find((m) => m.id === ln.machineId);
+        if (machine?.type === 'semi' && ln.paintUsed) {
+          if (!ln.paintRawMaterialId) {
+            setError(t.shiftPaintError);
+            return;
+          }
+          const pq = parseDecimalInput(ln.paintQuantity);
+          if (!pq || pq <= 0) {
+            setError(t.shiftPaintError);
+            return;
+          }
+        }
+      }
+      for (const ln of meaningfulProduction) {
+        const machine = state.machines.find((m) => m.id === ln.machineId);
+        if (machine?.type !== 'semi') continue;
+        const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
+        const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
+        const materialUnits = produced + defect;
+        const rows = getPlannedSemiRawRows(
+          state.warehouseProducts,
+          ln.productType,
+          materialUnits,
+        );
+        for (const row of rows) {
+          const s = ln.rawKgOverrides[row.rawMaterialId]?.trim();
+          if (!s) continue;
+          const kg = parseDecimalInput(s);
+          if (!Number.isFinite(kg) || kg <= 0) {
+            setError(`${t.shiftMaterialInvalidKg}: ${row.name}`);
+            return;
+          }
+        }
+      }
+    }
+
+    if (meaningfulPackaging.length > 0) {
+      const pkgCheck = validatePackagingLines(
+        packagingLines,
+        state.warehouseProducts,
+        state.warehouseStock,
+        {
+          shiftNoDefsHint: t.shiftNoDefsHint,
+          productTypesEmptyHint: t.productTypesEmptyHint,
+          labelWorker: t.labelWorker,
+          labelPackCount: t.labelPackCount,
+          labelProduct: t.labelProduct,
+          packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
+          packagingStockInsufficient: t.packagingStockInsufficient,
+        },
+      );
+      if (!pkgCheck.ok) {
+        setError(pkgCheck.error);
+        return;
       }
     }
 
@@ -1360,10 +1433,9 @@ export function ShiftWork() {
         await refresh();
       }
 
-      for (const ln of meaningfulLines) {
+      for (const ln of meaningfulProduction) {
         const hours = parseDecimalInput(ln.hoursWorked);
         const sel = state.machines.find((m) => m.id === ln.machineId);
-        const kwh = hours * (sel?.powerKw || 0);
         const paintPayload: Partial<
           Pick<ShiftRecord, 'paintUsed' | 'paintRawMaterialId' | 'paintQuantityKg'>
         > = {};
@@ -1403,14 +1475,40 @@ export function ShiftWork() {
             machineReading: ln.machineReading,
             producedQty: Math.max(0, parseNonNegativeInt(ln.producedQty) || 0),
             defectCount: Math.max(0, parseNonNegativeInt(ln.defectCount) || 0),
-            electricityKwh: parseFloat(kwh.toFixed(1)),
+            electricityKwh: 0,
             notes: ln.notes,
             ...paintPayload,
             ...(rawMaterialActualKg.length > 0 ? { rawMaterialActualKg } : {}),
-          }
+          },
         });
       }
-      // Elektr xarajati (Expense) backendda sync qilinadi; sahifalarda ko‘rish uchun yangilash kerak.
+
+      const recordKind: ShiftRecordKind = 'PACKAGING';
+      for (const ln of meaningfulPackaging) {
+        const hours = parsePackagingLineHours(ln.hoursWorked);
+        const packs = parsePackagingLinePacks(ln.packCount);
+        const producedQty = estimatePackagingPieces(ln, state.warehouseProducts);
+        await dispatch({
+          type: 'ADD_SHIFT_RECORD',
+          payload: {
+            date: form.date,
+            shift: form.shift,
+            workerName: form.workerName.trim(),
+            recordKind,
+            machineId: '',
+            hoursWorked: hours,
+            productType: ln.productType,
+            machineReading: '',
+            producedQty,
+            defectCount: 0,
+            electricityKwh: 0,
+            bagCount: 0,
+            packCount: packs,
+            notes: ln.notes,
+          },
+        });
+      }
+
       await refresh();
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Error';
@@ -1420,11 +1518,9 @@ export function ShiftWork() {
 
     setSuccess(`${form.workerName} — ${getShiftLabel(shiftDefinitions, form.shift, t)} ✓`);
     setTimeout(() => setSuccess(''), 4000);
-    setForm(prev => ({
-      ...prev,
-      workerName: '',
-    }));
+    setForm((prev) => ({ ...prev, workerName: '' }));
     setLines([createEmptyLine()]);
+    setPackagingLines([createEmptyPackagingLineCb()]);
   };
 
   const handleAddWorker = async (e: React.FormEvent) => {
@@ -1601,21 +1697,19 @@ export function ShiftWork() {
     setMachineError('');
     if (!machineForm.name.trim()) { setMachineError(t.machineName + '!'); return; }
     if (!machineForm.description.trim()) { setMachineError(t.machineDesc + '!'); return; }
-    const power = parseFloat(machineForm.powerKw);
-    if (!machineForm.powerKw || isNaN(power) || power <= 0) { setMachineError(t.machinePower + '!'); return; }
     dispatch({
       type: 'ADD_MACHINE',
       payload: {
         name: machineForm.name.trim(),
         description: machineForm.description.trim(),
-        powerKw: power,
+        powerKw: 0,
         maxCapacityPerHour: parseInt(machineForm.maxCapacityPerHour) || 5000,
         type: machineForm.type,
       }
     });
     setMachineSuccess(machineForm.name + ' ✓');
     setTimeout(() => setMachineSuccess(''), 3000);
-    setMachineForm({ name: '', description: '', powerKw: '', maxCapacityPerHour: '', type: 'semi' });
+    setMachineForm({ name: '', description: '', maxCapacityPerHour: '', type: 'semi' });
   };
 
   const handleDeleteMachine = (id: string) => {
@@ -1835,41 +1929,6 @@ export function ShiftWork() {
               </button>
             </div>
 
-            {formEntryMode === 'packaging' ? (
-              <ShiftPackagingForm
-                t={{
-                  labelDate: t.labelDate,
-                  labelShift: t.labelShift,
-                  labelWorker: t.labelWorker,
-                  labelProduct: t.labelProduct,
-                  labelHours: t.labelHours,
-                  labelPackCount: t.labelPackCount,
-                  labelNotes: t.labelNotes,
-                  placeholderWorker: t.placeholderWorker,
-                  placeholderNotes: t.placeholderNotes,
-                  formAddRow: t.formAddRow,
-                  btn: t.btnPackagingSave,
-                  labelMachine: t.labelMachine,
-                  shiftNoDefsHint: t.shiftNoDefsHint,
-                  shiftNoDefsGoToTab: t.shiftNoDefsGoToTab,
-                  productTypesEmptyHint: t.productTypesEmptyHint,
-                  shiftNoDefect: t.shiftNoDefect,
-                  unitPiecesAbbr: t.unitPiecesAbbr,
-                  hoursShort: t.hoursShort,
-                  packagingPiecesPreview: t.packagingPiecesPreview,
-                  packagingPiecesPreviewSemi: t.packagingPiecesPreviewSemi,
-                  packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
-                  packagingStockAvailable: t.packagingStockAvailable,
-                  packagingStockInsufficient: t.packagingStockInsufficient,
-                  packagingMaxPacks: t.packagingMaxPacks,
-                }}
-                shiftPickerDefs={shiftPickerDefs}
-                productOptions={shiftLineProductOptions}
-                onNeedShiftDefs={() => setActiveTab('shiftDefs')}
-                getShiftLabel={(defs, n) => getShiftLabel(defs, n, t)}
-              />
-            ) : (
-              <>
             {success && (
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl flex items-center gap-2">
                 <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
@@ -1877,7 +1936,7 @@ export function ShiftWork() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-3.5">
+            <form onSubmit={handleSaveAll} className="space-y-3.5">
               {/* Date + Shift */}
               <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
                 <div>
@@ -1964,6 +2023,67 @@ export function ShiftWork() {
                 )}
               </div>
 
+              {formEntryMode === 'packaging' && productionDraftLines.length > 0 ? (
+                <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/25 px-3 py-2">
+                  <p className="text-[11px] font-bold text-indigo-800 dark:text-indigo-200 mb-1.5">
+                    {t.draftProductionTitle}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {productionDraftLines.map((ln, i) => {
+                      const mach = state.machines.find((m) => m.id === ln.machineId);
+                      const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
+                      const machineLabel = mach?.name?.split('#')[0]?.trim() || '—';
+                      return (
+                        <span
+                          key={ln.id}
+                          className="inline-flex flex-wrap items-center gap-x-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-indigo-100 dark:border-indigo-900"
+                        >
+                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                            #{i + 1}
+                          </span>
+                          {machineLabel}
+                          {ln.productType ? ` · ${ln.productType}` : ''}
+                          {produced > 0
+                            ? ` · ${formatNumber(produced)} ${t.unitPiecesAbbr}`
+                            : ''}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
+              {formEntryMode === 'production' && packagingDraftLines.length > 0 ? (
+                <div className="rounded-xl border border-teal-200/80 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/25 px-3 py-2">
+                  <p className="text-[11px] font-bold text-teal-800 dark:text-teal-200 mb-1.5">
+                    {t.draftPackagingTitle}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {packagingDraftLines.map((ln, i) => {
+                      const packs = parsePackagingLinePacks(ln.packCount);
+                      const pieces = estimatePackagingPieces(ln, state.warehouseProducts);
+                      return (
+                        <span
+                          key={ln.id}
+                          className="inline-flex flex-wrap items-center gap-x-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-teal-100 dark:border-teal-900"
+                        >
+                          <span className="font-semibold text-teal-700 dark:text-teal-400">
+                            #{i + 1}
+                          </span>
+                          {ln.productType || '—'}
+                          {packs > 0 ? ` · ${packs} ${t.labelPackCount.toLowerCase()}` : ''}
+                          {pieces > 0
+                            ? ` · ${formatNumber(pieces)} ${t.unitPiecesAbbr}`
+                            : ''}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
+              {formEntryMode === 'production' ? (
+              <>
               {/* Multi lines: Machine + Hours + Product + ... */}
               <div className="flex items-center justify-between gap-2">
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -1982,7 +2102,6 @@ export function ShiftWork() {
                 {lines.map((ln, idx) => {
                   const selectedMachine = state.machines.find((m) => m.id === ln.machineId);
                   const hours = parseDecimalInput(ln.hoursWorked);
-                  const kwh = hours * (selectedMachine?.powerKw || 0);
                   const produced = Math.max(0, parseNonNegativeInt(ln.producedQty) || 0);
                   const defect = Math.max(0, parseNonNegativeInt(ln.defectCount) || 0);
                   const brakPct =
@@ -2057,12 +2176,6 @@ export function ShiftWork() {
                             {formatNumber(produced)}{' '}
                             <span className="font-normal text-slate-400">{t.unitPiecesAbbr}</span>
                           </span>
-                          {hours > 0 && selectedMachine ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400">
-                              <Zap size={10} />
-                              {kwh.toFixed(1)}
-                            </span>
-                          ) : null}
                           <ChevronDown
                             size={14}
                             className="ml-auto text-slate-400 shrink-0 -rotate-90"
@@ -2099,17 +2212,6 @@ export function ShiftWork() {
                           />
                         </div>
                       </div>
-
-                      {/* Electricity calc */}
-                      {hours > 0 && selectedMachine && (
-                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
-                          <p className="text-yellow-800 dark:text-yellow-400 text-xs font-semibold mb-1.5">{t.autoKwh}</p>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500">{selectedMachine.powerKw} kW × {hours}h =</span>
-                            <span className="font-bold text-yellow-700 dark:text-yellow-400">{kwh.toFixed(1)} kWh</span>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Product type */}
                       <div>
@@ -2292,6 +2394,46 @@ export function ShiftWork() {
                   );
                 })}
               </div>
+              </>
+              ) : (
+                <ShiftPackagingForm
+                  embedded
+                  lines={packagingLines}
+                  onLinesChange={setPackagingLines}
+                  expandedLineId={packagingExpandedLineId}
+                  onExpandedLineIdChange={setPackagingExpandedLineId}
+                  t={{
+                    labelDate: t.labelDate,
+                    labelShift: t.labelShift,
+                    labelWorker: t.labelWorker,
+                    labelProduct: t.labelProduct,
+                    labelHours: t.labelHours,
+                    labelPackCount: t.labelPackCount,
+                    labelNotes: t.labelNotes,
+                    placeholderWorker: t.placeholderWorker,
+                    placeholderNotes: t.placeholderNotes,
+                    formAddRow: t.formAddRow,
+                    btn: t.btnSaveAll,
+                    labelMachine: t.labelMachine,
+                    shiftNoDefsHint: t.shiftNoDefsHint,
+                    shiftNoDefsGoToTab: t.shiftNoDefsGoToTab,
+                    productTypesEmptyHint: t.productTypesEmptyHint,
+                    shiftNoDefect: t.shiftNoDefect,
+                    unitPiecesAbbr: t.unitPiecesAbbr,
+                    hoursShort: t.hoursShort,
+                    packagingPiecesPreview: t.packagingPiecesPreview,
+                    packagingPiecesPreviewSemi: t.packagingPiecesPreviewSemi,
+                    packagingNoPiecesPerBag: t.packagingNoPiecesPerBag,
+                    packagingStockAvailable: t.packagingStockAvailable,
+                    packagingStockInsufficient: t.packagingStockInsufficient,
+                    packagingMaxPacks: t.packagingMaxPacks,
+                  }}
+                  shiftPickerDefs={shiftPickerDefs}
+                  productOptions={shiftLineProductOptions}
+                  onNeedShiftDefs={() => setActiveTab('shiftDefs')}
+                  getShiftLabel={(defs, n) => getShiftLabel(defs, n, t)}
+                />
+              )}
 
               {error && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
@@ -2302,13 +2444,15 @@ export function ShiftWork() {
               <button
                 type="submit"
                 disabled={shiftPickerDefs.length === 0}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
+                className={`w-full py-3 disabled:cursor-not-allowed disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md ${
+                  formEntryMode === 'packaging'
+                    ? 'bg-teal-600 hover:bg-teal-700 disabled:hover:bg-teal-600 shadow-teal-200 dark:shadow-teal-900/30'
+                    : 'bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 shadow-indigo-200 dark:shadow-indigo-900/30'
+                }`}
               >
-                <CheckCircle2 size={16} /> {t.btn}
+                <CheckCircle2 size={16} /> {t.btnSaveAll}
               </button>
             </form>
-              </>
-            )}
           </div>
 
           {formEntryMode === 'production' ? (
@@ -2900,20 +3044,7 @@ export function ShiftWork() {
                     <div className="flex-1 min-w-0">
                       <p className="text-slate-800 dark:text-white font-semibold text-sm truncate">{emp.fullName}</p>
                       <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">
-                        <span className="whitespace-nowrap">
-                          {appT.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : '—'}
-                        </span>
-                        <span className="whitespace-nowrap">
-                          {' · '}
-                          {appT.prLeaveDateLabel}:{' '}
-                          {emp.isActive === false
-                            ? emp.employmentEndedAt
-                              ? formatDate(emp.employmentEndedAt)
-                              : emp.updatedAt
-                                ? formatDate(emp.updatedAt)
-                                : '—'
-                            : '—'}
-                        </span>
+                        {appT.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : '\u2014'}
                       </p>
                       <p className="text-slate-400 text-xs mt-0.5">
                         {t.workerStatLine.replace('{n}', String(workerRecs.length)).replace('{h}', String(totalHours))}
@@ -3011,24 +3142,11 @@ export function ShiftWork() {
                   placeholder={t.machinePlaceholderDesc} rows={2}
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
-                    <span className="text-yellow-500">⚡</span> {t.machinePower}
-                  </label>
-                  <div className="relative">
-                    <input type="number" value={machineForm.powerKw} onChange={e => setMachineForm({ ...machineForm, powerKw: e.target.value })}
-                      placeholder="0" min="0" step="0.5"
-                      className="w-full px-3 py-2.5 pr-10 border border-yellow-200 dark:border-yellow-700/50 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                    <span className="absolute right-3 top-2.5 text-xs text-yellow-600 dark:text-yellow-400 font-bold">kW</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.machineCapacity}</label>
-                  <input type="number" value={machineForm.maxCapacityPerHour} onChange={e => setMachineForm({ ...machineForm, maxCapacityPerHour: e.target.value })}
-                    placeholder="5000" min="0"
-                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-                </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.machineCapacity}</label>
+                <input type="number" value={machineForm.maxCapacityPerHour} onChange={e => setMachineForm({ ...machineForm, maxCapacityPerHour: e.target.value })}
+                  placeholder="5000" min="0"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.machineType}</label>
@@ -3041,14 +3159,6 @@ export function ShiftWork() {
                   ))}
                 </div>
               </div>
-              {machineForm.powerKw && parseFloat(machineForm.powerKw) > 0 && (
-                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
-                  <p className="text-yellow-800 dark:text-yellow-400 text-xs">
-                    ⚡ 1 soat = <strong>{parseFloat(machineForm.powerKw).toFixed(1)} kWh</strong>
-                    &nbsp;·&nbsp; 8 soat = <strong>{(parseFloat(machineForm.powerKw) * 8).toFixed(1)} kWh</strong>
-                  </p>
-                </div>
-              )}
               {machineError && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
                   <p className="text-red-600 dark:text-red-400 text-sm">{machineError}</p>
@@ -3088,9 +3198,6 @@ export function ShiftWork() {
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 text-xs mb-2">{machine.description}</p>
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className="flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                            <Zap size={11} /> {machine.powerKw} {t.machineKwPerHour}
-                          </span>
                           <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                             <BarChart3 size={11} /> {formatNumber(machine.maxCapacityPerHour)} {t.machinePerHour}
                           </span>

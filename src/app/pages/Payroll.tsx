@@ -17,6 +17,8 @@ import {
   todayYmd,
   displayGroupedIntInput,
   parseDigitsFromAmountInput,
+  EMPTY_PLACEHOLDER,
+  INLINE_SEP,
 } from '../utils/format';
 import type { Employee, EmployeeProductRate, ShiftRecord } from '../store/erp-store';
 import {
@@ -121,6 +123,8 @@ function VedomostTab() {
   const [editBonus, setEditBonus] = useState(0);
   const [editDays, setEditDays] = useState(0);
   const [generated, setGenerated] = useState(false);
+  const [closeVedomostOpen, setCloseVedomostOpen] = useState(false);
+  const [closingVedomost, setClosingVedomost] = useState(false);
 
   const rows = useMemo(() =>
     state.salaryVedomost
@@ -145,6 +149,24 @@ function VedomostTab() {
     dispatch({ type: 'GENERATE_VEDOMOST', payload: { month } });
     setGenerated(true);
     setTimeout(() => setGenerated(false), 2500);
+  };
+
+  const handleCloseVedomost = async () => {
+    setClosingVedomost(true);
+    try {
+      await dispatch({ type: 'DELETE_SALARY_MONTH', payload: { month } });
+      toast.success(t.prCloseVedomostSuccess);
+      setCloseVedomostOpen(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.toLowerCase().includes('paid')) {
+        toast.error(t.prCloseVedomostPaidBlocked);
+      } else {
+        toast.error(msg || t.prEmployeeSaveError);
+      }
+    } finally {
+      setClosingVedomost(false);
+    }
   };
 
   const handleToggleStatus = (id: string, current: 'paid' | 'unpaid') => {
@@ -211,8 +233,21 @@ function VedomostTab() {
           className={`flex items-center gap-2 h-9 px-4 rounded-xl text-sm font-medium transition-all shadow-sm ${generated ? 'bg-emerald-500 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
         >
           <FileText size={15} />
-          {generated ? 'вњ“ ' + t.prGenerate : t.prGenerate}
+          {generated ? '✓ ' + t.prGenerate : t.prGenerate}
         </button>
+
+        {allRows.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setCloseVedomostOpen(true)}
+            disabled={totals.paid > 0}
+            title={totals.paid > 0 ? t.prCloseVedomostPaidBlocked : undefined}
+            className="flex items-center gap-2 h-9 px-4 rounded-xl border border-red-200 bg-white text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/50 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-950/30"
+          >
+            <X size={15} />
+            {t.prCloseVedomost}
+          </button>
+        ) : null}
 
         {/* Status filter pills */}
         <div className="flex gap-1 ml-auto">
@@ -260,7 +295,7 @@ function VedomostTab() {
           <StatCard
             label={t.prIncomeTax}
             value={formatCurrency(totals.incomeTax)}
-            sub={`${t.prNps}: ${formatCurrency(totals.nps)} В· ${t.prKpiLabelSocial}: ${formatCurrency(totals.social)}`}
+            sub={`${t.prNps}: ${formatCurrency(totals.nps)} · ${t.prKpiLabelSocial}: ${formatCurrency(totals.social)}`}
             color="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
           />
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
@@ -295,13 +330,13 @@ function VedomostTab() {
               <span className="text-red-500 font-bold">в€’</span>
               <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 rounded text-orange-700 dark:text-orange-300">{t.prIncomeTax}</span>
             </span>
-            <span className="text-slate-300 dark:text-slate-600">В·</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
             {/* NPS note */}
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-slate-200 dark:bg-slate-600 text-[8px] font-bold text-slate-500">*</span>
               {t.prNpsNote}
             </span>
-            <span className="text-slate-300 dark:text-slate-600">В·</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
             {/* Social note */}
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-slate-200 dark:bg-slate-600 text-[8px] font-bold text-slate-500">*</span>
@@ -323,13 +358,23 @@ function VedomostTab() {
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           {/* Title bar */}
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3">
             <div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
-                {monthLabel(month)} вЂ” {t.prTitle}
+                {monthLabel(month)} — {t.prTitle}
               </h3>
               <p className="text-slate-400 text-xs">{rows.length} {t.totalRecords}</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setCloseVedomostOpen(true)}
+              disabled={totals.paid > 0}
+              title={totals.paid > 0 ? t.prCloseVedomostPaidBlocked : undefined}
+              className="shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+            >
+              <X size={14} />
+              {t.prCloseVedomost}
+            </button>
           </div>
 
           {/* Scrollable table */}
@@ -395,7 +440,7 @@ function VedomostTab() {
                             <span className="text-white text-[10px] font-bold">{emp?.fullName?.charAt(0) ?? '?'}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-slate-800 dark:text-slate-200">{emp?.fullName ?? 'вЂ”'}</p>
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{emp?.fullName ?? EMPTY_PLACEHOLDER}</p>
                             <p className="text-slate-400 text-[10px] font-mono">{emp?.cardNumber}</p>
                           </div>
                         </div>
@@ -572,6 +617,30 @@ function VedomostTab() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={closeVedomostOpen} onOpenChange={setCloseVedomostOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.prCloseVedomostTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.prCloseVedomostConfirm.replace('{month}', monthLabel(month))}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={closingVedomost}>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleCloseVedomost();
+              }}
+              disabled={closingVedomost}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {closingVedomost ? t.authLoading : t.prCloseVedomostAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -758,11 +827,11 @@ function BankTab() {
                               {t.prBankUploadDate}:
                             </span>{' '}
                             {formatDateTime(item.createdAt)}
-                            <span className="mx-1.5 text-slate-300 dark:text-slate-600">В·</span>
+                            <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
                             <span className="font-medium text-slate-500 dark:text-slate-400">
                               {t.prBankUploadedBy}:
                             </span>{' '}
-                            {item.uploadedByName ?? 'вЂ”'}
+                            {item.uploadedByName ?? EMPTY_PLACEHOLDER}
                           </p>
                         </div>
                         <span className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${statusColor}`}>
@@ -851,11 +920,11 @@ function BankTab() {
                       {t.prBankUploadDate}:
                     </span>{' '}
                     {formatDateTime(selectedVedomost.createdAt)}
-                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">В·</span>
+                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
                     <span className="font-medium text-slate-500 dark:text-slate-400">
                       {t.prBankUploadedBy}:
                     </span>{' '}
-                    {selectedVedomost.uploadedByName ?? 'вЂ”'}
+                    {selectedVedomost.uploadedByName ?? EMPTY_PLACEHOLDER}
                   </p>
                 )}
               </div>
@@ -916,21 +985,21 @@ function BankTab() {
                           {transaction.operationDate.slice(0, 10)}
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap text-slate-500 dark:text-slate-400">
-                          {transaction.documentNumber || 'вЂ”'}
+                          {transaction.documentNumber || EMPTY_PLACEHOLDER}
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="min-w-[180px]">
                             <p className="font-medium text-slate-700 dark:text-slate-200">
-                              {transaction.receiverName || 'вЂ”'}
+                              {transaction.receiverName || EMPTY_PLACEHOLDER}
                             </p>
                             <p className="text-[10px] text-slate-400">
-                              {transaction.employeeName || transaction.receiverStir || 'вЂ”'}
+                              {transaction.employeeName || transaction.receiverStir || EMPTY_PLACEHOLDER}
                             </p>
                           </div>
                         </td>
                         <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">
                           <div className="max-w-[320px] truncate">
-                            {transaction.paymentPurpose || 'вЂ”'}
+                            {transaction.paymentPurpose || EMPTY_PLACEHOLDER}
                           </div>
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
@@ -988,10 +1057,12 @@ function BankTab() {
                   <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-800 dark:text-slate-200">
-                        {item.receiverName || 'вЂ”'}
+                        {item.receiverName || EMPTY_PLACEHOLDER}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {item.receiverBankName || 'вЂ”'} В· {item.receiverAccount || 'вЂ”'}
+                        {item.receiverBankName || EMPTY_PLACEHOLDER}
+                        {INLINE_SEP}
+                        {item.receiverAccount || EMPTY_PLACEHOLDER}
                       </p>
                       <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(item.totalAmount)}
@@ -1031,10 +1102,12 @@ function BankTab() {
                   <div key={`${item.receiverName}-${index}`} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-800 dark:text-slate-200">
-                        {item.receiverName || 'вЂ”'}
+                        {item.receiverName || EMPTY_PLACEHOLDER}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {item.receiverStir || 'вЂ”'} В· {item.paymentPurpose || 'вЂ”'}
+                        {item.receiverStir || EMPTY_PLACEHOLDER}
+                        {INLINE_SEP}
+                        {item.paymentPurpose || EMPTY_PLACEHOLDER}
                       </p>
                       <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(item.totalAmount)}
@@ -1178,6 +1251,7 @@ function EmployeesTab() {
   const { t, filterData, filterLabel, dateFilter } = useApp();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
   const [employeeRosterSub, setEmployeeRosterSub] = useState<'active' | 'former'>('active');
+  const [addEmployeeOpen, setAddEmployeeOpen] = useState(false);
 
   const sortedPayrollEmployees = useMemo(
     () =>
@@ -1283,6 +1357,7 @@ function EmployeesTab() {
       await dispatch({ type: 'ADD_EMPLOYEE', payload: form });
       toast.success(t.successAdded);
       setForm({ fullName: '', position: '', cardNumber: '', stir: '', salaryType: 'fixed', salaryAmount: 0 });
+      setAddEmployeeOpen(false);
     } catch {
       toast.error(t.prEmployeeSaveError);
     }
@@ -1439,70 +1514,86 @@ function EmployeesTab() {
     hybrid: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   };
 
-  /** Ishdan chiqish: aniq `employmentEndedAt`, boвЂlmasa (eski yozuvlar) `updatedAt` taxmini */
+  /** Ishdan chiqish: aniq `employmentEndedAt`, bo‘lmasa (eski yozuvlar) `updatedAt` taxmini */
   const formatEmploymentLeaveDisplay = (emp: Employee) => {
-    if (emp.isActive !== false) return 'вЂ”';
     if (emp.employmentEndedAt) return formatDate(emp.employmentEndedAt);
     if (emp.updatedAt) return formatDate(emp.updatedAt);
-    return 'вЂ”';
+    return EMPTY_PLACEHOLDER;
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm h-fit space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-            <Plus size={16} className="text-indigo-600 dark:text-indigo-400" />
+        {employeeRosterSub === 'active' ? (
+          <div className="border-b border-slate-200 dark:border-slate-700 pb-5">
+            <button
+              type="button"
+              onClick={() => setAddEmployeeOpen((open) => !open)}
+              className="w-full flex items-center justify-between gap-2 text-left rounded-xl px-1 py-1 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
+              aria-expanded={addEmployeeOpen}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                  <Plus size={16} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h3 className="text-slate-800 dark:text-white font-semibold text-sm truncate">{t.prAddEmployee}</h3>
+              </div>
+              <ChevronDown
+                size={18}
+                className={`shrink-0 text-slate-400 transition-transform ${addEmployeeOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {addEmployeeOpen ? (
+              <form onSubmit={handleAdd} className="space-y-3 mt-4">
+                <div>
+                  <Label>{t.prFullName}</Label>
+                  <Input value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} placeholder="Rahimov Alijon Bahodirovich" required />
+                </div>
+                <div>
+                  <Label>{t.prPosition}</Label>
+                  <Input value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} placeholder="Qolip opertori" />
+                </div>
+                <div>
+                  <Label>{t.prCardNumber}</Label>
+                  <Input value={form.cardNumber} onChange={e => setForm(p => ({ ...p, cardNumber: e.target.value }))} placeholder="8600 0000 0000 0000" />
+                </div>
+                <div>
+                  <Label>{t.prStir}</Label>
+                  <Input value={form.stir} onChange={e => setForm(p => ({ ...p, stir: e.target.value }))} placeholder="123456789" />
+                </div>
+                <div>
+                  <Label>{t.prSalaryType}</Label>
+                  <StyledSelect
+                    value={form.salaryType}
+                    onValueChange={(value) => setForm(p => ({ ...p, salaryType: value as Employee['salaryType'] }))}
+                    options={[
+                      { value: 'fixed', label: t.prFixed },
+                      { value: 'per_piece', label: t.prPerPiece },
+                      { value: 'hybrid', label: t.prHybrid },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <Label>{t.prSalaryAmount} (so'm)</Label>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={form.salaryAmount > 0 ? displayGroupedIntInput(String(Math.round(form.salaryAmount))) : ''}
+                    onChange={(e) => {
+                      const d = parseDigitsFromAmountInput(e.target.value);
+                      setForm((p) => ({ ...p, salaryAmount: d === '' ? 0 : Number(d) }));
+                    }}
+                    placeholder="2 000 000"
+                  />
+                </div>
+                <button type="submit" className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                  <Plus size={15} /> {t.prAddEmployee}
+                </button>
+              </form>
+            ) : null}
           </div>
-          <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.prAddEmployee}</h3>
-        </div>
-        <form onSubmit={handleAdd} className="space-y-3">
-          <div>
-            <Label>{t.prFullName}</Label>
-            <Input value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} placeholder="Rahimov Alijon Bahodirovich" required />
-          </div>
-          <div>
-            <Label>{t.prPosition}</Label>
-            <Input value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} placeholder="Qolip opertori" />
-          </div>
-          <div>
-            <Label>{t.prCardNumber}</Label>
-            <Input value={form.cardNumber} onChange={e => setForm(p => ({ ...p, cardNumber: e.target.value }))} placeholder="8600 0000 0000 0000" />
-          </div>
-          <div>
-            <Label>{t.prStir}</Label>
-            <Input value={form.stir} onChange={e => setForm(p => ({ ...p, stir: e.target.value }))} placeholder="123456789" />
-          </div>
-          <div>
-            <Label>{t.prSalaryType}</Label>
-            <StyledSelect
-              value={form.salaryType}
-              onValueChange={(value) => setForm(p => ({ ...p, salaryType: value as Employee['salaryType'] }))}
-              options={[
-                { value: 'fixed', label: t.prFixed },
-                { value: 'per_piece', label: t.prPerPiece },
-                { value: 'hybrid', label: t.prHybrid },
-              ]}
-            />
-          </div>
-          <div>
-            <Label>{t.prSalaryAmount} (so'm)</Label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              value={form.salaryAmount > 0 ? displayGroupedIntInput(String(Math.round(form.salaryAmount))) : ''}
-              onChange={(e) => {
-                const d = parseDigitsFromAmountInput(e.target.value);
-                setForm((p) => ({ ...p, salaryAmount: d === '' ? 0 : Number(d) }));
-              }}
-              placeholder="2 000 000"
-            />
-          </div>
-          <button type="submit" className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-            <Plus size={15} /> {t.prAddEmployee}
-          </button>
-        </form>
+        ) : null}
 
         {selectedEmployee && selectedEmployeeIsActiveRoster && (
           <>
@@ -1714,7 +1805,7 @@ function EmployeesTab() {
                         <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{rate.productType}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {rate.rateType === 'percent'
-                            ? `${rate.rateValue}%${rate.baseAmount ? ` В· baza ${formatCurrency(rate.baseAmount)}` : ''}`
+                            ? `${rate.rateValue}%${rate.baseAmount ? ` · baza ${formatCurrency(rate.baseAmount)}` : ''}`
                             : `${formatCurrency(rate.rateValue)} / dona`}
                         </p>
                       </div>
@@ -1834,13 +1925,14 @@ function EmployeesTab() {
                 <p className="text-slate-400 text-xs">{emp.position}</p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   <span className="whitespace-nowrap">
-                    {t.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : 'вЂ”'}
+                    {t.prHireDateLabel}: {emp.createdAt ? formatDate(emp.createdAt) : EMPTY_PLACEHOLDER}
                   </span>
-                  <span className="whitespace-nowrap">
-                    {' В· '}
-                    {t.prLeaveDateLabel}:{' '}
-                    {formatEmploymentLeaveDisplay(emp)}
-                  </span>
+                  {employeeRosterSub === 'former' ? (
+                    <span className="whitespace-nowrap">
+                      {INLINE_SEP}
+                      {t.prLeaveDateLabel}: {formatEmploymentLeaveDisplay(emp)}
+                    </span>
+                  ) : null}
                 </p>
                 {shiftRange ? (
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -1848,8 +1940,8 @@ function EmployeesTab() {
                   </p>
                 ) : null}
                 <div className="flex items-center gap-4 mt-1">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || 'вЂ”'}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || 'вЂ”'}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><CreditCard size={11} />{emp.cardNumber || EMPTY_PLACEHOLDER}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{t.prStir}: {emp.stir || EMPTY_PLACEHOLDER}</span>
                   {emp.salaryAmount > 0 && <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(emp.salaryAmount)}</span>}
                 </div>
               </div>
@@ -1881,13 +1973,14 @@ function EmployeesTab() {
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               <span className="whitespace-nowrap">
                 {t.prHireDateLabel}:{' '}
-                {selectedEmployee.createdAt ? formatDate(selectedEmployee.createdAt) : 'вЂ”'}
+                {selectedEmployee.createdAt ? formatDate(selectedEmployee.createdAt) : EMPTY_PLACEHOLDER}
               </span>
-              <span className="whitespace-nowrap">
-                {' В· '}
-                {t.prLeaveDateLabel}:{' '}
-                {formatEmploymentLeaveDisplay(selectedEmployee)}
-              </span>
+              {employeeRosterSub === 'former' || selectedEmployee.isActive === false ? (
+                <span className="whitespace-nowrap">
+                  {INLINE_SEP}
+                  {t.prLeaveDateLabel}: {formatEmploymentLeaveDisplay(selectedEmployee)}
+                </span>
+              ) : null}
             </p>
             {(() => {
               const r = shiftEmploymentRangeById.get(selectedEmployee.id);
@@ -1921,12 +2014,12 @@ function EmployeesTab() {
                   <tbody>
                     {selectedShiftLog.map((row) => {
                       const mName = row.machineId
-                        ? machineNameById.get(row.machineId) || 'вЂ”'
-                        : 'вЂ”';
+                        ? machineNameById.get(row.machineId) || EMPTY_PLACEHOLDER
+                        : EMPTY_PLACEHOLDER;
                       const paintStr =
                         row.paintUsed && (row.paintQuantityKg ?? 0) > 0
-                          ? `${row.paintRawMaterialName ? `${row.paintRawMaterialName} В· ` : ''}${formatKgAmount(row.paintQuantityKg ?? 0)} kg`
-                          : 'вЂ”';
+                          ? `${row.paintRawMaterialName ? `${row.paintRawMaterialName} · ` : ''}${formatKgAmount(row.paintQuantityKg ?? 0)} kg`
+                          : EMPTY_PLACEHOLDER;
                       return (
                         <tr
                           key={row.id}
@@ -1935,7 +2028,7 @@ function EmployeesTab() {
                           <td className="whitespace-nowrap px-2 py-2 text-slate-800 dark:text-slate-200">{row.date}</td>
                           <td className="whitespace-nowrap px-2 py-2 text-slate-700 dark:text-slate-300">{row.shift}</td>
                           <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{mName}</td>
-                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{row.productType || 'вЂ”'}</td>
+                          <td className="px-2 py-2 text-slate-700 dark:text-slate-300">{row.productType || EMPTY_PLACEHOLDER}</td>
                           <td className="whitespace-nowrap px-2 py-2 tabular-nums text-slate-800 dark:text-slate-200">
                             {fmtDec(row.hoursWorked)}
                           </td>
@@ -1950,13 +2043,13 @@ function EmployeesTab() {
                           </td>
                           <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{paintStr}</td>
                           <td className="max-w-[6rem] truncate px-2 py-2 text-slate-600 dark:text-slate-400" title={row.machineReading}>
-                            {row.machineReading || 'вЂ”'}
+                            {row.machineReading || EMPTY_PLACEHOLDER}
                           </td>
                           <td
                             className="max-w-[8rem] truncate px-2 py-2 text-slate-500 dark:text-slate-500"
                             title={row.notes}
                           >
-                            {row.notes || 'вЂ”'}
+                            {row.notes || EMPTY_PLACEHOLDER}
                           </td>
                         </tr>
                       );

@@ -663,7 +663,7 @@ type ERPAction =
   | { type: 'PRODUCE_FINAL'; payload: { productType: '0.5L' | '1L' | '5L'; quantity: number; semiProductType: '18g' | '20g'; date: string } }
   | { type: 'ADD_SALE'; payload: { clientId: string; clientName: string; productCategory: 'semi' | 'final'; productType: string; quantity: number; pricePerUnit: number; paid: number; date: string } }
   | { type: 'ADD_SALE_ORDER'; payload: { clientId: string; clientName: string; date: string; items: SaleOrderItem[]; paid: number } }
-  | { type: 'UPDATE_SALE_ORDER'; payload: { id: string; clientId: string; items: SaleOrderItem[]; paid: number } }
+  | { type: 'UPDATE_SALE_ORDER'; payload: { id: string; clientId: string; date: string; items: SaleOrderItem[]; paid: number } }
   | {
       type: 'ADD_EXPENSE';
       payload: {
@@ -745,6 +745,7 @@ type ERPAction =
   | { type: 'UPSERT_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string; rateType: EmployeeProductRate['rateType']; rateValue: number; baseAmount?: number } }
   | { type: 'DELETE_EMPLOYEE_PRODUCT_RATE'; payload: { employeeId: string; productType: string } }
   | { type: 'GENERATE_VEDOMOST'; payload: { month: string } }
+  | { type: 'DELETE_SALARY_MONTH'; payload: { month: string } }
   | { type: 'UPDATE_SALARY_ROW'; payload: { id: string; bonus?: number; workedDays?: number } }
   | { type: 'SET_SALARY_STATUS'; payload: { id: string; status: 'paid' | 'unpaid' } }
   | { type: 'UPDATE_PAYROLL_SETTINGS'; payload: Partial<PayrollSettings> }
@@ -1214,6 +1215,7 @@ type BackendClientOrderStub = {
   id: string;
   clientId: string;
   createdAt: string;
+  orderedAt?: string;
   totalAmount: number;
   paidAmount: number;
   debtAmount: number;
@@ -1234,6 +1236,7 @@ type BackendOrder = {
   id: string;
   clientId: string;
   createdAt: string;
+  orderedAt?: string;
   totalAmount: number;
   paidAmount: number;
   items: Array<{
@@ -1813,6 +1816,7 @@ function mergeOrdersFromClients(
           id: raw.id,
           clientId: raw.clientId ?? client.id,
           createdAt: raw.createdAt,
+          orderedAt: raw.orderedAt,
           totalAmount: raw.totalAmount,
           paidAmount: raw.paidAmount,
           items: raw.items ?? [],
@@ -1836,9 +1840,10 @@ function mapBackendOrdersToSales(orders: BackendOrder[]): Sale[] {
       total: item.total,
     }));
 
+    const orderDateIso = order.orderedAt ?? order.createdAt;
     return {
       id: order.id,
-      date: order.createdAt.slice(0, 10),
+      date: orderDateIso.slice(0, 10),
       clientId: order.clientId,
       clientName: order.client?.name ?? '—',
       productCategory: items[0]?.productCategory ?? 'final',
@@ -2632,6 +2637,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({
               clientId: action.payload.clientId,
               paidAmount: action.payload.paid,
+              orderedAt: action.payload.date,
               items: action.payload.items.map((item) => ({
                 productType:
                   item.productCategory === 'semi'
@@ -2659,6 +2665,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({
               clientId: action.payload.clientId,
               paidAmount: action.payload.paid,
+              orderedAt: action.payload.date,
               items: action.payload.items.map((item) => ({
                 productType:
                   item.productCategory === 'semi'
@@ -2870,6 +2877,12 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         case 'GENERATE_VEDOMOST':
           await apiRequest('/finance/salary/generate', {
+            method: 'POST',
+            body: JSON.stringify({ month: action.payload.month }),
+          });
+          break;
+        case 'DELETE_SALARY_MONTH':
+          await apiRequest('/finance/salary/delete-month', {
             method: 'POST',
             body: JSON.stringify({ month: action.payload.month }),
           });

@@ -225,9 +225,6 @@ export function Expenses() {
   const { t, filterData } = useApp();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [form, setForm] = useState({
-    machineId: '',
-    hours: '',
-    powerKw: '',
     amount: '',
     description: '',
     date: todayYmd(),
@@ -278,25 +275,8 @@ export function Expenses() {
     }
   }, [categories, activeCategoryId]);
 
-  useEffect(() => {
-    if (state.machines.length === 0) return;
-    setForm((f) => {
-      const valid = state.machines.some((m) => m.id === f.machineId);
-      if (valid) return f;
-      return { ...f, machineId: state.machines[0].id };
-    });
-  }, [state.machines]);
-
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const isElectricity = activeCategory ? isElectricityCategory(activeCategory) : false;
-
-  const effectiveMachineId = form.machineId || state.machines[0]?.id || '';
-  const selectedMachine = state.machines.find((m) => m.id === effectiveMachineId);
-  const hours = parseFloat(form.hours) || 0;
-  const powerKw = parseFloat(form.powerKw) > 0 ? parseFloat(form.powerKw) : (selectedMachine?.powerKw || 0);
-  const kWh = hours * powerKw;
-  const pricePerKwh = state.payrollSettings.electricityPricePerKwh;
-  const electricityCost = kWh * pricePerKwh;
 
   const filteredExpenses = useMemo(
     () =>
@@ -350,49 +330,27 @@ export function Expenses() {
       setError(t.exNoCategories);
       return;
     }
-    if (isElectricity && state.machines.length === 0) {
-      setError(t.exNoMachinesElectric);
+    const digits = form.amount.replace(/\D/g, '');
+    const num = parseInt(digits, 10);
+    if (!digits || !Number.isFinite(num) || num <= 0) {
+      setError(t.labelAmount + '!');
       return;
-    }
-    let amount = 0;
-    let description = form.description;
-    if (isElectricity) {
-      if (!hours || hours <= 0) {
-        setError(t.labelHours + '!');
-        return;
-      }
-      amount = electricityCost;
-      description = `${selectedMachine?.name} - ${hours}h (${powerKw}kW × ${hours}h = ${kWh.toFixed(1)} kWh)`;
-    } else {
-      const digits = form.amount.replace(/\D/g, '');
-      const num = parseInt(digits, 10);
-      if (!digits || !Number.isFinite(num) || num <= 0) {
-        setError(t.labelAmount + '!');
-        return;
-      }
-      amount = num;
     }
     void dispatch({
       type: 'ADD_EXPENSE',
       payload: {
         categoryId: activeCategoryId,
-        amount,
-        description,
-        machineId: isElectricity ? effectiveMachineId : undefined,
-        hours: isElectricity ? hours : undefined,
-        powerKw: isElectricity ? powerKw : undefined,
+        amount: num,
+        description: form.description,
         date: form.date,
       },
     });
     setForm({
-      machineId: state.machines[0]?.id ?? '',
-      hours: '',
-      powerKw: '',
       amount: '',
       description: '',
       date: todayYmd(),
     });
-    setSuccess(`${t.successAdded}: ${formatCurrency(amount)}`);
+    setSuccess(`${t.successAdded}: ${formatCurrency(num)}`);
     setTimeout(() => setSuccess(''), 4000);
   };
 
@@ -679,103 +637,34 @@ export function Expenses() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
-              {isElectricity ? (
-                <>
-                  {state.machines.length === 0 ? (
-                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
-                      {t.exNoMachinesElectric}
-                    </div>
-                  ) : null}
-                  <div>
-                    <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelMachine}</label>
-                    <select
-                      value={form.machineId || state.machines[0]?.id}
-                      onChange={(e) => setForm({ ...form, machineId: e.target.value })}
-                      disabled={state.machines.length === 0}
-                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
-                    >
-                      {state.machines.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} ({m.powerKw} kW)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelHours}</label>
-                      <input
-                        type="number"
-                        value={form.hours}
-                        onChange={(e) => setForm({ ...form, hours: e.target.value })}
-                        placeholder="0"
-                        min="0"
-                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelPower}</label>
-                      <input
-                        type="number"
-                        value={form.powerKw || String(selectedMachine?.powerKw || '')}
-                        onChange={(e) => setForm({ ...form, powerKw: e.target.value })}
-                        placeholder={String(selectedMachine?.powerKw || '')}
-                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                    </div>
-                  </div>
-                  {hours > 0 && (
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
-                      <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-400 mb-2">{t.exCalcTitle}</p>
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-slate-500">{t.exKwh}</span>
-                          <span className="font-medium text-slate-700 dark:text-slate-300">
-                            {powerKw} × {hours} = {kWh.toFixed(1)} kWh
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-500">
-                            {t.exPricePerKwh} ({formatNumber(pricePerKwh)} {t.unitSum}):
-                          </span>
-                          <span className="font-bold text-yellow-700 dark:text-yellow-400">{formatCurrency(electricityCost)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">
-                      {t.exColAmount} ({t.unitSum})
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      value={displayGroupedIntInput(form.amount)}
-                      onChange={(e) => {
-                        const d = parseDigitsFromAmountInput(e.target.value);
-                        if (d.length > 15) return;
-                        setForm({ ...form, amount: d });
-                      }}
-                      placeholder="0"
-                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
-                    <input
-                      type="text"
-                      value={form.description}
-                      onChange={(e) => setForm({ ...form, description: e.target.value })}
-                      placeholder="..."
-                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    />
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">
+                  {t.exColAmount} ({t.unitSum})
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={displayGroupedIntInput(form.amount)}
+                  onChange={(e) => {
+                    const d = parseDigitsFromAmountInput(e.target.value);
+                    if (d.length > 15) return;
+                    setForm({ ...form, amount: d });
+                  }}
+                  placeholder="0"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="..."
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
               {error && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
                   <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
@@ -783,7 +672,7 @@ export function Expenses() {
               )}
               <button
                 type="submit"
-                disabled={categories.length === 0 || (isElectricity && state.machines.length === 0)}
+                disabled={categories.length === 0}
                 className="w-full py-2.5 bg-slate-800 dark:bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
               >
                 <Plus size={16} /> {t.exBtn}

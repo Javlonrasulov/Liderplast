@@ -51,6 +51,16 @@ export class CrmService {
     return `+998${national}`;
   }
 
+  private parseOrderDate(ymd?: string): Date | undefined {
+    if (!ymd?.trim()) {
+      return undefined;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd.trim())) {
+      throw new BadRequestException('Invalid order date');
+    }
+    return new Date(`${ymd.trim()}T12:00:00+05:00`);
+  }
+
   private orderItemTotalUzs(item: {
     quantity: number;
     price: number;
@@ -384,6 +394,7 @@ export class CrmService {
           clientId: dto.clientId,
           createdById,
           status: dto.status ?? OrderStatus.PENDING,
+          orderedAt: this.parseOrderDate(dto.orderedAt) ?? new Date(),
           totalAmount,
           paidAmount,
           debtAmount,
@@ -475,6 +486,8 @@ export class CrmService {
 
       await tx.orderItem.deleteMany({ where: { orderId: id } });
 
+      const orderedAt = this.parseOrderDate(dto.orderedAt);
+
       const updatedOrder = await tx.order.update({
         where: { id },
         data: {
@@ -483,6 +496,7 @@ export class CrmService {
             debtAmount <= 0
               ? OrderStatus.COMPLETED
               : (dto.status ?? OrderStatus.PENDING),
+          ...(orderedAt ? { orderedAt } : {}),
           totalAmount,
           paidAmount,
           debtAmount,
@@ -611,7 +625,7 @@ export class CrmService {
         },
         payments: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { orderedAt: 'desc' },
     });
   }
 

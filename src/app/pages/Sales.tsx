@@ -1195,6 +1195,7 @@ export function Sales() {
       </AlertDialog>
 
       <EditSaleDialog
+        key={editingSale?.id ?? 'closed'}
         sale={editingSale}
         open={editingSale !== null}
         onOpenChange={(open) => {

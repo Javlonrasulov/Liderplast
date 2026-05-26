@@ -1,6 +1,12 @@
 /** Business calendar timezone (Uzbekistan, UTC+5, no DST). */
 export const APP_TIME_ZONE = 'Asia/Tashkent';
 
+/** Bo‘sh qiymat / «yo‘q» ko‘rinishi (em dash, UTF-8). */
+export const EMPTY_PLACEHOLDER = '\u2014';
+
+/** Bir qatorda bir nechta maydon orasidagi ajratgich. */
+export const INLINE_SEP = ' \u00B7 ';
+
 /** YYYY-MM-DD in the user's local calendar (matches `<input type="date">` and wall-clock "today"). */
 export function toLocalDateString(iso: string | number | Date): string {
   const d = iso instanceof Date ? iso : new Date(iso);

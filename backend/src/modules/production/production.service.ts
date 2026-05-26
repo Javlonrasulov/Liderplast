@@ -61,6 +61,7 @@ export class ProductionService {
     return this.prisma.machine.create({
       data: {
         ...dto,
+        powerKw: dto.powerKw ?? 0,
         isActive: dto.isActive ?? true,
       },
     });
@@ -1062,7 +1063,7 @@ export class ProductionService {
     const created = await this.prisma.$transaction(async (tx) => {
       let machineId = dto.machineId;
       let producedQty = dto.producedQty;
-      let electricityKwh = dto.electricityKwh ?? 0;
+      let electricityKwh = 0;
       let bagCount: number | null = null;
       let packCount: number | null = null;
       let outputNote = 'Smena: ishlab chiqarish';
@@ -1269,9 +1270,7 @@ export class ProductionService {
             : {}),
           ...(dto.producedQty !== undefined ? { producedQty: dto.producedQty } : {}),
           ...(dto.defectCount !== undefined ? { defectCount: dto.defectCount } : {}),
-          ...(dto.electricityKwh !== undefined
-            ? { electricityKwh: dto.electricityKwh }
-            : {}),
+          electricityKwh: 0,
           ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
           paintUsed: wantsPaint,
           paintRawMaterialId: wantsPaint ? nextPaintRawMaterialId! : null,

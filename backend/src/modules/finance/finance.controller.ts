@@ -219,6 +219,12 @@ export class FinanceController {
     return this.financeService.generateSalary(dto);
   }
 
+  @Post('salary/delete-month')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteSalaryMonth(@Body() dto: GenerateSalaryDto) {
+    return this.financeService.deleteSalaryMonth(dto);
+  }
+
   @Get('salary')
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.WORKER)
   getSalaryRecords(

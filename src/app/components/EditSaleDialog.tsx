@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
 import {
   useERP,
+  type Client,
   type FinishedProductCatalogItem,
   type Sale,
   type SaleCurrency,
@@ -19,7 +20,7 @@ import {
   warehouseSaleDefaults,
 } from '../utils/sales-currency';
 import { useApp } from '../i18n/app-context';
-import { formatCurrency, formatDate, formatNumber } from '../utils/format';
+import { formatCurrency, formatNumber, todayYmd } from '../utils/format';
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,19 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
+/** Sotuvdagi mijoz — ro‘yxatda ID yoki nom bo‘yicha */
+function resolveSaleClientId(sale: Sale, clients: Client[]): string {
+  if (sale.clientId && clients.some((c) => c.id === sale.clientId)) {
+    return sale.clientId;
+  }
+  const target = sale.clientName.trim().toLowerCase();
+  if (target) {
+    const byName = clients.find((c) => c.name.trim().toLowerCase() === target);
+    if (byName) return byName.id;
+  }
+  return sale.clientId;
+}
+
 function itemsFromSale(sale: Sale): CartRow[] {
   const src =
     sale.items && sale.items.length > 0
@@ -82,6 +96,8 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
   const eurRate = cbuEurRate(cbuEur);
 
   const [clientId, setClientId] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
+  const [orderDate, setOrderDate] = useState(todayYmd());
   const [cartItems, setCartItems] = useState<CartRow[]>([]);
   const [paid, setPaid] = useState('');
   const [error, setError] = useState('');
@@ -92,15 +108,18 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
   const [addQty, setAddQty] = useState('');
   const [addPrice, setAddPrice] = useState('');
   const [addCurrency, setAddCurrency] = useState<SaleCurrency>('UZS');
+  const selectedClientRowRef = useRef<HTMLButtonElement>(null);
 
   const originalItems = useMemo(
     () => (sale ? itemsFromSale(sale) : []),
     [sale],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!sale || !open) return;
-    setClientId(sale.clientId);
+    setClientId(resolveSaleClientId(sale, state.clients));
+    setOrderDate(sale.date);
+    setClientSearch('');
     setCartItems(itemsFromSale(sale));
     setPaid(String(sale.paid));
     setError('');
@@ -109,7 +128,60 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
     setAddQty('');
     setAddPrice('');
     setAddCurrency('UZS');
-  }, [sale, open]);
+  }, [sale, open, state.clients]);
+
+  useEffect(() => {
+    if (!open || !clientId) return;
+    const t = window.setTimeout(() => {
+      selectedClientRowRef.current?.scrollIntoView({ block: 'nearest' });
+    }, 50);
+    return () => window.clearTimeout(t);
+  }, [open, clientId, sale?.id]);
+
+  const clientOptions = useMemo((): Client[] => {
+    const list = [...state.clients];
+    if (sale && !list.some((c) => c.id === sale.clientId)) {
+      list.unshift({
+        id: sale.clientId,
+        name: sale.clientName,
+        phone: '',
+        debt: 0,
+        createdAt: sale.createdAt,
+      });
+    }
+    return list.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
+  }, [state.clients, sale]);
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearch.trim().toLowerCase();
+    let list = q
+      ? clientOptions.filter((c) => c.name.toLowerCase().includes(q))
+      : [...clientOptions];
+
+    const selected = clientId ? clientOptions.find((c) => c.id === clientId) : undefined;
+    if (selected) {
+      list = [selected, ...list.filter((c) => c.id !== clientId)];
+    } else if (clientId && sale) {
+      list = [
+        {
+          id: clientId,
+          name: sale.clientName,
+          phone: '',
+          debt: 0,
+          createdAt: sale.createdAt,
+        },
+        ...list,
+      ];
+    }
+    return list;
+  }, [clientOptions, clientSearch, clientId, sale]);
+
+  const selectedClientName = useMemo(() => {
+    if (!sale || !clientId) return sale?.clientName ?? '';
+    const saleClientId = resolveSaleClientId(sale, state.clients);
+    if (clientId === saleClientId) return sale.clientName;
+    return clientOptions.find((c) => c.id === clientId)?.name ?? sale.clientName;
+  }, [clientId, clientOptions, sale, state.clients]);
 
   const saleSemiCatalog = useMemo(
     () =>
@@ -246,6 +318,10 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
       setError(t.labelPaid + ' > ' + t.labelTotal);
       return;
     }
+    if (!orderDate.trim()) {
+      setError(t.labelDate + '!');
+      return;
+    }
 
     const items: SaleOrderItem[] = cartItems.map(
       ({ productCategory, productType, quantity, pricePerUnit, currency, fxRateToUzs, total }) => ({
@@ -263,7 +339,7 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
     try {
       await dispatch({
         type: 'UPDATE_SALE_ORDER',
-        payload: { id: sale.id, clientId, items, paid: paidNum },
+        payload: { id: sale.id, clientId, date: orderDate, items, paid: paidNum },
       });
       toast.success(t.slSaleUpdated);
       onOpenChange(false);
@@ -287,26 +363,61 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900">
         <DialogHeader>
           <DialogTitle className="text-slate-800 dark:text-white">{t.slEditSaleTitle}</DialogTitle>
-          <p className="text-xs text-slate-500">
-            {formatDate(sale.date)} · {sale.clientName}
-          </p>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">{t.colClient}</label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className={SELECT_TRIGGER_CLS}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="z-[140] max-h-60">
-                {state.clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t.labelDate}</label>
+              <input
+                type="date"
+                value={orderDate}
+                onChange={(e) => setOrderDate(e.target.value)}
+                className={INPUT_CLS}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t.colClient}</label>
+              <p className="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-1.5 truncate">
+                {selectedClientName || '—'}
+              </p>
+              <input
+                type="search"
+                value={clientSearch}
+                onChange={(e) => setClientSearch(e.target.value)}
+                placeholder={t.slClientSearchPlaceholder}
+                className={INPUT_CLS}
+              />
+            </div>
+          </div>
+          <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+            {filteredClients.length === 0 ? (
+              <p className="px-3 py-3 text-xs text-slate-400">{t.noData}</p>
+            ) : (
+              filteredClients.map((c) => {
+                const active = c.id === clientId;
+                return (
+                  <button
+                    key={c.id}
+                    ref={active ? selectedClientRowRef : undefined}
+                    type="button"
+                    onClick={() => setClientId(c.id)}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 font-semibold'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
                     {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    {sale.clientId === c.id && sale.clientName !== c.name ? (
+                      <span className="ml-1 text-[10px] font-normal text-slate-400">
+                        ({sale.clientName})
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })
+            )}
           </div>
 
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">

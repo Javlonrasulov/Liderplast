@@ -1,18 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  Package,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { useERP, type ShiftRecordKind } from '../store/erp-store';
-import { useApp } from '../i18n/app-context';
-import { formatNumber, todayYmd } from '../utils/format';
-import { translateShiftInventoryApiError } from '../utils/shift-api-errors';
-import { SingleDatePicker } from '../components/SingleDatePicker';
+import { ChevronDown, Clock, Plus, Trash2 } from 'lucide-react';
+import { useERP } from '../store/erp-store';
+import { formatNumber } from '../utils/format';
 import type { ShiftDefinition } from './ShiftWork';
+import {
+  type PackagingLine,
+  createEmptyPackagingLine,
+} from '../utils/shift-packaging-utils';
+
+export type { PackagingLine } from '../utils/shift-packaging-utils';
 
 const PRODUCT_COLORS: Record<string, string> = {
   '18g': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
@@ -54,14 +50,6 @@ function normalizeNonNegativeIntInput(raw: string): string {
   return w === '' ? '0' : w;
 }
 
-type PackagingLine = {
-  id: string;
-  productType: string;
-  hoursWorked: string;
-  packCount: string;
-  notes: string;
-};
-
 export type ShiftPackagingTranslations = {
   labelDate: string;
   labelShift: string;
@@ -96,6 +84,12 @@ type Props = {
   productOptions: string[];
   onNeedShiftDefs: () => void;
   getShiftLabel: (defs: ShiftDefinition[], shift: number) => string;
+  /** ShiftWork ichida: sana/smena/ishchi va saqlash tugmasi tashqarida */
+  embedded?: boolean;
+  lines?: PackagingLine[];
+  onLinesChange?: React.Dispatch<React.SetStateAction<PackagingLine[]>>;
+  expandedLineId?: string | null;
+  onExpandedLineIdChange?: (id: string | null) => void;
 };
 
 export function ShiftPackagingForm({
@@ -103,19 +97,13 @@ export function ShiftPackagingForm({
   shiftPickerDefs,
   productOptions,
   onNeedShiftDefs,
-  getShiftLabel,
+  embedded = false,
+  lines: controlledLines,
+  onLinesChange,
+  expandedLineId: controlledExpandedId,
+  onExpandedLineIdChange,
 }: Props) {
-  const { state, dispatch, refresh } = useERP();
-  const { t: appT } = useApp();
-
-  const [form, setForm] = useState({
-    date: todayYmd(),
-    shift: 1,
-    workerName: '',
-  });
-  const [workerInputOpen, setWorkerInputOpen] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const { state } = useERP();
 
   const productKindByName = useMemo(() => {
     const m = new Map<string, 'SEMI' | 'FINISHED'>();
@@ -186,18 +174,24 @@ export function ShiftPackagingForm({
     [state.warehouseStock, productKindByName],
   );
 
-  const createEmptyLine = useCallback((): PackagingLine => {
-    return {
-      id: `pkg-${Math.random().toString(16).slice(2)}`,
-      productType: productOptions[0] || '',
-      hoursWorked: '',
-      packCount: '',
-      notes: '',
-    };
-  }, [productOptions]);
+  const createEmptyLine = useCallback(
+    (): PackagingLine => createEmptyPackagingLine(productOptions[0] || ''),
+    [productOptions],
+  );
 
-  const [lines, setLines] = useState<PackagingLine[]>([]);
-  const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
+  const [internalLines, setInternalLines] = useState<PackagingLine[]>([]);
+  const [internalExpandedId, setInternalExpandedId] = useState<string | null>(null);
+  const lines = embedded && controlledLines !== undefined ? controlledLines : internalLines;
+  const setLines =
+    embedded && onLinesChange ? onLinesChange : setInternalLines;
+  const expandedLineId =
+    embedded && controlledExpandedId !== undefined
+      ? controlledExpandedId
+      : internalExpandedId;
+  const setExpandedLineId =
+    embedded && onExpandedLineIdChange
+      ? onExpandedLineIdChange
+      : setInternalExpandedId;
 
   useEffect(() => {
     if (lines.length > 0) return;
@@ -211,12 +205,6 @@ export function ShiftPackagingForm({
       return lines[lines.length - 1]?.id ?? null;
     });
   }, [lines]);
-
-  const filteredWorkers = useMemo(() => {
-    const q = form.workerName.trim().toLowerCase();
-    if (!q) return state.workers;
-    return state.workers.filter((w) => w.toLowerCase().includes(q));
-  }, [form.workerName, state.workers]);
 
   const addLine = useCallback(() => {
     const newLine = createEmptyLine();
@@ -253,204 +241,8 @@ export function ShiftPackagingForm({
     [piecesPerBagByProduct, productKindByName, semiPiecesPerBagByName],
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (shiftPickerDefs.length === 0 || !shiftPickerDefs.some((d) => d.number === form.shift)) {
-      setError(t.shiftNoDefsHint);
-      return;
-    }
-    if (productOptions.length === 0) {
-      setError(t.productTypesEmptyHint);
-      return;
-    }
-    if (!form.workerName.trim()) {
-      setError(`${t.labelWorker}!`);
-      return;
-    }
-
-    const meaningfulLines = lines.filter((ln) => {
-      const packs = parseNonNegativeInt(ln.packCount);
-      const hasQty = !Number.isNaN(packs) && packs > 0;
-      return (
-        hasQty ||
-        Boolean(ln.hoursWorked.trim()) ||
-        Boolean(ln.notes.trim()) ||
-        Boolean(ln.productType)
-      );
-    });
-
-    if (meaningfulLines.length === 0) {
-      setError(`${t.labelPackCount}!`);
-      return;
-    }
-
-    for (const ln of meaningfulLines) {
-      const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
-      if (packs <= 0) {
-        setError(`${t.labelPackCount}!`);
-        return;
-      }
-      if (!ln.productType.trim()) {
-        setError(`${t.labelProduct}!`);
-        return;
-      }
-      const pieces = estimatePieces(ln);
-      if (pieces <= 0) {
-        setError(t.packagingNoPiecesPerBag);
-        return;
-      }
-      const available = unpackagedStockForProduct(ln.productType);
-      if (pieces > available) {
-        setError(
-          t.packagingStockInsufficient
-            .replace('{needed}', String(pieces))
-            .replace('{available}', String(available)),
-        );
-        return;
-      }
-    }
-
-    try {
-      if (!state.workers.some((w) => w === form.workerName.trim())) {
-        await dispatch({
-          type: 'ADD_WORKER',
-          payload: { fullName: form.workerName.trim(), preferredShiftNumber: form.shift },
-        });
-        await refresh();
-      }
-
-      const recordKind: ShiftRecordKind = 'PACKAGING';
-
-      for (const ln of meaningfulLines) {
-        const hours = parseDecimalInput(ln.hoursWorked);
-        const packs = Math.max(0, parseNonNegativeInt(ln.packCount) || 0);
-        const producedQty = estimatePieces(ln);
-
-        await dispatch({
-          type: 'ADD_SHIFT_RECORD',
-          payload: {
-            date: form.date,
-            shift: form.shift,
-            workerName: form.workerName.trim(),
-            recordKind,
-            machineId: '',
-            hoursWorked: hours,
-            productType: ln.productType,
-            machineReading: '',
-            producedQty,
-            defectCount: 0,
-            electricityKwh: 0,
-            bagCount: 0,
-            packCount: packs,
-            notes: ln.notes,
-          },
-        });
-      }
-      await refresh();
-    } catch (err) {
-      const raw = err instanceof Error ? err.message : 'Error';
-      setError(translateShiftInventoryApiError(raw, appT));
-      return;
-    }
-
-    setSuccess(`${form.workerName} — ${getShiftLabel(shiftPickerDefs, form.shift)} ✓`);
-    setTimeout(() => setSuccess(''), 4000);
-    setForm((prev) => ({ ...prev, workerName: '' }));
-    setLines([createEmptyLine()]);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3.5">
-      {success ? (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl flex items-center gap-2">
-          <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-          <p className="text-emerald-700 dark:text-emerald-400 text-sm font-medium">{success}</p>
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
-            {t.labelDate}
-          </label>
-          <SingleDatePicker
-            value={form.date}
-            onChange={(iso) => setForm({ ...form, date: iso || todayYmd() })}
-          />
-        </div>
-        <div className="min-w-0">
-          <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
-            {t.labelShift}
-          </label>
-          {shiftPickerDefs.length === 0 ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-3 py-3 text-xs text-amber-950 dark:border-amber-800/70 dark:bg-amber-950/35 dark:text-amber-100/90 space-y-2">
-              <p>{t.shiftNoDefsHint}</p>
-              <button
-                type="button"
-                onClick={onNeedShiftDefs}
-                className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
-              >
-                {t.shiftNoDefsGoToTab}
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {shiftPickerDefs.map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => setForm({ ...form, shift: d.number })}
-                  className={`min-w-[2.75rem] px-3 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                    form.shift === d.number
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'bg-white/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'
-                  }`}
-                >
-                  {d.number}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="relative">
-        <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">
-          {t.labelWorker}
-        </label>
-        <input
-          type="text"
-          value={form.workerName}
-          onChange={(e) => {
-            setForm({ ...form, workerName: e.target.value });
-            setWorkerInputOpen(true);
-          }}
-          onFocus={() => setWorkerInputOpen(true)}
-          onBlur={() => setTimeout(() => setWorkerInputOpen(false), 150)}
-          placeholder={t.placeholderWorker}
-          className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-        />
-        {workerInputOpen && filteredWorkers.length > 0 ? (
-          <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-            {filteredWorkers.map((w) => (
-              <button
-                key={w}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setForm({ ...form, workerName: w });
-                  setWorkerInputOpen(false);
-                }}
-                className="w-full text-left px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-teal-50 dark:hover:bg-teal-900/20"
-              >
-                {w}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
+  const body = (
+    <>
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">
           {t.labelProduct} · {t.labelHours} · {t.labelPackCount}
@@ -641,19 +433,12 @@ export function ShiftPackagingForm({
         })}
       </div>
 
-      {error ? (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
-          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-        </div>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={shiftPickerDefs.length === 0}
-        className="w-full py-3 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
-      >
-        <Package size={16} /> {t.btn}
-      </button>
-    </form>
+    </>
   );
+
+  if (embedded) {
+    return <div className="space-y-3.5">{body}</div>;
+  }
+
+  return <form className="space-y-3.5">{body}</form>;
 }

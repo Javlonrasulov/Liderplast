@@ -1203,108 +1203,22 @@ export class FinanceService {
   }
 
   /**
-   * Smena yozuvidagi kVt·soat × bazadagi narx bo‘yicha elektr kategoriyasiga xarajat
-   * (bir smenaga bitta bog‘langan Expense, `sourceShiftId`).
-   *
-   * Agar smenada kVt·soat kiritilmagan bo‘lsa, lekin `hoursWorked` va apparat `powerKw`
-   * bo‘lsa, taxminiy sarfiyat: soat × kVt (ish vaqtida nominal quvvat ishlatilgan deb).
+   * Smenadan avtomatik elektr xarajati yaratilmaydi — faqat avval bog‘langan
+   * `sourceShiftId` yozuvlarini o‘chiradi (qo‘lda kiritilgan xarajatlar saqlanadi).
    */
   async syncShiftElectricityExpense(shiftId: string) {
-    const shift = await this.prisma.shiftRecord.findUnique({
-      where: { id: shiftId },
-      include: { worker: true, machine: true },
-    });
-    if (!shift) {
-      return;
-    }
-
-    if (shift.recordKind === 'PACKAGING') {
-      const existing = await this.prisma.expense.findFirst({
-        where: { sourceShiftId: shiftId },
-      });
-      if (existing) {
-        await this.prisma.expense.delete({ where: { id: existing.id } });
-      }
-      return;
-    }
-
-    const settings = await this.prisma.salarySetting.findFirst();
-    const pricePerKwh = settings?.electricityPricePerKwh ?? 800;
-
-    const category = await this.getElectricityExpenseCategoryForSync();
-    if (!category) {
-      return;
-    }
-
-    const enteredKwh = Number(shift.electricityKwh) || 0;
-    const hours = Number(shift.hoursWorked) || 0;
-    const powerKw = Number(shift.machine?.powerKw) || 0;
-    const impliedKwh = Math.max(0, hours * powerKw);
-    const kwh = enteredKwh > 1e-6 ? enteredKwh : impliedKwh;
-
     const existing = await this.prisma.expense.findFirst({
       where: { sourceShiftId: shiftId },
     });
-
-    if (kwh <= 1e-6) {
-      if (existing) {
-        await this.prisma.expense.delete({ where: { id: existing.id } });
-      }
-      return;
-    }
-
-    const amount = Math.round(kwh * pricePerKwh * 100) / 100;
-    const workerName = shift.worker?.fullName?.trim() || '—';
-    const machineName = shift.machine?.name ?? '—';
-    const dateStr = shift.date.toISOString().slice(0, 10);
-    const kwhSource =
-      enteredKwh > 1e-6
-        ? `${kwh} kVt·soat`
-        : `${kwh.toFixed(2)} kVt·soat (${hours} soat × ${powerKw} kVt)`;
-    const description = `Smena → elektr: ${dateStr}, ${shift.shiftNumber}-smena — ${workerName}; ${machineName} — ${kwhSource} × ${pricePerKwh} so'm`;
-    const title = description.length >= 2 ? description.slice(0, 160) : 'Smena elektr';
-
-    const common = {
-      title,
-      type: category.legacyExpenseType,
-      categoryId: category.id,
-      amount,
-      description,
-      incurredAt: shift.date,
-      status: EntityStatus.COMPLETED,
-    };
-
     if (existing) {
-      await this.prisma.expense.update({
-        where: { id: existing.id },
-        data: common,
-      });
-    } else {
-      await this.prisma.expense.create({
-        data: {
-          ...common,
-          sourceShiftId: shiftId,
-        },
-      });
+      await this.prisma.expense.delete({ where: { id: existing.id } });
     }
   }
 
   async resyncAllShiftElectricityExpenses() {
-    const shifts = await this.prisma.shiftRecord.findMany({
-      where: {
-        OR: [
-          { electricityKwh: { gt: 0 } },
-          {
-            hoursWorked: { gt: 0 },
-            machine: { powerKw: { gt: 0 } },
-          },
-        ],
-      },
-      select: { id: true },
+    await this.prisma.expense.deleteMany({
+      where: { sourceShiftId: { not: null } },
     });
-    for (const row of shifts) {
-      await this.syncShiftElectricityExpense(row.id);
-    }
   }
 
   getEmployeeProductRates() {
@@ -1973,6 +1887,28 @@ export class FinanceService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /** Oy bo‘yicha barcha maosh qatorlarini o‘chirish (vedomostni «yopish»). */
+  async deleteSalaryMonth(dto: GenerateSalaryDto) {
+    const paidCount = await this.prisma.salaryRecord.count({
+      where: { month: dto.month, isPaid: true },
+    });
+    if (paidCount > 0) {
+      throw new BadRequestException(
+        'Cannot delete payroll statement: some workers are already marked as paid',
+      );
+    }
+
+    const result = await this.prisma.salaryRecord.deleteMany({
+      where: { month: dto.month },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('No payroll records for this month');
+    }
+
+    return { month: dto.month, deletedCount: result.count };
   }
 
   getSalaryRecords(currentUserId?: string, currentUserRole?: Role) {

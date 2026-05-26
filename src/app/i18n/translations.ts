@@ -654,6 +654,7 @@ export interface T {
   slSaveSaleEdit: string;
   slSaleUpdated: string;
   slSaleUpdateFailed: string;
+  slClientSearchPlaceholder: string;
   slSaleFxRate: string;
   slAddItem: string;
   slOrderItems: string;
@@ -832,6 +833,14 @@ export interface T {
   prTabRawOrders: string;
   prTabSettings: string;
   prGenerate: string;
+  /** Vedomostni butunlay o‘chirish / yopish */
+  prCloseVedomost: string;
+  prCloseVedomostTitle: string;
+  /** `{month}` — oy nomi */
+  prCloseVedomostConfirm: string;
+  prCloseVedomostPaidBlocked: string;
+  prCloseVedomostSuccess: string;
+  prCloseVedomostAction: string;
   prMonth: string;
   prFullName: string;
   prPosition: string;
@@ -1718,6 +1727,7 @@ const uz_cyrillic: T = {
   slSaveSaleEdit: 'Сақлаш',
   slSaleUpdated: 'Сотув янгиланди',
   slSaleUpdateFailed: 'Сотувни янгилаб бўлмади',
+  slClientSearchPlaceholder: 'Клиент қидириш…',
   slSaleFxRate: 'курс',
   slAddItem: 'Қатор қўшиш',
   slOrderItems: 'Буюртма маҳсулотлари',
@@ -1887,6 +1897,14 @@ const uz_cyrillic: T = {
   prTabRawOrders: 'Хомашё буюртма',
   prTabSettings: 'Солиқ созламалари',
   prGenerate: 'Ведомост яратиш',
+  prCloseVedomost: 'Ведомостни ёпиш',
+  prCloseVedomostTitle: 'Ведомостни ёпиш',
+  prCloseVedomostConfirm:
+    '{month} ойи учун барча маош қаторлари ўчирилади. Бу амални бекор қилиб бўлмайди. Давом этасизми?',
+  prCloseVedomostPaidBlocked:
+    'Баъзи ишчилар «берилди» деб белгиланган — аввал ҳолатни ўзгартиринг ёки тўловни бекор қилинг.',
+  prCloseVedomostSuccess: 'Ведомост ёпилди',
+  prCloseVedomostAction: 'Ҳа, ёпиш',
   prMonth: 'Ой',
   prFullName: 'Ф.И.Ш.',
   prPosition: 'Лавозим',
@@ -2765,6 +2783,7 @@ const uz_latin: T = {
   slSaveSaleEdit: 'Saqlash',
   slSaleUpdated: 'Sotuv yangilandi',
   slSaleUpdateFailed: 'Sotuvni yangilab bo\'lmadi',
+  slClientSearchPlaceholder: 'Klient qidirish…',
   slSaleFxRate: 'kurs',
   slAddItem: 'Qator qo\'shish',
   slOrderItems: 'Buyurtma mahsulotlari',
@@ -2934,6 +2953,14 @@ const uz_latin: T = {
   prTabRawOrders: 'Xomashyo buyurtma',
   prTabSettings: 'Soliq sozlamalari',
   prGenerate: 'Vedomost yaratish',
+  prCloseVedomost: 'Vedomostni yopish',
+  prCloseVedomostTitle: 'Vedomostni yopish',
+  prCloseVedomostConfirm:
+    "{month} oyi uchun barcha maosh qatorlari o'chiriladi. Bu amalni bekor qilib bo'lmaydi. Davom etasizmi?",
+  prCloseVedomostPaidBlocked:
+    "Ba'zi ishchilar «berildi» deb belgilangan — avval holatni o'zgartiring.",
+  prCloseVedomostSuccess: 'Vedomost yopildi',
+  prCloseVedomostAction: 'Ha, yopish',
   prMonth: 'Oy',
   prFullName: 'F.I.Sh.',
   prPosition: 'Lavozim',
@@ -3811,6 +3838,7 @@ const ru: T = {
   slSaveSaleEdit: 'Сохранить',
   slSaleUpdated: 'Продажа обновлена',
   slSaleUpdateFailed: 'Не удалось обновить продажу',
+  slClientSearchPlaceholder: 'Поиск клиента…',
   slSaleFxRate: 'курс',
   slAddItem: 'Добавить строку',
   slOrderItems: 'Товары в заказе',
@@ -3980,6 +4008,14 @@ const ru: T = {
   prTabRawOrders: 'Заказ сырья',
   prTabSettings: 'Налоговые ставки',
   prGenerate: 'Сформировать ведомость',
+  prCloseVedomost: 'Закрыть ведомость',
+  prCloseVedomostTitle: 'Закрыть ведомость',
+  prCloseVedomostConfirm:
+    'Все строки зарплаты за {month} будут удалены. Отменить действие нельзя. Продолжить?',
+  prCloseVedomostPaidBlocked:
+    'Некоторые сотрудники отмечены как «выплачено» — сначала снимите отметку.',
+  prCloseVedomostSuccess: 'Ведомость закрыта',
+  prCloseVedomostAction: 'Да, закрыть',
   prMonth: 'Месяц',
   prFullName: 'Ф.И.О.',
   prPosition: 'Должность',

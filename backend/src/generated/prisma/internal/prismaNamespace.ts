@@ -3578,6 +3578,7 @@ export const OrderScalarFieldEnum = {
   totalAmount: 'totalAmount',
   paidAmount: 'paidAmount',
   debtAmount: 'debtAmount',
+  orderedAt: 'orderedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

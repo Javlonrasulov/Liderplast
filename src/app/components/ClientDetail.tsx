@@ -912,6 +912,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       )}
 
       <EditSaleDialog
+        key={editingSale?.id ?? 'closed'}
         sale={editingSale}
         open={editingSale !== null}
         onOpenChange={(open) => {

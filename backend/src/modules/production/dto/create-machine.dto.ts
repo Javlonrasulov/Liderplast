@@ -21,9 +21,10 @@ export class CreateMachineDto {
   @IsEnum(ProductionStage)
   stage!: ProductionStage;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  powerKw!: number;
+  powerKw?: number;
 
   @IsNumber()
   @Min(0)
