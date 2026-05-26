@@ -408,6 +408,7 @@ export type ProductionConsumptionScalarFieldEnum = (typeof ProductionConsumption
 export const ShiftRecordScalarFieldEnum = {
   id: 'id',
   workerId: 'workerId',
+  createdById: 'createdById',
   machineId: 'machineId',
   shiftNumber: 'shiftNumber',
   date: 'date',

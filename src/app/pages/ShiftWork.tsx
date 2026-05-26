@@ -131,6 +131,7 @@ const TR = {
     colDate: 'Сана',
     colShift: 'Смена',
     colWorker: 'Ишчи',
+    colEnteredBy: 'Киритган',
     colProduct: 'Маҳсулот',
     colMachine: 'Аппарат',
     colHours: 'Соат',
@@ -291,6 +292,7 @@ const TR = {
     colDate: 'Sana',
     colShift: 'Smena',
     colWorker: 'Ishchi',
+    colEnteredBy: 'Kiritgan',
     colProduct: 'Mahsulot',
     colMachine: 'Apparat',
     colHours: 'Soat',
@@ -451,6 +453,7 @@ const TR = {
     colDate: 'Дата',
     colShift: 'Смена',
     colWorker: 'Рабочий',
+    colEnteredBy: 'Ввёл',
     colProduct: 'Продукт',
     colMachine: 'Аппарат',
     colHours: 'Часы',
@@ -1652,6 +1655,7 @@ export function ShiftWork() {
           date: r.date,
           shiftLabel: getShiftLabel(shiftDefinitions, r.shift, t),
           workerName: r.workerName,
+          enteredByName: r.enteredByName?.trim() || '—',
           kindLabel:
             r.recordKind === 'PACKAGING' ? t.packagingKindBadge : t.kindProduction,
           productType: r.productType,
@@ -1673,6 +1677,7 @@ export function ShiftWork() {
         colDate: t.colDate,
         colShift: t.colShift,
         colWorker: t.colWorker,
+        colEnteredBy: t.colEnteredBy,
         colKind: t.historyColKind,
         colProduct: t.colProduct,
         colMachine: t.colMachine,
@@ -2783,7 +2788,7 @@ export function ShiftWork() {
               <table className="w-full text-sm min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    {[t.colNum, t.colDate, t.colShift, t.colWorker, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced, t.colActions].map((h, i) => (
+                    {[t.colNum, t.colDate, t.colShift, t.colWorker, t.colEnteredBy, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced, t.colActions].map((h, i) => (
                       <th key={i} className="text-left px-2 min-[400px]:px-3 py-2 min-[400px]:py-3 text-[11px] min-[400px]:text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -2811,6 +2816,9 @@ export function ShiftWork() {
                             </div>
                             {r.workerName}
                           </div>
+                        </td>
+                        <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap max-w-[9rem] truncate" title={r.enteredByName || undefined}>
+                          {r.enteredByName || '—'}
                         </td>
                         <td className="px-3 py-3">
                           <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
@@ -2862,7 +2870,7 @@ export function ShiftWork() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700">
-                    <td colSpan={8} className="px-3 py-3 text-xs font-bold text-slate-700 dark:text-slate-200">{t.total} ({filteredRecords.length} {t.records})</td>
+                    <td colSpan={9} className="px-3 py-3 text-xs font-bold text-slate-700 dark:text-slate-200">{t.total} ({filteredRecords.length} {t.records})</td>
                     <td className="px-3 py-3 text-center text-xs font-bold text-red-600">
                       {filteredRecords.reduce((s, r) => s + r.defectCount, 0)}
                     </td>

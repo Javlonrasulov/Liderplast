@@ -176,7 +176,8 @@ model User {
   updatedAt           DateTime            @updatedAt
   refreshTokens       RefreshToken[]
   productions         ProductionRecord[]  @relation("WorkerProductions")
-  shiftRecords        ShiftRecord[]
+  shiftRecords        ShiftRecord[]       @relation("ShiftWorker")
+  createdShiftRecords ShiftRecord[]       @relation("ShiftRecordCreator")
   employeeProductRates EmployeeProductRate[]
   salaryRecords       SalaryRecord[]
   createdOrders       Order[]             @relation("OrderCreator")
@@ -522,7 +523,9 @@ model ProductionConsumption {
 model ShiftRecord {
   id            String        @id @default(cuid())
   workerId      String
-  worker        User          @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  worker        User          @relation("ShiftWorker", fields: [workerId], references: [id], onDelete: Cascade)
+  createdById   String?
+  createdBy     User?         @relation("ShiftRecordCreator", fields: [createdById], references: [id], onDelete: SetNull)
   machineId     String?
   machine       Machine?      @relation(fields: [machineId], references: [id], onDelete: SetNull)
   shiftNumber   Int

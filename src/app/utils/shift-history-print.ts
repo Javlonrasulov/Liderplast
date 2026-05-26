@@ -14,6 +14,7 @@ export type ShiftHistoryPrintRow = {
   date: string;
   shiftLabel: string;
   workerName: string;
+  enteredByName: string;
   kindLabel: string;
   productType: string;
   machineName: string;
@@ -34,6 +35,7 @@ export type ShiftHistoryPrintLabels = {
   colDate: string;
   colShift: string;
   colWorker: string;
+  colEnteredBy: string;
   colKind: string;
   colProduct: string;
   colMachine: string;
@@ -68,6 +70,7 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
           <td class="c nowrap">${esc(formatDate(r.date))}</td>
           <td class="l">${esc(r.shiftLabel)}</td>
           <td class="l bold">${esc(r.workerName)}</td>
+          <td class="l">${esc(r.enteredByName)}</td>
           <td class="c">${esc(r.kindLabel)}</td>
           <td class="l bold">${esc(r.productType)}</td>
           <td class="l">${esc(r.machineName)}</td>
@@ -187,6 +190,7 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
           <th>${esc(L.colDate)}</th>
           <th>${esc(L.colShift)}</th>
           <th>${esc(L.colWorker)}</th>
+          <th>${esc(L.colEnteredBy)}</th>
           <th>${esc(L.colKind)}</th>
           <th>${esc(L.colProduct)}</th>
           <th>${esc(L.colMachine)}</th>
@@ -198,11 +202,11 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
         </tr>
       </thead>
       <tbody>
-        ${bodyRows || `<tr><td colspan="12" class="c">—</td></tr>`}
+        ${bodyRows || `<tr><td colspan="13" class="c">—</td></tr>`}
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="9" class="total-label">${esc(L.total)}</td>
+          <td colspan="10" class="total-label">${esc(L.total)}</td>
           <td class="c bad">${formatNumber(totalDefect)}</td>
           <td class="r">${formatNumber(totalProduced)} ${esc(L.unitPieces)}</td>
           <td></td>

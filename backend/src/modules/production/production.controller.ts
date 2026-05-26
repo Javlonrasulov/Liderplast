@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { CreateMachineDto } from './dto/create-machine.dto.js';
@@ -57,8 +58,11 @@ export class ProductionController {
 
   @Post('shifts')
   @Roles(Role.DIRECTOR, Role.MANAGER, Role.WORKER)
-  createShift(@Body() dto: CreateShiftRecordDto) {
-    return this.productionService.createShiftRecord(dto);
+  createShift(
+    @Body() dto: CreateShiftRecordDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.productionService.createShiftRecord(dto, userId);
   }
 
   @Get('shifts')

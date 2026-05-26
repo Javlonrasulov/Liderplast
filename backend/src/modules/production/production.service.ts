@@ -32,6 +32,22 @@ function shiftInventoryErr(code: string, param?: string): string {
   return `ERR::${code}`;
 }
 
+const shiftRecordDetailsInclude = {
+  worker: {
+    omit: { passwordHash: true },
+  },
+  createdBy: {
+    select: { id: true, fullName: true },
+  },
+  machine: true,
+  paintRawMaterial: { select: { id: true, name: true, unit: true } },
+  materialUsages: {
+    include: {
+      rawMaterial: { select: { id: true, name: true, unit: true } },
+    },
+  },
+} as const;
+
 @Injectable()
 export class ProductionService {
   constructor(
@@ -1011,7 +1027,7 @@ export class ProductionService {
     );
   }
 
-  async createShiftRecord(dto: CreateShiftRecordDto) {
+  async createShiftRecord(dto: CreateShiftRecordDto, createdByUserId?: string) {
     const wantsPaint =
       dto.paintUsed === true &&
       Boolean(dto.paintRawMaterialId) &&
@@ -1086,6 +1102,7 @@ export class ProductionService {
       const shift = await tx.shiftRecord.create({
         data: {
           workerId: dto.workerId,
+          createdById: createdByUserId ?? null,
           machineId,
           shiftNumber: dto.shiftNumber,
           date: new Date(dto.date),
@@ -1153,18 +1170,7 @@ export class ProductionService {
 
       return tx.shiftRecord.findUniqueOrThrow({
         where: { id: shift.id },
-        include: {
-          worker: {
-            omit: { passwordHash: true },
-          },
-          machine: true,
-          paintRawMaterial: { select: { id: true, name: true, unit: true } },
-          materialUsages: {
-            include: {
-              rawMaterial: { select: { id: true, name: true, unit: true } },
-            },
-          },
-        },
+        include: shiftRecordDetailsInclude,
       });
     });
 
@@ -1327,18 +1333,7 @@ export class ProductionService {
 
       return tx.shiftRecord.findUniqueOrThrow({
         where: { id: shift.id },
-        include: {
-          worker: {
-            omit: { passwordHash: true },
-          },
-          machine: true,
-          paintRawMaterial: { select: { id: true, name: true, unit: true } },
-          materialUsages: {
-            include: {
-              rawMaterial: { select: { id: true, name: true, unit: true } },
-            },
-          },
-        },
+        include: shiftRecordDetailsInclude,
       });
     });
 
@@ -1393,18 +1388,7 @@ export class ProductionService {
 
   getShiftRecords() {
     return this.prisma.shiftRecord.findMany({
-      include: {
-        worker: {
-          omit: { passwordHash: true },
-        },
-        machine: true,
-        paintRawMaterial: { select: { id: true, name: true, unit: true } },
-        materialUsages: {
-          include: {
-            rawMaterial: { select: { id: true, name: true, unit: true } },
-          },
-        },
-      },
+      include: shiftRecordDetailsInclude,
       orderBy: { createdAt: 'desc' },
     });
   }

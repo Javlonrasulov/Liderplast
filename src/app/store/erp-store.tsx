@@ -365,6 +365,8 @@ export interface ShiftRecord {
   electricityKwh: number;
   notes: string;
   createdAt: string;
+  /** Tizimga yozuvni kiritgan foydalanuvchi */
+  enteredByName?: string;
   /** Smenada kraska ishlatilgani (backend/frontend mos kelishi uchun ixtiyoriy) */
   paintUsed?: boolean;
   paintRawMaterialId?: string;
@@ -1021,6 +1023,7 @@ type BackendShiftRecord = {
   paintQuantityKg?: number | null;
   paintRawMaterial?: { id: string; name: string; unit?: string } | null;
   worker: { id: string; fullName: string };
+  createdBy?: { id: string; fullName: string } | null;
   machine?: { id: string } | null;
   materialUsages?: Array<{
     rawMaterialId: string;
@@ -2348,6 +2351,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     electricityKwh: shift.electricityKwh,
     notes: shift.notes ?? '',
     createdAt: shift.createdAt,
+    enteredByName: shift.createdBy?.fullName?.trim() || undefined,
     paintUsed: shift.paintUsed ?? false,
     paintRawMaterialId: shift.paintRawMaterialId ?? undefined,
     paintQuantityKg: shift.paintQuantityKg ?? undefined,
