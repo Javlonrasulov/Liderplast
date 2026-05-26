@@ -621,6 +621,8 @@ type ERPAction =
       payload: {
         id: string;
         itemType: WarehouseItemType;
+        /** Xomashyo: qoldiq, qoplar va harakatlarni tozalab soft-delete */
+        revertInventory?: boolean;
       };
     }
   | {
@@ -2568,12 +2570,15 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
-        case 'DELETE_WAREHOUSE_PRODUCT':
+        case 'DELETE_WAREHOUSE_PRODUCT': {
+          const revertQs =
+            action.payload.revertInventory === true ? '?revert=true' : '';
           await apiRequest(
-            `/warehouse/products/${action.payload.itemType}/${action.payload.id}`,
+            `/warehouse/products/${action.payload.itemType}/${action.payload.id}${revertQs}`,
             { method: 'DELETE' },
           );
           break;
+        }
         case 'CREATE_RAW_MATERIAL_BAG':
           await apiRequest('/raw-material-bags/create', {
             method: 'POST',

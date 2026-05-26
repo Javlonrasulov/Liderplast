@@ -7,6 +7,7 @@ import {
   ParseEnumPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -56,9 +57,12 @@ export class WarehouseController {
     @Param('itemType', new ParseEnumPipe(InventoryItemType))
     itemType: InventoryItemType,
     @Param('id') id: string,
+    @Query('revert') revert?: string,
     @CurrentUser('sub') userId?: string,
   ) {
-    return this.warehouseService.deleteProduct(itemType, id, userId);
+    return this.warehouseService.deleteProduct(itemType, id, userId, {
+      revertInventory: revert === 'true' || revert === '1',
+    });
   }
 
   @Post('incoming')

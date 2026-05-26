@@ -20,6 +20,7 @@ export interface T {
   rmWarehouseStockPageDesc: string;
   rmWarehouseStockTotal: string;
   rmWarehouseStockEmpty: string;
+  rmDeleteConfirmDesc: string;
   navSales: string;
   navExpenses: string;
   navSuppliers: string;
@@ -1115,6 +1116,8 @@ const uz_cyrillic: T = {
     'Каталогдаги ҳар бир хомашё тури учун омбордаги қолдиқ (килограмм).',
   rmWarehouseStockTotal: 'Жами хомашё',
   rmWarehouseStockEmpty: 'Хомашё каталоги бўш — аввал тур яратинг.',
+  rmDeleteConfirmDesc:
+    '«{name}» ўчирилади: қолдиқ {kg} кг, барча қоплар ва омбор ҳаракатлари ёзувлари ҳам тозаланади. Давом этасизми?',
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
   navSuppliers: 'Етказиб берувчи',
@@ -2180,6 +2183,8 @@ const uz_latin: T = {
   rmWarehouseStockPageDesc: 'Katalogdagi har bir xomashyo turi uchun ombordagi qoldiq (kg).',
   rmWarehouseStockTotal: 'Jami xomashyo',
   rmWarehouseStockEmpty: 'Xomashyo katalogi bo‘sh — avval tur yarating.',
+  rmDeleteConfirmDesc:
+    '«{name}» o‘chiriladi: {kg} kg qoldiq, barcha qoplar va ombor harakatlari yozuvlari ham tozalanadi. Davom etasizmi?',
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
   navSuppliers: 'Yetkazib beruvchi',
@@ -3245,6 +3250,8 @@ const ru: T = {
   rmWarehouseStockPageDesc: 'Складской остаток (кг) по каждому типу сырья из каталога.',
   rmWarehouseStockTotal: 'Всего сырья',
   rmWarehouseStockEmpty: 'Каталог сырья пуст — сначала добавьте тип.',
+  rmDeleteConfirmDesc:
+    '«{name}» будет удалён: остаток {kg} кг, все мешки и записи складских движений будут очищены. Продолжить?',
   navSales: 'Продажи',
   navExpenses: 'Расходы',
   navSuppliers: 'Поставщик',

@@ -80,6 +80,7 @@ export function RawMaterial() {
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
   const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [createTypeOpen, setCreateTypeOpen] = useState(false);
   const [rmTab, setRmTab] = useState<'catalog' | 'overview' | 'stock'>('catalog');
   const [incomingQtyMismatchPayload, setIncomingQtyMismatchPayload] = useState<
     | null
@@ -132,6 +133,7 @@ export function RawMaterial() {
         },
       });
       setCreateForm({ name: '', description: '', rawMaterialKind: 'SIRO' });
+      setCreateTypeOpen(false);
       setSuccess(t.rmCreatedSuccess);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -643,8 +645,29 @@ export function RawMaterial() {
             </div>
           )}
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+      <button
+        type="button"
+        onClick={() => setCreateTypeOpen((open) => !open)}
+        aria-expanded={createTypeOpen}
+        className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+          createTypeOpen
+            ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700'
+            : 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:bg-slate-800 dark:text-emerald-400 dark:hover:bg-emerald-900/20'
+        }`}
+      >
+        <Plus size={16} className="shrink-0" />
+        {t.rmCreateTypeTitle}
+        <ChevronDown
+          size={16}
+          className={`shrink-0 transition-transform ${createTypeOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      <div
+        className={`grid grid-cols-1 gap-6 ${createTypeOpen ? 'xl:grid-cols-2' : ''}`}
+      >
+        {createTypeOpen && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
                 <Droplets size={16} className="text-white" />
@@ -707,6 +730,7 @@ export function RawMaterial() {
               </button>
             </form>
         </div>
+        )}
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">

@@ -1,10 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { Droplets, Palette, AlertTriangle, Pencil, X } from 'lucide-react';
+import { Droplets, Palette, AlertTriangle, Pencil, Trash2, X } from 'lucide-react';
 import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { calcPercent, formatKgAmount, formatNumber } from '../utils/format';
+import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { useAuth } from '../auth/auth-context';
 import { Button } from '../components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
@@ -32,11 +43,14 @@ export function RawMaterialWarehouseStock() {
     user?.role === 'DIRECTOR' ||
     hasPermission('view_warehouse') ||
     hasPermission('view_raw_material');
+  const canDelete = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
 
   const [editing, setEditing] = useState<RawMaterialProduct | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RawMaterialProduct | null>(null);
   const [nameDraft, setNameDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const qtyByName = useMemo(() => {
     const m = new Map<string, number>();
@@ -93,6 +107,38 @@ export function RawMaterialWarehouseStock() {
     setError('');
   };
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
+    try {
+      await dispatch({
+        type: 'DELETE_WAREHOUSE_PRODUCT',
+        payload: {
+          id: deleteTarget.id,
+          itemType: 'RAW_MATERIAL',
+          revertInventory: true,
+        },
+      });
+      setSuccess(t.whProductDeleted);
+      setDeleteTarget(null);
+      if (editing?.id === deleteTarget.id) {
+        closeEdit();
+      }
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const submitRename = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
@@ -123,9 +169,22 @@ export function RawMaterialWarehouseStock() {
     }
   };
 
+  const deleteTargetKg = deleteTarget ? (qtyByName.get(deleteTarget.name) ?? 0) : 0;
+
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden">
       <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
+
+      {success ? (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+          {success}
+        </p>
+      ) : null}
+      {error && !editing && !deleteTarget ? (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300">
+          {error}
+        </p>
+      ) : null}
 
       {rows.length === 0 ? (
         <p className="rounded-2xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
@@ -231,16 +290,34 @@ export function RawMaterialWarehouseStock() {
                         {t.rmWarning}
                       </span>
                     ) : null}
-                    {canManage ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => openEdit(rm)}
-                        aria-label={t.whEdit}
-                      >
-                        <Pencil size={16} />
-                      </Button>
+                    {canManage || canDelete ? (
+                      <div className="flex items-center gap-1">
+                        {canManage ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openEdit(rm)}
+                            aria-label={t.whEdit}
+                          >
+                            <Pencil size={16} />
+                          </Button>
+                        ) : null}
+                        {canDelete ? (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => {
+                              setError('');
+                              setDeleteTarget(rm);
+                            }}
+                            aria-label={t.suDelete}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        ) : null}
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -268,6 +345,45 @@ export function RawMaterialWarehouseStock() {
           </div>
         </>
       )}
+
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open && !submitting) {
+            setDeleteTarget(null);
+            setError('');
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.whDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget
+                ? t.rmDeleteConfirmDesc
+                    .replace('{name}', deleteTarget.name)
+                    .replace('{kg}', formatKgAmount(deleteTargetKg))
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {error && deleteTarget ? (
+            <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDelete();
+              }}
+              disabled={submitting}
+              className="bg-rose-600 hover:bg-rose-700"
+            >
+              {submitting ? t.authLoading : t.whDeleteAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && closeEdit()}>
         <DialogContent className="max-w-md">

@@ -204,8 +204,15 @@ export class WarehouseService {
     itemType: InventoryItemType,
     id: string,
     deletedById?: string,
+    options?: { revertInventory?: boolean },
   ) {
     const payload = await this.prisma.$transaction(async (tx) => {
+      if (
+        options?.revertInventory &&
+        itemType === InventoryItemType.RAW_MATERIAL
+      ) {
+        await this.revertRawMaterialInventoryTx(tx, id);
+      }
       await this.ensureProductCanBeDeletedTx(tx, itemType, id);
       const before = await this.getProductByIdOrThrow(tx, itemType, id);
 
@@ -1503,6 +1510,40 @@ export class WarehouseService {
       deletedById: deleted?.actor?.id,
       deletedByName: deleted?.actor?.fullName,
     };
+  }
+
+  /**
+   * Xomashyo turini o‘chirishdan oldin: qoplar, harakatlar va qoldiqni nolga tushiradi.
+   * Smena/retsept tarixidagi yozuvlar saqlanadi; faqat ombor operatsiyalari tozalanadi.
+   */
+  private async revertRawMaterialInventoryTx(tx: Tx, rawMaterialId: string) {
+    const item = await tx.rawMaterial.findUnique({ where: { id: rawMaterialId } });
+    if (!item || item.isDeleted) {
+      throw new NotFoundException('Product not found');
+    }
+
+    const bagIds = (
+      await tx.rawMaterialBag.findMany({
+        where: { rawMaterialId },
+        select: { id: true },
+      })
+    ).map((b) => b.id);
+
+    if (bagIds.length > 0) {
+      await tx.bagConnectionSession.deleteMany({
+        where: { bagId: { in: bagIds } },
+      });
+      await tx.bagWriteoff.deleteMany({ where: { bagId: { in: bagIds } } });
+      await tx.bagAuditLog.deleteMany({ where: { bagId: { in: bagIds } } });
+      await tx.rawMaterialBag.deleteMany({ where: { rawMaterialId } });
+    }
+
+    await tx.bagAuditLog.deleteMany({ where: { rawMaterialId } });
+    await tx.inventoryMovement.deleteMany({ where: { rawMaterialId } });
+    await tx.inventoryBalance.updateMany({
+      where: { rawMaterialId },
+      data: { quantity: 0, status: EntityStatus.COMPLETED },
+    });
   }
 
   /**
