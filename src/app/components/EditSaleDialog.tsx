@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Pencil, Check, X } from 'lucide-react';
 import {
   useERP,
   type Client,
@@ -109,7 +109,9 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
   const [addQty, setAddQty] = useState('');
   const [addPrice, setAddPrice] = useState('');
   const [addCurrency, setAddCurrency] = useState<SaleCurrency>('UZS');
+  const [editingLineId, setEditingLineId] = useState<string | null>(null);
   const selectedClientRowRef = useRef<HTMLButtonElement>(null);
+  const editingLineBackupRef = useRef<CartRow | null>(null);
 
   const originalItems = useMemo(
     () => (sale ? itemsFromSale(sale) : []),
@@ -129,6 +131,8 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
     setAddQty('');
     setAddPrice('');
     setAddCurrency('UZS');
+    setEditingLineId(null);
+    editingLineBackupRef.current = null;
   }, [sale, open, state.clients]);
 
   useEffect(() => {
@@ -235,6 +239,45 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
 
   const availableForAdd = getEditStock(addCat, selectedProductName);
 
+  const applyWarehousePricing = (product = selectedWarehouseProduct) => {
+    const { price, currency } = warehouseSaleDefaults(product);
+    setAddPrice(price);
+    setAddCurrency(currency);
+  };
+
+  const resetAddForm = () => {
+    setEditingLineId(null);
+    editingLineBackupRef.current = null;
+    setAddQty('');
+    applyWarehousePricing();
+  };
+
+  const cancelEditLine = () => {
+    if (editingLineBackupRef.current) {
+      setCartItems((p) => [...p, editingLineBackupRef.current!]);
+    }
+    editingLineBackupRef.current = null;
+    setEditingLineId(null);
+    setAddQty('');
+    applyWarehousePricing();
+    setError('');
+  };
+
+  const startEditLine = (item: CartRow) => {
+    if (editingLineId && editingLineId !== item._id) {
+      cancelEditLine();
+    }
+    editingLineBackupRef.current = item;
+    setEditingLineId(item._id);
+    setAddCat(item.productCategory);
+    setAddType(item.productType);
+    setAddQty(String(item.quantity));
+    setAddPrice(String(item.pricePerUnit));
+    setAddCurrency(item.currency ?? 'UZS');
+    setCartItems((p) => p.filter((r) => r._id !== item._id));
+    setError('');
+  };
+
   const orderTotal = useMemo(() => cartItems.reduce((s, i) => s + i.total, 0), [cartItems]);
   const paidNum = parseFloat(paid) || 0;
   const debt = orderTotal - paidNum;
@@ -251,12 +294,13 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
     });
   }, [cartItems, originalItems, semiStockByProductName, finalStockByProductName]);
 
-  const handleAddLine = () => {
+  const handleAddOrUpdateLine = () => {
     const qty = parseInt(addQty, 10) || 0;
     const price = parseFloat(addPrice) || 0;
     if (!selectedProductName.trim() || qty <= 0 || price <= 0) return;
 
-    const fx = saleFxRate(addCurrency, addWarehouseFx, usdRate, eurRate);
+    const savedFx = editingLineBackupRef.current?.fxRateToUzs;
+    const fx = saleFxRate(addCurrency, addWarehouseFx ?? savedFx, usdRate, eurRate);
     if (addCurrency !== 'UZS' && !fx) {
       setError('Valyuta kursi yuklanmadi. Biroz kuting yoki UZS tanlang.');
       return;
@@ -272,10 +316,11 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
     }
 
     const total = saleLineTotalUzs(qty, price, addCurrency, usdRate, eurRate, addWarehouseFx);
+    const lineId = editingLineId ?? `new_${Date.now()}`;
     setCartItems((prev) => [
       ...prev,
       {
-        _id: `new_${Date.now()}`,
+        _id: lineId,
         productCategory: addCat,
         productType: selectedProductName,
         quantity: qty,
@@ -285,26 +330,24 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
         total,
       },
     ]);
-    setAddQty('');
-    applyWarehousePricing();
+    editingLineBackupRef.current = null;
+    resetAddForm();
     setError('');
   };
 
-  const applyWarehousePricing = (product = selectedWarehouseProduct) => {
-    const { price, currency } = warehouseSaleDefaults(product);
-    setAddPrice(price);
-    setAddCurrency(currency);
-  };
-
   useEffect(() => {
-    if (open) applyWarehousePricing();
-  }, [selectedProductName, addCat, open]);
+    if (open && !editingLineId) applyWarehousePricing();
+  }, [selectedProductName, addCat, open, editingLineId]);
 
   const handleSave = async () => {
     if (!sale) return;
     setError('');
     if (!clientId) {
       setError(t.colClient + '!');
+      return;
+    }
+    if (editingLineId) {
+      setError(t.slFinishLineEdit);
       return;
     }
     if (cartItems.length === 0) {
@@ -429,19 +472,31 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
                 {cartItems.map((item) => (
                   <li
                     key={item._id}
-                    className="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 dark:text-slate-200"
+                    className="flex items-center gap-1 px-3 py-2 text-xs text-slate-700 dark:text-slate-200"
                   >
                     <span className="flex-1 min-w-0">
                       <span className="font-medium">{item.productType}</span>
                       <span className="text-slate-400 ml-1">
                         · {formatNumber(item.quantity)} {t.unitPiece} ·{' '}
                         {formatCurrency(item.total)}
+                        {item.currency && item.currency !== 'UZS' ? ` · ${item.currency}` : ''}
                       </span>
                     </span>
                     <button
                       type="button"
-                      onClick={() => setCartItems((p) => p.filter((r) => r._id !== item._id))}
-                      className="p-1 rounded text-slate-400 hover:text-red-500"
+                      onClick={() => startEditLine(item)}
+                      className="p-1 rounded text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                      title={t.slEditLine}
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editingLineId === item._id) cancelEditLine();
+                        else setCartItems((p) => p.filter((r) => r._id !== item._id));
+                      }}
+                      className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                       title={t.slRemoveItem}
                     >
                       <Trash2 size={14} />
@@ -452,7 +507,21 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
+          {editingLineId && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-800 dark:text-amber-200">
+              <span>{t.slEditingLine}</span>
+              <button
+                type="button"
+                onClick={cancelEditLine}
+                className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 hover:underline font-medium"
+              >
+                <X size={12} />
+                {t.btnCancel}
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 items-end">
             <div>
               <label className="block text-[10px] text-slate-400 mb-1">{t.colProduct}</label>
               <Select value={addCat} onValueChange={(v) => setAddCat(v as 'semi' | 'final')}>
@@ -501,14 +570,33 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
                 className={INPUT_CLS}
               />
             </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 mb-1">{t.labelCurrency}</label>
+              <Select value={addCurrency} onValueChange={(v) => setAddCurrency(v as SaleCurrency)}>
+                <SelectTrigger className={SELECT_TRIGGER_CLS}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-[140]">
+                  {(['UZS', 'USD', 'EUR'] as const).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <button
               type="button"
-              onClick={handleAddLine}
-              className="h-10 flex items-center justify-center rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"
+              onClick={handleAddOrUpdateLine}
+              className={`h-10 flex items-center justify-center rounded-xl text-white disabled:opacity-40 ${
+                editingLineId
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
               disabled={!selectedProductName || !addQty || !addPrice}
-              title={t.slAddToCart}
+              title={editingLineId ? t.slSaveLine : t.slAddToCart}
             >
-              <Plus size={18} />
+              {editingLineId ? <Check size={18} /> : <Plus size={18} />}
             </button>
           </div>
           {addQty && (

@@ -659,6 +659,10 @@ export interface T {
   slApiClientNotFound: string;
   slApiPaidExceedsTotal: string;
   slApiPaidBelowRecorded: string;
+  slEditLine: string;
+  slSaveLine: string;
+  slEditingLine: string;
+  slFinishLineEdit: string;
   slClientSearchPlaceholder: string;
   slSaleFxRate: string;
   slAddItem: string;
@@ -1737,6 +1741,10 @@ const uz_cyrillic: T = {
   slApiClientNotFound: 'Клиент топилмади',
   slApiPaidExceedsTotal: 'Тўлов жами суммадан ошмаслиги керак',
   slApiPaidBelowRecorded: 'Тўлов аллақачон қайд этилган тўловлардан кам бўлмаслиги керак',
+  slEditLine: 'Қаторни таҳрирлаш',
+  slSaveLine: 'Қаторни сақлаш',
+  slEditingLine: 'Маҳсулот таҳрирланмоқда — ўзгартириб, яшил ✓ босинг',
+  slFinishLineEdit: 'Аввал маҳсулот қаторини сақланг ёки бекор қилинг',
   slClientSearchPlaceholder: 'Клиент қидириш…',
   slSaleFxRate: 'курс',
   slAddItem: 'Қатор қўшиш',
@@ -2798,6 +2806,10 @@ const uz_latin: T = {
   slApiClientNotFound: 'Klient topilmadi',
   slApiPaidExceedsTotal: 'To\'lov jami summadan oshmasligi kerak',
   slApiPaidBelowRecorded: 'To\'lov avval qayd etilgan to\'lovlardan kam bo\'lmasligi kerak',
+  slEditLine: 'Qatorni tahrirlash',
+  slSaveLine: 'Qatorni saqlash',
+  slEditingLine: 'Mahsulot tahrirlanmoqda — o\'zgartirib, yashil ✓ bosing',
+  slFinishLineEdit: 'Avval mahsulot qatorini saqlang yoki bekor qiling',
   slClientSearchPlaceholder: 'Klient qidirish…',
   slSaleFxRate: 'kurs',
   slAddItem: 'Qator qo\'shish',
@@ -3858,6 +3870,10 @@ const ru: T = {
   slApiClientNotFound: 'Клиент не найден',
   slApiPaidExceedsTotal: 'Оплата не может превышать сумму заказа',
   slApiPaidBelowRecorded: 'Оплата не может быть меньше уже учтённых платежей',
+  slEditLine: 'Редактировать строку',
+  slSaveLine: 'Сохранить строку',
+  slEditingLine: 'Редактирование — измените и нажмите зелёную ✓',
+  slFinishLineEdit: 'Сначала сохраните или отмените редактирование строки',
   slClientSearchPlaceholder: 'Поиск клиента…',
   slSaleFxRate: 'курс',
   slAddItem: 'Добавить строку',
