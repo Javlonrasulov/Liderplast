@@ -654,6 +654,10 @@ export interface T {
   slSaveSaleEdit: string;
   slSaleUpdated: string;
   slSaleUpdateFailed: string;
+  slApiClientRemoved: string;
+  slApiClientNotFound: string;
+  slApiPaidExceedsTotal: string;
+  slApiPaidBelowRecorded: string;
   slClientSearchPlaceholder: string;
   slSaleFxRate: string;
   slAddItem: string;
@@ -1727,6 +1731,10 @@ const uz_cyrillic: T = {
   slSaveSaleEdit: 'Сақлаш',
   slSaleUpdated: 'Сотув янгиланди',
   slSaleUpdateFailed: 'Сотувни янгилаб бўлмади',
+  slApiClientRemoved: 'Клиент рўйхатдан ўчирилган — бошқа клиентни танланг',
+  slApiClientNotFound: 'Клиент топилмади',
+  slApiPaidExceedsTotal: 'Тўлов жами суммадан ошмаслиги керак',
+  slApiPaidBelowRecorded: 'Тўлов аллақачон қайд этилган тўловлардан кам бўлмаслиги керак',
   slClientSearchPlaceholder: 'Клиент қидириш…',
   slSaleFxRate: 'курс',
   slAddItem: 'Қатор қўшиш',
@@ -2783,6 +2791,10 @@ const uz_latin: T = {
   slSaveSaleEdit: 'Saqlash',
   slSaleUpdated: 'Sotuv yangilandi',
   slSaleUpdateFailed: 'Sotuvni yangilab bo\'lmadi',
+  slApiClientRemoved: 'Klient ro\'yxatdan o\'chirilgan — boshqa klientni tanlang',
+  slApiClientNotFound: 'Klient topilmadi',
+  slApiPaidExceedsTotal: 'To\'lov jami summadan oshmasligi kerak',
+  slApiPaidBelowRecorded: 'To\'lov avval qayd etilgan to\'lovlardan kam bo\'lmasligi kerak',
   slClientSearchPlaceholder: 'Klient qidirish…',
   slSaleFxRate: 'kurs',
   slAddItem: 'Qator qo\'shish',
@@ -3838,6 +3850,10 @@ const ru: T = {
   slSaveSaleEdit: 'Сохранить',
   slSaleUpdated: 'Продажа обновлена',
   slSaleUpdateFailed: 'Не удалось обновить продажу',
+  slApiClientRemoved: 'Клиент удалён из списка — выберите другого',
+  slApiClientNotFound: 'Клиент не найден',
+  slApiPaidExceedsTotal: 'Оплата не может превышать сумму заказа',
+  slApiPaidBelowRecorded: 'Оплата не может быть меньше уже учтённых платежей',
   slClientSearchPlaceholder: 'Поиск клиента…',
   slSaleFxRate: 'курс',
   slAddItem: 'Добавить строку',

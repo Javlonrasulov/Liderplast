@@ -36,6 +36,8 @@ import {
   SelectValue,
 } from './ui/select';
 import { finalBucketFromCatalog } from '../utils/warehouse-catalog-buckets';
+import { translateCrmApiError } from '../utils/crm-api-errors';
+import { ApiError } from '../api/http';
 
 const INPUT_CLS =
   'w-full px-2.5 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400';
@@ -53,17 +55,15 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-/** Sotuvdagi mijoz — ro‘yxatda ID yoki nom bo‘yicha */
+/** Tahrirlashda avvalo sotuvdagi mijoz ID si saqlanadi */
 function resolveSaleClientId(sale: Sale, clients: Client[]): string {
-  if (sale.clientId && clients.some((c) => c.id === sale.clientId)) {
-    return sale.clientId;
-  }
+  if (sale.clientId) return sale.clientId;
   const target = sale.clientName.trim().toLowerCase();
   if (target) {
     const byName = clients.find((c) => c.name.trim().toLowerCase() === target);
     if (byName) return byName.id;
   }
-  return sale.clientId;
+  return '';
 }
 
 function itemsFromSale(sale: Sale): CartRow[] {
@@ -345,10 +345,8 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
       onOpenChange(false);
     } catch (err) {
       console.error('[edit-sale]', err);
-      const msg =
-        err instanceof Error && err.message.includes('Insufficient stock')
-          ? t.slAvailableStock + '!'
-          : t.slSaleUpdateFailed;
+      const raw = err instanceof ApiError ? err.message : err instanceof Error ? err.message : '';
+      const msg = raw ? translateCrmApiError(raw, t) : t.slSaleUpdateFailed;
       setError(msg);
       toast.error(msg);
     } finally {

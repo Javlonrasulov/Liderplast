@@ -22,7 +22,6 @@ export type ShiftHistoryPrintRow = {
   defectCount: number;
   defectPct: string;
   producedQty: number;
-  electricityKwh: number;
   notes: string;
 };
 
@@ -42,7 +41,6 @@ export type ShiftHistoryPrintLabels = {
   colReading: string;
   colDefect: string;
   colProduced: string;
-  colKwh: string;
   colNotes: string;
   total: string;
   unitPieces: string;
@@ -62,8 +60,6 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
 
   const totalDefect = rows.reduce((s, r) => s + r.defectCount, 0);
   const totalProduced = rows.reduce((s, r) => s + r.producedQty, 0);
-  const totalKwh = rows.reduce((s, r) => s + r.electricityKwh, 0);
-
   const bodyRows = rows
     .map(
       (r, i) => `
@@ -79,7 +75,6 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
           <td class="c mono">${esc(r.reading)}</td>
           <td class="c ${r.defectCount > 0 ? 'bad' : 'ok'}">${r.defectCount > 0 ? `<strong>${formatNumber(r.defectCount)}</strong> (${r.defectPct}%)` : esc(L.noDefect)}</td>
           <td class="r bold">${formatNumber(r.producedQty)}</td>
-          <td class="r">${r.electricityKwh > 0 ? formatNumber(r.electricityKwh) : '—'}</td>
           <td class="l notes">${esc(r.notes || '—')}</td>
         </tr>`,
     )
@@ -199,19 +194,17 @@ export function buildShiftHistoryPrintHtml(input: ShiftHistoryPrintInput): strin
           <th>${esc(L.colReading)}</th>
           <th>${esc(L.colDefect)}</th>
           <th>${esc(L.colProduced)}</th>
-          <th>${esc(L.colKwh)}</th>
           <th>${esc(L.colNotes)}</th>
         </tr>
       </thead>
       <tbody>
-        ${bodyRows || `<tr><td colspan="13" class="c">—</td></tr>`}
+        ${bodyRows || `<tr><td colspan="12" class="c">—</td></tr>`}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="9" class="total-label">${esc(L.total)}</td>
           <td class="c bad">${formatNumber(totalDefect)}</td>
           <td class="r">${formatNumber(totalProduced)} ${esc(L.unitPieces)}</td>
-          <td class="r">${formatNumber(totalKwh)}</td>
           <td></td>
         </tr>
       </tfoot>

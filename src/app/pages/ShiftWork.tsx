@@ -1327,6 +1327,16 @@ export function ShiftWork() {
     });
   }, [createEmptyLine]);
 
+  const removePackagingLine = useCallback(
+    (id: string) => {
+      setPackagingLines((prev) => {
+        const next = prev.filter((ln) => ln.id !== id);
+        return next.length > 0 ? next : [createEmptyPackagingLineCb()];
+      });
+    },
+    [createEmptyPackagingLineCb],
+  );
+
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -1638,7 +1648,6 @@ export function ShiftWork() {
           defectCount: r.defectCount,
           defectPct: brakPct,
           producedQty: r.producedQty,
-          electricityKwh: r.recordKind === 'PACKAGING' ? 0 : r.electricityKwh,
           notes: r.notes?.trim() || '',
         };
       }),
@@ -1658,7 +1667,6 @@ export function ShiftWork() {
         colReading: t.colReading,
         colDefect: t.colDefect,
         colProduced: t.colProduced,
-        colKwh: t.colKwh,
         colNotes: t.labelNotes,
         total: t.total,
         unitPieces: t.unitPiecesAbbr,
@@ -2036,16 +2044,26 @@ export function ShiftWork() {
                       return (
                         <span
                           key={ln.id}
-                          className="inline-flex flex-wrap items-center gap-x-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-indigo-100 dark:border-indigo-900"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-indigo-100 dark:border-indigo-900"
                         >
-                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                            #{i + 1}
+                          <span className="inline-flex flex-wrap items-center gap-x-1 min-w-0">
+                            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                              #{i + 1}
+                            </span>
+                            {machineLabel}
+                            {ln.productType ? ` · ${ln.productType}` : ''}
+                            {produced > 0
+                              ? ` · ${formatNumber(produced)} ${t.unitPiecesAbbr}`
+                              : ''}
                           </span>
-                          {machineLabel}
-                          {ln.productType ? ` · ${ln.productType}` : ''}
-                          {produced > 0
-                            ? ` · ${formatNumber(produced)} ${t.unitPiecesAbbr}`
-                            : ''}
+                          <button
+                            type="button"
+                            onClick={() => removeLine(ln.id)}
+                            className="shrink-0 p-0.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                            title={t.shiftDefDelete}
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </span>
                       );
                     })}
@@ -2065,16 +2083,26 @@ export function ShiftWork() {
                       return (
                         <span
                           key={ln.id}
-                          className="inline-flex flex-wrap items-center gap-x-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-teal-100 dark:border-teal-900"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-teal-100 dark:border-teal-900"
                         >
-                          <span className="font-semibold text-teal-700 dark:text-teal-400">
-                            #{i + 1}
+                          <span className="inline-flex flex-wrap items-center gap-x-1 min-w-0">
+                            <span className="font-semibold text-teal-700 dark:text-teal-400">
+                              #{i + 1}
+                            </span>
+                            {ln.productType || '—'}
+                            {packs > 0 ? ` · ${packs} ${t.labelPackCount.toLowerCase()}` : ''}
+                            {pieces > 0
+                              ? ` · ${formatNumber(pieces)} ${t.unitPiecesAbbr}`
+                              : ''}
                           </span>
-                          {ln.productType || '—'}
-                          {packs > 0 ? ` · ${packs} ${t.labelPackCount.toLowerCase()}` : ''}
-                          {pieces > 0
-                            ? ` · ${formatNumber(pieces)} ${t.unitPiecesAbbr}`
-                            : ''}
+                          <button
+                            type="button"
+                            onClick={() => removePackagingLine(ln.id)}
+                            className="shrink-0 p-0.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                            title={t.shiftDefDelete}
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </span>
                       );
                     })}
@@ -2625,7 +2653,7 @@ export function ShiftWork() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-700/50">
-                      {[t.colShift, t.colWorker, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced, t.colKwh].map(h => (
+                      {[t.colShift, t.colWorker, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced].map(h => (
                         <th key={h} className="text-left px-3 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -2662,9 +2690,6 @@ export function ShiftWork() {
                             )}
                           </td>
                           <td className="px-3 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400">{formatNumber(r.producedQty)}</td>
-                          <td className="px-3 py-3 text-right text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                            {r.recordKind === 'PACKAGING' ? '—' : r.electricityKwh}
-                          </td>
                         </tr>
                       );
                     })}
@@ -2674,7 +2699,6 @@ export function ShiftWork() {
                       <td colSpan={6} className="px-3 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">{t.total}</td>
                       <td className="px-3 py-3 text-center text-xs font-bold text-red-600">{todayBrak}</td>
                       <td className="px-3 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatNumber(todayProduced)}</td>
-                      <td className="px-3 py-3 text-right text-xs font-bold text-yellow-600">{todayKwh.toFixed(1)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -2737,7 +2761,7 @@ export function ShiftWork() {
               <table className="w-full text-sm min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    {[t.colNum, t.colDate, t.colShift, t.colWorker, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced, t.colKwh, t.colActions].map((h, i) => (
+                    {[t.colNum, t.colDate, t.colShift, t.colWorker, t.colProduct, t.colMachine, t.colHours, t.colReading, t.colDefect, t.colProduced, t.colActions].map((h, i) => (
                       <th key={i} className="text-left px-2 min-[400px]:px-3 py-2 min-[400px]:py-3 text-[11px] min-[400px]:text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -2792,15 +2816,6 @@ export function ShiftWork() {
                         <td className="px-3 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                           {formatNumber(r.producedQty)} <span className="text-xs font-normal text-slate-400">{t.unitPiecesAbbr}</span>
                         </td>
-                        <td className="px-3 py-3 text-right text-xs">
-                          {r.recordKind === 'PACKAGING' ? (
-                            <span className="text-slate-400">—</span>
-                          ) : (
-                            <span className="flex items-center justify-end gap-1 text-yellow-600 dark:text-yellow-400">
-                              <Zap size={10} />{r.electricityKwh}
-                            </span>
-                          )}
-                        </td>
                         <td className="px-2 min-[400px]:px-3 py-2 min-[400px]:py-3">
                           {deleteConfirm === r.id ? (
                             <div className="flex flex-col min-[400px]:flex-row items-stretch min-[400px]:items-center gap-1">
@@ -2831,9 +2846,6 @@ export function ShiftWork() {
                     </td>
                     <td className="px-3 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400">
                       {formatNumber(filteredRecords.reduce((s, r) => s + r.producedQty, 0))}
-                    </td>
-                    <td className="px-3 py-3 text-right text-xs font-bold text-yellow-600">
-                      {filteredRecords.reduce((s, r) => s + r.electricityKwh, 0).toFixed(1)}
                     </td>
                     <td />
                   </tr>

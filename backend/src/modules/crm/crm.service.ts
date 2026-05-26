@@ -461,7 +461,8 @@ export class CrmService {
     if (!client) {
       throw new NotFoundException('Client not found');
     }
-    if (isClientRemoved(client)) {
+    // Eski sotuv — ro‘yxatdan o‘chirilgan mijoz bilan ham tahrirlash (mijoz o‘zgarmasa)
+    if (isClientRemoved(client) && dto.clientId !== existing.clientId) {
       throw new BadRequestException('Client has been removed');
     }
 
