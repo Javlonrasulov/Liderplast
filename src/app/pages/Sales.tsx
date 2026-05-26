@@ -34,6 +34,7 @@ import {
 } from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
 import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
+import { EditSaleDialog } from '../components/EditSaleDialog';
 import { Checkbox } from '../components/ui/checkbox';
 import { PhoneInput } from '../components/PhoneInput';
 import { emptyUzPhoneInput, formatUzPhoneDisplay, normalizeUzPhoneForApi } from '../utils/phone';
@@ -85,6 +86,7 @@ export function Sales() {
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
+  const [editingSale, setEditingSale] = useState<Sale | null>(null);
 
   // ---- Order form ----
   const [clientId, setClientId] = useState(state.clients[0]?.id || '');
@@ -1103,6 +1105,14 @@ export function Sales() {
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
+                                onClick={() => setEditingSale(sale)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                title={t.slEditSale}
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handlePrintSale(sale)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
                                 title={t.prPrint}
@@ -1183,6 +1193,14 @@ export function Sales() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditSaleDialog
+        sale={editingSale}
+        open={editingSale !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingSale(null);
+        }}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Role } from '../../generated/prisma/enums.js';
 import { CreateClientDto } from './dto/create-client.dto.js';
 import { UpdateClientDto } from './dto/update-client.dto.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
+import { UpdateOrderDto } from './dto/update-order.dto.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
 import { CrmService } from './crm.service.js';
 
@@ -49,6 +50,16 @@ export class CrmController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER, Role.WORKER)
   getOrders() {
     return this.crmService.getOrders();
+  }
+
+  @Patch('orders/:id')
+  @Roles(Role.DIRECTOR, Role.MANAGER)
+  updateOrder(
+    @Param('id') id: string,
+    @Body() dto: UpdateOrderDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.crmService.updateOrder(id, dto, userId);
   }
 
   @Post('payments')

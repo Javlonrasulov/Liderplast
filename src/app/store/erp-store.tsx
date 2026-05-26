@@ -663,6 +663,7 @@ type ERPAction =
   | { type: 'PRODUCE_FINAL'; payload: { productType: '0.5L' | '1L' | '5L'; quantity: number; semiProductType: '18g' | '20g'; date: string } }
   | { type: 'ADD_SALE'; payload: { clientId: string; clientName: string; productCategory: 'semi' | 'final'; productType: string; quantity: number; pricePerUnit: number; paid: number; date: string } }
   | { type: 'ADD_SALE_ORDER'; payload: { clientId: string; clientName: string; date: string; items: SaleOrderItem[]; paid: number } }
+  | { type: 'UPDATE_SALE_ORDER'; payload: { id: string; clientId: string; items: SaleOrderItem[]; paid: number } }
   | {
       type: 'ADD_EXPENSE';
       payload: {
@@ -2628,6 +2629,33 @@ export function ERPProvider({ children }: { children: ReactNode }) {
         case 'ADD_SALE_ORDER':
           await apiRequest('/orders', {
             method: 'POST',
+            body: JSON.stringify({
+              clientId: action.payload.clientId,
+              paidAmount: action.payload.paid,
+              items: action.payload.items.map((item) => ({
+                productType:
+                  item.productCategory === 'semi'
+                    ? 'SEMI_PRODUCT'
+                    : 'FINISHED_PRODUCT',
+                semiProductId:
+                  item.productCategory === 'semi'
+                    ? lookups.semiByName.get(item.productType)
+                    : undefined,
+                finishedProductId:
+                  item.productCategory === 'final'
+                    ? lookups.finalByName.get(item.productType)
+                    : undefined,
+                quantity: item.quantity,
+                price: item.pricePerUnit,
+                currency: item.currency,
+                fxRateToUzs: item.fxRateToUzs,
+              })),
+            }),
+          });
+          break;
+        case 'UPDATE_SALE_ORDER':
+          await apiRequest(`/orders/${action.payload.id}`, {
+            method: 'PATCH',
             body: JSON.stringify({
               clientId: action.payload.clientId,
               paidAmount: action.payload.paid,

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import {
   ArrowLeft, User, Phone, Building2, CreditCard, ShoppingCart, Wallet,
   Plus, Trash2, CheckCircle2, AlertTriangle, Scale, Calendar, ChevronDown,
-  ChevronUp, TrendingUp, Copy, Check, BadgeCheck, Clock, Pencil, Printer, Download
+  ChevronUp, TrendingUp, Copy, Check, BadgeCheck, Clock, Pencil, Printer, Download,
 } from 'lucide-react';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -28,6 +28,7 @@ import {
   uzPhoneTelHref,
 } from '../utils/phone';
 import { AktSverka } from './AktSverka';
+import { EditSaleDialog } from './EditSaleDialog';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const INPUT_CLS =
@@ -57,6 +58,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
+  const [editingSale, setEditingSale] = useState<(typeof state.sales)[number] | null>(null);
   const [isEditing, setIsEditing] = useState(initialEditing);
   const [editForm, setEditForm] = useState<ClientEditForm>({
     name: '',
@@ -659,6 +661,14 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                               <div className="flex items-center gap-1">
                                 <button
                                   type="button"
+                                  onClick={() => setEditingSale(sale)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                  title={t.slEditSale}
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={() => printSaleDeliveryNote(sale, state.sales)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
                                   title={t.prPrint}
@@ -732,6 +742,14 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                         </div>
                         <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                           <div className="flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setEditingSale(sale)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                              title={t.slEditSale}
+                            >
+                              <Pencil size={13} />
+                            </button>
                             <button
                               type="button"
                               onClick={() => printSaleDeliveryNote(sale, state.sales)}
@@ -892,6 +910,14 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       {activeTab === 'akt' && (
         <AktSverka clientId={clientId} />
       )}
+
+      <EditSaleDialog
+        sale={editingSale}
+        open={editingSale !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingSale(null);
+        }}
+      />
     </div>
   );
 }

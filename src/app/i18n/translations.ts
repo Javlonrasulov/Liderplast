@@ -649,6 +649,11 @@ export interface T {
   slDownloadSelectedPdf: string;
   slBulkPdfSummaryTitle: string;
   slSelectSalesForPdf: string;
+  slEditSale: string;
+  slEditSaleTitle: string;
+  slSaveSaleEdit: string;
+  slSaleUpdated: string;
+  slSaleUpdateFailed: string;
   slSaleFxRate: string;
   slAddItem: string;
   slOrderItems: string;
@@ -1708,6 +1713,11 @@ const uz_cyrillic: T = {
   slDownloadSelectedPdf: 'Танланганларни PDF',
   slBulkPdfSummaryTitle: 'Сотувлар хулосаси',
   slSelectSalesForPdf: 'PDF учун камида битта сотувни танланг',
+  slEditSale: 'Таҳрирлаш',
+  slEditSaleTitle: 'Сотувни таҳрирлаш',
+  slSaveSaleEdit: 'Сақлаш',
+  slSaleUpdated: 'Сотув янгиланди',
+  slSaleUpdateFailed: 'Сотувни янгилаб бўлмади',
   slSaleFxRate: 'курс',
   slAddItem: 'Қатор қўшиш',
   slOrderItems: 'Буюртма маҳсулотлари',
@@ -2750,6 +2760,11 @@ const uz_latin: T = {
   slDownloadSelectedPdf: 'Tanlanganlarni PDF',
   slBulkPdfSummaryTitle: 'Sotuvlar xulosasi',
   slSelectSalesForPdf: 'PDF uchun kamida bitta sotuvni tanlang',
+  slEditSale: 'Tahrirlash',
+  slEditSaleTitle: 'Sotuvni tahrirlash',
+  slSaveSaleEdit: 'Saqlash',
+  slSaleUpdated: 'Sotuv yangilandi',
+  slSaleUpdateFailed: 'Sotuvni yangilab bo\'lmadi',
   slSaleFxRate: 'kurs',
   slAddItem: 'Qator qo\'shish',
   slOrderItems: 'Buyurtma mahsulotlari',
@@ -3791,6 +3806,11 @@ const ru: T = {
   slDownloadSelectedPdf: 'Скачать PDF выбранных',
   slBulkPdfSummaryTitle: 'Сводка продаж',
   slSelectSalesForPdf: 'Выберите хотя бы одну продажу для PDF',
+  slEditSale: 'Редактировать',
+  slEditSaleTitle: 'Редактирование продажи',
+  slSaveSaleEdit: 'Сохранить',
+  slSaleUpdated: 'Продажа обновлена',
+  slSaleUpdateFailed: 'Не удалось обновить продажу',
   slSaleFxRate: 'курс',
   slAddItem: 'Добавить строку',
   slOrderItems: 'Товары в заказе',

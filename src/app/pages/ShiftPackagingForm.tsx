@@ -616,7 +616,7 @@ export function ShiftPackagingForm({
                         <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
                           {t.packagingStockInsufficient
                             .replace('{needed}', String(pieces))
-                            .replace('{available}', String(semiAvailable))}
+                            .replace('{available}', String(unpackagedAvailable))}
                         </p>
                       ) : null}
                     </div>
