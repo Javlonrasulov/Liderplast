@@ -73,8 +73,12 @@ export class ProductionController {
 
   @Patch('shifts/:id')
   @Roles(Role.DIRECTOR, Role.MANAGER, Role.WORKER)
-  updateShift(@Param('id') id: string, @Body() dto: UpdateShiftRecordDto) {
-    return this.productionService.updateShiftRecord(id, dto);
+  updateShift(
+    @Param('id') id: string,
+    @Body() dto: UpdateShiftRecordDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.productionService.updateShiftRecord(id, dto, userId);
   }
 
   @Delete('shifts/:id')

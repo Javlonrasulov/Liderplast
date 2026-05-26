@@ -1186,7 +1186,11 @@ export class ProductionService {
     return created;
   }
 
-  async updateShiftRecord(id: string, dto: UpdateShiftRecordDto) {
+  async updateShiftRecord(
+    id: string,
+    dto: UpdateShiftRecordDto,
+    editorUserId?: string,
+  ) {
     const existing = await this.prisma.shiftRecord.findUnique({
       where: { id },
       include: { machine: true },
@@ -1265,6 +1269,9 @@ export class ProductionService {
       const shift = await tx.shiftRecord.update({
         where: { id },
         data: {
+          ...(existing.createdById == null && editorUserId
+            ? { createdById: editorUserId }
+            : {}),
           ...(dto.workerId !== undefined ? { workerId: dto.workerId } : {}),
           ...(dto.machineId !== undefined ? { machineId: dto.machineId || null } : {}),
           ...(dto.shiftNumber !== undefined ? { shiftNumber: dto.shiftNumber } : {}),

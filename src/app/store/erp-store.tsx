@@ -3046,7 +3046,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             action.payload.rawMaterialActualKg.length > 0
               ? { rawMaterialActualKg: action.payload.rawMaterialActualKg }
               : {};
-          await apiRequest('/production/shifts', {
+          await apiRequest<BackendShiftRecord>('/production/shifts', {
             method: 'POST',
             body: JSON.stringify({
               workerId,

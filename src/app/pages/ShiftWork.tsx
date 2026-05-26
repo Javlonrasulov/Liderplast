@@ -132,6 +132,7 @@ const TR = {
     colShift: 'Смена',
     colWorker: 'Ишчи',
     colEnteredBy: 'Киритган',
+    enteredByUnknown: '— (эски ёзув)',
     colProduct: 'Маҳсулот',
     colMachine: 'Аппарат',
     colHours: 'Соат',
@@ -293,6 +294,7 @@ const TR = {
     colShift: 'Smena',
     colWorker: 'Ishchi',
     colEnteredBy: 'Kiritgan',
+    enteredByUnknown: '— (eski yozuv)',
     colProduct: 'Mahsulot',
     colMachine: 'Apparat',
     colHours: 'Soat',
@@ -454,6 +456,7 @@ const TR = {
     colShift: 'Смена',
     colWorker: 'Рабочий',
     colEnteredBy: 'Ввёл',
+    enteredByUnknown: '— (старая запись)',
     colProduct: 'Продукт',
     colMachine: 'Аппарат',
     colHours: 'Часы',
@@ -1655,7 +1658,7 @@ export function ShiftWork() {
           date: r.date,
           shiftLabel: getShiftLabel(shiftDefinitions, r.shift, t),
           workerName: r.workerName,
-          enteredByName: r.enteredByName?.trim() || '—',
+          enteredByName: r.enteredByName?.trim() || t.enteredByUnknown,
           kindLabel:
             r.recordKind === 'PACKAGING' ? t.packagingKindBadge : t.kindProduction,
           productType: r.productType,
@@ -2818,7 +2821,7 @@ export function ShiftWork() {
                           </div>
                         </td>
                         <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap max-w-[9rem] truncate" title={r.enteredByName || undefined}>
-                          {r.enteredByName || '—'}
+                          {r.enteredByName || t.enteredByUnknown}
                         </td>
                         <td className="px-3 py-3">
                           <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${PRODUCT_COLORS[r.productType] || 'bg-slate-100 text-slate-700'}`}>{r.productType}</span>
