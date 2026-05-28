@@ -282,17 +282,31 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
   const paidNum = parseFloat(paid) || 0;
   const debt = orderTotal - paidNum;
 
-  const allStockOk = useMemo(() => {
-    const acc: Record<string, number> = {};
+  const cartStockRows = useMemo(() => {
+    const acc: Record<string, { cat: 'semi' | 'final'; type: string; requested: number }> = {};
     for (const item of cartItems) {
       const key = `${item.productCategory}__${item.productType}`;
-      acc[key] = (acc[key] || 0) + item.quantity;
+      const cur = acc[key];
+      if (cur) cur.requested += item.quantity;
+      else {
+        acc[key] = {
+          cat: item.productCategory,
+          type: item.productType,
+          requested: item.quantity,
+        };
+      }
     }
-    return Object.entries(acc).every(([key, total]) => {
-      const [cat, type] = key.split('__');
-      return total <= getEditStock(cat as 'semi' | 'final', type);
-    });
+    return Object.values(acc)
+      .map((r) => ({
+        ...r,
+        available: getEditStock(r.cat, r.type),
+      }))
+      .sort((a, b) => a.type.localeCompare(b.type));
   }, [cartItems, originalItems, semiStockByProductName, finalStockByProductName]);
+
+  const allStockOk = useMemo(() => {
+    return cartStockRows.every((r) => r.requested <= r.available);
+  }, [cartStockRows]);
 
   const handleAddOrUpdateLine = () => {
     const qty = parseInt(addQty, 10) || 0;
@@ -311,7 +325,7 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
       .filter((i) => `${i.productCategory}__${i.productType}` === key)
       .reduce((s, i) => s + i.quantity, 0);
     if (qty + already > getEditStock(addCat, selectedProductName)) {
-      setError(t.slAvailableStock + '!');
+      setError(t.slStockNotEnough);
       return;
     }
 
@@ -355,7 +369,7 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
       return;
     }
     if (!allStockOk) {
-      setError(t.slAvailableStock + '!');
+      setError(t.slStockNotEnough);
       return;
     }
     if (paidNum > orderTotal) {
@@ -637,7 +651,27 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
             </div>
           )}
           {!allStockOk && cartItems.length > 0 && !error && (
-            <p className="text-xs text-amber-600">{t.slAvailableStock}!</p>
+            <div className="mt-2 flex items-start gap-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs">
+              <AlertTriangle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">{t.slStockNotEnough}</p>
+                <div className="mt-1 space-y-0.5">
+                  {cartStockRows.map((r) => {
+                    const ok = r.requested <= r.available;
+                    return (
+                      <p
+                        key={`${r.cat}__${r.type}`}
+                        className={ok ? 'text-emerald-700 dark:text-emerald-300' : ''}
+                      >
+                        {ok ? '✓ ' : ''}
+                        {r.type}: {t.slAvailableStock} {formatNumber(r.available)} {t.unitPiece}, {t.slStockNeeded}{' '}
+                        {formatNumber(r.requested)} {t.unitPiece}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 

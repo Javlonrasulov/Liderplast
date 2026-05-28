@@ -279,25 +279,38 @@ export function Sales() {
   const paidNum = parseFloat(paid) || 0;
   const debt = orderTotal - paidNum;
 
-  const allStockOk = useMemo(() => {
-    // Recompute properly per type considering combined cart quantities
-    const acc: Record<string, number> = {};
+  const cartStockRows = useMemo(() => {
+    const acc: Record<string, { cat: 'semi' | 'final'; type: string; requested: number }> = {};
     for (const item of cartItems) {
       const key = `${item.productCategory}__${item.productType}`;
-      acc[key] = (acc[key] || 0) + item.quantity;
+      const cur = acc[key];
+      if (cur) cur.requested += item.quantity;
+      else {
+        acc[key] = {
+          cat: item.productCategory,
+          type: item.productType,
+          requested: item.quantity,
+        };
+      }
     }
-    return Object.entries(acc).every(([key, total]) => {
-      const [cat, type] = key.split('__');
-      return total <= getStock(cat as 'semi' | 'final', type);
-    });
+    return Object.values(acc)
+      .map((r) => ({
+        ...r,
+        available: getStock(r.cat, r.type),
+      }))
+      .sort((a, b) => a.type.localeCompare(b.type));
   }, [cartItems, semiStockByProductName, finalStockByProductName, saleSemiCatalog, saleFinalCatalog]);
+
+  const allStockOk = useMemo(() => {
+    return cartStockRows.every((r) => r.requested <= r.available);
+  }, [cartStockRows]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!clientId) { setError(t.colClient + '!'); return; }
     if (cartItems.length === 0) { setError(t.slCartEmpty + '!'); return; }
-    if (!allStockOk) { setError(t.slAvailableStock + '!'); return; }
+    if (!allStockOk) { setError(t.slStockNotEnough); return; }
 
     const client = state.clients.find(c => c.id === clientId);
     const items: SaleOrderItem[] = cartItems.map(
@@ -818,7 +831,21 @@ export function Sales() {
               {!allStockOk && cartItems.length > 0 && (
                 <div className="mb-3 flex items-center gap-2 p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
                   <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
-                  <p className="text-red-600 dark:text-red-400 text-xs">{t.slAvailableStock}!</p>
+                  <div className="text-xs text-red-700 dark:text-red-300">
+                    <p className="font-semibold">{t.slStockNotEnough}</p>
+                    <div className="mt-1 space-y-0.5">
+                      {cartStockRows.map((r) => {
+                        const ok = r.requested <= r.available;
+                        return (
+                          <p key={`${r.cat}__${r.type}`} className={ok ? 'text-emerald-700 dark:text-emerald-300' : ''}>
+                            {ok ? '✓ ' : ''}
+                            {r.type}: {t.slAvailableStock} {formatNumber(r.available)} {t.unitPiece}, {t.slStockNeeded}{' '}
+                            {formatNumber(r.requested)} {t.unitPiece}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
               <button type="submit" disabled={cartItems.length === 0 || !allStockOk}

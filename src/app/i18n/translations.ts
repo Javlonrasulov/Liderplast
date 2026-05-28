@@ -634,6 +634,8 @@ export interface T {
   slFinalCat: string;
   slProductType: string;
   slAvailableStock: string;
+  slStockNotEnough: string;
+  slStockNeeded: string;
   slAvailableProducts: string;
   slNewClient: string;
   slClientList: string;
@@ -1724,6 +1726,8 @@ const uz_cyrillic: T = {
   slFinalCat: 'Тайёр (Бакалашка)',
   slProductType: 'Маҳсулот тури',
   slAvailableStock: 'мавжуд',
+  slStockNotEnough: 'Омборда етарли эмас',
+  slStockNeeded: 'керак',
   slAvailableProducts: 'Мавжуд Маҳсулотлар',
   slNewClient: 'Янги Клиент',
   slClientList: 'Клиентлар Рўйхати',
@@ -2797,6 +2801,8 @@ const uz_latin: T = {
   slFinalCat: 'Tayyor (Bakalashka)',
   slProductType: 'Mahsulot turi',
   slAvailableStock: 'mavjud',
+  slStockNotEnough: 'Omborda yetarli emas',
+  slStockNeeded: 'kerak',
   slAvailableProducts: 'Mavjud Mahsulotlar',
   slNewClient: 'Yangi Klient',
   slClientList: "Klientlar Ro'yxati",
@@ -3869,6 +3875,8 @@ const ru: T = {
   slFinalCat: 'Готовый продукт (бутылки)',
   slProductType: 'Тип продукта',
   slAvailableStock: 'доступно',
+  slStockNotEnough: 'На складе недостаточно',
+  slStockNeeded: 'нужно',
   slAvailableProducts: 'Доступные продукты',
   slNewClient: 'Новый клиент',
   slClientList: 'Список киентов',
