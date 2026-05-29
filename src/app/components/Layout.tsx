@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router';
 import {
   LayoutDashboard, Droplets, Boxes,
-  ShoppingCart, Zap, BarChart3, ChevronLeft, ChevronRight,
+  ShoppingCart, Zap, BarChart3, Building2, ChevronLeft, ChevronRight,
   Sun, Moon, User, Menu, Globe, Check, ChevronDown,
   CalendarClock, Wallet, UserCog, LogOut, MoreVertical,
   ClipboardList, Factory, Package, Truck,
@@ -228,6 +228,13 @@ export function Layout() {
     { kind: 'leaf', path: '/expenses', icon: Zap, label: t.navExpenses, perm: 'view_expenses' },
     {
       kind: 'leaf',
+      path: '/company-assets',
+      icon: Building2,
+      label: t.navCompanyAssets,
+      perm: 'view_company_assets',
+    },
+    {
+      kind: 'leaf',
       path: '/suppliers',
       icon: Truck,
       label: t.navSuppliers,
@@ -289,6 +296,7 @@ export function Layout() {
     '/inventory': t.navInventory,
     '/sales': t.navSales,
     '/expenses': t.navExpenses,
+    '/company-assets': t.navCompanyAssets,
     '/suppliers': t.navSuppliers,
     '/shifts': t.navShifts,
     '/payroll': t.navPayroll,

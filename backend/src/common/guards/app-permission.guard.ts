@@ -197,6 +197,16 @@ function requiredPermissionGroups(
       anyOf: ['manage_suppliers', 'view_expenses', 'view_raw_material'],
     },
     {
+      test: /^\/finance\/supplier-purchase-orders\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['manage_suppliers', 'view_expenses'],
+    },
+    {
+      test: /^\/finance\/supplier-purchase-orders\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['manage_suppliers', 'view_expenses'],
+    },
+    {
       test: /^\/finance\/expenses\/categories$/,
       method: 'GET',
       anyOf: ['view_expenses'],
@@ -316,8 +326,49 @@ function requiredPermissionGroups(
       anyOf: ['manage_users', 'manage_shift_workers'],
     },
 
-    { test: /^\/files\/upload$/, method: 'POST', anyOf: ['manage_settings'] },
-    { test: /^\/files\/uploads$/, method: 'GET', anyOf: ['manage_settings'] },
+    { test: /^\/files\/upload$/, method: 'POST', anyOf: ['manage_settings', 'manage_company_assets'] },
+    { test: /^\/files\/uploads$/, method: 'GET', anyOf: ['manage_settings', 'manage_company_assets'] },
+
+    {
+      test: /^\/company-assets\/stats$/,
+      method: 'GET',
+      anyOf: ['view_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets\/filter-options$/,
+      method: 'GET',
+      anyOf: ['view_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets$/,
+      method: 'GET',
+      anyOf: ['view_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets\/[^/]+$/,
+      method: 'GET',
+      anyOf: ['view_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets$/,
+      method: 'POST',
+      anyOf: ['manage_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets\/bulk$/,
+      method: 'PATCH',
+      anyOf: ['manage_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['manage_company_assets', 'view_expenses'],
+    },
+    {
+      test: /^\/company-assets\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['manage_company_assets', 'view_expenses'],
+    },
   ];
 
   for (const rule of rules) {

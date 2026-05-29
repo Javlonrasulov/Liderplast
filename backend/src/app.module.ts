@@ -17,6 +17,7 @@ import { RawMaterialBagsModule } from './modules/raw-material-bags/raw-material-
 import { CrmModule } from './modules/crm/crm.module.js';
 import { FinanceModule } from './modules/finance/finance.module.js';
 import { FileUploadModule } from './modules/file-upload/file-upload.module.js';
+import { CompanyAssetsModule } from './modules/company-assets/company-assets.module.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module.js';
     CrmModule,
     FinanceModule,
     FileUploadModule,
+    CompanyAssetsModule,
   ],
   controllers: [AppController],
   providers: [

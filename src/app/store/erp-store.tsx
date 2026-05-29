@@ -798,6 +798,7 @@ type ERPAction =
         paidAmountUzs?: number;
         debtDueDate?: string;
         notes?: string;
+        orderedAt?: string;
       };
     }
   | {
@@ -807,6 +808,7 @@ type ERPAction =
         paymentType: 'CASH' | 'CREDIT';
         paidAmountUzs?: number;
         notes?: string;
+        orderedAt?: string;
         items: Array<{
           itemType: 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
           rawMaterialId?: string;
@@ -820,6 +822,24 @@ type ERPAction =
         }>;
       };
     }
+  | {
+      type: 'UPDATE_SUPPLIER_PURCHASE_ORDER';
+      payload: {
+        id: string;
+        orderedAt?: string;
+        supplierId?: string;
+        quantity?: number;
+        quantityUnit?: 'KG' | 'TON' | 'PIECES';
+        currency?: 'UZS' | 'USD' | 'EUR';
+        fxRateToUzs?: number;
+        amountOriginal?: number;
+        paymentType?: 'CASH' | 'CREDIT';
+        paidAmountUzs?: number;
+        debtDueDate?: string;
+        notes?: string;
+      };
+    }
+  | { type: 'DELETE_SUPPLIER_PURCHASE_ORDER'; payload: string }
   | { type: 'FULFILL_SUPPLIER_PURCHASE_ORDER'; payload: string };
 
 interface ERPContextValue {
@@ -2763,6 +2783,29 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           await apiRequest('/finance/supplier-purchase-orders/batch', {
             method: 'POST',
             body: JSON.stringify(action.payload),
+          });
+          break;
+        case 'UPDATE_SUPPLIER_PURCHASE_ORDER':
+          await apiRequest(`/finance/supplier-purchase-orders/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              orderedAt: action.payload.orderedAt,
+              supplierId: action.payload.supplierId,
+              quantity: action.payload.quantity,
+              quantityUnit: action.payload.quantityUnit,
+              currency: action.payload.currency,
+              fxRateToUzs: action.payload.fxRateToUzs,
+              amountOriginal: action.payload.amountOriginal,
+              paymentType: action.payload.paymentType,
+              paidAmountUzs: action.payload.paidAmountUzs,
+              debtDueDate: action.payload.debtDueDate,
+              notes: action.payload.notes,
+            }),
+          });
+          break;
+        case 'DELETE_SUPPLIER_PURCHASE_ORDER':
+          await apiRequest(`/finance/supplier-purchase-orders/${action.payload}`, {
+            method: 'DELETE',
           });
           break;
         case 'FULFILL_SUPPLIER_PURCHASE_ORDER': {

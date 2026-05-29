@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { SingleDatePicker } from './SingleDatePicker';
+import { todayYmd } from '../utils/format';
 
 type ProductCat = 'RAW_MATERIAL' | 'SEMI_PRODUCT' | 'FINISHED_PRODUCT';
 type QtyUnit = 'KG' | 'TON' | 'PIECES';
@@ -162,6 +164,7 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
   const [paidNow, setPaidNow] = useState('');
   const [debtNow, setDebtNow] = useState('');
   const [notes, setNotes] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState(todayYmd());
   const [busy, setBusy] = useState(false);
 
   const rawList = useMemo(
@@ -415,6 +418,7 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
           paymentType,
           paidAmountUzs: paymentType === 'CREDIT' ? paidUzs : undefined,
           notes: notes.trim() || undefined,
+          orderedAt: purchaseDate,
           items: lines.map((line) => ({
             itemType: line.itemType,
             rawMaterialId: line.rawMaterialId,
@@ -530,9 +534,10 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.supFormTitle}</h3>
             </div>
 
-            <div>
-              <Label>{t.supSelectSupplier}</Label>
-              <div className="flex gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label>{t.supSelectSupplier}</Label>
+                <div className="flex gap-2">
                 <div className="flex-1 min-w-0">
                   <StyledSelect
                     value={supplierId}
@@ -552,6 +557,11 @@ export function SupplierPurchasesPanel({ onAddSupplier }: { onAddSupplier: () =>
                 >
                   <Plus size={16} />
                 </button>
+              </div>
+              </div>
+              <div>
+                <Label>{t.labelDate}</Label>
+                <SingleDatePicker value={purchaseDate} onChange={setPurchaseDate} />
               </div>
             </div>
 

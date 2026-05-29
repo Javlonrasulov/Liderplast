@@ -13,6 +13,7 @@ import { ShiftWork } from './pages/ShiftWork';
 import { Payroll } from './pages/Payroll';
 import { SystemUsers } from './pages/SystemUsers';
 import { Inventory } from './pages/Inventory';
+import { CompanyAssets } from './pages/CompanyAssets';
 import { RouteGuard } from './components/RouteGuard';
 
 function Root() {
@@ -67,6 +68,14 @@ export const router = createBrowserRouter([
       },
       { path: 'inventarizatsiya', element: <Navigate to="/inventory" replace /> },
       { path: 'expenses', Component: Expenses },
+      {
+        path: 'company-assets',
+        element: (
+          <RouteGuard permission="view_company_assets">
+            <CompanyAssets />
+          </RouteGuard>
+        ),
+      },
       {
         path: 'suppliers',
         element: (

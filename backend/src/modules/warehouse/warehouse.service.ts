@@ -401,6 +401,15 @@ export class WarehouseService {
     return this.applyMovementTx(tx, dto, MovementType.INCOMING, createdById);
   }
 
+  /** Ombordan chiqim (mavjud tranzaksiya ichida — masalan, sotib olishni bekor qilish). */
+  async applyConsumptionMovementTx(
+    tx: Tx,
+    dto: InventoryMovementDto,
+    createdById?: string,
+  ) {
+    return this.applyMovementTx(tx, dto, MovementType.CONSUMPTION, createdById);
+  }
+
   emitWarehouseMovement(result: Awaited<ReturnType<typeof this.applyMovementTx>>) {
     this.realtimeGateway.emitWarehouseUpdated(result);
   }

@@ -24,6 +24,120 @@ export interface T {
   navSales: string;
   navExpenses: string;
   navSuppliers: string;
+  navCompanyAssets: string;
+  caTitle: string;
+  caSubtitle: string;
+  caAddAsset: string;
+  caEditAsset: string;
+  caStatTotal: string;
+  caStatActive: string;
+  caStatRepair: string;
+  caStatWarehouse: string;
+  caStatWrittenOff: string;
+  caSearchName: string;
+  caSearchInventory: string;
+  caFilterStatus: string;
+  caFilterCategory: string;
+  caFilterLocation: string;
+  caFilterEmployee: string;
+  caAll: string;
+  caColId: string;
+  caColInventory: string;
+  caColName: string;
+  caColCategory: string;
+  caColEmployee: string;
+  caColLocation: string;
+  caColPurchased: string;
+  caColInitialValue: string;
+  caColCondition: string;
+  caColStatus: string;
+  caColNotes: string;
+  caColActions: string;
+  caStatusActive: string;
+  caStatusRepair: string;
+  caStatusWarehouse: string;
+  caStatusWrittenOff: string;
+  caCatTransport: string;
+  caCatOffice: string;
+  caCatComputer: string;
+  caCatProduction: string;
+  caCatTech: string;
+  caCatFurniture: string;
+  caCatOther: string;
+  caCondNew: string;
+  caCondGood: string;
+  caCondFair: string;
+  caCondPoor: string;
+  caFieldName: string;
+  caFieldInventory: string;
+  caFieldSerial: string;
+  caFieldCategory: string;
+  caFieldManufacturer: string;
+  caFieldModel: string;
+  caFieldPurchaseDate: string;
+  caFieldPurchasePrice: string;
+  caFieldCurrency: string;
+  caFieldFxRate: string;
+  caFxCbuHint: string;
+  caFieldWarranty: string;
+  caFieldEmployee: string;
+  caFieldLocation: string;
+  caFieldCondition: string;
+  caFieldStatus: string;
+  caFieldImage: string;
+  caFieldDocuments: string;
+  caFieldNotes: string;
+  caAmountUzsPreview: string;
+  caDetailTitle: string;
+  caTabInfo: string;
+  caTabHistory: string;
+  caTabDocuments: string;
+  caTabExpense: string;
+  caActCreated: string;
+  caActUpdated: string;
+  caActAssigned: string;
+  caActReturned: string;
+  caActRepair: string;
+  caActWrittenOff: string;
+  caActDeleted: string;
+  caDelete: string;
+  caDeleteConfirmTitle: string;
+  caDeleteConfirmDesc: string;
+  caDeletedSuccess: string;
+  caAuditTitle: string;
+  caAuditCreated: string;
+  caAuditUpdated: string;
+  caAuditDeleted: string;
+  caAuditPerformedBy: string;
+  caAuditUnknown: string;
+  caExportExcel: string;
+  caExportPdf: string;
+  caBulkStatus: string;
+  caBulkApply: string;
+  caSelected: string;
+  caSave: string;
+  caCancel: string;
+  caView: string;
+  caPage: string;
+  caOf: string;
+  caNoEmployee: string;
+  caAutoInventory: string;
+  caExpenseLinked: string;
+  caChooseFile: string;
+  caNoFileChosen: string;
+  caRemoveFile: string;
+  caFileUploaded: string;
+  caErrNameRequired: string;
+  caErrPurchasePriceRequired: string;
+  caErrPurchasePriceInvalid: string;
+  caErrFxRateRequired: string;
+  caErrFxRateInvalid: string;
+  caErrDateInvalid: string;
+  caErrValidationGeneric: string;
+  caErrInventoryDuplicate: string;
+  caErrEmployeeNotFound: string;
+  caErrNotFound: string;
+  caErrFileTooLarge: string;
   supTitle: string;
   supSubtitle: string;
   supFormTitle: string;
@@ -85,6 +199,13 @@ export interface T {
   supPdfAccountant: string;
   supPdfWarehouse: string;
   supPdfSupplierSign: string;
+  supPdfColPrice: string;
+  supPdfRecordsCount: string;
+  supPdfTotalUzs: string;
+  supEditPurchase: string;
+  supDeletePurchase: string;
+  supDeletePurchaseConfirm: string;
+  supLegacyNoEdit: string;
   supPurchaseStockHint: string;
   navReports: string;
   navShifts: string;
@@ -178,6 +299,8 @@ export interface T {
   suPermViewReports: string;
   suPermManageSettings: string;
   suPermManageUsers: string;
+  suPermViewCompanyAssets: string;
+  suPermManageCompanyAssets: string;
 
   layoutLogout: string;
 
@@ -1129,6 +1252,120 @@ const uz_cyrillic: T = {
   navSales: 'Сотув',
   navExpenses: 'Харажатлар',
   navSuppliers: 'Етказиб берувчи',
+  navCompanyAssets: 'Корхона мулки',
+  caTitle: 'Корхона мулки',
+  caSubtitle: 'Асосий воситаларни ҳисобга олиш ва бошқариш',
+  caAddAsset: 'Мулк қўшиш',
+  caEditAsset: 'Таҳрирлаш',
+  caStatTotal: 'Жами мулклар',
+  caStatActive: 'Фаол',
+  caStatRepair: 'Таъмирда',
+  caStatWarehouse: 'Омборда',
+  caStatWrittenOff: 'Ҳисобдан чиқарилган',
+  caSearchName: 'Мулк номи бўйича',
+  caSearchInventory: 'Инвентар рақами',
+  caFilterStatus: 'Статус',
+  caFilterCategory: 'Категория',
+  caFilterLocation: 'Бўлим',
+  caFilterEmployee: 'Ходим',
+  caAll: 'Барчаси',
+  caColId: 'ID',
+  caColInventory: 'Инвентар №',
+  caColName: 'Мулк номи',
+  caColCategory: 'Категория',
+  caColEmployee: 'Ходим',
+  caColLocation: 'Жойлашув',
+  caColPurchased: 'Сотиб олинган',
+  caColInitialValue: 'Бошланғич қиймати',
+  caColCondition: 'Ҳолати',
+  caColStatus: 'Статус',
+  caColNotes: 'Изоҳ',
+  caColActions: 'Амаллар',
+  caStatusActive: 'Фаол',
+  caStatusRepair: 'Таъмирда',
+  caStatusWarehouse: 'Омборда',
+  caStatusWrittenOff: 'Ҳисобдан чиқарилган',
+  caCatTransport: 'Транспорт воситалари',
+  caCatOffice: 'Офис жиҳозлари',
+  caCatComputer: 'Компьютер техникаси',
+  caCatProduction: 'Ишлаб чиқариш ускуналари',
+  caCatTech: 'Технологик аппаратлар',
+  caCatFurniture: 'Мебел',
+  caCatOther: 'Бошқа',
+  caCondNew: 'Янги',
+  caCondGood: 'Яхши',
+  caCondFair: 'Ўрта',
+  caCondPoor: 'Ёмон',
+  caFieldName: 'Мулк номи',
+  caFieldInventory: 'Инвентар рақами',
+  caFieldSerial: 'Серия рақами',
+  caFieldCategory: 'Категория',
+  caFieldManufacturer: 'Ишлаб чиқарувчи',
+  caFieldModel: 'Модел',
+  caFieldPurchaseDate: 'Харид санаси',
+  caFieldPurchasePrice: 'Харид нархи',
+  caFieldCurrency: 'Валюта',
+  caFieldFxRate: 'Курс (1 valyuta = soʻm)',
+  caFxCbuHint: 'Ўзбекистон Марказий банки курси (cbu.uz); керак бўлса қўлда ўзгартирилади',
+  caFieldWarranty: 'Кафолат муддати',
+  caFieldEmployee: 'Бириктирилган ходим',
+  caFieldLocation: 'Жойлашув (бўлим)',
+  caFieldCondition: 'Ҳолати',
+  caFieldStatus: 'Статус',
+  caFieldImage: 'Расм',
+  caFieldDocuments: 'Ҳужжатлар',
+  caFieldNotes: 'Изоҳ',
+  caAmountUzsPreview: 'Сўмдаги қиймат (xarajatga)',
+  caDetailTitle: 'Мулк картаси',
+  caTabInfo: 'Маълумот',
+  caTabHistory: 'Тарих',
+  caTabDocuments: 'Ҳужжатлар',
+  caTabExpense: 'Харажат',
+  caActCreated: 'Қўшилди',
+  caActUpdated: 'Таҳрирланди',
+  caActAssigned: 'Ходимга бириктирилди',
+  caActReturned: 'Қайтариб олинди',
+  caActRepair: 'Таъмирга юборилди',
+  caActWrittenOff: 'Ҳисобдан чиқарилди',
+  caActDeleted: 'Ўчирилди',
+  caDelete: 'Ўчириш',
+  caDeleteConfirmTitle: 'Мулкни ўчирасизми?',
+  caDeleteConfirmDesc: 'Ўчирилган мулк рўйхатдан яширилади. Тарихда ким ва қачон ўчиргани сақланади.',
+  caDeletedSuccess: 'Мулк ўчирилди',
+  caAuditTitle: 'Аудит',
+  caAuditCreated: 'Қўшган',
+  caAuditUpdated: 'Охирги таҳрирлаган',
+  caAuditDeleted: 'Ўчирган',
+  caAuditPerformedBy: 'Ким қilgan',
+  caAuditUnknown: 'Номаъlum',
+  caExportExcel: 'Excel',
+  caExportPdf: 'PDF',
+  caBulkStatus: 'Статусни ўзгартириш',
+  caBulkApply: 'Қўллаш',
+  caSelected: 'танланди',
+  caSave: 'Сақлаш',
+  caCancel: 'Бекор',
+  caView: 'Кўриш',
+  caPage: 'Саҳифа',
+  caOf: '/',
+  caNoEmployee: '—',
+  caAutoInventory: 'Автоматик',
+  caExpenseLinked: 'Xarajatlar bo‘limida ko‘rinadi',
+  caChooseFile: 'Файл танлаш',
+  caNoFileChosen: 'Файл танланмади',
+  caRemoveFile: 'Ўчириш',
+  caFileUploaded: 'Юкланган',
+  caErrNameRequired: 'Мулк номини киритинг',
+  caErrPurchasePriceRequired: 'Харид нархини киритинг',
+  caErrPurchasePriceInvalid: 'Харид нархи нотўғри (0 дан катта бўлиши керак)',
+  caErrFxRateRequired: 'Валюта курсини киритинг ёки MB курсини кутинг',
+  caErrFxRateInvalid: 'Валюта курси нотўғри',
+  caErrDateInvalid: 'Санани тўғри танланг',
+  caErrValidationGeneric: 'Маълумотлар тўлиқ ёки нотўғри. Майдонларни текширинг',
+  caErrInventoryDuplicate: 'Бундай инвентар рақами мавжуд',
+  caErrEmployeeNotFound: 'Танланган ходим топилмади',
+  caErrNotFound: 'Мулк топилмади',
+  caErrFileTooLarge: 'Файл ҳажми жуда катта',
   supTitle: 'Етказиб берувчи',
   supSubtitle: 'Ташқи етказиб берувчидан хомашё сотиб олиш ва буюртмалар',
   supFormTitle: 'Сотиб олиш',
@@ -1191,6 +1428,14 @@ const uz_cyrillic: T = {
   supPdfAccountant: 'Бухгалтер',
   supPdfWarehouse: 'Омбор (қабул)',
   supPdfSupplierSign: 'Етказиб берувчи',
+  supPdfColPrice: 'Нарх',
+  supPdfRecordsCount: 'Ёзувлар',
+  supPdfTotalUzs: 'Жами (UZS)',
+  supEditPurchase: 'Таҳрирлаш',
+  supDeletePurchase: 'Ўчириш',
+  supDeletePurchaseConfirm:
+    'Ушбу сотиб олиш ёзувини ўчирасизми? Омбор ва харажатлар ҳам янгиланади.',
+  supLegacyNoEdit: 'Эски ёзув — фақат янги сотиб олишларни таҳрирлаш мумкин',
   supPurchaseStockHint: 'Сотиб олиш билан маҳсулот дарҳол омборга қўшилади',
   navReports: 'Ҳисоботлар',
   navShifts: 'Ишлаб чиқариш',
@@ -1284,6 +1529,8 @@ const uz_cyrillic: T = {
   suPermViewReports: 'Ҳисоботлар',
   suPermManageSettings: 'Созламалар',
   suPermManageUsers: 'Фойдаланувчиларни бошқариш',
+  suPermViewCompanyAssets: 'Корхона мулки (кўриш)',
+  suPermManageCompanyAssets: 'Корхона мулкини бошқариш',
   layoutLogout: 'Чиқиш',
 
   dfTitle: 'Сана оралиғи',
@@ -2204,6 +2451,120 @@ const uz_latin: T = {
   navSales: 'Sotuv',
   navExpenses: 'Xarajatlar',
   navSuppliers: 'Yetkazib beruvchi',
+  navCompanyAssets: 'Korxona mulki',
+  caTitle: 'Korxona mulki',
+  caSubtitle: 'Asosiy vositalarni hisobga olish va boshqarish',
+  caAddAsset: 'Mulk qo\'shish',
+  caEditAsset: 'Tahrirlash',
+  caStatTotal: 'Jami mulklar',
+  caStatActive: 'Faol',
+  caStatRepair: 'Ta\'mirda',
+  caStatWarehouse: 'Omborda',
+  caStatWrittenOff: 'Hisobdan chiqarilgan',
+  caSearchName: 'Mulk nomi bo\'yicha',
+  caSearchInventory: 'Inventar raqami',
+  caFilterStatus: 'Status',
+  caFilterCategory: 'Kategoriya',
+  caFilterLocation: 'Bo\'lim',
+  caFilterEmployee: 'Xodim',
+  caAll: 'Barchasi',
+  caColId: 'ID',
+  caColInventory: 'Inventar №',
+  caColName: 'Mulk nomi',
+  caColCategory: 'Kategoriya',
+  caColEmployee: 'Xodim',
+  caColLocation: 'Joylashuv',
+  caColPurchased: 'Sotib olingan',
+  caColInitialValue: 'Boshlang\'ich qiymati',
+  caColCondition: 'Holati',
+  caColStatus: 'Status',
+  caColNotes: 'Izoh',
+  caColActions: 'Amallar',
+  caStatusActive: 'Faol',
+  caStatusRepair: 'Ta\'mirda',
+  caStatusWarehouse: 'Omborda',
+  caStatusWrittenOff: 'Hisobdan chiqarilgan',
+  caCatTransport: 'Transport vositalari',
+  caCatOffice: 'Ofis jihozlari',
+  caCatComputer: 'Kompyuter texnikasi',
+  caCatProduction: 'Ishlab chiqarish uskunalari',
+  caCatTech: 'Texnologik apparatlar',
+  caCatFurniture: 'Mebel',
+  caCatOther: 'Boshqa',
+  caCondNew: 'Yangi',
+  caCondGood: 'Yaxshi',
+  caCondFair: 'O\'rta',
+  caCondPoor: 'Yomon',
+  caFieldName: 'Mulk nomi',
+  caFieldInventory: 'Inventar raqami',
+  caFieldSerial: 'Seriya raqami',
+  caFieldCategory: 'Kategoriya',
+  caFieldManufacturer: 'Ishlab chiqaruvchi',
+  caFieldModel: 'Model',
+  caFieldPurchaseDate: 'Xarid sanasi',
+  caFieldPurchasePrice: 'Xarid narxi',
+  caFieldCurrency: 'Valyuta',
+  caFieldFxRate: 'Kurs (1 valyuta = so\'m)',
+  caFxCbuHint: 'O\'zbekiston Markaziy banki kursi (cbu.uz); kerak bo\'lsa qo\'lda o\'zgartiriladi',
+  caFieldWarranty: 'Kafolat muddati',
+  caFieldEmployee: 'Biriktirilgan xodim',
+  caFieldLocation: 'Joylashuv (bo\'lim)',
+  caFieldCondition: 'Holati',
+  caFieldStatus: 'Status',
+  caFieldImage: 'Rasm',
+  caFieldDocuments: 'Hujjatlar',
+  caFieldNotes: 'Izoh',
+  caAmountUzsPreview: 'So\'mdagi qiymat (xarajatga)',
+  caDetailTitle: 'Mulk kartasi',
+  caTabInfo: 'Ma\'lumot',
+  caTabHistory: 'Tarix',
+  caTabDocuments: 'Hujjatlar',
+  caTabExpense: 'Xarajat',
+  caActCreated: 'Qo\'shildi',
+  caActUpdated: 'Tahrirlandi',
+  caActAssigned: 'Xodimga biriktirildi',
+  caActReturned: 'Qaytarib olindi',
+  caActRepair: 'Ta\'mirga yuborildi',
+  caActWrittenOff: 'Hisobdan chiqarilgan',
+  caActDeleted: 'O\'chirildi',
+  caDelete: 'O\'chirish',
+  caDeleteConfirmTitle: 'Mulkni o\'chirasizmi?',
+  caDeleteConfirmDesc: 'O\'chirilgan mulk ro\'yxatdan yashirinadi. Tarixda kim va qachon o\'chirgani saqlanadi.',
+  caDeletedSuccess: 'Mulk o\'chirildi',
+  caAuditTitle: 'Audit',
+  caAuditCreated: 'Qo\'shgan',
+  caAuditUpdated: 'Oxirgi tahrirlagan',
+  caAuditDeleted: 'O\'chirgan',
+  caAuditPerformedBy: 'Kim qilgan',
+  caAuditUnknown: 'Noma\'lum',
+  caExportExcel: 'Excel',
+  caExportPdf: 'PDF',
+  caBulkStatus: 'Statusni o\'zgartirish',
+  caBulkApply: 'Qo\'llash',
+  caSelected: 'tanlandi',
+  caSave: 'Saqlash',
+  caCancel: 'Bekor',
+  caView: 'Ko\'rish',
+  caPage: 'Sahifa',
+  caOf: '/',
+  caNoEmployee: '—',
+  caAutoInventory: 'Avtomatik',
+  caExpenseLinked: 'Xarajatlar bo\'limida ko\'rinadi',
+  caChooseFile: 'Fayl tanlash',
+  caNoFileChosen: 'Fayl tanlanmagan',
+  caRemoveFile: 'O\'chirish',
+  caFileUploaded: 'Yuklangan',
+  caErrNameRequired: 'Mulk nomini kiriting',
+  caErrPurchasePriceRequired: 'Xarid narxini kiriting',
+  caErrPurchasePriceInvalid: 'Xarid narxi noto\'g\'ri (0 dan katta bo\'lishi kerak)',
+  caErrFxRateRequired: 'Valyuta kursini kiriting yoki MB kursini kuting',
+  caErrFxRateInvalid: 'Valyuta kursi noto\'g\'ri',
+  caErrDateInvalid: 'Sanani to\'g\'ri tanlang',
+  caErrValidationGeneric: 'Ma\'lumotlar to\'liq emas yoki noto\'g\'ri. Maydonlarni tekshiring',
+  caErrInventoryDuplicate: 'Bunday inventar raqami mavjud',
+  caErrEmployeeNotFound: 'Tanlangan xodim topilmadi',
+  caErrNotFound: 'Mulk topilmadi',
+  caErrFileTooLarge: 'Fayl hajmi juda katta (ruxsat etilgan limitdan oshdi)',
   supTitle: 'Yetkazib beruvchi',
   supSubtitle: 'Tashqi yetkazib beruvchidan xomashyo sotib olish va buyurtmalar',
   supFormTitle: 'Sotib olish',
@@ -2266,6 +2627,14 @@ const uz_latin: T = {
   supPdfAccountant: 'Buxgalter',
   supPdfWarehouse: 'Ombor (qabul)',
   supPdfSupplierSign: 'Yetkazib beruvchi',
+  supPdfColPrice: 'Narx',
+  supPdfRecordsCount: 'Yozuvlar',
+  supPdfTotalUzs: 'Jami (UZS)',
+  supEditPurchase: 'Tahrirlash',
+  supDeletePurchase: 'O‘chirish',
+  supDeletePurchaseConfirm:
+    'Ushbu sotib olish yozuvini o‘chirasizmi? Ombor va xarajatlar ham yangilanadi.',
+  supLegacyNoEdit: 'Eski yozuv — faqat yangi sotib olishlarni tahrirlash mumkin',
   supPurchaseStockHint: 'Sotib olish bilan mahsulot darhol omborga qo‘shiladi',
   navReports: 'Hisobotlar',
   navShifts: 'Ishlab chiqarish',
@@ -2359,6 +2728,8 @@ const uz_latin: T = {
   suPermViewReports: 'Hisobotlar',
   suPermManageSettings: 'Sozlamalar',
   suPermManageUsers: 'Foydalanuvchilarni boshqarish',
+  suPermViewCompanyAssets: 'Korxona mulki (ko‘rish)',
+  suPermManageCompanyAssets: 'Korxona mulkini boshqarish',
   layoutLogout: 'Chiqish',
 
   dfTitle: 'Sana oralig\'i',
@@ -3279,6 +3650,120 @@ const ru: T = {
   navSales: 'Продажи',
   navExpenses: 'Расходы',
   navSuppliers: 'Поставщик',
+  navCompanyAssets: 'Имущество компании',
+  caTitle: 'Имущество компании',
+  caSubtitle: 'Учёт и управление основными средствами',
+  caAddAsset: 'Добавить имущество',
+  caEditAsset: 'Редактировать',
+  caStatTotal: 'Всего',
+  caStatActive: 'Активные',
+  caStatRepair: 'В ремонте',
+  caStatWarehouse: 'На складе',
+  caStatWrittenOff: 'Списано',
+  caSearchName: 'По названию',
+  caSearchInventory: 'Инвентарный №',
+  caFilterStatus: 'Статус',
+  caFilterCategory: 'Категория',
+  caFilterLocation: 'Отдел',
+  caFilterEmployee: 'Сотрудник',
+  caAll: 'Все',
+  caColId: 'ID',
+  caColInventory: 'Инв. №',
+  caColName: 'Название',
+  caColCategory: 'Категория',
+  caColEmployee: 'Сотрудник',
+  caColLocation: 'Место',
+  caColPurchased: 'Дата покупки',
+  caColInitialValue: 'Начальная стоимость',
+  caColCondition: 'Состояние',
+  caColStatus: 'Статус',
+  caColNotes: 'Примечание',
+  caColActions: 'Действия',
+  caStatusActive: 'Активный',
+  caStatusRepair: 'В ремонте',
+  caStatusWarehouse: 'На складе',
+  caStatusWrittenOff: 'Списан',
+  caCatTransport: 'Транспорт',
+  caCatOffice: 'Офисное оборудование',
+  caCatComputer: 'Компьютерная техника',
+  caCatProduction: 'Производственное оборудование',
+  caCatTech: 'Технологическое оборудование',
+  caCatFurniture: 'Мебель',
+  caCatOther: 'Прочее',
+  caCondNew: 'Новый',
+  caCondGood: 'Хорошее',
+  caCondFair: 'Среднее',
+  caCondPoor: 'Плохое',
+  caFieldName: 'Название',
+  caFieldInventory: 'Инвентарный №',
+  caFieldSerial: 'Серийный №',
+  caFieldCategory: 'Категория',
+  caFieldManufacturer: 'Производитель',
+  caFieldModel: 'Модель',
+  caFieldPurchaseDate: 'Дата покупки',
+  caFieldPurchasePrice: 'Цена покупки',
+  caFieldCurrency: 'Валюта',
+  caFieldFxRate: 'Курс (1 валюта = сум)',
+  caFxCbuHint: 'Курс Центрального банка Узбекистана (cbu.uz); при необходимости редактируется вручную',
+  caFieldWarranty: 'Гарантия до',
+  caFieldEmployee: 'Сотрудник',
+  caFieldLocation: 'Место (отдел)',
+  caFieldCondition: 'Состояние',
+  caFieldStatus: 'Статус',
+  caFieldImage: 'Фото',
+  caFieldDocuments: 'Документы',
+  caFieldNotes: 'Примечание',
+  caAmountUzsPreview: 'Сумма в сумах (расход)',
+  caDetailTitle: 'Карточка имущества',
+  caTabInfo: 'Информация',
+  caTabHistory: 'История',
+  caTabDocuments: 'Документы',
+  caTabExpense: 'Расход',
+  caActCreated: 'Создано',
+  caActUpdated: 'Изменено',
+  caActAssigned: 'Назначено',
+  caActReturned: 'Возвращено',
+  caActRepair: 'В ремонт',
+  caActWrittenOff: 'Списано',
+  caActDeleted: 'Удалено',
+  caDelete: 'Удалить',
+  caDeleteConfirmTitle: 'Удалить имущество?',
+  caDeleteConfirmDesc: 'Удалённое имущество скрывается из списка. В истории сохранится, кто и когда удалил.',
+  caDeletedSuccess: 'Имущество удалено',
+  caAuditTitle: 'Аудит',
+  caAuditCreated: 'Добавил',
+  caAuditUpdated: 'Последнее изменение',
+  caAuditDeleted: 'Удалил',
+  caAuditPerformedBy: 'Кто выполнил',
+  caAuditUnknown: 'Неизвестно',
+  caExportExcel: 'Excel',
+  caExportPdf: 'PDF',
+  caBulkStatus: 'Изменить статус',
+  caBulkApply: 'Применить',
+  caSelected: 'выбрано',
+  caSave: 'Сохранить',
+  caCancel: 'Отмена',
+  caView: 'Просмотр',
+  caPage: 'Страница',
+  caOf: 'из',
+  caNoEmployee: '—',
+  caAutoInventory: 'Авто',
+  caExpenseLinked: 'Отображается в разделе расходов',
+  caChooseFile: 'Выбрать файл',
+  caNoFileChosen: 'Файл не выбран',
+  caRemoveFile: 'Удалить',
+  caFileUploaded: 'Загружен',
+  caErrNameRequired: 'Введите название имущества',
+  caErrPurchasePriceRequired: 'Введите цену покупки',
+  caErrPurchasePriceInvalid: 'Неверная цена покупки (должна быть больше 0)',
+  caErrFxRateRequired: 'Укажите курс или дождитесь загрузки курса ЦБ',
+  caErrFxRateInvalid: 'Неверный валютный курс',
+  caErrDateInvalid: 'Выберите корректную дату',
+  caErrValidationGeneric: 'Данные неполные или неверные. Проверьте поля формы',
+  caErrInventoryDuplicate: 'Такой инвентарный номер уже существует',
+  caErrEmployeeNotFound: 'Выбранный сотрудник не найден',
+  caErrNotFound: 'Имущество не найдено',
+  caErrFileTooLarge: 'Файл слишком большой',
   supTitle: 'Поставщик',
   supSubtitle: 'Закупка сырья у внешнего поставщика и заказы',
   supFormTitle: 'Закупка',
@@ -3341,6 +3826,14 @@ const ru: T = {
   supPdfAccountant: 'Бухгалтер',
   supPdfWarehouse: 'Склад (принял)',
   supPdfSupplierSign: 'Поставщик',
+  supPdfColPrice: 'Цена',
+  supPdfRecordsCount: 'Записей',
+  supPdfTotalUzs: 'Итого (UZS)',
+  supEditPurchase: 'Изменить',
+  supDeletePurchase: 'Удалить',
+  supDeletePurchaseConfirm:
+    'Удалить эту закупку? Склад и расходы также будут обновлены.',
+  supLegacyNoEdit: 'Старая запись — редактируются только новые закупки',
   supPurchaseStockHint: 'При покупке товар сразу поступает на склад',
   navReports: 'Отчёты',
   navShifts: 'Производство',
@@ -3434,6 +3927,8 @@ const ru: T = {
   suPermViewReports: 'Отчёты',
   suPermManageSettings: 'Настройки',
   suPermManageUsers: 'Управление пользователями',
+  suPermViewCompanyAssets: 'Имущество компании (просмотр)',
+  suPermManageCompanyAssets: 'Управление имуществом компании',
   layoutLogout: 'Выход',
 
   dfTitle: 'Период',

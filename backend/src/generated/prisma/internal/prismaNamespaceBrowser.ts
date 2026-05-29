@@ -87,7 +87,10 @@ export const ModelName = {
   BankVedomost: 'BankVedomost',
   BankTransaction: 'BankTransaction',
   UploadedFile: 'UploadedFile',
-  UploadJob: 'UploadJob'
+  UploadJob: 'UploadJob',
+  CompanyAsset: 'CompanyAsset',
+  CompanyAssetActivityLog: 'CompanyAssetActivityLog',
+  CompanyAssetDocument: 'CompanyAssetDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -452,6 +455,8 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  deliveryVehiclePlate: 'deliveryVehiclePlate',
+  deliveryDriverName: 'deliveryDriverName',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -715,6 +720,62 @@ export const UploadJobScalarFieldEnum = {
 } as const
 
 export type UploadJobScalarFieldEnum = (typeof UploadJobScalarFieldEnum)[keyof typeof UploadJobScalarFieldEnum]
+
+
+export const CompanyAssetScalarFieldEnum = {
+  id: 'id',
+  inventoryNumber: 'inventoryNumber',
+  name: 'name',
+  serialNumber: 'serialNumber',
+  category: 'category',
+  manufacturer: 'manufacturer',
+  model: 'model',
+  purchasedAt: 'purchasedAt',
+  purchasePriceOriginal: 'purchasePriceOriginal',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  initialValueUzs: 'initialValueUzs',
+  warrantyUntil: 'warrantyUntil',
+  assignedUserId: 'assignedUserId',
+  location: 'location',
+  condition: 'condition',
+  status: 'status',
+  imageUrl: 'imageUrl',
+  notes: 'notes',
+  expenseId: 'expenseId',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyAssetScalarFieldEnum = (typeof CompanyAssetScalarFieldEnum)[keyof typeof CompanyAssetScalarFieldEnum]
+
+
+export const CompanyAssetActivityLogScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  actionType: 'actionType',
+  details: 'details',
+  performedAt: 'performedAt',
+  performedById: 'performedById'
+} as const
+
+export type CompanyAssetActivityLogScalarFieldEnum = (typeof CompanyAssetActivityLogScalarFieldEnum)[keyof typeof CompanyAssetActivityLogScalarFieldEnum]
+
+
+export const CompanyAssetDocumentScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type CompanyAssetDocumentScalarFieldEnum = (typeof CompanyAssetDocumentScalarFieldEnum)[keyof typeof CompanyAssetDocumentScalarFieldEnum]
 
 
 export const SortOrder = {

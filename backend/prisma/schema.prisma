@@ -118,6 +118,38 @@ enum PurchaseQuantityUnit {
   PIECES
 }
 
+enum CompanyAssetStatus {
+  ACTIVE
+  WRITTEN_OFF
+}
+
+enum CompanyAssetCategory {
+  TRANSPORT
+  OFFICE_EQUIPMENT
+  COMPUTER_TECH
+  PRODUCTION_EQUIPMENT
+  TECH_APPARATUS
+  FURNITURE
+  OTHER
+}
+
+enum CompanyAssetCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum CompanyAssetActionType {
+  CREATED
+  UPDATED
+  ASSIGNED
+  RETURNED
+  SENT_TO_REPAIR
+  WRITTEN_OFF
+  DELETED
+}
+
 enum PurchasePaymentType {
   CASH
   CREDIT
@@ -191,6 +223,11 @@ model User {
   uploadedBankVedomosts BankVedomost[]
   rawMaterialPurchaseOrdersCreated RawMaterialPurchaseOrder[] @relation("RawMaterialOrderCreator")
   supplierPurchaseOrdersCreated    SupplierPurchaseOrder[]    @relation("SupplierPurchaseOrderCreator")
+  assignedCompanyAssets            CompanyAsset[]             @relation("CompanyAssetAssignee")
+  companyAssetsCreated             CompanyAsset[]             @relation("CompanyAssetCreator")
+  companyAssetsUpdated             CompanyAsset[]             @relation("CompanyAssetUpdater")
+  companyAssetsDeleted             CompanyAsset[]             @relation("CompanyAssetDeleter")
+  companyAssetActivityLogs         CompanyAssetActivityLog[]  @relation("CompanyAssetActivityActor")
 
   @@index([stir])
 }
@@ -662,6 +699,7 @@ model Expense {
   rawMaterialPurchaseOrder RawMaterialPurchaseOrder?
   supplierPurchaseOrder    SupplierPurchaseOrder?
   bagWriteoff              BagWriteoff?
+  companyAsset             CompanyAsset?
 }
 
 /// Buxgalteriyada berilgan xom ashyo tashqi buyurtmasi (ombor kirimi alohida)
@@ -864,4 +902,73 @@ model UploadJob {
   startedAt      DateTime     @default(now())
   completedAt    DateTime?
   createdAt      DateTime     @default(now())
+}
+
+/// Korxona mulki (asosiy vositalar)
+model CompanyAsset {
+  id                    String                 @id @default(cuid())
+  inventoryNumber       String                 @unique
+  name                  String
+  serialNumber          String?
+  category              CompanyAssetCategory
+  manufacturer          String?
+  model                 String?
+  purchasedAt           DateTime
+  purchasePriceOriginal Float
+  currency              PurchaseOrderCurrency
+  fxRateToUzs           Float
+  initialValueUzs       Float
+  warrantyUntil         DateTime?
+  assignedUserId        String?
+  assignedUser          User?                  @relation("CompanyAssetAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  location              String?
+  condition             CompanyAssetCondition  @default(GOOD)
+  status                CompanyAssetStatus     @default(ACTIVE)
+  imageUrl              String?
+  notes                 String?
+  expenseId             String?                @unique
+  expense               Expense?               @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  createdById           String?
+  createdBy             User?                  @relation("CompanyAssetCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById           String?
+  updatedBy             User?                  @relation("CompanyAssetUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  isDeleted             Boolean                @default(false)
+  deletedAt             DateTime?
+  deletedById           String?
+  deletedBy             User?                  @relation("CompanyAssetDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  activityLogs          CompanyAssetActivityLog[]
+  documents             CompanyAssetDocument[]
+
+  @@index([status])
+  @@index([isDeleted])
+  @@index([category])
+  @@index([assignedUserId])
+  @@index([location])
+  @@index([name])
+}
+
+model CompanyAssetActivityLog {
+  id            String                 @id @default(cuid())
+  assetId       String
+  asset         CompanyAsset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actionType    CompanyAssetActionType
+  details       String?
+  performedAt   DateTime               @default(now())
+  performedById String?
+  performedBy   User?                  @relation("CompanyAssetActivityActor", fields: [performedById], references: [id], onDelete: SetNull)
+
+  @@index([assetId, performedAt])
+}
+
+model CompanyAssetDocument {
+  id         String       @id @default(cuid())
+  assetId    String
+  asset      CompanyAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  fileName   String
+  fileUrl    String
+  uploadedAt DateTime     @default(now())
+
+  @@index([assetId])
 }

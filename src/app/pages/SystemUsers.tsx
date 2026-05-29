@@ -137,6 +137,8 @@ function labelForPermission(t: T, key: AppPermissionKey): string {
     view_reports: t.suPermViewReports,
     manage_settings: t.suPermManageSettings,
     manage_users: t.suPermManageUsers,
+    view_company_assets: t.suPermViewCompanyAssets,
+    manage_company_assets: t.suPermManageCompanyAssets,
   };
   return m[key];
 }
@@ -177,6 +179,8 @@ function defaultPermissionSet(preset: RolePreset): Set<AppPermissionKey> {
       'view_payroll',
       'view_vedemost',
       'view_reports',
+      'view_company_assets',
+      'manage_company_assets',
     ]);
   }
   if (preset === 'accountant') {
@@ -191,6 +195,8 @@ function defaultPermissionSet(preset: RolePreset): Set<AppPermissionKey> {
       'view_suppliers',
       'manage_suppliers',
       'view_sales',
+      'view_company_assets',
+      'manage_company_assets',
     ]);
   }
   if (preset === 'operator') {

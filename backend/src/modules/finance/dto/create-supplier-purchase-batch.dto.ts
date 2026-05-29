@@ -30,6 +30,11 @@ export class CreateSupplierPurchaseBatchDto {
   @IsString()
   notes?: string;
 
+  /** YYYY-MM-DD — sotib olish sanasi */
+  @IsOptional()
+  @IsString()
+  orderedAt?: string;
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

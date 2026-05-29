@@ -420,7 +420,10 @@ export const ModelName = {
   BankVedomost: 'BankVedomost',
   BankTransaction: 'BankTransaction',
   UploadedFile: 'UploadedFile',
-  UploadJob: 'UploadJob'
+  UploadJob: 'UploadJob',
+  CompanyAsset: 'CompanyAsset',
+  CompanyAssetActivityLog: 'CompanyAssetActivityLog',
+  CompanyAssetDocument: 'CompanyAssetDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -436,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3178,6 +3181,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CompanyAsset: {
+      payload: Prisma.$CompanyAssetPayload<ExtArgs>
+      fields: Prisma.CompanyAssetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyAssetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyAssetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyAssetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyAssetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyAssetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyAssetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyAssetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyAssetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyAssetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        update: {
+          args: Prisma.CompanyAssetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyAssetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyAssetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyAssetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyAssetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyAssetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyAsset>
+        }
+        groupBy: {
+          args: Prisma.CompanyAssetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyAssetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetCountAggregateOutputType> | number
+        }
+      }
+    }
+    CompanyAssetActivityLog: {
+      payload: Prisma.$CompanyAssetActivityLogPayload<ExtArgs>
+      fields: Prisma.CompanyAssetActivityLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyAssetActivityLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyAssetActivityLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyAssetActivityLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyAssetActivityLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyAssetActivityLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyAssetActivityLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyAssetActivityLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyAssetActivityLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyAssetActivityLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        update: {
+          args: Prisma.CompanyAssetActivityLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyAssetActivityLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyAssetActivityLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyAssetActivityLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyAssetActivityLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetActivityLogPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyAssetActivityLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyAssetActivityLog>
+        }
+        groupBy: {
+          args: Prisma.CompanyAssetActivityLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetActivityLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyAssetActivityLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetActivityLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    CompanyAssetDocument: {
+      payload: Prisma.$CompanyAssetDocumentPayload<ExtArgs>
+      fields: Prisma.CompanyAssetDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyAssetDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyAssetDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyAssetDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyAssetDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyAssetDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyAssetDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyAssetDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyAssetDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyAssetDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        update: {
+          args: Prisma.CompanyAssetDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyAssetDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyAssetDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyAssetDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyAssetDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAssetDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyAssetDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyAssetDocument>
+        }
+        groupBy: {
+          args: Prisma.CompanyAssetDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyAssetDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAssetDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3563,6 +3788,8 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  deliveryVehiclePlate: 'deliveryVehiclePlate',
+  deliveryDriverName: 'deliveryDriverName',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -3826,6 +4053,62 @@ export const UploadJobScalarFieldEnum = {
 } as const
 
 export type UploadJobScalarFieldEnum = (typeof UploadJobScalarFieldEnum)[keyof typeof UploadJobScalarFieldEnum]
+
+
+export const CompanyAssetScalarFieldEnum = {
+  id: 'id',
+  inventoryNumber: 'inventoryNumber',
+  name: 'name',
+  serialNumber: 'serialNumber',
+  category: 'category',
+  manufacturer: 'manufacturer',
+  model: 'model',
+  purchasedAt: 'purchasedAt',
+  purchasePriceOriginal: 'purchasePriceOriginal',
+  currency: 'currency',
+  fxRateToUzs: 'fxRateToUzs',
+  initialValueUzs: 'initialValueUzs',
+  warrantyUntil: 'warrantyUntil',
+  assignedUserId: 'assignedUserId',
+  location: 'location',
+  condition: 'condition',
+  status: 'status',
+  imageUrl: 'imageUrl',
+  notes: 'notes',
+  expenseId: 'expenseId',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyAssetScalarFieldEnum = (typeof CompanyAssetScalarFieldEnum)[keyof typeof CompanyAssetScalarFieldEnum]
+
+
+export const CompanyAssetActivityLogScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  actionType: 'actionType',
+  details: 'details',
+  performedAt: 'performedAt',
+  performedById: 'performedById'
+} as const
+
+export type CompanyAssetActivityLogScalarFieldEnum = (typeof CompanyAssetActivityLogScalarFieldEnum)[keyof typeof CompanyAssetActivityLogScalarFieldEnum]
+
+
+export const CompanyAssetDocumentScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type CompanyAssetDocumentScalarFieldEnum = (typeof CompanyAssetDocumentScalarFieldEnum)[keyof typeof CompanyAssetDocumentScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4287,6 +4570,62 @@ export type EnumUploadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 export type ListEnumUploadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UploadStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'CompanyAssetCategory'
+ */
+export type EnumCompanyAssetCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetCategory[]'
+ */
+export type ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetCategory[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetCondition'
+ */
+export type EnumCompanyAssetConditionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetCondition'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetCondition[]'
+ */
+export type ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetCondition[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetStatus'
+ */
+export type EnumCompanyAssetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetStatus[]'
+ */
+export type ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetActionType'
+ */
+export type EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetActionType'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyAssetActionType[]'
+ */
+export type ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetActionType[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -4419,6 +4758,9 @@ export type GlobalOmitConfig = {
   bankTransaction?: Prisma.BankTransactionOmit
   uploadedFile?: Prisma.UploadedFileOmit
   uploadJob?: Prisma.UploadJobOmit
+  companyAsset?: Prisma.CompanyAssetOmit
+  companyAssetActivityLog?: Prisma.CompanyAssetActivityLogOmit
+  companyAssetDocument?: Prisma.CompanyAssetDocumentOmit
 }
 
 /* Types for Logging */

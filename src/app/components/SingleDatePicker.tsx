@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useApp } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
-import { getAppCalendarParts, todayYmd } from '../utils/format';
+import { getAppCalendarParts, todayYmd, formatDate } from '../utils/format';
 
 // ─── Localized data ───────────────────────────────────────────────────────────
 const DAY_HEADERS: Record<Language, string[]> = {
@@ -55,11 +55,9 @@ function buildCells(year: number, month: number): Cell[] {
   return cells;
 }
 
-function fmtDisplay(dateStr: string, lang: Language): string {
+function fmtDisplay(dateStr: string): string {
   if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  const monthName = MONTH_NAMES[lang][parseInt(m) - 1];
-  return `${parseInt(d)} ${monthName} ${y}`;
+  return formatDate(dateStr.slice(0, 10));
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -69,6 +67,8 @@ interface SingleDatePickerProps {
   placeholder?: string;
   /** Modal ichida — dropdown ustida qolishi uchun */
   menuZClassName?: string;
+  /** Kelajak kunlarni tanlash (masalan, kafolat muddati). Default: false */
+  allowFuture?: boolean;
 }
 
 export function SingleDatePicker({
@@ -76,6 +76,7 @@ export function SingleDatePicker({
   onChange,
   placeholder,
   menuZClassName = 'z-50',
+  allowFuture = false,
 }: SingleDatePickerProps) {
   const { lang } = useApp();
   const [open, setOpen] = useState(false);
@@ -89,7 +90,7 @@ export function SingleDatePicker({
   });
 
   const ref = useRef<HTMLDivElement>(null);
-  const maxDateStr = todayYmd();
+  const maxDateStr = allowFuture ? '' : todayYmd();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -109,7 +110,7 @@ export function SingleDatePicker({
   };
 
   const handleDayClick = (dateStr: string) => {
-    if (dateStr > maxDateStr) return;
+    if (maxDateStr && dateStr > maxDateStr) return;
     onChange(dateStr);
     setOpen(false);
   };
@@ -124,12 +125,13 @@ export function SingleDatePicker({
 
   const { year: appYear, month: appMonth } = getAppCalendarParts();
   const atOrBeyondCurrentMonth =
-    viewYear > appYear || (viewYear === appYear && viewMonth >= appMonth);
+    !allowFuture &&
+    (viewYear > appYear || (viewYear === appYear && viewMonth >= appMonth));
 
   const cells = buildCells(viewYear, viewMonth);
   const dayHeaders = DAY_HEADERS[lang];
   const monthLabel = `${MONTH_NAMES[lang][viewMonth]} ${viewYear}`;
-  const displayValue = value ? fmtDisplay(value, lang) : (placeholder || '');
+  const displayValue = value ? fmtDisplay(value) : (placeholder || '');
 
   return (
     <div className="relative" ref={ref}>
@@ -197,8 +199,8 @@ export function SingleDatePicker({
             {/* Day grid */}
             <div className="grid grid-cols-7">
               {cells.map((cell) => {
-                const isFuture = cell.dateStr > maxDateStr;
-                const isToday = cell.dateStr === maxDateStr;
+                const isFuture = maxDateStr ? cell.dateStr > maxDateStr : false;
+                const isToday = cell.dateStr === todayYmd();
                 const isSelected = cell.dateStr === value;
 
                 let innerClass = `w-7 h-7 flex items-center justify-center rounded-full text-xs transition-all ${

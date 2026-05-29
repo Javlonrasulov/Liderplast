@@ -176,6 +176,50 @@ export const PurchaseQuantityUnit = {
 export type PurchaseQuantityUnit = (typeof PurchaseQuantityUnit)[keyof typeof PurchaseQuantityUnit]
 
 
+export const CompanyAssetStatus = {
+  ACTIVE: 'ACTIVE',
+  WRITTEN_OFF: 'WRITTEN_OFF'
+} as const
+
+export type CompanyAssetStatus = (typeof CompanyAssetStatus)[keyof typeof CompanyAssetStatus]
+
+
+export const CompanyAssetCategory = {
+  TRANSPORT: 'TRANSPORT',
+  OFFICE_EQUIPMENT: 'OFFICE_EQUIPMENT',
+  COMPUTER_TECH: 'COMPUTER_TECH',
+  PRODUCTION_EQUIPMENT: 'PRODUCTION_EQUIPMENT',
+  TECH_APPARATUS: 'TECH_APPARATUS',
+  FURNITURE: 'FURNITURE',
+  OTHER: 'OTHER'
+} as const
+
+export type CompanyAssetCategory = (typeof CompanyAssetCategory)[keyof typeof CompanyAssetCategory]
+
+
+export const CompanyAssetCondition = {
+  NEW: 'NEW',
+  GOOD: 'GOOD',
+  FAIR: 'FAIR',
+  POOR: 'POOR'
+} as const
+
+export type CompanyAssetCondition = (typeof CompanyAssetCondition)[keyof typeof CompanyAssetCondition]
+
+
+export const CompanyAssetActionType = {
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED',
+  ASSIGNED: 'ASSIGNED',
+  RETURNED: 'RETURNED',
+  SENT_TO_REPAIR: 'SENT_TO_REPAIR',
+  WRITTEN_OFF: 'WRITTEN_OFF',
+  DELETED: 'DELETED'
+} as const
+
+export type CompanyAssetActionType = (typeof CompanyAssetActionType)[keyof typeof CompanyAssetActionType]
+
+
 export const PurchasePaymentType = {
   CASH: 'CASH',
   CREDIT: 'CREDIT'

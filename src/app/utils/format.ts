@@ -115,10 +115,21 @@ export function formatKg(num: number): string {
   return formatNumber(num) + ' kg';
 }
 
+/** Ko‘rsatish: `DD-MM-YYYY` (masalan 29-05-2026). Ichki saqlash: `YYYY-MM-DD`. */
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
+  const head = dateStr.trim().slice(0, 10);
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(head);
+  if (iso) {
+    return `${iso[3]}-${iso[2]}-${iso[1]}`;
+  }
+  const parsed = parseYmdLocal(head);
+  if (parsed) {
+    return `${String(parsed.getDate()).padStart(2, '0')}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${parsed.getFullYear()}`;
+  }
   const d = new Date(dateStr);
-  return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
 }
 
 export function formatDateTime(dateStr: string): string {

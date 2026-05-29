@@ -202,3 +202,18 @@ export type UploadedFile = Prisma.UploadedFileModel
  * 
  */
 export type UploadJob = Prisma.UploadJobModel
+/**
+ * Model CompanyAsset
+ * Korxona mulki (asosiy vositalar)
+ */
+export type CompanyAsset = Prisma.CompanyAssetModel
+/**
+ * Model CompanyAssetActivityLog
+ * 
+ */
+export type CompanyAssetActivityLog = Prisma.CompanyAssetActivityLogModel
+/**
+ * Model CompanyAssetDocument
+ * 
+ */
+export type CompanyAssetDocument = Prisma.CompanyAssetDocumentModel

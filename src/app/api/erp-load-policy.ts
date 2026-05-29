@@ -27,6 +27,7 @@ export type ErpApiLoadPlan = {
   orders: boolean;
   payments: boolean;
   expenses: boolean;
+  companyAssets: boolean;
   supplierOrders: boolean;
   suppliers: boolean;
   users: boolean;
@@ -57,6 +58,9 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     payments: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_sales'),
     expenses:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_expenses'),
+    companyAssets:
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
+      has('view_company_assets'),
     supplierOrders:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
       (has('view_suppliers') || has('view_expenses') || has('view_raw_material')),

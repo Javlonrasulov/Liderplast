@@ -28,6 +28,7 @@ import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-pur
 import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
 import { CreateSupplierPurchaseBatchDto } from './dto/create-supplier-purchase-batch.dto.js';
+import { UpdateSupplierPurchaseOrderDto } from './dto/update-supplier-purchase-order.dto.js';
 import { FinanceService } from './finance.service.js';
 
 @Controller('finance')
@@ -143,6 +144,25 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   fulfillSupplierPurchaseOrder(@Param('id') id: string) {
     return this.financeService.fulfillSupplierPurchaseOrder(id);
+  }
+
+  @Patch('supplier-purchase-orders/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateSupplierPurchaseOrder(
+    @Param('id') id: string,
+    @Body() dto: UpdateSupplierPurchaseOrderDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.updateSupplierPurchaseOrder(id, dto, userId);
+  }
+
+  @Delete('supplier-purchase-orders/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteSupplierPurchaseOrder(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.deleteSupplierPurchaseOrder(id, userId);
   }
 
   /** @deprecated — ikkala URL ham qo‘llab-quvvatlanadi (proxy / eski mijozlar) */

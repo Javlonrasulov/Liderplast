@@ -7,6 +7,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import * as XLSX from 'xlsx';
+import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { WarehouseService } from '../warehouse/warehouse.service.js';
 import { InventoryMovementDto } from '../warehouse/dto/inventory-movement.dto.js';
@@ -17,6 +18,7 @@ import {
   EntityStatus,
   ExpenseType,
   InventoryItemType,
+  MovementType,
   PurchaseOrderCurrency,
   PurchasePaymentType,
   PurchaseQuantityUnit,
@@ -30,6 +32,7 @@ import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
 import { CreateSupplierPurchaseBatchDto } from './dto/create-supplier-purchase-batch.dto.js';
 import { SupplierPurchaseBatchItemDto } from './dto/supplier-purchase-batch-item.dto.js';
+import { UpdateSupplierPurchaseOrderDto } from './dto/update-supplier-purchase-order.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
@@ -683,6 +686,44 @@ export class FinanceService {
     return quantity;
   }
 
+  private parsePurchaseDate(ymd?: string): Date | undefined {
+    if (!ymd?.trim()) return undefined;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd.trim())) {
+      throw new BadRequestException('Invalid purchase date');
+    }
+    return new Date(`${ymd.trim()}T12:00:00+05:00`);
+  }
+
+  private orderMovementNoteMarker(orderId: string) {
+    return `(${orderId})`;
+  }
+
+  private async findSupplierPurchaseIncomingMovement(
+    tx: Prisma.TransactionClient,
+    order: {
+      id: string;
+      itemType: InventoryItemType;
+      rawMaterialId: string | null;
+      semiProductId: string | null;
+      finishedProductId: string | null;
+    },
+  ) {
+    const marker = this.orderMovementNoteMarker(order.id);
+    return tx.inventoryMovement.findFirst({
+      where: {
+        movementType: MovementType.INCOMING,
+        note: { contains: marker },
+        itemType: order.itemType,
+        ...(order.rawMaterialId ? { rawMaterialId: order.rawMaterialId } : {}),
+        ...(order.semiProductId ? { semiProductId: order.semiProductId } : {}),
+        ...(order.finishedProductId
+          ? { finishedProductId: order.finishedProductId }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   private buildSupplierPurchaseIncomingDto(
     itemType: InventoryItemType,
     product: {
@@ -761,6 +802,8 @@ export class FinanceService {
         ? `qarz ${Math.round(debtAmountUzs)} UZS`
         : 'naqd';
 
+    const purchasedAt = this.parsePurchaseDate(dto.orderedAt) ?? new Date();
+
     const movementResult = await this.prisma.$transaction(async (tx) => {
       const expense = await tx.expense.create({
         data: {
@@ -778,7 +821,7 @@ export class FinanceService {
           ]
             .filter(Boolean)
             .join(' · '),
-          incurredAt: new Date(),
+          incurredAt: purchasedAt,
           createdById,
         },
       });
@@ -802,6 +845,7 @@ export class FinanceService {
           debtDueDate: dto.debtDueDate ? new Date(dto.debtDueDate) : null,
           expenseId: expense.id,
           status: RawMaterialOrderStatus.FULFILLED,
+          orderedAt: purchasedAt,
           fulfilledAt: new Date(),
           notes: dto.notes?.trim() || null,
           createdById: createdById ?? null,
@@ -903,6 +947,8 @@ export class FinanceService {
       dto.paymentType === PurchasePaymentType.CREDIT ? totalPaid : undefined,
     );
 
+    const purchasedAt = this.parsePurchaseDate(dto.orderedAt) ?? new Date();
+
     const movementResult = await this.prisma.$transaction(async (tx) => {
       const orders: Awaited<ReturnType<typeof tx.supplierPurchaseOrder.create>>[] =
         [];
@@ -937,7 +983,7 @@ export class FinanceService {
             ]
               .filter(Boolean)
               .join(' · '),
-            incurredAt: new Date(),
+            incurredAt: purchasedAt,
             createdById,
           },
         });
@@ -961,6 +1007,7 @@ export class FinanceService {
             debtDueDate: null,
             expenseId: expense.id,
             status: RawMaterialOrderStatus.FULFILLED,
+            orderedAt: purchasedAt,
             fulfilledAt: new Date(),
             notes: batchNotes,
             createdById: createdById ?? null,
@@ -993,6 +1040,246 @@ export class FinanceService {
       this.warehouseService.emitWarehouseMovement(wh);
     }
     return movementResult.orders;
+  }
+
+  async updateSupplierPurchaseOrder(
+    id: string,
+    dto: UpdateSupplierPurchaseOrderDto,
+    updatedById?: string,
+  ) {
+    const existing = await this.prisma.supplierPurchaseOrder.findUnique({
+      where: { id },
+      include: {
+        supplier: { select: { id: true, name: true } },
+        rawMaterial: { select: { id: true, name: true } },
+        semiProduct: { select: { id: true, name: true } },
+        finishedProduct: { select: { id: true, name: true } },
+      },
+    });
+    if (!existing) {
+      throw new NotFoundException('Purchase order not found');
+    }
+
+    let supplier = existing.supplier;
+    if (dto.supplierId && dto.supplierId !== existing.supplierId) {
+      const next = await this.prisma.supplier.findFirst({
+        where: { id: dto.supplierId, isDeleted: false },
+      });
+      if (!next) throw new BadRequestException('Supplier not found');
+      supplier = next;
+    }
+
+    const quantity = dto.quantity ?? existing.quantity;
+    const quantityUnit = dto.quantityUnit ?? existing.quantityUnit;
+    const currency = dto.currency ?? existing.currency;
+    let fx = dto.fxRateToUzs ?? existing.fxRateToUzs;
+    if (currency === PurchaseOrderCurrency.UZS) fx = 1;
+    if (!Number.isFinite(fx) || fx <= 0) {
+      throw new BadRequestException('Invalid CBU / exchange rate');
+    }
+
+    const amountOriginal = dto.amountOriginal ?? existing.amountOriginal;
+    const amountUzs =
+      currency === PurchaseOrderCurrency.UZS
+        ? amountOriginal
+        : amountOriginal * fx;
+    if (!Number.isFinite(amountUzs) || amountUzs < 0) {
+      throw new BadRequestException('Invalid amounts');
+    }
+
+    const paymentType = dto.paymentType ?? existing.paymentType;
+    let paidAmountUzs = dto.paidAmountUzs ?? existing.paidAmountUzs;
+    if (paymentType === PurchasePaymentType.CASH) {
+      paidAmountUzs = amountUzs;
+    }
+    if (
+      !Number.isFinite(paidAmountUzs) ||
+      paidAmountUzs < 0 ||
+      paidAmountUzs > amountUzs
+    ) {
+      throw new BadRequestException('Invalid paid amount');
+    }
+    const debtAmountUzs = Math.max(0, amountUzs - paidAmountUzs);
+    if (paymentType === PurchasePaymentType.CREDIT && debtAmountUzs <= 0) {
+      throw new BadRequestException('Credit order requires remaining debt');
+    }
+
+    const productName =
+      existing.rawMaterial?.name ??
+      existing.semiProduct?.name ??
+      existing.finishedProduct?.name ??
+      '';
+    const unitLbl = this.quantityUnitLabel(quantityUnit);
+    const paymentLbl =
+      paymentType === PurchasePaymentType.CREDIT
+        ? `qarz ${Math.round(debtAmountUzs)} UZS`
+        : 'naqd';
+    const orderedAt = dto.orderedAt
+      ? this.parsePurchaseDate(dto.orderedAt)
+      : existing.orderedAt;
+    const notes =
+      dto.notes !== undefined ? dto.notes.trim() || null : existing.notes;
+
+    const movementResult = await this.prisma.$transaction(async (tx) => {
+      await tx.expense.update({
+        where: { id: existing.expenseId },
+        data: {
+          title: `Sotib olish: ${productName} (${supplier.name})`,
+          amount: amountUzs,
+          description: [
+            `${quantity} ${unitLbl}`,
+            `${currency} ${amountOriginal}`,
+            `kurs ${fx}`,
+            `→ ${Math.round(amountUzs)} UZS`,
+            paymentLbl,
+            notes,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          incurredAt: orderedAt ?? existing.orderedAt,
+        },
+      });
+
+      const order = await tx.supplierPurchaseOrder.update({
+        where: { id },
+        data: {
+          supplierId: supplier.id,
+          quantity,
+          quantityUnit,
+          currency,
+          fxRateToUzs: fx,
+          amountOriginal,
+          amountUzs,
+          paymentType,
+          paidAmountUzs,
+          debtAmountUzs,
+          debtDueDate: dto.debtDueDate
+            ? new Date(dto.debtDueDate)
+            : existing.debtDueDate,
+          ...(orderedAt ? { orderedAt } : {}),
+          notes,
+        },
+        include: this.supplierPurchaseOrderInclude(),
+      });
+
+      let wh: Awaited<
+        ReturnType<WarehouseService['applyIncomingMovementTx']>
+      > | null = null;
+
+      if (existing.status === RawMaterialOrderStatus.FULFILLED) {
+        const incoming = await this.findSupplierPurchaseIncomingMovement(tx, existing);
+        const newWhQty = this.warehouseQuantityFromPurchase(
+          existing.itemType,
+          quantity,
+          quantityUnit,
+        );
+        if (incoming) {
+          const delta = newWhQty - incoming.quantity;
+          if (Math.abs(delta) > 1e-9) {
+            const product = {
+              name: productName,
+              rawMaterialId: existing.rawMaterialId,
+              semiProductId: existing.semiProductId,
+              finishedProductId: existing.finishedProductId,
+            };
+            if (delta > 0) {
+              const incDto = this.buildSupplierPurchaseIncomingDto(
+                existing.itemType,
+                product,
+                supplier.name,
+                quantity,
+                quantityUnit,
+                existing.id,
+              );
+              incDto.quantity = delta;
+              incDto.note = `Tahrir: qo‘shimcha kirim · ${productName} (${existing.id})`;
+              wh = await this.warehouseService.applyIncomingMovementTx(
+                tx,
+                incDto,
+                updatedById,
+              );
+            } else {
+              const outDto: InventoryMovementDto = {
+                itemType: existing.itemType,
+                rawMaterialId: existing.rawMaterialId ?? undefined,
+                semiProductId: existing.semiProductId ?? undefined,
+                finishedProductId: existing.finishedProductId ?? undefined,
+                quantity: Math.abs(delta),
+                note: `Tahrir: kamaytirish · ${productName} (${existing.id})`,
+              };
+              wh = await this.warehouseService.applyConsumptionMovementTx(
+                tx,
+                outDto,
+                updatedById,
+              );
+            }
+          }
+        }
+      }
+
+      return { order, wh };
+    });
+
+    if (movementResult.wh) {
+      this.warehouseService.emitWarehouseMovement(movementResult.wh);
+    }
+    return movementResult.order;
+  }
+
+  async deleteSupplierPurchaseOrder(id: string, deletedById?: string) {
+    const existing = await this.prisma.supplierPurchaseOrder.findUnique({
+      where: { id },
+      include: {
+        supplier: { select: { name: true } },
+        rawMaterial: { select: { name: true } },
+        semiProduct: { select: { name: true } },
+        finishedProduct: { select: { name: true } },
+      },
+    });
+    if (!existing) {
+      throw new NotFoundException('Purchase order not found');
+    }
+
+    const productName =
+      existing.rawMaterial?.name ??
+      existing.semiProduct?.name ??
+      existing.finishedProduct?.name ??
+      '';
+
+    const movementResult = await this.prisma.$transaction(async (tx) => {
+      let wh: Awaited<
+        ReturnType<WarehouseService['applyConsumptionMovementTx']>
+      > | null = null;
+
+      if (existing.status === RawMaterialOrderStatus.FULFILLED) {
+        const incoming = await this.findSupplierPurchaseIncomingMovement(tx, existing);
+        if (incoming && incoming.quantity > 0) {
+          const outDto: InventoryMovementDto = {
+            itemType: existing.itemType,
+            rawMaterialId: existing.rawMaterialId ?? undefined,
+            semiProductId: existing.semiProductId ?? undefined,
+            finishedProductId: existing.finishedProductId ?? undefined,
+            quantity: incoming.quantity,
+            note: `O‘chirish: ${productName} (${existing.id})`,
+          };
+          wh = await this.warehouseService.applyConsumptionMovementTx(
+            tx,
+            outDto,
+            deletedById,
+          );
+        }
+      }
+
+      await tx.supplierPurchaseOrder.delete({ where: { id } });
+      await tx.expense.delete({ where: { id: existing.expenseId } });
+
+      return { wh };
+    });
+
+    if (movementResult.wh) {
+      this.warehouseService.emitWarehouseMovement(movementResult.wh);
+    }
+    return { ok: true };
   }
 
   private supplierPurchaseOrderInclude() {

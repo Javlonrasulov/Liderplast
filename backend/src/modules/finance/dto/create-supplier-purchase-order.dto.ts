@@ -71,4 +71,9 @@ export class CreateSupplierPurchaseOrderDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  /** YYYY-MM-DD */
+  @IsOptional()
+  @IsString()
+  orderedAt?: string;
 }

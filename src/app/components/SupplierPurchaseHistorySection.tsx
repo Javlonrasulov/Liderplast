@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Download, Printer } from 'lucide-react';
+import { Download, Pencil, Printer, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -11,6 +11,7 @@ import {
   printSupplierPurchaseOrder,
 } from '../utils/supplier-purchase-document';
 import type { SupplierPurchasePdfLabels } from '../utils/supplier-purchase-pdfmake';
+import { SupplierPurchaseEditDialog } from './SupplierPurchaseEditDialog';
 
 const emptyCell = '\u2014';
 
@@ -29,11 +30,13 @@ export function SupplierPurchaseHistorySection() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [downloading, setDownloading] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<SupplierPurchaseOrder | null>(null);
+
+  const canManage =
+    hasPermission('manage_suppliers') || hasPermission('view_expenses');
 
   const canFulfill =
-    hasPermission('manage_suppliers') ||
-    hasPermission('view_expenses') ||
-    hasPermission('view_raw_material');
+    canManage || hasPermission('view_raw_material');
 
   const historySorted = useMemo(
     () =>
@@ -161,10 +164,38 @@ export function SupplierPurchaseHistorySection() {
     void runPdfDownload(historySorted, t.supDownloadAllPdf);
   };
 
+  const handleDelete = async (order: SupplierPurchaseOrder) => {
+    if (order.legacy) {
+      toast.error(t.supLegacyNoEdit);
+      return;
+    }
+    if (!canManage) return;
+    if (!window.confirm(t.supDeletePurchaseConfirm)) return;
+    const toastId = toast.loading(`${t.supDeletePurchase}…`);
+    try {
+      await dispatch({ type: 'DELETE_SUPPLIER_PURCHASE_ORDER', payload: order.id });
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(order.id);
+        return next;
+      });
+      toast.success(t.supDeletePurchase, { id: toastId });
+    } catch (err) {
+      console.error('[suppliers] delete purchase failed', err);
+      toast.error(t.slPdfDownloadFailed, { id: toastId });
+    }
+  };
+
   const selectedCountLabel = t.supSelectedCount.replace('{n}', String(selectedIds.size));
 
   return (
     <div className="space-y-2">
+      {editingOrder && (
+        <SupplierPurchaseEditDialog
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
         <div className="flex flex-wrap items-center gap-2">
@@ -302,6 +333,26 @@ export function SupplierPurchaseHistorySection() {
                       >
                         <Download size={14} />
                       </button>
+                      {canManage && !o.legacy && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingOrder(o)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                          title={t.supEditPurchase}
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      {canManage && !o.legacy && (
+                        <button
+                          type="button"
+                          onClick={() => void handleDelete(o)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          title={t.supDeletePurchase}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                       {o.status === 'PENDING' && canFulfill && (
                         <button
                           type="button"

@@ -345,6 +345,11 @@ export type UserWhereInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostListRelationFilter
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderListRelationFilter
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderListRelationFilter
+  assignedCompanyAssets?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsCreated?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsUpdated?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsDeleted?: Prisma.CompanyAssetListRelationFilter
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -384,6 +389,11 @@ export type UserOrderByWithRelationInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostOrderByRelationAggregateInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderOrderByRelationAggregateInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderOrderByRelationAggregateInput
+  assignedCompanyAssets?: Prisma.CompanyAssetOrderByRelationAggregateInput
+  companyAssetsCreated?: Prisma.CompanyAssetOrderByRelationAggregateInput
+  companyAssetsUpdated?: Prisma.CompanyAssetOrderByRelationAggregateInput
+  companyAssetsDeleted?: Prisma.CompanyAssetOrderByRelationAggregateInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -426,6 +436,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   uploadedBankVedomosts?: Prisma.BankVedomostListRelationFilter
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderListRelationFilter
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderListRelationFilter
+  assignedCompanyAssets?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsCreated?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsUpdated?: Prisma.CompanyAssetListRelationFilter
+  companyAssetsDeleted?: Prisma.CompanyAssetListRelationFilter
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogListRelationFilter
 }, "id" | "phone" | "login">
 
 export type UserOrderByWithAggregationInput = {
@@ -517,6 +532,11 @@ export type UserCreateInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -556,6 +576,11 @@ export type UserUncheckedCreateInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUpdateInput = {
@@ -595,6 +620,11 @@ export type UserUpdateInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -634,6 +664,11 @@ export type UserUncheckedUpdateInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1109,6 +1144,86 @@ export type UserUpdateOneWithoutUploadedFilesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUploadedFilesInput, Prisma.UserUpdateWithoutUploadedFilesInput>, Prisma.UserUncheckedUpdateWithoutUploadedFilesInput>
 }
 
+export type UserCreateNestedOneWithoutAssignedCompanyAssetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedCompanyAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedCompanyAssetsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCompanyAssetsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCompanyAssetsUpdatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsUpdatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCompanyAssetsDeletedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsDeletedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsDeletedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAssignedCompanyAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedCompanyAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedCompanyAssetsInput
+  upsert?: Prisma.UserUpsertWithoutAssignedCompanyAssetsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignedCompanyAssetsInput, Prisma.UserUpdateWithoutAssignedCompanyAssetsInput>, Prisma.UserUncheckedUpdateWithoutAssignedCompanyAssetsInput>
+}
+
+export type UserUpdateOneWithoutCompanyAssetsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutCompanyAssetsCreatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCompanyAssetsCreatedInput, Prisma.UserUpdateWithoutCompanyAssetsCreatedInput>, Prisma.UserUncheckedUpdateWithoutCompanyAssetsCreatedInput>
+}
+
+export type UserUpdateOneWithoutCompanyAssetsUpdatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsUpdatedInput
+  upsert?: Prisma.UserUpsertWithoutCompanyAssetsUpdatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCompanyAssetsUpdatedInput, Prisma.UserUpdateWithoutCompanyAssetsUpdatedInput>, Prisma.UserUncheckedUpdateWithoutCompanyAssetsUpdatedInput>
+}
+
+export type UserUpdateOneWithoutCompanyAssetsDeletedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsDeletedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetsDeletedInput
+  upsert?: Prisma.UserUpsertWithoutCompanyAssetsDeletedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCompanyAssetsDeletedInput, Prisma.UserUpdateWithoutCompanyAssetsDeletedInput>, Prisma.UserUncheckedUpdateWithoutCompanyAssetsDeletedInput>
+}
+
+export type UserCreateNestedOneWithoutCompanyAssetActivityLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedCreateWithoutCompanyAssetActivityLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetActivityLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCompanyAssetActivityLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedCreateWithoutCompanyAssetActivityLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyAssetActivityLogsInput
+  upsert?: Prisma.UserUpsertWithoutCompanyAssetActivityLogsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCompanyAssetActivityLogsInput, Prisma.UserUpdateWithoutCompanyAssetActivityLogsInput>, Prisma.UserUncheckedUpdateWithoutCompanyAssetActivityLogsInput>
+}
+
 export type UserCreateWithoutRefreshTokensInput = {
   id?: string
   fullName: string
@@ -1145,6 +1260,11 @@ export type UserCreateWithoutRefreshTokensInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -1183,6 +1303,11 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -1237,6 +1362,11 @@ export type UserUpdateWithoutRefreshTokensInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -1275,6 +1405,11 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutInventoryMovementsInput = {
@@ -1313,6 +1448,11 @@ export type UserCreateWithoutInventoryMovementsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutInventoryMovementsInput = {
@@ -1351,6 +1491,11 @@ export type UserUncheckedCreateWithoutInventoryMovementsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutInventoryMovementsInput = {
@@ -1405,6 +1550,11 @@ export type UserUpdateWithoutInventoryMovementsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
@@ -1443,6 +1593,11 @@ export type UserUncheckedUpdateWithoutInventoryMovementsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutProductAuditLogsInput = {
@@ -1481,6 +1636,11 @@ export type UserCreateWithoutProductAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutProductAuditLogsInput = {
@@ -1519,6 +1679,11 @@ export type UserUncheckedCreateWithoutProductAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutProductAuditLogsInput = {
@@ -1573,6 +1738,11 @@ export type UserUpdateWithoutProductAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
@@ -1611,6 +1781,11 @@ export type UserUncheckedUpdateWithoutProductAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutBagWriteoffsInput = {
@@ -1649,6 +1824,11 @@ export type UserCreateWithoutBagWriteoffsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutBagWriteoffsInput = {
@@ -1687,6 +1867,11 @@ export type UserUncheckedCreateWithoutBagWriteoffsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutBagWriteoffsInput = {
@@ -1741,6 +1926,11 @@ export type UserUpdateWithoutBagWriteoffsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
@@ -1779,6 +1969,11 @@ export type UserUncheckedUpdateWithoutBagWriteoffsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutBagAuditLogsInput = {
@@ -1817,6 +2012,11 @@ export type UserCreateWithoutBagAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutBagAuditLogsInput = {
@@ -1855,6 +2055,11 @@ export type UserUncheckedCreateWithoutBagAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutBagAuditLogsInput = {
@@ -1909,6 +2114,11 @@ export type UserUpdateWithoutBagAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
@@ -1947,6 +2157,11 @@ export type UserUncheckedUpdateWithoutBagAuditLogsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutProductionsInput = {
@@ -1985,6 +2200,11 @@ export type UserCreateWithoutProductionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutProductionsInput = {
@@ -2023,6 +2243,11 @@ export type UserUncheckedCreateWithoutProductionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutProductionsInput = {
@@ -2077,6 +2302,11 @@ export type UserUpdateWithoutProductionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductionsInput = {
@@ -2115,6 +2345,11 @@ export type UserUncheckedUpdateWithoutProductionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutShiftRecordsInput = {
@@ -2153,6 +2388,11 @@ export type UserCreateWithoutShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutShiftRecordsInput = {
@@ -2191,6 +2431,11 @@ export type UserUncheckedCreateWithoutShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutShiftRecordsInput = {
@@ -2234,6 +2479,11 @@ export type UserCreateWithoutCreatedShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedShiftRecordsInput = {
@@ -2272,6 +2522,11 @@ export type UserUncheckedCreateWithoutCreatedShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedShiftRecordsInput = {
@@ -2326,6 +2581,11 @@ export type UserUpdateWithoutShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShiftRecordsInput = {
@@ -2364,6 +2624,11 @@ export type UserUncheckedUpdateWithoutShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUpsertWithoutCreatedShiftRecordsInput = {
@@ -2413,6 +2678,11 @@ export type UserUpdateWithoutCreatedShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedShiftRecordsInput = {
@@ -2451,6 +2721,11 @@ export type UserUncheckedUpdateWithoutCreatedShiftRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutCreatedOrdersInput = {
@@ -2489,6 +2764,11 @@ export type UserCreateWithoutCreatedOrdersInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
@@ -2527,6 +2807,11 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -2581,6 +2866,11 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
@@ -2619,6 +2909,11 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutCreatedExpensesInput = {
@@ -2657,6 +2952,11 @@ export type UserCreateWithoutCreatedExpensesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedExpensesInput = {
@@ -2695,6 +2995,11 @@ export type UserUncheckedCreateWithoutCreatedExpensesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedExpensesInput = {
@@ -2749,6 +3054,11 @@ export type UserUpdateWithoutCreatedExpensesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
@@ -2787,6 +3097,11 @@ export type UserUncheckedUpdateWithoutCreatedExpensesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
@@ -2825,6 +3140,11 @@ export type UserCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
@@ -2863,6 +3183,11 @@ export type UserUncheckedCreateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutRawMaterialPurchaseOrdersCreatedInput = {
@@ -2917,6 +3242,11 @@ export type UserUpdateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRawMaterialPurchaseOrdersCreatedInput = {
@@ -2955,6 +3285,11 @@ export type UserUncheckedUpdateWithoutRawMaterialPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutSupplierPurchaseOrdersCreatedInput = {
@@ -2993,6 +3328,11 @@ export type UserCreateWithoutSupplierPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutSupplierPurchaseOrdersCreatedInput = {
@@ -3031,6 +3371,11 @@ export type UserUncheckedCreateWithoutSupplierPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutSupplierPurchaseOrdersCreatedInput = {
@@ -3085,6 +3430,11 @@ export type UserUpdateWithoutSupplierPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupplierPurchaseOrdersCreatedInput = {
@@ -3123,6 +3473,11 @@ export type UserUncheckedUpdateWithoutSupplierPurchaseOrdersCreatedInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutEmployeeProductRatesInput = {
@@ -3161,6 +3516,11 @@ export type UserCreateWithoutEmployeeProductRatesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
@@ -3199,6 +3559,11 @@ export type UserUncheckedCreateWithoutEmployeeProductRatesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutEmployeeProductRatesInput = {
@@ -3253,6 +3618,11 @@ export type UserUpdateWithoutEmployeeProductRatesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
@@ -3291,6 +3661,11 @@ export type UserUncheckedUpdateWithoutEmployeeProductRatesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutSalaryRecordsInput = {
@@ -3329,6 +3704,11 @@ export type UserCreateWithoutSalaryRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutSalaryRecordsInput = {
@@ -3367,6 +3747,11 @@ export type UserUncheckedCreateWithoutSalaryRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutSalaryRecordsInput = {
@@ -3421,6 +3806,11 @@ export type UserUpdateWithoutSalaryRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
@@ -3459,6 +3849,11 @@ export type UserUncheckedUpdateWithoutSalaryRecordsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutUploadedBankVedomostsInput = {
@@ -3497,6 +3892,11 @@ export type UserCreateWithoutUploadedBankVedomostsInput = {
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedBankVedomostsInput = {
@@ -3535,6 +3935,11 @@ export type UserUncheckedCreateWithoutUploadedBankVedomostsInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedBankVedomostsInput = {
@@ -3589,6 +3994,11 @@ export type UserUpdateWithoutUploadedBankVedomostsInput = {
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedBankVedomostsInput = {
@@ -3627,6 +4037,11 @@ export type UserUncheckedUpdateWithoutUploadedBankVedomostsInput = {
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutBankTransactionsInput = {
@@ -3665,6 +4080,11 @@ export type UserCreateWithoutBankTransactionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutBankTransactionsInput = {
@@ -3703,6 +4123,11 @@ export type UserUncheckedCreateWithoutBankTransactionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutBankTransactionsInput = {
@@ -3757,6 +4182,11 @@ export type UserUpdateWithoutBankTransactionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBankTransactionsInput = {
@@ -3795,6 +4225,11 @@ export type UserUncheckedUpdateWithoutBankTransactionsInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserCreateWithoutUploadedFilesInput = {
@@ -3833,6 +4268,11 @@ export type UserCreateWithoutUploadedFilesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedFilesInput = {
@@ -3871,6 +4311,11 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedFilesInput = {
@@ -3925,6 +4370,11 @@ export type UserUpdateWithoutUploadedFilesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedFilesInput = {
@@ -3963,6 +4413,951 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
   rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
   supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserCreateWithoutAssignedCompanyAssetsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserUncheckedCreateWithoutAssignedCompanyAssetsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserCreateOrConnectWithoutAssignedCompanyAssetsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedCompanyAssetsInput>
+}
+
+export type UserCreateWithoutCompanyAssetsCreatedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserUncheckedCreateWithoutCompanyAssetsCreatedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserCreateOrConnectWithoutCompanyAssetsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsCreatedInput>
+}
+
+export type UserCreateWithoutCompanyAssetsUpdatedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserUncheckedCreateWithoutCompanyAssetsUpdatedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserCreateOrConnectWithoutCompanyAssetsUpdatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsUpdatedInput>
+}
+
+export type UserCreateWithoutCompanyAssetsDeletedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserUncheckedCreateWithoutCompanyAssetsDeletedInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedCreateNestedManyWithoutPerformedByInput
+}
+
+export type UserCreateOrConnectWithoutCompanyAssetsDeletedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsDeletedInput>
+}
+
+export type UserUpsertWithoutAssignedCompanyAssetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedUpdateWithoutAssignedCompanyAssetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedCompanyAssetsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignedCompanyAssetsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignedCompanyAssetsInput, Prisma.UserUncheckedUpdateWithoutAssignedCompanyAssetsInput>
+}
+
+export type UserUpdateWithoutAssignedCompanyAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignedCompanyAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUpsertWithoutCompanyAssetsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCompanyAssetsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsCreatedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsCreatedInput>
+}
+
+export type UserUpdateWithoutCompanyAssetsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCompanyAssetsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUpsertWithoutCompanyAssetsUpdatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsUpdatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsUpdatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCompanyAssetsUpdatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsUpdatedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsUpdatedInput>
+}
+
+export type UserUpdateWithoutCompanyAssetsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCompanyAssetsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUpsertWithoutCompanyAssetsDeletedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsDeletedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedCreateWithoutCompanyAssetsDeletedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCompanyAssetsDeletedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetsDeletedInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetsDeletedInput>
+}
+
+export type UserUpdateWithoutCompanyAssetsDeletedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCompanyAssetsDeletedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetActivityLogs?: Prisma.CompanyAssetActivityLogUncheckedUpdateManyWithoutPerformedByNestedInput
+}
+
+export type UserCreateWithoutCompanyAssetActivityLogsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetCreateNestedManyWithoutDeletedByInput
+}
+
+export type UserUncheckedCreateWithoutCompanyAssetActivityLogsInput = {
+  id?: string
+  fullName: string
+  phone: string
+  login?: string | null
+  customRoleLabel?: string | null
+  permissions?: Prisma.UserCreatepermissionsInput | string[]
+  canLogin?: boolean
+  passwordHash: string
+  position?: string | null
+  cardNumber?: string | null
+  stir?: string | null
+  role?: $Enums.Role
+  salaryType?: $Enums.SalaryType
+  salaryRate?: number
+  preferredShiftNumber?: number | null
+  isActive?: boolean
+  employmentEndedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  productions?: Prisma.ProductionRecordUncheckedCreateNestedManyWithoutWorkerInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedCreateNestedManyWithoutCreatedByInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedCreateNestedManyWithoutWorkerInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedCreateNestedManyWithoutWorkerInput
+  createdOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutCreatedByInput
+  createdExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUploadedByInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedCreateNestedManyWithoutCreatedByInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedCreateNestedManyWithoutCreatedByInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedCreateNestedManyWithoutActorInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedCreateNestedManyWithoutUploadedByInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutAssignedUserInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutCreatedByInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutUpdatedByInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutDeletedByInput
+}
+
+export type UserCreateOrConnectWithoutCompanyAssetActivityLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedCreateWithoutCompanyAssetActivityLogsInput>
+}
+
+export type UserUpsertWithoutCompanyAssetActivityLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetActivityLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedCreateWithoutCompanyAssetActivityLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCompanyAssetActivityLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCompanyAssetActivityLogsInput, Prisma.UserUncheckedUpdateWithoutCompanyAssetActivityLogsInput>
+}
+
+export type UserUpdateWithoutCompanyAssetActivityLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUpdateManyWithoutDeletedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCompanyAssetActivityLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customRoleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.UserUpdatepermissionsInput | string[]
+  canLogin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cardNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  salaryType?: Prisma.EnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType
+  salaryRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  preferredShiftNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employmentEndedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  productions?: Prisma.ProductionRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  shiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdShiftRecords?: Prisma.ShiftRecordUncheckedUpdateManyWithoutCreatedByNestedInput
+  employeeProductRates?: Prisma.EmployeeProductRateUncheckedUpdateManyWithoutWorkerNestedInput
+  salaryRecords?: Prisma.SalaryRecordUncheckedUpdateManyWithoutWorkerNestedInput
+  createdOrders?: Prisma.OrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUploadedByNestedInput
+  inventoryMovements?: Prisma.InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagAuditLogs?: Prisma.BagAuditLogUncheckedUpdateManyWithoutCreatedByNestedInput
+  bagWriteoffs?: Prisma.BagWriteoffUncheckedUpdateManyWithoutCreatedByNestedInput
+  productAuditLogs?: Prisma.ProductAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput
+  uploadedBankVedomosts?: Prisma.BankVedomostUncheckedUpdateManyWithoutUploadedByNestedInput
+  rawMaterialPurchaseOrdersCreated?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  supplierPurchaseOrdersCreated?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedCompanyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutAssignedUserNestedInput
+  companyAssetsCreated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+  companyAssetsUpdated?: Prisma.CompanyAssetUncheckedUpdateManyWithoutUpdatedByNestedInput
+  companyAssetsDeleted?: Prisma.CompanyAssetUncheckedUpdateManyWithoutDeletedByNestedInput
 }
 
 
@@ -3988,6 +5383,11 @@ export type UserCountOutputType = {
   uploadedBankVedomosts: number
   rawMaterialPurchaseOrdersCreated: number
   supplierPurchaseOrdersCreated: number
+  assignedCompanyAssets: number
+  companyAssetsCreated: number
+  companyAssetsUpdated: number
+  companyAssetsDeleted: number
+  companyAssetActivityLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4008,6 +5408,11 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   uploadedBankVedomosts?: boolean | UserCountOutputTypeCountUploadedBankVedomostsArgs
   rawMaterialPurchaseOrdersCreated?: boolean | UserCountOutputTypeCountRawMaterialPurchaseOrdersCreatedArgs
   supplierPurchaseOrdersCreated?: boolean | UserCountOutputTypeCountSupplierPurchaseOrdersCreatedArgs
+  assignedCompanyAssets?: boolean | UserCountOutputTypeCountAssignedCompanyAssetsArgs
+  companyAssetsCreated?: boolean | UserCountOutputTypeCountCompanyAssetsCreatedArgs
+  companyAssetsUpdated?: boolean | UserCountOutputTypeCountCompanyAssetsUpdatedArgs
+  companyAssetsDeleted?: boolean | UserCountOutputTypeCountCompanyAssetsDeletedArgs
+  companyAssetActivityLogs?: boolean | UserCountOutputTypeCountCompanyAssetActivityLogsArgs
 }
 
 /**
@@ -4139,6 +5544,41 @@ export type UserCountOutputTypeCountSupplierPurchaseOrdersCreatedArgs<ExtArgs ex
   where?: Prisma.SupplierPurchaseOrderWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignedCompanyAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCompanyAssetsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCompanyAssetsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCompanyAssetsDeletedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCompanyAssetActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetActivityLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4177,6 +5617,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   uploadedBankVedomosts?: boolean | Prisma.User$uploadedBankVedomostsArgs<ExtArgs>
   rawMaterialPurchaseOrdersCreated?: boolean | Prisma.User$rawMaterialPurchaseOrdersCreatedArgs<ExtArgs>
   supplierPurchaseOrdersCreated?: boolean | Prisma.User$supplierPurchaseOrdersCreatedArgs<ExtArgs>
+  assignedCompanyAssets?: boolean | Prisma.User$assignedCompanyAssetsArgs<ExtArgs>
+  companyAssetsCreated?: boolean | Prisma.User$companyAssetsCreatedArgs<ExtArgs>
+  companyAssetsUpdated?: boolean | Prisma.User$companyAssetsUpdatedArgs<ExtArgs>
+  companyAssetsDeleted?: boolean | Prisma.User$companyAssetsDeletedArgs<ExtArgs>
+  companyAssetActivityLogs?: boolean | Prisma.User$companyAssetActivityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4265,6 +5710,11 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   uploadedBankVedomosts?: boolean | Prisma.User$uploadedBankVedomostsArgs<ExtArgs>
   rawMaterialPurchaseOrdersCreated?: boolean | Prisma.User$rawMaterialPurchaseOrdersCreatedArgs<ExtArgs>
   supplierPurchaseOrdersCreated?: boolean | Prisma.User$supplierPurchaseOrdersCreatedArgs<ExtArgs>
+  assignedCompanyAssets?: boolean | Prisma.User$assignedCompanyAssetsArgs<ExtArgs>
+  companyAssetsCreated?: boolean | Prisma.User$companyAssetsCreatedArgs<ExtArgs>
+  companyAssetsUpdated?: boolean | Prisma.User$companyAssetsUpdatedArgs<ExtArgs>
+  companyAssetsDeleted?: boolean | Prisma.User$companyAssetsDeletedArgs<ExtArgs>
+  companyAssetActivityLogs?: boolean | Prisma.User$companyAssetActivityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4290,6 +5740,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     uploadedBankVedomosts: Prisma.$BankVedomostPayload<ExtArgs>[]
     rawMaterialPurchaseOrdersCreated: Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>[]
     supplierPurchaseOrdersCreated: Prisma.$SupplierPurchaseOrderPayload<ExtArgs>[]
+    assignedCompanyAssets: Prisma.$CompanyAssetPayload<ExtArgs>[]
+    companyAssetsCreated: Prisma.$CompanyAssetPayload<ExtArgs>[]
+    companyAssetsUpdated: Prisma.$CompanyAssetPayload<ExtArgs>[]
+    companyAssetsDeleted: Prisma.$CompanyAssetPayload<ExtArgs>[]
+    companyAssetActivityLogs: Prisma.$CompanyAssetActivityLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4728,6 +6183,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   uploadedBankVedomosts<T extends Prisma.User$uploadedBankVedomostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedBankVedomostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankVedomostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rawMaterialPurchaseOrdersCreated<T extends Prisma.User$rawMaterialPurchaseOrdersCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$rawMaterialPurchaseOrdersCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   supplierPurchaseOrdersCreated<T extends Prisma.User$supplierPurchaseOrdersCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$supplierPurchaseOrdersCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPurchaseOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignedCompanyAssets<T extends Prisma.User$assignedCompanyAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedCompanyAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAssetsCreated<T extends Prisma.User$companyAssetsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$companyAssetsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAssetsUpdated<T extends Prisma.User$companyAssetsUpdatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$companyAssetsUpdatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAssetsDeleted<T extends Prisma.User$companyAssetsDeletedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$companyAssetsDeletedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAssetActivityLogs<T extends Prisma.User$companyAssetActivityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$companyAssetActivityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5574,6 +7034,126 @@ export type User$supplierPurchaseOrdersCreatedArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.SupplierPurchaseOrderScalarFieldEnum | Prisma.SupplierPurchaseOrderScalarFieldEnum[]
+}
+
+/**
+ * User.assignedCompanyAssets
+ */
+export type User$assignedCompanyAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
+  orderBy?: Prisma.CompanyAssetOrderByWithRelationInput | Prisma.CompanyAssetOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetScalarFieldEnum | Prisma.CompanyAssetScalarFieldEnum[]
+}
+
+/**
+ * User.companyAssetsCreated
+ */
+export type User$companyAssetsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
+  orderBy?: Prisma.CompanyAssetOrderByWithRelationInput | Prisma.CompanyAssetOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetScalarFieldEnum | Prisma.CompanyAssetScalarFieldEnum[]
+}
+
+/**
+ * User.companyAssetsUpdated
+ */
+export type User$companyAssetsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
+  orderBy?: Prisma.CompanyAssetOrderByWithRelationInput | Prisma.CompanyAssetOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetScalarFieldEnum | Prisma.CompanyAssetScalarFieldEnum[]
+}
+
+/**
+ * User.companyAssetsDeleted
+ */
+export type User$companyAssetsDeletedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
+  orderBy?: Prisma.CompanyAssetOrderByWithRelationInput | Prisma.CompanyAssetOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetScalarFieldEnum | Prisma.CompanyAssetScalarFieldEnum[]
+}
+
+/**
+ * User.companyAssetActivityLogs
+ */
+export type User$companyAssetActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAssetActivityLog
+   */
+  select?: Prisma.CompanyAssetActivityLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAssetActivityLog
+   */
+  omit?: Prisma.CompanyAssetActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetActivityLogInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetActivityLogWhereInput
+  orderBy?: Prisma.CompanyAssetActivityLogOrderByWithRelationInput | Prisma.CompanyAssetActivityLogOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetActivityLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetActivityLogScalarFieldEnum | Prisma.CompanyAssetActivityLogScalarFieldEnum[]
 }
 
 /**

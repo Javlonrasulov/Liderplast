@@ -732,6 +732,74 @@ export type EnumUploadStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumUploadStatusFilter<$PrismaModel>
 }
 
+export type EnumCompanyAssetCategoryFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCategory | Prisma.EnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel> | $Enums.CompanyAssetCategory
+}
+
+export type EnumCompanyAssetConditionFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCondition | Prisma.EnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel> | $Enums.CompanyAssetCondition
+}
+
+export type EnumCompanyAssetStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetStatus | Prisma.EnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel> | $Enums.CompanyAssetStatus
+}
+
+export type EnumCompanyAssetCategoryWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCategory | Prisma.EnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetCategoryWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetCategory
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel>
+}
+
+export type EnumCompanyAssetConditionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCondition | Prisma.EnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetConditionWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetCondition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel>
+}
+
+export type EnumCompanyAssetStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetStatus | Prisma.EnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetStatusWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel>
+}
+
+export type EnumCompanyAssetActionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetActionType | Prisma.EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel> | $Enums.CompanyAssetActionType
+}
+
+export type EnumCompanyAssetActionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetActionType | Prisma.EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetActionTypeWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetActionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -1412,6 +1480,74 @@ export type NestedEnumUploadStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumUploadStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumUploadStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCompanyAssetCategoryFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCategory | Prisma.EnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel> | $Enums.CompanyAssetCategory
+}
+
+export type NestedEnumCompanyAssetConditionFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCondition | Prisma.EnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel> | $Enums.CompanyAssetCondition
+}
+
+export type NestedEnumCompanyAssetStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetStatus | Prisma.EnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel> | $Enums.CompanyAssetStatus
+}
+
+export type NestedEnumCompanyAssetCategoryWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCategory | Prisma.EnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCategory[] | Prisma.ListEnumCompanyAssetCategoryFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetCategoryWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetCategory
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetCategoryFilter<$PrismaModel>
+}
+
+export type NestedEnumCompanyAssetConditionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetCondition | Prisma.EnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetCondition[] | Prisma.ListEnumCompanyAssetConditionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetConditionWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetCondition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetConditionFilter<$PrismaModel>
+}
+
+export type NestedEnumCompanyAssetStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetStatus | Prisma.EnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetStatus[] | Prisma.ListEnumCompanyAssetStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetStatusWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCompanyAssetActionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetActionType | Prisma.EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel> | $Enums.CompanyAssetActionType
+}
+
+export type NestedEnumCompanyAssetActionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyAssetActionType | Prisma.EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyAssetActionType[] | Prisma.ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyAssetActionTypeWithAggregatesFilter<$PrismaModel> | $Enums.CompanyAssetActionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyAssetActionTypeFilter<$PrismaModel>
 }
 
 

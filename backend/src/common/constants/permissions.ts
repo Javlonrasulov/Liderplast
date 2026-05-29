@@ -20,6 +20,8 @@ export const ALL_APP_PERMISSIONS = [
   'view_reports',
   'manage_settings',
   'manage_users',
+  'view_company_assets',
+  'manage_company_assets',
 ] as const;
 
 export type AppPermission = (typeof ALL_APP_PERMISSIONS)[number];
@@ -47,6 +49,8 @@ export function defaultPermissionsForRole(role: Role): string[] {
         'view_payroll',
         'view_vedemost',
         'view_reports',
+        'view_company_assets',
+        'manage_company_assets',
       ];
     case Role.ACCOUNTANT:
       return [
@@ -60,6 +64,8 @@ export function defaultPermissionsForRole(role: Role): string[] {
         'view_suppliers',
         'manage_suppliers',
         'view_sales',
+        'view_company_assets',
+        'manage_company_assets',
       ];
     case Role.MANAGER:
       return [

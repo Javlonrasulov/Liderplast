@@ -270,6 +270,7 @@ export type ExpenseWhereInput = {
   rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
   supplierPurchaseOrder?: Prisma.XOR<Prisma.SupplierPurchaseOrderNullableScalarRelationFilter, Prisma.SupplierPurchaseOrderWhereInput> | null
   bagWriteoff?: Prisma.XOR<Prisma.BagWriteoffNullableScalarRelationFilter, Prisma.BagWriteoffWhereInput> | null
+  companyAsset?: Prisma.XOR<Prisma.CompanyAssetNullableScalarRelationFilter, Prisma.CompanyAssetWhereInput> | null
 }
 
 export type ExpenseOrderByWithRelationInput = {
@@ -290,6 +291,7 @@ export type ExpenseOrderByWithRelationInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOrderByWithRelationInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderOrderByWithRelationInput
   bagWriteoff?: Prisma.BagWriteoffOrderByWithRelationInput
+  companyAsset?: Prisma.CompanyAssetOrderByWithRelationInput
 }
 
 export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
@@ -313,6 +315,7 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
   supplierPurchaseOrder?: Prisma.XOR<Prisma.SupplierPurchaseOrderNullableScalarRelationFilter, Prisma.SupplierPurchaseOrderWhereInput> | null
   bagWriteoff?: Prisma.XOR<Prisma.BagWriteoffNullableScalarRelationFilter, Prisma.BagWriteoffWhereInput> | null
+  companyAsset?: Prisma.XOR<Prisma.CompanyAssetNullableScalarRelationFilter, Prisma.CompanyAssetWhereInput> | null
 }, "id" | "sourceShiftId">
 
 export type ExpenseOrderByWithAggregationInput = {
@@ -366,6 +369,7 @@ export type ExpenseCreateInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateInput = {
@@ -383,6 +387,7 @@ export type ExpenseUncheckedCreateInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUpdateInput = {
@@ -400,6 +405,7 @@ export type ExpenseUpdateInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateInput = {
@@ -417,6 +423,7 @@ export type ExpenseUncheckedUpdateInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateManyInput = {
@@ -688,6 +695,22 @@ export type ExpenseUpdateOneRequiredWithoutSupplierPurchaseOrderNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ExpenseUpdateToOneWithWhereWithoutSupplierPurchaseOrderInput, Prisma.ExpenseUpdateWithoutSupplierPurchaseOrderInput>, Prisma.ExpenseUncheckedUpdateWithoutSupplierPurchaseOrderInput>
 }
 
+export type ExpenseCreateNestedOneWithoutCompanyAssetInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedCreateWithoutCompanyAssetInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutCompanyAssetInput
+  connect?: Prisma.ExpenseWhereUniqueInput
+}
+
+export type ExpenseUpdateOneWithoutCompanyAssetNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedCreateWithoutCompanyAssetInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutCompanyAssetInput
+  upsert?: Prisma.ExpenseUpsertWithoutCompanyAssetInput
+  disconnect?: Prisma.ExpenseWhereInput | boolean
+  delete?: Prisma.ExpenseWhereInput | boolean
+  connect?: Prisma.ExpenseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ExpenseUpdateToOneWithWhereWithoutCompanyAssetInput, Prisma.ExpenseUpdateWithoutCompanyAssetInput>, Prisma.ExpenseUncheckedUpdateWithoutCompanyAssetInput>
+}
+
 export type ExpenseCreateWithoutCreatedByInput = {
   id?: string
   title: string
@@ -702,6 +725,7 @@ export type ExpenseCreateWithoutCreatedByInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutCreatedByInput = {
@@ -718,6 +742,7 @@ export type ExpenseUncheckedCreateWithoutCreatedByInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutCreatedByInput = {
@@ -777,6 +802,7 @@ export type ExpenseCreateWithoutBagWriteoffInput = {
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutBagWriteoffInput = {
@@ -793,6 +819,7 @@ export type ExpenseUncheckedCreateWithoutBagWriteoffInput = {
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutBagWriteoffInput = {
@@ -825,6 +852,7 @@ export type ExpenseUpdateWithoutBagWriteoffInput = {
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutBagWriteoffInput = {
@@ -841,6 +869,7 @@ export type ExpenseUncheckedUpdateWithoutBagWriteoffInput = {
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutSourceShiftInput = {
@@ -857,6 +886,7 @@ export type ExpenseCreateWithoutSourceShiftInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
@@ -873,6 +903,7 @@ export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutSourceShiftInput = {
@@ -905,6 +936,7 @@ export type ExpenseUpdateWithoutSourceShiftInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
@@ -921,6 +953,7 @@ export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutCategoryInput = {
@@ -937,6 +970,7 @@ export type ExpenseCreateWithoutCategoryInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutCategoryInput = {
@@ -953,6 +987,7 @@ export type ExpenseUncheckedCreateWithoutCategoryInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutCategoryInput = {
@@ -995,6 +1030,7 @@ export type ExpenseCreateWithoutRawMaterialPurchaseOrderInput = {
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput = {
@@ -1011,6 +1047,7 @@ export type ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput = {
   sourceShiftId?: string | null
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutRawMaterialPurchaseOrderInput = {
@@ -1043,6 +1080,7 @@ export type ExpenseUpdateWithoutRawMaterialPurchaseOrderInput = {
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput = {
@@ -1059,6 +1097,7 @@ export type ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput = {
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutSupplierPurchaseOrderInput = {
@@ -1075,6 +1114,7 @@ export type ExpenseCreateWithoutSupplierPurchaseOrderInput = {
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutSupplierPurchaseOrderInput = {
@@ -1091,6 +1131,7 @@ export type ExpenseUncheckedCreateWithoutSupplierPurchaseOrderInput = {
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutSupplierPurchaseOrderInput = {
@@ -1123,6 +1164,7 @@ export type ExpenseUpdateWithoutSupplierPurchaseOrderInput = {
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutSupplierPurchaseOrderInput = {
@@ -1138,6 +1180,91 @@ export type ExpenseUncheckedUpdateWithoutSupplierPurchaseOrderInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
+  bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
+}
+
+export type ExpenseCreateWithoutCompanyAssetInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
+  sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
+  bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+}
+
+export type ExpenseUncheckedCreateWithoutCompanyAssetInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  createdById?: string | null
+  categoryId?: string | null
+  sourceShiftId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
+  bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+}
+
+export type ExpenseCreateOrConnectWithoutCompanyAssetInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedCreateWithoutCompanyAssetInput>
+}
+
+export type ExpenseUpsertWithoutCompanyAssetInput = {
+  update: Prisma.XOR<Prisma.ExpenseUpdateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedUpdateWithoutCompanyAssetInput>
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedCreateWithoutCompanyAssetInput>
+  where?: Prisma.ExpenseWhereInput
+}
+
+export type ExpenseUpdateToOneWithWhereWithoutCompanyAssetInput = {
+  where?: Prisma.ExpenseWhereInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateWithoutCompanyAssetInput, Prisma.ExpenseUncheckedUpdateWithoutCompanyAssetInput>
+}
+
+export type ExpenseUpdateWithoutCompanyAssetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
+  sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
+  bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+}
+
+export type ExpenseUncheckedUpdateWithoutCompanyAssetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
@@ -1168,6 +1295,7 @@ export type ExpenseUpdateWithoutCreatedByInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
@@ -1184,6 +1312,7 @@ export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1226,6 +1355,7 @@ export type ExpenseUpdateWithoutCategoryInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutCategoryInput = {
@@ -1242,6 +1372,7 @@ export type ExpenseUncheckedUpdateWithoutCategoryInput = {
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutCategoryInput = {
@@ -1277,6 +1408,7 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
   supplierPurchaseOrder?: boolean | Prisma.Expense$supplierPurchaseOrderArgs<ExtArgs>
   bagWriteoff?: boolean | Prisma.Expense$bagWriteoffArgs<ExtArgs>
+  companyAsset?: boolean | Prisma.Expense$companyAssetArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
 export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1335,6 +1467,7 @@ export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
   supplierPurchaseOrder?: boolean | Prisma.Expense$supplierPurchaseOrderArgs<ExtArgs>
   bagWriteoff?: boolean | Prisma.Expense$bagWriteoffArgs<ExtArgs>
+  companyAsset?: boolean | Prisma.Expense$companyAssetArgs<ExtArgs>
 }
 export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
@@ -1356,6 +1489,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     rawMaterialPurchaseOrder: Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs> | null
     supplierPurchaseOrder: Prisma.$SupplierPurchaseOrderPayload<ExtArgs> | null
     bagWriteoff: Prisma.$BagWriteoffPayload<ExtArgs> | null
+    companyAsset: Prisma.$CompanyAssetPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1769,6 +1903,7 @@ export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends runtime.
   rawMaterialPurchaseOrder<T extends Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>>): Prisma.Prisma__RawMaterialPurchaseOrderClient<runtime.Types.Result.GetResult<Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   supplierPurchaseOrder<T extends Prisma.Expense$supplierPurchaseOrderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$supplierPurchaseOrderArgs<ExtArgs>>): Prisma.Prisma__SupplierPurchaseOrderClient<runtime.Types.Result.GetResult<Prisma.$SupplierPurchaseOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   bagWriteoff<T extends Prisma.Expense$bagWriteoffArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$bagWriteoffArgs<ExtArgs>>): Prisma.Prisma__BagWriteoffClient<runtime.Types.Result.GetResult<Prisma.$BagWriteoffPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  companyAsset<T extends Prisma.Expense$companyAssetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$companyAssetArgs<ExtArgs>>): Prisma.Prisma__CompanyAssetClient<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2321,6 +2456,25 @@ export type Expense$bagWriteoffArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.BagWriteoffInclude<ExtArgs> | null
   where?: Prisma.BagWriteoffWhereInput
+}
+
+/**
+ * Expense.companyAsset
+ */
+export type Expense$companyAssetArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
 }
 
 /**

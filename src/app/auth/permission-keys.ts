@@ -18,6 +18,8 @@ export const APP_PERMISSION_KEYS = [
   'view_reports',
   'manage_settings',
   'manage_users',
+  'view_company_assets',
+  'manage_company_assets',
 ] as const;
 
 export type AppPermissionKey = (typeof APP_PERMISSION_KEYS)[number];
