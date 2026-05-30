@@ -108,12 +108,20 @@ export function unitPriceInUzs(
   return price * fx;
 }
 
-export function formatSalePriceLabel(
-  price: number,
-  currency: SaleCurrency,
-  formatNumber: (n: number) => string,
-): string {
-  return `${formatNumber(price)} ${currency}`;
+/** Sotuv narxi — UZS butun, USD/EUR kichik kasrlar saqlanadi (masalan 0,012). */
+export function formatSaleUnitPrice(price: number, currency: SaleCurrency): string {
+  if (!Number.isFinite(price)) return '0';
+  if (currency === 'UZS') {
+    return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(price));
+  }
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 6,
+  }).format(price);
+}
+
+export function formatSalePriceLabel(price: number, currency: SaleCurrency): string {
+  return `${formatSaleUnitPrice(price, currency)} ${currency}`;
 }
 
 export type SaleLineForDisplay = {
@@ -143,11 +151,12 @@ export function formatSaleHistoryPriceDetail(
   formatCurrency: (n: number) => string,
   labels: { unitPiece: string; fxRate: string },
 ): string {
+  const unitPrice = formatSaleUnitPrice(line.pricePerUnit, line.currency);
   if (line.currency === 'UZS') {
-    return `${formatNumber(line.pricePerUnit)} so'm × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
+    return `${unitPrice} so'm × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
   }
   const fx = effectiveSaleFxRate(line);
-  const head = `${formatNumber(line.pricePerUnit)} ${line.currency} × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
+  const head = `${unitPrice} ${line.currency} × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
   if (fx != null) {
     return `${head} · ${labels.fxRate} ${formatNumber(fx)} → ${formatCurrency(line.total)}`;
   }

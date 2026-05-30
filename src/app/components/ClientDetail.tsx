@@ -750,6 +750,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
               <div className="sm:hidden divide-y divide-slate-100 dark:divide-slate-700">
                 {clientSales.map(sale => {
                   const saleDebt = sale.total - sale.paid;
+                  const priceLine = saleLineFromSale(sale);
                   return (
                     <div key={sale.id} className="px-4 py-3.5">
                       <div className="flex items-start justify-between gap-2">
@@ -762,7 +763,13 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                             }`}>{sale.productType}</span>
                             <span className="text-xs text-slate-400 font-mono">{formatDate(sale.date)}</span>
                           </div>
-                          <p className="text-xs text-slate-500">{formatNumber(sale.quantity)} ta × {formatNumber(sale.pricePerUnit)}</p>
+                          <p className="text-xs text-slate-500">
+                            <SaleHistoryPriceDetail
+                              line={priceLine}
+                              unitPiece={t.unitPiece}
+                              fxRateLabel={t.slSaleFxRate}
+                            />
+                          </p>
                         </div>
                         <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                           <div className="flex gap-1">

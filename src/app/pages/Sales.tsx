@@ -627,7 +627,7 @@ export function Sales() {
                             </td>
                             <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 font-medium">{formatNumber(item.quantity)}</td>
                             <td className="px-4 py-3 text-xs text-slate-500">
-                              {formatSalePriceLabel(item.pricePerUnit, item.currency, formatNumber)}
+                              {formatSalePriceLabel(item.pricePerUnit, item.currency)}
                               {item.currency !== 'UZS' && item.fxRateToUzs != null && item.fxRateToUzs > 0 && (
                                 <span className="mt-0.5 block text-[10px] text-indigo-600 dark:text-indigo-400">
                                   ≈ {formatCurrency(item.pricePerUnit * item.fxRateToUzs)} / {t.unitPiece}
@@ -727,7 +727,6 @@ export function Sales() {
                         {formatSalePriceLabel(
                           selectedWarehouseProduct.salePrice,
                           selectedWarehouseProduct.priceCurrency ?? 'UZS',
-                          formatNumber,
                         )}
                       </p>
                     )}
@@ -800,7 +799,7 @@ export function Sales() {
                         )}
                         {addCurrency !== 'UZS' && addUnitPriceUzs != null && (
                           <span className="ml-1">
-                            ({formatSalePriceLabel(parseFloat(addPrice), addCurrency, formatNumber)} / {t.unitPiece})
+                            ({formatSalePriceLabel(parseFloat(addPrice), addCurrency)} / {t.unitPiece})
                           </span>
                         )}
                       </span>

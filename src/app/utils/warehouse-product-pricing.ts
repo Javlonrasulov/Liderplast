@@ -1,4 +1,5 @@
 import type { SaleCurrency } from '../store/erp-store';
+import { formatSaleUnitPrice } from './sales-currency';
 
 export type WarehouseProductPricingFields = {
   purchasePrice: string;
@@ -145,7 +146,7 @@ function pricingDetailRows(
 
   const pushPrice = (id: string, label: string, amount: number | undefined) => {
     if (amount == null || amount <= 0) return;
-    const value = `${formatNumber(amount)} ${currencyDisplay(cur)}`;
+    const value = `${formatSaleUnitPrice(amount, cur)} ${currencyDisplay(cur)}`;
     let subValue: string | undefined;
     if (cur !== 'UZS' && fx > 0) {
       const uzs = priceAmountInUzs(String(amount), String(fx));
