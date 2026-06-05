@@ -3337,6 +3337,15 @@ export function ERPProvider({ children }: { children: ReactNode }) {
     [state.rawMaterialEntries],
   );
 
+  const rawMaterialStockByProductName = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const row of state.warehouseStock) {
+      if (row.itemType !== 'RAW_MATERIAL' || !row.itemName) continue;
+      m[row.itemName] = (m[row.itemName] ?? 0) + row.quantity;
+    }
+    return m;
+  }, [state.warehouseStock]);
+
   const semiStockByProductName = useMemo(() => {
     const m: Record<string, number> = {};
     for (const row of state.warehouseStock) {
