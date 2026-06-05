@@ -826,6 +826,9 @@ export interface T {
   exHistoryFullscreenExit: string;
   /** Тарих жадвали — амаллар устуни */
   exHistoryColActions: string;
+  exHistoryColUser: string;
+  exAuditCreated: string;
+  exAuditUpdated: string;
   exExpenseEditTitle: string;
   exExpenseDeleteTitle: string;
   exExpenseDeleteHint: string;
@@ -2047,6 +2050,9 @@ const uz_cyrillic: T = {
   exHistoryFullscreenEnter: 'Тўлиқ экран',
   exHistoryFullscreenExit: 'Ёпиш (Esc)',
   exHistoryColActions: 'Амаллар',
+  exHistoryColUser: 'Фойдаланувчи',
+  exAuditCreated: 'Киритди: {name}',
+  exAuditUpdated: 'Ўзгартирди: {name}',
   exExpenseEditTitle: 'Харажатни таҳрирлаш',
   exExpenseDeleteTitle: 'Харажатни ўчирамизми?',
   exExpenseDeleteHint: 'Ёзув рўйхатдан олиб ташланади. «Хом ашё ташқи буюртма» категориясидаги ёзувлар ўчирилмайди.',
@@ -3252,6 +3258,9 @@ const uz_latin: T = {
   exHistoryFullscreenEnter: "To'liq ekran",
   exHistoryFullscreenExit: 'Yopish (Esc)',
   exHistoryColActions: 'Amallar',
+  exHistoryColUser: 'Foydalanuvchi',
+  exAuditCreated: 'Kiritdi: {name}',
+  exAuditUpdated: "O'zgartirdi: {name}",
   exExpenseEditTitle: 'Xarajatni tahrirlash',
   exExpenseDeleteTitle: "Xarajatni o'chiramizmi?",
   exExpenseDeleteHint:
@@ -4457,6 +4466,9 @@ const ru: T = {
   exHistoryFullscreenEnter: 'На весь экран',
   exHistoryFullscreenExit: 'Закрыть (Esc)',
   exHistoryColActions: 'Действия',
+  exHistoryColUser: 'Пользователь',
+  exAuditCreated: 'Внёс: {name}',
+  exAuditUpdated: 'Изменил: {name}',
   exExpenseEditTitle: 'Редактировать расход',
   exExpenseDeleteTitle: 'Удалить расход?',
   exExpenseDeleteHint:

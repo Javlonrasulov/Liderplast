@@ -417,6 +417,9 @@ export class FinanceService {
         createdBy: {
           omit: { passwordHash: true },
         },
+        updatedBy: {
+          omit: { passwordHash: true },
+        },
       },
     });
   }
@@ -426,6 +429,9 @@ export class FinanceService {
       include: {
         category: true,
         createdBy: {
+          omit: { passwordHash: true },
+        },
+        updatedBy: {
           omit: { passwordHash: true },
         },
       },
@@ -460,7 +466,7 @@ export class FinanceService {
     }
   }
 
-  async updateExpense(id: string, dto: UpdateExpenseDto) {
+  async updateExpense(id: string, dto: UpdateExpenseDto, updatedById?: string) {
     const existing = await this.prisma.expense.findUnique({
       where: { id },
       include: {
@@ -511,10 +517,14 @@ export class FinanceService {
         ...(dto.categoryId !== undefined
           ? { categoryId: nextCategoryId, type: nextType }
           : {}),
+        ...(updatedById ? { updatedById } : {}),
       },
       include: {
         category: true,
         createdBy: {
+          omit: { passwordHash: true },
+        },
+        updatedBy: {
           omit: { passwordHash: true },
         },
       },
@@ -1248,6 +1258,7 @@ export class FinanceService {
             .filter(Boolean)
             .join(' · '),
           incurredAt: orderedAt ?? existing.orderedAt,
+          ...(updatedById ? { updatedById } : {}),
         },
       });
 

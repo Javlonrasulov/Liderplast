@@ -43,7 +43,9 @@ export type ExpenseMinAggregateOutputType = {
   status: $Enums.EntityStatus | null
   incurredAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
   createdById: string | null
+  updatedById: string | null
   categoryId: string | null
   sourceShiftId: string | null
 }
@@ -57,7 +59,9 @@ export type ExpenseMaxAggregateOutputType = {
   status: $Enums.EntityStatus | null
   incurredAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
   createdById: string | null
+  updatedById: string | null
   categoryId: string | null
   sourceShiftId: string | null
 }
@@ -71,7 +75,9 @@ export type ExpenseCountAggregateOutputType = {
   status: number
   incurredAt: number
   createdAt: number
+  updatedAt: number
   createdById: number
+  updatedById: number
   categoryId: number
   sourceShiftId: number
   _all: number
@@ -95,7 +101,9 @@ export type ExpenseMinAggregateInputType = {
   status?: true
   incurredAt?: true
   createdAt?: true
+  updatedAt?: true
   createdById?: true
+  updatedById?: true
   categoryId?: true
   sourceShiftId?: true
 }
@@ -109,7 +117,9 @@ export type ExpenseMaxAggregateInputType = {
   status?: true
   incurredAt?: true
   createdAt?: true
+  updatedAt?: true
   createdById?: true
+  updatedById?: true
   categoryId?: true
   sourceShiftId?: true
 }
@@ -123,7 +133,9 @@ export type ExpenseCountAggregateInputType = {
   status?: true
   incurredAt?: true
   createdAt?: true
+  updatedAt?: true
   createdById?: true
+  updatedById?: true
   categoryId?: true
   sourceShiftId?: true
   _all?: true
@@ -224,7 +236,9 @@ export type ExpenseGroupByOutputType = {
   status: $Enums.EntityStatus
   incurredAt: Date
   createdAt: Date
+  updatedAt: Date
   createdById: string | null
+  updatedById: string | null
   categoryId: string | null
   sourceShiftId: string | null
   _count: ExpenseCountAggregateOutputType | null
@@ -261,10 +275,13 @@ export type ExpenseWhereInput = {
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Expense"> | string | null
   sourceShiftId?: Prisma.StringNullableFilter<"Expense"> | string | null
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   category?: Prisma.XOR<Prisma.ExpenseCategoryNullableScalarRelationFilter, Prisma.ExpenseCategoryWhereInput> | null
   sourceShift?: Prisma.XOR<Prisma.ShiftRecordNullableScalarRelationFilter, Prisma.ShiftRecordWhereInput> | null
   rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
@@ -282,10 +299,13 @@ export type ExpenseOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceShiftId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.UserOrderByWithRelationInput
+  updatedBy?: Prisma.UserOrderByWithRelationInput
   category?: Prisma.ExpenseCategoryOrderByWithRelationInput
   sourceShift?: Prisma.ShiftRecordOrderByWithRelationInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOrderByWithRelationInput
@@ -307,9 +327,12 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Expense"> | string | null
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   category?: Prisma.XOR<Prisma.ExpenseCategoryNullableScalarRelationFilter, Prisma.ExpenseCategoryWhereInput> | null
   sourceShift?: Prisma.XOR<Prisma.ShiftRecordNullableScalarRelationFilter, Prisma.ShiftRecordWhereInput> | null
   rawMaterialPurchaseOrder?: Prisma.XOR<Prisma.RawMaterialPurchaseOrderNullableScalarRelationFilter, Prisma.RawMaterialPurchaseOrderWhereInput> | null
@@ -327,7 +350,9 @@ export type ExpenseOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceShiftId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ExpenseCountOrderByAggregateInput
@@ -349,7 +374,9 @@ export type ExpenseScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
+  updatedById?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   sourceShiftId?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
 }
@@ -363,7 +390,9 @@ export type ExpenseCreateInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -381,7 +410,9 @@ export type ExpenseUncheckedCreateInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -399,7 +430,9 @@ export type ExpenseUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -417,7 +450,9 @@ export type ExpenseUncheckedUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -435,7 +470,9 @@ export type ExpenseCreateManyInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
 }
@@ -449,6 +486,7 @@ export type ExpenseUpdateManyMutationInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ExpenseUncheckedUpdateManyInput = {
@@ -460,7 +498,9 @@ export type ExpenseUncheckedUpdateManyInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -489,7 +529,9 @@ export type ExpenseCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   sourceShiftId?: Prisma.SortOrder
 }
@@ -507,7 +549,9 @@ export type ExpenseMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   sourceShiftId?: Prisma.SortOrder
 }
@@ -521,7 +565,9 @@ export type ExpenseMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   sourceShiftId?: Prisma.SortOrder
 }
@@ -542,10 +588,24 @@ export type ExpenseCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
 }
 
+export type ExpenseCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput> | Prisma.ExpenseCreateWithoutUpdatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput | Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.ExpenseCreateManyUpdatedByInputEnvelope
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+}
+
 export type ExpenseUncheckedCreateNestedManyWithoutCreatedByInput = {
   create?: Prisma.XOR<Prisma.ExpenseCreateWithoutCreatedByInput, Prisma.ExpenseUncheckedCreateWithoutCreatedByInput> | Prisma.ExpenseCreateWithoutCreatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutCreatedByInput[]
   connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutCreatedByInput | Prisma.ExpenseCreateOrConnectWithoutCreatedByInput[]
   createMany?: Prisma.ExpenseCreateManyCreatedByInputEnvelope
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+}
+
+export type ExpenseUncheckedCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput> | Prisma.ExpenseCreateWithoutUpdatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput | Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.ExpenseCreateManyUpdatedByInputEnvelope
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
 }
 
@@ -563,6 +623,20 @@ export type ExpenseUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
 }
 
+export type ExpenseUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput> | Prisma.ExpenseCreateWithoutUpdatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput | Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.ExpenseUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.ExpenseUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.ExpenseCreateManyUpdatedByInputEnvelope
+  set?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  disconnect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  delete?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutUpdatedByInput | Prisma.ExpenseUpdateManyWithWhereWithoutUpdatedByInput[]
+  deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
+}
+
 export type ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput = {
   create?: Prisma.XOR<Prisma.ExpenseCreateWithoutCreatedByInput, Prisma.ExpenseUncheckedCreateWithoutCreatedByInput> | Prisma.ExpenseCreateWithoutCreatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutCreatedByInput[]
   connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutCreatedByInput | Prisma.ExpenseCreateOrConnectWithoutCreatedByInput[]
@@ -574,6 +648,20 @@ export type ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput = {
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
   update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutCreatedByInput[]
   updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutCreatedByInput | Prisma.ExpenseUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
+}
+
+export type ExpenseUncheckedUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput> | Prisma.ExpenseCreateWithoutUpdatedByInput[] | Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput | Prisma.ExpenseCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.ExpenseUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.ExpenseUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.ExpenseCreateManyUpdatedByInputEnvelope
+  set?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  disconnect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  delete?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutUpdatedByInput | Prisma.ExpenseUpdateManyWithWhereWithoutUpdatedByInput[]
   deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
 }
 
@@ -720,6 +808,8 @@ export type ExpenseCreateWithoutCreatedByInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -737,6 +827,8 @@ export type ExpenseUncheckedCreateWithoutCreatedByInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -752,6 +844,54 @@ export type ExpenseCreateOrConnectWithoutCreatedByInput = {
 
 export type ExpenseCreateManyCreatedByInputEnvelope = {
   data: Prisma.ExpenseCreateManyCreatedByInput | Prisma.ExpenseCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type ExpenseCreateWithoutUpdatedByInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
+  sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
+  bagWriteoff?: Prisma.BagWriteoffCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetCreateNestedOneWithoutExpenseInput
+}
+
+export type ExpenseUncheckedCreateWithoutUpdatedByInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  categoryId?: string | null
+  sourceShiftId?: string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
+  bagWriteoff?: Prisma.BagWriteoffUncheckedCreateNestedOneWithoutExpenseInput
+  companyAsset?: Prisma.CompanyAssetUncheckedCreateNestedOneWithoutExpenseInput
+}
+
+export type ExpenseCreateOrConnectWithoutUpdatedByInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type ExpenseCreateManyUpdatedByInputEnvelope = {
+  data: Prisma.ExpenseCreateManyUpdatedByInput | Prisma.ExpenseCreateManyUpdatedByInput[]
   skipDuplicates?: boolean
 }
 
@@ -783,9 +923,27 @@ export type ExpenseScalarWhereInput = {
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   createdById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Expense"> | string | null
   sourceShiftId?: Prisma.StringNullableFilter<"Expense"> | string | null
+}
+
+export type ExpenseUpsertWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  update: Prisma.XOR<Prisma.ExpenseUpdateWithoutUpdatedByInput, Prisma.ExpenseUncheckedUpdateWithoutUpdatedByInput>
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutUpdatedByInput, Prisma.ExpenseUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type ExpenseUpdateWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateWithoutUpdatedByInput, Prisma.ExpenseUncheckedUpdateWithoutUpdatedByInput>
+}
+
+export type ExpenseUpdateManyWithWhereWithoutUpdatedByInput = {
+  where: Prisma.ExpenseScalarWhereInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateManyMutationInput, Prisma.ExpenseUncheckedUpdateManyWithoutUpdatedByInput>
 }
 
 export type ExpenseCreateWithoutBagWriteoffInput = {
@@ -797,7 +955,9 @@ export type ExpenseCreateWithoutBagWriteoffInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -814,7 +974,9 @@ export type ExpenseUncheckedCreateWithoutBagWriteoffInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -847,7 +1009,9 @@ export type ExpenseUpdateWithoutBagWriteoffInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -864,7 +1028,9 @@ export type ExpenseUncheckedUpdateWithoutBagWriteoffInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -881,7 +1047,9 @@ export type ExpenseCreateWithoutSourceShiftInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -898,7 +1066,9 @@ export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -931,7 +1101,9 @@ export type ExpenseUpdateWithoutSourceShiftInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -948,7 +1120,9 @@ export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -965,7 +1139,9 @@ export type ExpenseCreateWithoutCategoryInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -982,7 +1158,9 @@ export type ExpenseUncheckedCreateWithoutCategoryInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -1025,7 +1203,9 @@ export type ExpenseCreateWithoutRawMaterialPurchaseOrderInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -1042,7 +1222,9 @@ export type ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -1075,7 +1257,9 @@ export type ExpenseUpdateWithoutRawMaterialPurchaseOrderInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -1092,7 +1276,9 @@ export type ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -1109,7 +1295,9 @@ export type ExpenseCreateWithoutSupplierPurchaseOrderInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -1126,7 +1314,9 @@ export type ExpenseUncheckedCreateWithoutSupplierPurchaseOrderInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -1159,7 +1349,9 @@ export type ExpenseUpdateWithoutSupplierPurchaseOrderInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -1176,7 +1368,9 @@ export type ExpenseUncheckedUpdateWithoutSupplierPurchaseOrderInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -1193,7 +1387,9 @@ export type ExpenseCreateWithoutCompanyAssetInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedExpensesInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedExpensesInput
   category?: Prisma.ExpenseCategoryCreateNestedOneWithoutExpensesInput
   sourceShift?: Prisma.ShiftRecordCreateNestedOneWithoutShiftElectricityExpenseInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderCreateNestedOneWithoutExpenseInput
@@ -1210,7 +1406,9 @@ export type ExpenseUncheckedCreateWithoutCompanyAssetInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedCreateNestedOneWithoutExpenseInput
@@ -1243,7 +1441,9 @@ export type ExpenseUpdateWithoutCompanyAssetInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -1260,7 +1460,9 @@ export type ExpenseUncheckedUpdateWithoutCompanyAssetInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -1277,6 +1479,23 @@ export type ExpenseCreateManyCreatedByInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedById?: string | null
+  categoryId?: string | null
+  sourceShiftId?: string | null
+}
+
+export type ExpenseCreateManyUpdatedByInput = {
+  id?: string
+  title: string
+  type: $Enums.ExpenseType
+  amount: number
+  description?: string | null
+  status?: $Enums.EntityStatus
+  incurredAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
   categoryId?: string | null
   sourceShiftId?: string | null
 }
@@ -1290,6 +1509,8 @@ export type ExpenseUpdateWithoutCreatedByInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -1307,6 +1528,8 @@ export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -1324,6 +1547,61 @@ export type ExpenseUncheckedUpdateManyWithoutCreatedByInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ExpenseUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  category?: Prisma.ExpenseCategoryUpdateOneWithoutExpensesNestedInput
+  sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
+  bagWriteoff?: Prisma.BagWriteoffUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUpdateOneWithoutExpenseNestedInput
+}
+
+export type ExpenseUncheckedUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
+  supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
+  bagWriteoff?: Prisma.BagWriteoffUncheckedUpdateOneWithoutExpenseNestedInput
+  companyAsset?: Prisma.CompanyAssetUncheckedUpdateOneWithoutExpenseNestedInput
+}
+
+export type ExpenseUncheckedUpdateManyWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -1337,7 +1615,9 @@ export type ExpenseCreateManyCategoryInput = {
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   createdById?: string | null
+  updatedById?: string | null
   sourceShiftId?: string | null
 }
 
@@ -1350,7 +1630,9 @@ export type ExpenseUpdateWithoutCategoryInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedExpensesNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedExpensesNestedInput
   sourceShift?: Prisma.ShiftRecordUpdateOneWithoutShiftElectricityExpenseNestedInput
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUpdateOneWithoutExpenseNestedInput
@@ -1367,7 +1649,9 @@ export type ExpenseUncheckedUpdateWithoutCategoryInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
   supplierPurchaseOrder?: Prisma.SupplierPurchaseOrderUncheckedUpdateOneWithoutExpenseNestedInput
@@ -1384,7 +1668,9 @@ export type ExpenseUncheckedUpdateManyWithoutCategoryInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceShiftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -1399,10 +1685,13 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   status?: boolean
   incurredAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   createdById?: boolean
+  updatedById?: boolean
   categoryId?: boolean
   sourceShiftId?: boolean
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
   rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
@@ -1420,10 +1709,13 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   incurredAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   createdById?: boolean
+  updatedById?: boolean
   categoryId?: boolean
   sourceShiftId?: boolean
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
@@ -1437,10 +1729,13 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   incurredAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   createdById?: boolean
+  updatedById?: boolean
   categoryId?: boolean
   sourceShiftId?: boolean
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
@@ -1454,14 +1749,17 @@ export type ExpenseSelectScalar = {
   status?: boolean
   incurredAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   createdById?: boolean
+  updatedById?: boolean
   categoryId?: boolean
   sourceShiftId?: boolean
 }
 
-export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "amount" | "description" | "status" | "incurredAt" | "createdAt" | "createdById" | "categoryId" | "sourceShiftId", ExtArgs["result"]["expense"]>
+export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "amount" | "description" | "status" | "incurredAt" | "createdAt" | "updatedAt" | "createdById" | "updatedById" | "categoryId" | "sourceShiftId", ExtArgs["result"]["expense"]>
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
   rawMaterialPurchaseOrder?: boolean | Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>
@@ -1471,11 +1769,13 @@ export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
 }
 export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
 }
 export type ExpenseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
   category?: boolean | Prisma.Expense$categoryArgs<ExtArgs>
   sourceShift?: boolean | Prisma.Expense$sourceShiftArgs<ExtArgs>
 }
@@ -1484,6 +1784,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Expense"
   objects: {
     createdBy: Prisma.$UserPayload<ExtArgs> | null
+    updatedBy: Prisma.$UserPayload<ExtArgs> | null
     category: Prisma.$ExpenseCategoryPayload<ExtArgs> | null
     sourceShift: Prisma.$ShiftRecordPayload<ExtArgs> | null
     rawMaterialPurchaseOrder: Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs> | null
@@ -1500,7 +1801,9 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     status: $Enums.EntityStatus
     incurredAt: Date
     createdAt: Date
+    updatedAt: Date
     createdById: string | null
+    updatedById: string | null
     categoryId: string | null
     sourceShiftId: string | null
   }, ExtArgs["result"]["expense"]>
@@ -1898,6 +2201,7 @@ readonly fields: ExpenseFieldRefs;
 export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   createdBy<T extends Prisma.Expense$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  updatedBy<T extends Prisma.Expense$updatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$updatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.Expense$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$categoryArgs<ExtArgs>>): Prisma.Prisma__ExpenseCategoryClient<runtime.Types.Result.GetResult<Prisma.$ExpenseCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sourceShift<T extends Prisma.Expense$sourceShiftArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$sourceShiftArgs<ExtArgs>>): Prisma.Prisma__ShiftRecordClient<runtime.Types.Result.GetResult<Prisma.$ShiftRecordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   rawMaterialPurchaseOrder<T extends Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$rawMaterialPurchaseOrderArgs<ExtArgs>>): Prisma.Prisma__RawMaterialPurchaseOrderClient<runtime.Types.Result.GetResult<Prisma.$RawMaterialPurchaseOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -1941,7 +2245,9 @@ export interface ExpenseFieldRefs {
   readonly status: Prisma.FieldRef<"Expense", 'EntityStatus'>
   readonly incurredAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Expense", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Expense", 'String'>
+  readonly updatedById: Prisma.FieldRef<"Expense", 'String'>
   readonly categoryId: Prisma.FieldRef<"Expense", 'String'>
   readonly sourceShiftId: Prisma.FieldRef<"Expense", 'String'>
 }
@@ -2348,6 +2654,25 @@ export type ExpenseDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
  * Expense.createdBy
  */
 export type Expense$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Expense.updatedBy
+ */
+export type Expense$updatedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the User
    */

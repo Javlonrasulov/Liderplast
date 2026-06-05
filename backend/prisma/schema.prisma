@@ -214,6 +214,7 @@ model User {
   salaryRecords       SalaryRecord[]
   createdOrders       Order[]             @relation("OrderCreator")
   createdExpenses     Expense[]           @relation("ExpenseCreator")
+  updatedExpenses     Expense[]           @relation("ExpenseUpdater")
   uploadedFiles       UploadedFile[]      @relation("UploadedBy")
   inventoryMovements  InventoryMovement[] @relation("MovementCreator")
   bagAuditLogs        BagAuditLog[]       @relation("BagAuditCreator")
@@ -690,8 +691,11 @@ model Expense {
   status      EntityStatus     @default(COMPLETED)
   incurredAt  DateTime         @default(now())
   createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   createdById String?
   createdBy   User?            @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?            @relation("ExpenseUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
   categoryId  String?
   category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   sourceShiftId String?        @unique

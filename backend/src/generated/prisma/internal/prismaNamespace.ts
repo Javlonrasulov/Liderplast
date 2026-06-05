@@ -3865,7 +3865,9 @@ export const ExpenseScalarFieldEnum = {
   status: 'status',
   incurredAt: 'incurredAt',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   createdById: 'createdById',
+  updatedById: 'updatedById',
   categoryId: 'categoryId',
   sourceShiftId: 'sourceShiftId'
 } as const

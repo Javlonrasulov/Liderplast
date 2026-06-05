@@ -80,8 +80,12 @@ export class FinanceController {
 
   @Patch('expenses/:id')
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
-  updateExpense(@Param('id') id: string, @Body() dto: UpdateExpenseDto) {
-    return this.financeService.updateExpense(id, dto);
+  updateExpense(
+    @Param('id') id: string,
+    @Body() dto: UpdateExpenseDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.financeService.updateExpense(id, dto, userId);
   }
 
   @Delete('expenses/:id')

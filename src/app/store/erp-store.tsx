@@ -251,6 +251,9 @@ export interface Expense {
   hours?: number;
   powerKw?: number;
   createdAt: string;
+  updatedAt?: string;
+  createdByName?: string;
+  updatedByName?: string;
   /** Smenadan avtomatik yaratilgan elektr xarajati */
   sourceShiftId?: string | null;
 }
@@ -1331,9 +1334,12 @@ type BackendExpense = {
   description?: string | null;
   incurredAt: string;
   createdAt: string;
+  updatedAt?: string;
   categoryId?: string | null;
   category?: BackendExpenseCategory | null;
   sourceShiftId?: string | null;
+  createdBy?: { fullName: string } | null;
+  updatedBy?: { fullName: string } | null;
 };
 
 type BackendSupplier = {
@@ -2369,6 +2375,9 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     amount: expense.amount,
     description: expense.description ?? expense.title,
     createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
+    createdByName: expense.createdBy?.fullName?.trim() || undefined,
+    updatedByName: expense.updatedBy?.fullName?.trim() || undefined,
     sourceShiftId: expense.sourceShiftId ?? undefined,
   }));
 

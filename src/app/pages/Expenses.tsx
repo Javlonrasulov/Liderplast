@@ -131,6 +131,19 @@ function isElectricityCategory(c: ExpenseCategory) {
   return c.electricityCalc || c.legacyExpenseType === 'electricity';
 }
 
+function expenseUserAuditLines(expense: Expense, t: T): string[] {
+  const lines: string[] = [];
+  const created = expense.createdByName?.trim();
+  const updated = expense.updatedByName?.trim();
+  if (created) {
+    lines.push(t.exAuditCreated.replace('{name}', created));
+  }
+  if (updated && updated !== created) {
+    lines.push(t.exAuditUpdated.replace('{name}', updated));
+  }
+  return lines;
+}
+
 function ExpenseHistoryTableView({
   expenses,
   categories,
@@ -159,11 +172,11 @@ function ExpenseHistoryTableView({
       <table className="w-full">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-700/50">
-            {[t.colDate, t.colType, t.exColAmount, t.colNote, t.exHistoryColActions].map((h, i) => (
+            {[t.colDate, t.colType, t.exColAmount, t.exHistoryColUser, t.colNote, t.exHistoryColActions].map((h, i) => (
               <th
                 key={h}
                 className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 ${
-                  i === 3 ? noteCol : i === 4 ? 'text-right w-24' : ''
+                  i === 4 ? noteCol : i === 5 ? 'text-right w-24' : i === 3 ? 'hidden sm:table-cell' : ''
                 }`}
               >
                 {h}
@@ -187,6 +200,7 @@ function ExpenseHistoryTableView({
               : expense.description;
             const noteText = formatExpenseHistoryNote(rawNote, t);
             const locked = isRawMaterialExternalOrderExpense(expense, categories);
+            const auditLines = expenseUserAuditLines(expense, t);
             return (
               <tr
                 key={expense.id}
@@ -202,6 +216,19 @@ function ExpenseHistoryTableView({
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
                   {formatCurrency(expense.amount)}
+                </td>
+                <td className="hidden px-4 py-3 text-xs text-slate-600 dark:text-slate-300 sm:table-cell">
+                  {auditLines.length > 0 ? (
+                    <div className="space-y-0.5">
+                      {auditLines.map((line) => (
+                        <div key={line} className="leading-snug">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
                 </td>
                 <td className={`px-4 py-3 text-xs text-slate-500 dark:text-slate-400 ${noteCol}`}>
                   <div className="flex min-w-0 items-start gap-2">
@@ -247,6 +274,7 @@ function ExpenseHistoryTableView({
               {t.exTotalLabel}
             </td>
             <td className="px-4 py-3 text-right text-sm font-bold text-red-600">{formatCurrency(totalFiltered)}</td>
+            <td className="hidden sm:table-cell" />
             <td className={noteCol} />
             <td />
           </tr>
