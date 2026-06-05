@@ -28,6 +28,8 @@ import { formatShiftExpenseTableNote } from '../utils/shift-expense-description'
 import { formatExpenseHistoryNote } from '../utils/expense-history-note';
 import {
   EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF,
+  EXPENSE_CATEGORY_ID_RAW_MATERIAL_EXTERNAL_ORDER,
+  isRawMaterialExternalOrderExpense,
   labelExpenseCategory,
   resolveExpenseCategoryNameFromState,
 } from '../utils/expense-category-label';
@@ -43,6 +45,13 @@ import {
 } from '../components/ui/alert-dialog';
 import { SimpleDonutChart, CategoryExpenseHorizontalBars } from '../components/charts';
 import { cn } from '../components/ui/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 
 const CHART_BAR = [
   'bg-yellow-500',
@@ -129,12 +138,16 @@ function ExpenseHistoryTableView({
   t,
   totalFiltered,
   wideNote,
+  onEdit,
+  onDelete,
 }: {
   expenses: Expense[];
   categories: ExpenseCategory[];
   t: T;
   totalFiltered: number;
   wideNote: boolean;
+  onEdit: (expense: Expense) => void;
+  onDelete: (expense: Expense) => void;
 }) {
   const noteCol = wideNote ? 'table-cell max-w-[min(48rem,55vw)]' : 'hidden md:table-cell max-w-xs';
   if (expenses.length === 0) {
@@ -147,11 +160,11 @@ function ExpenseHistoryTableView({
       <table className="w-full">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-700/50">
-            {[t.colDate, t.colType, t.exColAmount, t.colNote].map((h, i) => (
+            {[t.colDate, t.colType, t.exColAmount, t.colNote, t.exHistoryColActions].map((h, i) => (
               <th
                 key={h}
                 className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 ${
-                  i === 3 ? noteCol : ''
+                  i === 3 ? noteCol : i === 4 ? 'text-right w-24' : ''
                 }`}
               >
                 {h}
@@ -174,6 +187,7 @@ function ExpenseHistoryTableView({
               ? formatShiftExpenseTableNote(expense.description, t)
               : expense.description;
             const noteText = formatExpenseHistoryNote(rawNote, t);
+            const locked = isRawMaterialExternalOrderExpense(expense, categories);
             return (
               <tr
                 key={expense.id}
@@ -202,6 +216,28 @@ function ExpenseHistoryTableView({
                     </span>
                   </div>
                 </td>
+                <td className="px-4 py-3 text-right">
+                  {!locked ? (
+                    <div className="inline-flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(expense)}
+                        className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                        aria-label={t.exExpenseEditTitle}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(expense)}
+                        className="rounded-lg p-1.5 text-red-600 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
+                        aria-label={t.exCategoryDelete}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  ) : null}
+                </td>
               </tr>
             );
           })}
@@ -213,6 +249,7 @@ function ExpenseHistoryTableView({
             </td>
             <td className="px-4 py-3 text-right text-sm font-bold text-red-600">{formatCurrency(totalFiltered)}</td>
             <td className={noteCol} />
+            <td />
           </tr>
         </tfoot>
       </table>
@@ -237,8 +274,22 @@ export function Expenses() {
   const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
   const [statsChartView, setStatsChartView] = useState<ExStatsChartView>(readStoredStatsChartView);
   const [historyFullscreen, setHistoryFullscreen] = useState(false);
+  const [expenseEdit, setExpenseEdit] = useState<Expense | null>(null);
+  const [expenseEditForm, setExpenseEditForm] = useState({
+    categoryId: '',
+    amount: '',
+    description: '',
+    date: todayYmd(),
+  });
+  const [expenseEditError, setExpenseEditError] = useState('');
+  const [expenseDeleteId, setExpenseDeleteId] = useState<string | null>(null);
 
   const categories = state.expenseCategories;
+
+  const editableExpenseCategories = useMemo(
+    () => categories.filter((c) => c.id !== EXPENSE_CATEGORY_ID_RAW_MATERIAL_EXTERNAL_ORDER),
+    [categories],
+  );
 
   useEffect(() => {
     try {
@@ -383,6 +434,61 @@ export function Expenses() {
     if (!categoryDeleteId) return;
     void dispatch({ type: 'DELETE_EXPENSE_CATEGORY', payload: categoryDeleteId });
     setCategoryDeleteId(null);
+  };
+
+  const openExpenseEdit = (expense: Expense) => {
+    setExpenseEdit(expense);
+    setExpenseEditError('');
+    setExpenseEditForm({
+      categoryId: expense.categoryId,
+      amount: String(Math.round(expense.amount)),
+      description: expense.description ?? '',
+      date: expense.date,
+    });
+  };
+
+  const saveExpenseEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expenseEdit) return;
+    setExpenseEditError('');
+    const digits = expenseEditForm.amount.replace(/\D/g, '');
+    const num = parseInt(digits, 10);
+    if (!digits || !Number.isFinite(num) || num <= 0) {
+      setExpenseEditError(t.labelAmount + '!');
+      return;
+    }
+    if (!expenseEditForm.categoryId) {
+      setExpenseEditError(t.exNoCategories);
+      return;
+    }
+    try {
+      await dispatch({
+        type: 'UPDATE_EXPENSE',
+        payload: {
+          id: expenseEdit.id,
+          categoryId: expenseEditForm.categoryId,
+          amount: num,
+          description: expenseEditForm.description,
+          date: expenseEditForm.date,
+        },
+      });
+      setExpenseEdit(null);
+      setSuccess(t.btnSave + ' ✓');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setExpenseEditError(err instanceof Error ? err.message : 'Error');
+    }
+  };
+
+  const requestDeleteExpense = (expense: Expense) => {
+    if (isRawMaterialExternalOrderExpense(expense, categories)) return;
+    setExpenseDeleteId(expense.id);
+  };
+
+  const confirmDeleteExpense = () => {
+    if (!expenseDeleteId) return;
+    void dispatch({ type: 'DELETE_EXPENSE', payload: expenseDeleteId });
+    setExpenseDeleteId(null);
   };
 
   return (
@@ -788,6 +894,8 @@ export function Expenses() {
             t={t}
             totalFiltered={totalTableFiltered}
             wideNote={false}
+            onEdit={openExpenseEdit}
+            onDelete={requestDeleteExpense}
           />
         </div>
       </div>
@@ -824,6 +932,8 @@ export function Expenses() {
                 t={t}
                 totalFiltered={totalTableFiltered}
                 wideNote
+                onEdit={openExpenseEdit}
+                onDelete={requestDeleteExpense}
               />
             </div>
           </div>,
@@ -849,6 +959,112 @@ export function Expenses() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteCategory}
+              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500/30"
+            >
+              {t.exCategoryDelete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={Boolean(expenseEdit)} onOpenChange={(open) => !open && setExpenseEdit(null)}>
+        <DialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-slate-900 dark:text-white">{t.exExpenseEditTitle}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={saveExpenseEdit} className="space-y-3">
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.colType}</label>
+              <select
+                value={expenseEditForm.categoryId}
+                onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, categoryId: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              >
+                {editableExpenseCategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {isElectricityCategory(c)
+                      ? `⚡ ${labelExpenseCategory(c.id, c.name, t)}`
+                      : labelExpenseCategory(c.id, c.name, t)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.labelDate}</label>
+              <input
+                type="date"
+                value={expenseEditForm.date}
+                onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, date: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                {t.exColAmount} ({t.unitSum})
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                value={displayGroupedIntInput(expenseEditForm.amount)}
+                onChange={(e) => {
+                  const d = parseDigitsFromAmountInput(e.target.value);
+                  if (d.length > 15) return;
+                  setExpenseEditForm((prev) => ({ ...prev, amount: d }));
+                }}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.labelDesc}</label>
+              <input
+                type="text"
+                value={expenseEditForm.description}
+                onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+            {expenseEditError ? (
+              <p className="text-sm text-red-600 dark:text-red-400">{expenseEditError}</p>
+            ) : null}
+            <DialogFooter className="gap-2 sm:gap-0">
+              <button
+                type="button"
+                onClick={() => setExpenseEdit(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                {t.btnCancel}
+              </button>
+              <button
+                type="submit"
+                className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-600"
+              >
+                {t.btnSave}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={Boolean(expenseDeleteId)}
+        onOpenChange={(open) => {
+          if (!open) setExpenseDeleteId(null);
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">{t.exExpenseDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+              {t.exExpenseDeleteHint}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
+              {t.btnCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteExpense}
               className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500/30"
             >
               {t.exCategoryDelete}

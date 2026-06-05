@@ -18,6 +18,7 @@ import { Role } from '../../generated/prisma/enums.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
+import { UpdateExpenseDto } from './dto/update-expense.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
 import { UpsertEmployeeProductRateDto } from './dto/upsert-employee-product-rate.dto.js';
@@ -75,6 +76,18 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   getExpenses() {
     return this.financeService.getExpenses();
+  }
+
+  @Patch('expenses/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateExpense(@Param('id') id: string, @Body() dto: UpdateExpenseDto) {
+    return this.financeService.updateExpense(id, dto);
+  }
+
+  @Delete('expenses/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteExpense(@Param('id') id: string) {
+    return this.financeService.deleteExpense(id);
   }
 
   @Post('raw-material-purchase-orders')

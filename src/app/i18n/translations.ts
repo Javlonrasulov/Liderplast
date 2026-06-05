@@ -824,6 +824,11 @@ export interface T {
   /** Тарих жадвали — to‘liq ekran */
   exHistoryFullscreenEnter: string;
   exHistoryFullscreenExit: string;
+  /** Тарих жадвали — амаллар устуни */
+  exHistoryColActions: string;
+  exExpenseEditTitle: string;
+  exExpenseDeleteTitle: string;
+  exExpenseDeleteHint: string;
   exColAmount: string;
   exCategoriesTitle: string;
   exCategoryAdd: string;
@@ -2039,6 +2044,10 @@ const uz_cyrillic: T = {
   exHistory: 'Харажатлар Тарихи',
   exHistoryFullscreenEnter: 'Тўлиқ экран',
   exHistoryFullscreenExit: 'Ёпиш (Esc)',
+  exHistoryColActions: 'Амаллар',
+  exExpenseEditTitle: 'Харажатни таҳрирлаш',
+  exExpenseDeleteTitle: 'Харажатни ўчирамизми?',
+  exExpenseDeleteHint: 'Ёзув рўйхатдан олиб ташланади. «Хом ашё ташқи буюртма» категориясидаги ёзувлар ўчирилмайди.',
   exColAmount: 'Сумма',
   exCategoriesTitle: 'Харажат категориялари',
   exCategoryAdd: 'Янги категория',
@@ -3238,6 +3247,11 @@ const uz_latin: T = {
   exHistory: 'Xarajatlar Tarixi',
   exHistoryFullscreenEnter: "To'liq ekran",
   exHistoryFullscreenExit: 'Yopish (Esc)',
+  exHistoryColActions: 'Amallar',
+  exExpenseEditTitle: 'Xarajatni tahrirlash',
+  exExpenseDeleteTitle: "Xarajatni o'chiramizmi?",
+  exExpenseDeleteHint:
+    "Yozuv ro'yxatdan olib tashlanadi. «Xom ashyo tashqi buyurtma» kategoriyasidagi yozuvlar o'chirilmaydi.",
   exColAmount: 'Summa',
   exCategoriesTitle: 'Xarajat kategoriyalari',
   exCategoryAdd: 'Yangi kategoriya',
@@ -4436,6 +4450,11 @@ const ru: T = {
   exHistory: 'История расходов',
   exHistoryFullscreenEnter: 'На весь экран',
   exHistoryFullscreenExit: 'Закрыть (Esc)',
+  exHistoryColActions: 'Действия',
+  exExpenseEditTitle: 'Редактировать расход',
+  exExpenseDeleteTitle: 'Удалить расход?',
+  exExpenseDeleteHint:
+    'Запись будет удалена из списка. Расходы категории «Сырьё: внешний заказ» удалить здесь нельзя.',
   exColAmount: 'Сумма',
   exCategoriesTitle: 'Категории расходов',
   exCategoryAdd: 'Новая категория',

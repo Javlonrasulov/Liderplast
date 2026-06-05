@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router';
 import {
   LayoutDashboard, Droplets, Boxes,
@@ -8,9 +8,9 @@ import {
   ClipboardList, Factory, Package, Truck,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useERP } from '../store/erp-store';
+import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
-import { formatNumber } from '../utils/format';
+import { formatKgAmount } from '../utils/format';
 import { DateFilterPicker } from './DateFilterPicker';
 import { ExpensesElectricityNavButton } from './ExpensesElectricityNavButton';
 import { Language } from '../i18n/translations';
@@ -19,6 +19,10 @@ import { useAuth } from '../auth/auth-context';
 import { AccountCredentialsDialog } from '../auth/AccountCredentialsDialog';
 import type { AppPermissionKey } from '../auth/permission-keys';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+
+/** RawMaterialWarehouseStock билан бир хил кам қолдиқ чегаралари */
+const LOW_SIRO_KG = 1000;
+const LOW_PAINT_KG = 200;
 
 const LANG_OPTIONS: { value: Language; short: string; label: string; flag: string }[] = [
   { value: 'uz_cyrillic', short: 'КИ', label: 'Ўзбек (Кирил)', flag: '🇺🇿' },
@@ -141,7 +145,7 @@ export function Layout() {
   const [credentialsOpen, setCredentialsOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
   const location = useLocation();
-  const { rawMaterialStock } = useERP();
+  const { state, rawMaterialStockByProductName } = useERP();
   const { t } = useApp();
   const { user, logout, hasPermission } = useAuth();
 
@@ -305,7 +309,32 @@ export function Layout() {
   };
 
   const pageTitle = PAGE_TITLES[location.pathname] || 'Lider Plast ERP';
-  const lowStock = rawMaterialStock < 1000;
+
+  const rawMaterialSidebarRows = useMemo(() => {
+    const order = (k: RawMaterialKind | undefined) => (k === 'PAINT' ? 1 : 0);
+    return state.warehouseProducts
+      .filter((p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL')
+      .sort((a, b) => {
+        const d = order(a.rawMaterialKind) - order(b.rawMaterialKind);
+        if (d !== 0) return d;
+        return a.name.localeCompare(b.name);
+      })
+      .map((rm) => {
+        const kg = rawMaterialStockByProductName[rm.name] ?? 0;
+        const isPaint = rm.rawMaterialKind === 'PAINT';
+        return {
+          id: rm.id,
+          name: rm.name,
+          kindLabel: isPaint ? t.rmKindPaint : t.rmKindSiro,
+          kg,
+          isPaint,
+          isLow: isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG,
+          barMax: isPaint ? 2000 : 3500,
+        };
+      });
+  }, [state.warehouseProducts, rawMaterialStockByProductName, t.rmKindPaint, t.rmKindSiro]);
+
+  const lowStock = rawMaterialSidebarRows.some((row) => row.isLow);
   const showExpensesElectricityNav =
     location.pathname === '/expenses' && hasPermission('view_expenses');
 
@@ -500,21 +529,52 @@ export function Layout() {
           })}
         </nav>
 
-        {/* Raw material (PET) stock status */}
-        {!collapsed && (
-          <div className="mx-3 mb-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-500 dark:text-slate-400 text-xs">{t.layoutSiroRemaining}</span>
-              <span className={`text-xs font-semibold ${lowStock ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                {formatNumber(rawMaterialStock)} kg
-              </span>
-            </div>
-            <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${lowStock ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, (rawMaterialStock / 3500) * 100)}%` }} />
+        {/* Raw material stock by catalog type */}
+        {!collapsed && rawMaterialSidebarRows.length > 0 && (
+          <div className="mx-3 mb-3 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700/50 dark:bg-slate-800">
+            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              {t.layoutSiroRemaining}
+            </p>
+            <div className="space-y-2.5">
+              {rawMaterialSidebarRows.map((row) => {
+                const barPct = Math.min(100, (row.kg / row.barMax) * 100);
+                const barColor = row.isLow
+                  ? 'bg-amber-500'
+                  : row.isPaint
+                    ? 'bg-fuchsia-500'
+                    : 'bg-emerald-500';
+                const qtyColor = row.isLow
+                  ? 'text-amber-500 dark:text-amber-400'
+                  : 'text-emerald-600 dark:text-emerald-400';
+
+                return (
+                  <div key={row.id}>
+                    <div className="mb-1 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-medium text-slate-700 dark:text-slate-200">
+                          {row.name}
+                        </p>
+                        <p className="truncate text-[10px] text-slate-400 dark:text-slate-500">
+                          {row.kindLabel}
+                        </p>
+                      </div>
+                      <span className={`shrink-0 text-xs font-semibold tabular-nums ${qtyColor}`}>
+                        {formatKgAmount(row.kg)} kg
+                      </span>
+                    </div>
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                        style={{ width: `${barPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             {lowStock && (
-              <p className="text-amber-500 dark:text-amber-400 text-xs mt-1.5 flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
+              <p className="mt-2.5 flex items-center gap-1 text-xs text-amber-500 dark:text-amber-400">
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500 dark:bg-amber-400" />
                 {t.layoutMaterialLow}
               </p>
             )}

@@ -28,11 +28,27 @@ function norm(s: string): string {
   return s.toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
-function isRawMaterialExternalOrderCategory(categoryId: string, nameFromDb: string): boolean {
+export function isRawMaterialExternalOrderCategory(
+  categoryId: string,
+  nameFromDb: string,
+): boolean {
   if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_EXTERNAL_ORDER) return true;
   const n = (nameFromDb ?? '').trim();
   if (RAW_MATERIAL_ORDER_DB_NAMES.has(n)) return true;
   return norm(n) === norm('Xom ashyo tashqi buyurtma');
+}
+
+/** Xarajatlar tarixida tahrir/o‘chirish taqiqlangan (tashqi buyurtma) */
+export function isRawMaterialExternalOrderExpense(
+  expense: { categoryId: string; categoryName?: string | null },
+  categories: { id: string; name: string }[],
+): boolean {
+  const dbName = resolveExpenseCategoryNameFromState(
+    expense.categoryId,
+    expense.categoryName,
+    categories,
+  );
+  return isRawMaterialExternalOrderCategory(expense.categoryId, dbName);
 }
 
 function isRawMaterialBagWriteoffCategory(categoryId: string, nameFromDb: string): boolean {

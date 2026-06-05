@@ -35,6 +35,7 @@ import { SupplierPurchaseBatchItemDto } from './dto/supplier-purchase-batch-item
 import { UpdateSupplierPurchaseOrderDto } from './dto/update-supplier-purchase-order.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
+import { UpdateExpenseDto } from './dto/update-expense.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
 import { UpsertEmployeeProductRateDto } from './dto/upsert-employee-product-rate.dto.js';
@@ -425,6 +426,111 @@ export class FinanceService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  private assertExpenseManuallyEditable(expense: {
+    categoryId: string | null;
+    category: { id: string; name: string } | null;
+    rawMaterialPurchaseOrder: unknown | null;
+  }) {
+    if (expense.rawMaterialPurchaseOrder) {
+      throw new BadRequestException(
+        'Xom ashyo tashqi buyurtma xarajatini bu yerda o‘zgartirib yoki o‘chirib bo‘lmaydi.',
+      );
+    }
+    const categoryId = expense.categoryId ?? expense.category?.id ?? '';
+    if (categoryId === RAW_MATERIAL_ORDER_CATEGORY_ID) {
+      throw new BadRequestException(
+        'Xom ashyo tashqi buyurtma xarajatini bu yerda o‘zgartirib yoki o‘chirib bo‘lmaydi.',
+      );
+    }
+    const name = (expense.category?.name ?? '').trim();
+    if (
+      name === 'Xom ashyo tashqi buyurtma' ||
+      normalizeText(name) === normalizeText('Xom ashyo tashqi buyurtma')
+    ) {
+      throw new BadRequestException(
+        'Xom ashyo tashqi buyurtma xarajatini bu yerda o‘zgartirib yoki o‘chirib bo‘lmaydi.',
+      );
+    }
+  }
+
+  async updateExpense(id: string, dto: UpdateExpenseDto) {
+    const existing = await this.prisma.expense.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        rawMaterialPurchaseOrder: true,
+      },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense not found');
+    }
+    this.assertExpenseManuallyEditable(existing);
+
+    let nextCategoryId = existing.categoryId;
+    let nextType = existing.type;
+    if (dto.categoryId !== undefined) {
+      const category = await this.prisma.expenseCategory.findUnique({
+        where: { id: dto.categoryId },
+      });
+      if (!category || category.deletedAt) {
+        throw new BadRequestException('Expense category not found or inactive');
+      }
+      if (category.id === RAW_MATERIAL_ORDER_CATEGORY_ID) {
+        throw new BadRequestException(
+          'Xarajatni «xom ashyo tashqi buyurtma» kategoriyasiga o‘tkazib bo‘lmaydi.',
+        );
+      }
+      nextCategoryId = category.id;
+      nextType = category.legacyExpenseType;
+    }
+
+    const nextDescription =
+      dto.description !== undefined ? dto.description : existing.description;
+    const title =
+      nextDescription && nextDescription.trim().length >= 2
+        ? nextDescription.trim().slice(0, 160)
+        : existing.title;
+
+    return this.prisma.expense.update({
+      where: { id },
+      data: {
+        ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description, title }
+          : {}),
+        ...(dto.incurredAt !== undefined
+          ? { incurredAt: new Date(dto.incurredAt) }
+          : {}),
+        ...(dto.categoryId !== undefined
+          ? { categoryId: nextCategoryId, type: nextType }
+          : {}),
+      },
+      include: {
+        category: true,
+        createdBy: {
+          omit: { passwordHash: true },
+        },
+      },
+    });
+  }
+
+  async deleteExpense(id: string) {
+    const existing = await this.prisma.expense.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        rawMaterialPurchaseOrder: true,
+      },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense not found');
+    }
+    this.assertExpenseManuallyEditable(existing);
+
+    await this.prisma.expense.delete({ where: { id } });
+    return { success: true };
   }
 
   /** Migration seed bo‘lmasa ham yetkazib beruvchi xaridlari ishlaydi */

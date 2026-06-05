@@ -687,6 +687,17 @@ type ERPAction =
   | { type: 'ADD_EXPENSE_CATEGORY'; payload: { name: string } }
   | { type: 'UPDATE_EXPENSE_CATEGORY'; payload: { id: string; name: string } }
   | { type: 'DELETE_EXPENSE_CATEGORY'; payload: string }
+  | {
+      type: 'UPDATE_EXPENSE';
+      payload: {
+        id: string;
+        categoryId?: string;
+        amount?: number;
+        description?: string;
+        date?: string;
+      };
+    }
+  | { type: 'DELETE_EXPENSE'; payload: string }
   | { type: 'ADD_CLIENT'; payload: { name: string; phone?: string; bankAccount?: string; bankName?: string } }
   | {
       type: 'UPDATE_CLIENT';
@@ -856,6 +867,8 @@ interface ERPContextValue {
   /** Katalog номи бўйича қолдиқ (сотув / KPI учун аниқ) */
   semiStockByProductName: Record<string, number>;
   finalStockByProductName: Record<string, number>;
+  /** Хомашё кatalog номи бўйича қолдиқ (sidebar, омбор) */
+  rawMaterialStockByProductName: Record<string, number>;
 }
 
 const emptyState: ERPState = {
@@ -2756,6 +2769,30 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
+        case 'UPDATE_EXPENSE': {
+          const body: Record<string, unknown> = {};
+          if (action.payload.categoryId !== undefined) {
+            body.categoryId = action.payload.categoryId;
+          }
+          if (action.payload.amount !== undefined) {
+            body.amount = action.payload.amount;
+          }
+          if (action.payload.description !== undefined) {
+            body.description = action.payload.description;
+          }
+          if (action.payload.date !== undefined) {
+            body.incurredAt = action.payload.date;
+          }
+          if (Object.keys(body).length === 0) break;
+          await apiRequest(`/finance/expenses/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(body),
+          });
+          break;
+        }
+        case 'DELETE_EXPENSE':
+          await apiRequest(`/finance/expenses/${action.payload}`, { method: 'DELETE' });
+          break;
         case 'CREATE_SUPPLIER':
           await apiRequest('/finance/suppliers', {
             method: 'POST',
@@ -3344,6 +3381,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       finalProductStock,
       semiStockByProductName,
       finalStockByProductName,
+      rawMaterialStockByProductName,
     }),
     [
       state,
@@ -3356,6 +3394,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
       finalProductStock,
       semiStockByProductName,
       finalStockByProductName,
+      rawMaterialStockByProductName,
     ],
   );
 
