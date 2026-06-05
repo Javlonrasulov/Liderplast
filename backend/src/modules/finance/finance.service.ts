@@ -394,6 +394,11 @@ export class FinanceService {
     if (!category || category.deletedAt) {
       throw new BadRequestException('Expense category not found or inactive');
     }
+    if (category.id === RAW_MATERIAL_ORDER_CATEGORY_ID) {
+      throw new BadRequestException(
+        'Xom ashyo tashqi buyurtma xarajati faqat tashqi buyurtma yaratilganda qo‘shiladi.',
+      );
+    }
 
     const incurredAt = dto.incurredAt ? new Date(dto.incurredAt) : new Date();
 
@@ -1587,6 +1592,11 @@ export class FinanceService {
     if (existing.electricityCalc || existing.legacyExpenseType === 'ELECTRICITY') {
       throw new BadRequestException(
         'Electricity calculation category cannot be removed. You can rename it.',
+      );
+    }
+    if (existing.id === RAW_MATERIAL_ORDER_CATEGORY_ID) {
+      throw new BadRequestException(
+        'Raw material external order category cannot be removed. You can rename it.',
       );
     }
     return this.prisma.expenseCategory.update({

@@ -848,6 +848,8 @@ export interface T {
   exStatsViewBars: string;
   exStatsRank: string;
   exNoCategories: string;
+  /** Tashqi buyurtma kategoriyasi qo‘lda kiritilmaydi */
+  exExternalOrderManualBlocked: string;
   /** Diagramma va yuqori statistika barcha vaqt; tarix jadvali sana filtri bo‘yicha */
   exPageStatsNote: string;
   exNoMachinesElectric: string;
@@ -2063,6 +2065,8 @@ const uz_cyrillic: T = {
   exStatsViewBars: 'Устунлар',
   exStatsRank: '#',
   exNoCategories: 'Категория йўқ. Аввал категория яратинг.',
+  exExternalOrderManualBlocked:
+    '«Хом ашё ташқи буюртма» фақат ташқи буюртма берилганда харажатга қўшилади — бу ерда қўлда киритилмайди.',
   exPageStatsNote:
     'Диаграмма ва юқори статистика — барча вақт. «Тарих» жадвали — танланган сана фильтри бўйича.',
   exNoMachinesElectric:
@@ -3267,6 +3271,8 @@ const uz_latin: T = {
   exStatsViewBars: 'Ustunlar',
   exStatsRank: '#',
   exNoCategories: "Kategoriya yo'q. Avval kategoriya yarating.",
+  exExternalOrderManualBlocked:
+    "«Xom ashyo tashqi buyurtma» faqat tashqi buyurtma berilganda xarajatga qo'shiladi — bu yerda qo'lda kiritilmaydi.",
   exPageStatsNote:
     "Diagramma va yuqori statistika — barcha vaqt. «Tarix» jadvali — tanlangan sana filtri bo'yicha.",
   exNoMachinesElectric:
@@ -4470,6 +4476,8 @@ const ru: T = {
   exStatsViewBars: 'Столбцы',
   exStatsRank: '#',
   exNoCategories: 'Нет категорий. Сначала создайте категорию.',
+  exExternalOrderManualBlocked:
+    '«Сырьё: внешний заказ» добавляется в расходы только при создании внешнего заказа — вручную здесь не вводится.',
   exPageStatsNote:
     'Диаграмма и сводка сверху — за всё время. Таблица «История» — по выбранному фильтру дат.',
   exNoMachinesElectric:

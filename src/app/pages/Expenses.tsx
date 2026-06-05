@@ -28,7 +28,6 @@ import { formatShiftExpenseTableNote } from '../utils/shift-expense-description'
 import { formatExpenseHistoryNote } from '../utils/expense-history-note';
 import {
   EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF,
-  EXPENSE_CATEGORY_ID_RAW_MATERIAL_EXTERNAL_ORDER,
   isRawMaterialExternalOrderExpense,
   labelExpenseCategory,
   resolveExpenseCategoryNameFromState,
@@ -286,8 +285,12 @@ export function Expenses() {
 
   const categories = state.expenseCategories;
 
-  const editableExpenseCategories = useMemo(
-    () => categories.filter((c) => c.id !== EXPENSE_CATEGORY_ID_RAW_MATERIAL_EXTERNAL_ORDER),
+  /** Qo‘lda kiritish: tashqi buyurtma kategoriyasi faqat buyurtma yaratilganda xarajatga tushadi */
+  const manualExpenseCategories = useMemo(
+    () =>
+      categories.filter(
+        (c) => !isRawMaterialExternalOrderExpense({ categoryId: c.id, categoryName: c.name }, categories),
+      ),
     [categories],
   );
 
@@ -318,13 +321,14 @@ export function Expenses() {
   }, [historyFullscreen]);
 
   useEffect(() => {
-    if (categories.length === 0) return;
-    const stillValid = activeCategoryId && categories.some((c) => c.id === activeCategoryId);
+    if (manualExpenseCategories.length === 0) return;
+    const stillValid =
+      activeCategoryId && manualExpenseCategories.some((c) => c.id === activeCategoryId);
     if (!stillValid) {
-      const elec = categories.find((c) => isElectricityCategory(c));
-      setActiveCategoryId(elec?.id ?? categories[0].id);
+      const elec = manualExpenseCategories.find((c) => isElectricityCategory(c));
+      setActiveCategoryId(elec?.id ?? manualExpenseCategories[0].id);
     }
-  }, [categories, activeCategoryId]);
+  }, [manualExpenseCategories, activeCategoryId]);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const isElectricity = activeCategory ? isElectricityCategory(activeCategory) : false;
@@ -379,6 +383,15 @@ export function Expenses() {
     setError('');
     if (!activeCategoryId) {
       setError(t.exNoCategories);
+      return;
+    }
+    if (
+      isRawMaterialExternalOrderExpense(
+        { categoryId: activeCategoryId, categoryName: activeCategory?.name },
+        categories,
+      )
+    ) {
+      setError(t.exExternalOrderManualBlocked);
       return;
     }
     const digits = form.amount.replace(/\D/g, '');
@@ -700,11 +713,11 @@ export function Expenses() {
               </div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.exFormTitle}</h3>
             </div>
-            {categories.length === 0 ? (
+            {manualExpenseCategories.length === 0 ? (
               <p className="text-sm text-amber-600 dark:text-amber-400">{t.exNoCategories}</p>
             ) : (
               <div className="grid grid-cols-2 gap-2 mb-4 max-h-48 overflow-y-auto pr-1">
-                {categories.map((c) => {
+                {manualExpenseCategories.map((c) => {
                   const active = activeCategoryId === c.id;
                   return (
                     <button
@@ -851,7 +864,11 @@ export function Expenses() {
                         >
                           <Pencil size={16} />
                         </button>
-                        {!isElectricityCategory(c) && (
+                        {!isElectricityCategory(c) &&
+                          !isRawMaterialExternalOrderExpense(
+                            { categoryId: c.id, categoryName: c.name },
+                            categories,
+                          ) && (
                           <button
                             type="button"
                             onClick={() => requestDeleteCategory(c.id)}
@@ -980,7 +997,7 @@ export function Expenses() {
                 onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, categoryId: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
               >
-                {editableExpenseCategories.map((c) => (
+                {manualExpenseCategories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {isElectricityCategory(c)
                       ? `⚡ ${labelExpenseCategory(c.id, c.name, t)}`
