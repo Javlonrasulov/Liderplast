@@ -5,13 +5,16 @@ import {
   assetCategoryLabel,
   assetStatusLabel,
 } from '../pages/company-assets/labels';
-import { formatCurrency, formatDate } from './format';
+import { formatAssetInitialValue } from '../pages/company-assets/format-value';
+import { formatDate } from './format';
 import { downloadPdfDefinition } from './pdfmake-download';
 
 export function exportCompanyAssetsExcel(
   items: CompanyAssetListItem[],
   t: T,
   fileName = 'korxona-mulki.xlsx',
+  cbuUsdRate = 0,
+  cbuEurRate = 0,
 ) {
   const headers = [
     'ID',
@@ -33,7 +36,7 @@ export function exportCompanyAssetsExcel(
     a.assignedUser?.fullName ?? '—',
     a.location ?? '—',
     formatDate(a.purchasedAt),
-    a.initialValueUzs,
+    formatAssetInitialValue(a, cbuUsdRate, cbuEurRate, t),
     assetStatusLabel(a.status, t),
     a.notes ?? '',
   ]);
@@ -47,6 +50,8 @@ export async function exportCompanyAssetsPdf(
   items: CompanyAssetListItem[],
   t: T,
   title: string,
+  cbuUsdRate = 0,
+  cbuEurRate = 0,
 ) {
   const body = [
     [
@@ -61,7 +66,7 @@ export async function exportCompanyAssetsPdf(
       a.name,
       assetCategoryLabel(a.category, t),
       assetStatusLabel(a.status, t),
-      formatCurrency(a.initialValueUzs),
+      formatAssetInitialValue(a, cbuUsdRate, cbuEurRate, t),
     ]),
   ];
 

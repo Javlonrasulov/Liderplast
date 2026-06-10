@@ -68,6 +68,10 @@ import {
 } from '../utils/company-assets-export';
 import { printCompanyAssets } from '../utils/company-assets-print';
 import { companyAssetsExportT } from './company-assets/export-i18n';
+import {
+  formatAssetInitialValue,
+  formatFormValuePreview,
+} from './company-assets/format-value';
 import { cn } from '../components/ui/utils';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { FilePickerField } from '../components/FilePickerField';
@@ -423,7 +427,7 @@ export function CompanyAssets() {
     const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
-      exportCompanyAssetsExcel(all, et);
+      exportCompanyAssetsExcel(all, et, 'korxona-mulki.xlsx', usdRate, eurRate);
       toast.success(t.caExportExcel);
     } catch {
       toast.error(et.caExportError);
@@ -434,7 +438,7 @@ export function CompanyAssets() {
     const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
-      await exportCompanyAssetsPdf(all, et, et.caTitle);
+      await exportCompanyAssetsPdf(all, et, et.caTitle, usdRate, eurRate);
       toast.success(t.caExportPdf);
     } catch {
       toast.error(et.caExportError);
@@ -849,7 +853,9 @@ export function CompanyAssets() {
                     <td className="px-3 py-2">{row.assignedUser?.fullName ?? t.caNoEmployee}</td>
                     <td className="px-3 py-2">{row.location ?? '—'}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{formatDate(row.purchasedAt)}</td>
-                    <td className="px-3 py-2 font-medium text-red-600 dark:text-red-400">{formatCurrency(row.initialValueUzs)}</td>
+                    <td className="px-3 py-2 text-xs font-medium leading-snug text-red-600 dark:text-red-400">
+                      {formatAssetInitialValue(row, usdRate, eurRate, t)}
+                    </td>
                     <td className="px-3 py-2">
                       <span className={cn('inline-flex rounded-full px-2 py-0.5 text-xs font-medium', statusBadgeClass(row.status))}>
                         {assetStatusLabel(row.status, t)}
@@ -1036,7 +1042,18 @@ export function CompanyAssets() {
                   </label>
                 )}
                 <div className="sm:col-span-2 rounded-xl bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-200">
-                  <p className="font-medium">{t.caAmountUzsPreview}: {formatCurrency(amountUzsPreview)}</p>
+                  <p className="font-medium">
+                    {t.caColInitialValue}:{' '}
+                    {formatFormValuePreview(
+                      purchaseAmountNum,
+                      form.currency,
+                      fxNum,
+                      amountUzsPreview,
+                      usdRate,
+                      eurRate,
+                      t,
+                    )}
+                  </p>
                   <p className="mt-1 text-xs opacity-80">{t.caExpenseLinked}</p>
                 </div>
               </>
@@ -1160,7 +1177,12 @@ export function CompanyAssets() {
                 <p><span className="text-slate-500">{t.caColStatus}:</span> {assetStatusLabel(detail.status, t)}</p>
                 <p><span className="text-slate-500">{t.caColEmployee}:</span> {detail.assignedUser?.fullName ?? t.caNoEmployee}</p>
                 <p><span className="text-slate-500">{t.caColLocation}:</span> {detail.location ?? '—'}</p>
-                <p><span className="text-slate-500">{t.caColInitialValue}:</span> {formatCurrency(detail.initialValueUzs)}</p>
+                <p className="sm:col-span-2">
+                  <span className="text-slate-500">{t.caColInitialValue}:</span>{' '}
+                  <span className="font-medium text-red-600 dark:text-red-400">
+                    {formatAssetInitialValue(detail, usdRate, eurRate, t)}
+                  </span>
+                </p>
                 <p><span className="text-slate-500">{t.caColPurchased}:</span> {formatDate(detail.purchasedAt)}</p>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-600 dark:bg-slate-800/50">

@@ -88,6 +88,8 @@ export interface T {
   caFieldDocuments: string;
   caFieldNotes: string;
   caAmountUzsPreview: string;
+  caValueRateDan: string;
+  caValueUsdUnit: string;
   caDetailTitle: string;
   caTabInfo: string;
   caTabHistory: string;
@@ -1390,6 +1392,8 @@ const uz_cyrillic: T = {
   caFieldDocuments: 'Ҳужжатлар',
   caFieldNotes: 'Изоҳ',
   caAmountUzsPreview: 'Сўмдаги қиймат (xarajatga)',
+  caValueRateDan: 'дан',
+  caValueUsdUnit: '$',
   caDetailTitle: 'Мулк картаси',
   caTabInfo: 'Маълумот',
   caTabHistory: 'Тарих',
@@ -2664,6 +2668,8 @@ const uz_latin: T = {
   caFieldDocuments: 'Hujjatlar',
   caFieldNotes: 'Izoh',
   caAmountUzsPreview: 'So\'mdagi qiymat (xarajatga)',
+  caValueRateDan: 'dan',
+  caValueUsdUnit: '$',
   caDetailTitle: 'Mulk kartasi',
   caTabInfo: 'Ma\'lumot',
   caTabHistory: 'Tarix',
@@ -3939,6 +3945,8 @@ const ru: T = {
   caFieldDocuments: 'Документы',
   caFieldNotes: 'Примечание',
   caAmountUzsPreview: 'Сумма в сумах (расход)',
+  caValueRateDan: 'по курсу',
+  caValueUsdUnit: '$',
   caDetailTitle: 'Карточка имущества',
   caTabInfo: 'Информация',
   caTabHistory: 'История',
