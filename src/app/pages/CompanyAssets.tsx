@@ -73,6 +73,7 @@ import { SingleDatePicker } from '../components/SingleDatePicker';
 import { FilePickerField } from '../components/FilePickerField';
 import { ApiError } from '../api/http';
 import { translateCompanyAssetApiError } from '../utils/company-assets-api-errors';
+import { compressImageFileToDataUrl } from '../utils/compress-image-data-url';
 import {
   Select,
   SelectContent,
@@ -500,7 +501,7 @@ export function CompanyAssets() {
       toast.error(t.caErrFileTooLarge);
       return;
     }
-    const url = await readFileAsDataUrl(file);
+    const url = await compressImageFileToDataUrl(file);
     setImageFileName(file.name);
     setForm((f) => ({ ...f, imageUrl: url }));
   };
@@ -514,7 +515,9 @@ export function CompanyAssets() {
       toast.error(t.caErrFileTooLarge);
       return;
     }
-    const url = await readFileAsDataUrl(file);
+    const url = file.type.startsWith('image/')
+      ? await compressImageFileToDataUrl(file)
+      : await readFileAsDataUrl(file);
     setLastDocFileName(file.name);
     setPendingDocs((d) => [...d, { fileName: file.name, fileUrl: url }]);
   };

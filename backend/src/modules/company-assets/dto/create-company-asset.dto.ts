@@ -1,4 +1,6 @@
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsEnum,
   IsISO8601,
   IsNumber,
@@ -6,7 +8,9 @@ import {
   IsString,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { CompanyAssetDocumentDto } from './company-asset-document.dto.js';
 import {
   CompanyAssetCategory,
   CompanyAssetCondition,
@@ -85,5 +89,8 @@ export class CreateCompanyAssetDto {
   notes?: string;
 
   @IsOptional()
-  documents?: { fileName: string; fileUrl: string }[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CompanyAssetDocumentDto)
+  documents?: CompanyAssetDocumentDto[];
 }

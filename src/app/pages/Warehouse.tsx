@@ -569,6 +569,27 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     () => [...siroRawMaterials].sort((a, b) => a.name.localeCompare(b.name)),
     [siroRawMaterials],
   );
+
+  const ingredientRawMaterialOptions = useMemo(() => {
+    const options = rawMaterials.map((rm) => ({ id: rm.id, name: rm.name }));
+    if (editingProduct?.itemType === 'SEMI_PRODUCT') {
+      for (const link of editingProduct.rawMaterials) {
+        if (
+          link.rawMaterialId &&
+          !options.some((option) => option.id === link.rawMaterialId)
+        ) {
+          options.push({
+            id: link.rawMaterialId,
+            name: `${link.name} — ${t.whRawMaterialUnavailable}`,
+          });
+        }
+      }
+    }
+    return options.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
+  }, [rawMaterials, editingProduct, t]);
+
+  const isKnownRawMaterialId = (id: string) =>
+    Boolean(id && rawMaterials.some((rm) => rm.id === id));
   const paintRawMaterialsSorted = useMemo(
     () => [...paintRawMaterials].sort((a, b) => a.name.localeCompare(b.name)),
     [paintRawMaterials],
@@ -1071,6 +1092,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       }
       if (
         rawMaterialsPayload.some(
+          (item) => !rawMaterials.some((rm) => rm.id === item.rawMaterialId),
+        )
+      ) {
+        throw new Error(t.whErrRawMaterialsNotFound);
+      }
+      if (
+        rawMaterialsPayload.some(
           (item) => !Number.isFinite(item.amountGram) || item.amountGram <= 0,
         )
       ) {
@@ -1486,7 +1514,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     >
                       {t.whSelectRawMaterial}
                     </SelectItem>
-                    {rawMaterials.map((rawMaterial) => (
+                    {ingredientRawMaterialOptions.map((rawMaterial) => (
                       <SelectItem
                         key={rawMaterial.id}
                         value={rawMaterial.id}
@@ -1497,6 +1525,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     ))}
                   </SelectContent>
                 </Select>
+                {item.rawMaterialId && !isKnownRawMaterialId(item.rawMaterialId) ? (
+                  <p className="md:col-span-3 text-xs font-medium text-red-600 dark:text-red-400">
+                    {t.whErrRawMaterialsNotFound}
+                  </p>
+                ) : null}
                 <input
                   type="number"
                   min="0"

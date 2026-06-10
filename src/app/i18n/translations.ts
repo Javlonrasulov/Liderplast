@@ -170,6 +170,7 @@ export interface T {
   caErrEmployeeNotFound: string;
   caErrNotFound: string;
   caErrFileTooLarge: string;
+  caErrPayloadTooLarge: string;
   supTitle: string;
   supSubtitle: string;
   supFormTitle: string;
@@ -767,6 +768,7 @@ export interface T {
   whErrProductNotFound: string;
   whErrRawMaterialsNotFound: string;
   whErrMachinesNotFound: string;
+  whRawMaterialUnavailable: string;
   whSemi18Label: string;
   whSemi20Label: string;
   whFinal05Label: string;
@@ -1470,6 +1472,7 @@ const uz_cyrillic: T = {
   caErrEmployeeNotFound: 'Танланган ходим топилмади',
   caErrNotFound: 'Мулк топилмади',
   caErrFileTooLarge: 'Файл ҳажми жуда катта',
+  caErrPayloadTooLarge: 'Расм ёки ҳужжат жуда катта. Кичикроқ файл танланг ёки қайта урининг.',
   supTitle: 'Етказиб берувчи',
   supSubtitle: 'Ташқи етказиб берувчидан хомашё сотиб олиш ва буюртмалар',
   supFormTitle: 'Сотиб олиш',
@@ -2058,6 +2061,7 @@ const uz_cyrillic: T = {
   whErrRawMaterialsNotFound:
     'Танланган хомашё топилмади. Таркибни қайта танланг.',
   whErrMachinesNotFound: 'Танланган аппарат топилмади. Рўйхатни янгиланг.',
+  whRawMaterialUnavailable: 'мавжуд эмас',
   whSemi18Label: '18g қолип',
   whSemi20Label: '20g қолип',
   whFinal05Label: '0.5L',
@@ -2742,6 +2746,7 @@ const uz_latin: T = {
   caErrEmployeeNotFound: 'Tanlangan xodim topilmadi',
   caErrNotFound: 'Mulk topilmadi',
   caErrFileTooLarge: 'Fayl hajmi juda katta (ruxsat etilgan limitdan oshdi)',
+  caErrPayloadTooLarge: 'Rasm yoki hujjat juda katta. Kichikroq fayl tanlang yoki qayta urining.',
   supTitle: 'Yetkazib beruvchi',
   supSubtitle: 'Tashqi yetkazib beruvchidan xomashyo sotib olish va buyurtmalar',
   supFormTitle: 'Sotib olish',
@@ -3330,6 +3335,7 @@ const uz_latin: T = {
   whErrRawMaterialsNotFound:
     'Tanlangan xomashyo topilmadi. Tarkibni qayta tanlang.',
   whErrMachinesNotFound: 'Tanlangan apparat topilmadi. Ro‘yxatni yangilang.',
+  whRawMaterialUnavailable: 'mavjud emas',
   whSemi18Label: '18g qolip',
   whSemi20Label: '20g qolip',
   whFinal05Label: '0.5L',
@@ -4015,6 +4021,7 @@ const ru: T = {
   caErrEmployeeNotFound: 'Выбранный сотрудник не найден',
   caErrNotFound: 'Имущество не найдено',
   caErrFileTooLarge: 'Файл слишком большой',
+  caErrPayloadTooLarge: 'Изображение или документ слишком большой. Выберите файл меньшего размера.',
   supTitle: 'Поставщик',
   supSubtitle: 'Закупка сырья у внешнего поставщика и заказы',
   supFormTitle: 'Закупка',
@@ -4602,6 +4609,7 @@ const ru: T = {
   whErrRawMaterialsNotFound:
     'Выбранное сырьё не найдено. Перевыберите состав.',
   whErrMachinesNotFound: 'Выбранный аппарат не найден. Обновите список.',
+  whRawMaterialUnavailable: 'недоступно',
   whSemi18Label: 'Заготовка 18g',
   whSemi20Label: 'Заготовка 20g',
   whFinal05Label: '0.5L',

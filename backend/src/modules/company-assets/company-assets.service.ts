@@ -106,10 +106,19 @@ export class CompanyAssetsService {
   }
 
   private async nextInventoryNumber(): Promise<string> {
-    const count = await this.prisma.companyAsset.count({ where: activeOnly });
-    const seq = String(count + 1).padStart(5, '0');
     const year = new Date().getFullYear();
-    return `KM-${year}-${seq}`;
+    const prefix = `KM-${year}-`;
+    const latest = await this.prisma.companyAsset.findFirst({
+      where: { inventoryNumber: { startsWith: prefix } },
+      orderBy: { inventoryNumber: 'desc' },
+      select: { inventoryNumber: true },
+    });
+    let seq = 1;
+    if (latest?.inventoryNumber.startsWith(prefix)) {
+      const parsed = Number.parseInt(latest.inventoryNumber.slice(prefix.length), 10);
+      if (Number.isFinite(parsed) && parsed > 0) seq = parsed + 1;
+    }
+    return `${prefix}${String(seq).padStart(5, '0')}`;
   }
 
   private requireActor(userId?: string): string {

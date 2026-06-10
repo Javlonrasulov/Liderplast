@@ -10,6 +10,14 @@ export function translateCompanyAssetApiError(message: string, t: T): string {
   if (lower.includes('request failed with status')) return t.prEmployeeSaveError;
 
   if (
+    lower.includes('entity too large') ||
+    lower.includes('payload too large') ||
+    lower.includes('request entity too large')
+  ) {
+    return t.caErrPayloadTooLarge;
+  }
+
+  if (
     lower.includes('purchasepriceoriginal') ||
     lower.includes('purchase price') ||
     lower.includes('invalid amounts') ||

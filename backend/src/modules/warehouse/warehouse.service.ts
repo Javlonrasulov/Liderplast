@@ -102,6 +102,12 @@ type ResolvedProductInput = {
 
 @Injectable()
 export class WarehouseService {
+  /** O‘chirilgan xomashyo bog‘lanishlari ko‘rinmasin va saqlanmasin */
+  private readonly semiRawMaterialLinksQuery = {
+    where: { rawMaterial: { isDeleted: false } },
+    include: { rawMaterial: true },
+    orderBy: { createdAt: 'asc' as const },
+  };
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
@@ -358,12 +364,7 @@ export class WarehouseService {
       this.prisma.semiProduct.findMany({
         where: { isDeleted: false },
         include: {
-          rawMaterialLinks: {
-            include: {
-              rawMaterial: true,
-            },
-            orderBy: { createdAt: 'asc' },
-          },
+          rawMaterialLinks: this.semiRawMaterialLinksQuery,
           machineLinks: {
             include: { machine: true },
             orderBy: { createdAt: 'asc' },
@@ -731,7 +732,15 @@ export class WarehouseService {
       });
 
       if (existing.length !== rawMaterials.length) {
-        throw new NotFoundException('One or more raw materials were not found');
+        const found = new Set(existing.map((row) => row.id));
+        const missing = rawMaterials
+          .map((row) => row.rawMaterialId)
+          .filter((id) => !found.has(id));
+        throw new NotFoundException(
+          missing.length > 0
+            ? `One or more raw materials were not found: ${missing.join(', ')}`
+            : 'One or more raw materials were not found',
+        );
       }
 
       const machineIds = relations.machineIds ?? [];
@@ -1224,10 +1233,7 @@ export class WarehouseService {
         const item = await tx.semiProduct.findFirst({
           where: { name, isDeleted: false },
           include: {
-            rawMaterialLinks: {
-              include: { rawMaterial: true },
-              orderBy: { createdAt: 'asc' },
-            },
+            rawMaterialLinks: this.semiRawMaterialLinksQuery,
             machineLinks: {
               include: { machine: true },
               orderBy: { createdAt: 'asc' },
@@ -1302,10 +1308,7 @@ export class WarehouseService {
         const item = await tx.semiProduct.findFirst({
           where: { id, isDeleted: false },
           include: {
-            rawMaterialLinks: {
-              include: { rawMaterial: true },
-              orderBy: { createdAt: 'asc' },
-            },
+            rawMaterialLinks: this.semiRawMaterialLinksQuery,
             machineLinks: {
               include: { machine: true },
               orderBy: { createdAt: 'asc' },
@@ -1440,12 +1443,12 @@ export class WarehouseService {
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
       rawMaterials: item.rawMaterialLinks.map((link) => ({
-        id: link.id,
-        rawMaterialId: link.rawMaterialId,
-        name: link.rawMaterial.name,
-        unit: link.rawMaterial.unit,
-        amountGram: link.amountGram,
-      })),
+          id: link.id,
+          rawMaterialId: link.rawMaterialId,
+          name: link.rawMaterial.name,
+          unit: link.rawMaterial.unit,
+          amountGram: link.amountGram,
+        })),
       machines: (item.machineLinks ?? []).map((link) => ({
         id: link.id,
         machineId: link.machineId,
