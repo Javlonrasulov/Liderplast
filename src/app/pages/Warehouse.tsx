@@ -14,7 +14,10 @@ import {
   Trash2,
   TrendingDown,
   TrendingUp,
+  FileDown,
   History,
+  Printer,
+  Search,
   X,
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
@@ -36,6 +39,13 @@ import {
   formatNumber,
 } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
+import {
+  buildWarehouseStockExportSections,
+  downloadWarehouseStockExcel,
+  printWarehouseStock,
+  warehouseStockExportFileName,
+  type WarehouseExportScope,
+} from '../utils/warehouse-stock-export';
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
 import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
 import {
@@ -47,6 +57,8 @@ import {
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
 import { Button } from '../components/ui/button';
+import { Label } from '../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -396,6 +408,69 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     [t],
   );
 
+  const stockExportLabelsBase = useMemo(
+    () => ({
+      printedAt: t.whExportPrintedAt,
+      colNum: t.whExportColNum,
+      colName: t.whExportColName,
+      colUnit: t.whExportColUnit,
+      colSalePrice: t.whExportColSalePrice,
+      colQty: t.whExportColQty,
+      colTotalUzs: t.whExportColTotalUzs,
+      colTotalUsd: t.whExportColTotalUsd,
+      colType: t.whExportColType,
+      sectionSemi: t.whExportSectionSemi,
+      sectionFinal: t.whExportSectionFinal,
+      typeSemi: t.whExportTypeSemi,
+      typeFinal: t.whExportTypeFinal,
+      grandTotal: t.whExportGrandTotal,
+      unitPiece: t.unitPiece,
+      noPrice: t.whExportNoPrice,
+      docTitle: mode === 'semi' ? t.whExportDocTitleSemi : t.whExportDocTitleFinal,
+    }),
+    [t, mode],
+  );
+
+  const currentExportTypeLabel = mode === 'semi' ? t.whExportTypeSemi : t.whExportTypeFinal;
+
+  const openStockExportDialog = (action: 'excel' | 'print') => {
+    setExportAction(action);
+    setExportScope('current_only');
+    setExportDialogOpen(true);
+  };
+
+  const runStockExport = () => {
+    const printedAtIso = new Date().toISOString().slice(0, 10);
+    const labels = {
+      ...stockExportLabelsBase,
+      docTitle:
+        exportScope === 'current_only'
+          ? stockExportLabelsBase.docTitle
+          : `${t.whExportSectionSemi} + ${t.whExportSectionFinal}`,
+    };
+    const sections = buildWarehouseStockExportSections({
+      scope: exportScope,
+      mode,
+      semiProducts,
+      finishedProducts,
+      semiStockByName: semiStockByProductName,
+      finalStockByName: finalStockByProductName,
+      labels,
+      printedAtIso,
+    });
+    if (exportAction === 'excel') {
+      downloadWarehouseStockExcel(
+        sections,
+        labels,
+        printedAtIso,
+        warehouseStockExportFileName(mode, exportScope),
+      );
+    } else {
+      printWarehouseStock(sections, labels, printedAtIso);
+    }
+    setExportDialogOpen(false);
+  };
+
   const pricingFormLabels = useMemo(
     () => ({
       section: t.whPricingSection,
@@ -444,6 +519,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const [whTab, setWhTab] = useState<'overview' | 'catalog' | 'statistics' | 'history'>(
     'overview',
   );
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportAction, setExportAction] = useState<'excel' | 'print'>('excel');
+  const [exportScope, setExportScope] = useState<WarehouseExportScope>('current_only');
+  const [catalogSearch, setCatalogSearch] = useState('');
 
   /**
    * Mahsulotlarni boshqarish: Admin, Director — har doim;
@@ -816,12 +895,26 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       date: item.createdAt?.slice(0, 10) ?? '1970-01-01',
     }));
 
-    return filterData(items).sort(
+    const q = catalogSearch.trim().toLowerCase();
+    const searched = q
+      ? items.filter((item) => {
+          const haystack = [item.name, item.description ?? '']
+            .join(' ')
+            .toLowerCase();
+          return haystack.includes(q);
+        })
+      : items;
+
+    return filterData(searched).sort(
       (left, right) =>
         new Date(right.createdAt ?? 0).getTime() -
         new Date(left.createdAt ?? 0).getTime(),
     );
-  }, [filterData, productCatalog]);
+  }, [filterData, productCatalog, catalogSearch]);
+
+  useEffect(() => {
+    setCatalogSearch('');
+  }, [mode]);
 
   const defaultFormType: ProductFormType = mode === 'final' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
   const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> =
@@ -1638,6 +1731,80 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           </button>
         </div>
 
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => openStockExportDialog('excel')}
+          >
+            <FileDown size={16} />
+            {t.whExportExcel}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => openStockExportDialog('print')}
+          >
+            <Printer size={16} />
+            {t.whExportPrint}
+          </Button>
+        </div>
+
+        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t.whExportScopeTitle}</DialogTitle>
+              <DialogDescription>{t.whExportScopeDescription}</DialogDescription>
+            </DialogHeader>
+            <RadioGroup
+              value={exportScope}
+              onValueChange={(v) => setExportScope(v as WarehouseExportScope)}
+              className="gap-3"
+            >
+              <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                <RadioGroupItem value="current_only" id="wh-export-current" className="mt-0.5" />
+                <Label htmlFor="wh-export-current" className="cursor-pointer font-normal leading-snug">
+                  {t.whExportScopeCurrent.replace('{type}', currentExportTypeLabel)}
+                </Label>
+              </div>
+              <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                <RadioGroupItem value="both_combined" id="wh-export-combined" className="mt-0.5" />
+                <Label htmlFor="wh-export-combined" className="cursor-pointer font-normal leading-snug">
+                  {t.whExportScopeBothCombined}
+                </Label>
+              </div>
+              <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                <RadioGroupItem value="both_separate" id="wh-export-separate" className="mt-0.5" />
+                <Label htmlFor="wh-export-separate" className="cursor-pointer font-normal leading-snug">
+                  {t.whExportScopeBothSeparate}
+                </Label>
+              </div>
+            </RadioGroup>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setExportDialogOpen(false)}>
+                {t.btnCancel}
+              </Button>
+              <Button type="button" onClick={runStockExport}>
+                {exportAction === 'excel' ? (
+                  <>
+                    <FileDown size={16} />
+                    {t.whExportExcel}
+                  </>
+                ) : (
+                  <>
+                    <Printer size={16} />
+                    {t.whExportPrint}
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {(error || success) && (
           <div
             className={`rounded-2xl border px-4 py-3 text-sm ${
@@ -2109,9 +2276,25 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           )}
         </div>
 
+        <div className="border-b border-slate-200/80 bg-white/50 px-5 py-3 dark:border-slate-700 dark:bg-slate-800/50">
+          <div className="relative max-w-md">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={catalogSearch}
+              onChange={(e) => setCatalogSearch(e.target.value)}
+              placeholder={t.whCatalogSearchPlaceholder}
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-500"
+            />
+          </div>
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="flex min-h-[10rem] items-center justify-center px-4 py-10 text-sm text-slate-500 dark:text-slate-400">
-            {t.whNoProducts}
+            {catalogSearch.trim() ? t.whCatalogNoSearchResults : t.whNoProducts}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">

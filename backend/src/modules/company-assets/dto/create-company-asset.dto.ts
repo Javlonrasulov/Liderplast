@@ -28,8 +28,9 @@ export class CreateCompanyAssetDto {
   @IsString()
   serialNumber?: string;
 
+  @IsOptional()
   @IsEnum(CompanyAssetCategory)
-  category!: CompanyAssetCategory;
+  category?: CompanyAssetCategory;
 
   @IsOptional()
   @IsString()
@@ -39,8 +40,9 @@ export class CreateCompanyAssetDto {
   @IsString()
   model?: string;
 
+  @IsOptional()
   @IsISO8601()
-  purchasedAt!: string;
+  purchasedAt?: string;
 
   @IsNumber()
   @Min(0)
@@ -49,9 +51,10 @@ export class CreateCompanyAssetDto {
   @IsEnum(PurchaseOrderCurrency)
   currency!: PurchaseOrderCurrency;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  fxRateToUzs!: number;
+  fxRateToUzs?: number;
 
   @IsOptional()
   @IsISO8601()

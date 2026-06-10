@@ -33,9 +33,14 @@ export interface CompanyAssetListItem {
   inventoryNumber: string;
   name: string;
   category: CompanyAssetCategory;
+  manufacturer?: string | null;
+  model?: string | null;
   assignedUser?: CompanyAssetUser | null;
   location?: string | null;
   purchasedAt: string;
+  purchasePriceOriginal?: number;
+  currency?: AssetCurrency;
+  fxRateToUzs?: number;
   initialValueUzs: number;
   condition: CompanyAssetCondition;
   status: CompanyAssetStatus;

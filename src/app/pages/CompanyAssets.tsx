@@ -4,6 +4,7 @@ import {
   Search,
   FileSpreadsheet,
   FileText,
+  Printer,
   Eye,
   Pencil,
   Trash2,
@@ -65,6 +66,7 @@ import {
   exportCompanyAssetsExcel,
   exportCompanyAssetsPdf,
 } from '../utils/company-assets-export';
+import { printCompanyAssets } from '../utils/company-assets-print';
 import { cn } from '../components/ui/utils';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { FilePickerField } from '../components/FilePickerField';
@@ -77,6 +79,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import {
+  clearCompanyAssetFormDraft,
+  loadCompanyAssetFormDraft,
+  saveCompanyAssetFormDraft,
+} from './company-assets/form-draft';
 
 const PAGE_SIZE = 20;
 
@@ -94,6 +101,41 @@ const SELECT_ITEM_CLS =
   'cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800';
 
 const CURRENCIES: AssetCurrency[] = ['UZS', 'USD', 'EUR'];
+
+function createEmptyAssetForm() {
+  return {
+    inventoryNumber: '',
+    name: '',
+    serialNumber: '',
+    category: 'OTHER' as (typeof ASSET_CATEGORIES)[number],
+    manufacturer: '',
+    model: '',
+    purchasedAt: todayYmd(),
+    purchasePrice: '',
+    currency: 'UZS' as AssetCurrency,
+    fxRateToUzs: '',
+    warrantyUntil: '',
+    assignedUserId: '',
+    location: '',
+    status: 'ACTIVE' as CompanyAssetStatus,
+    imageUrl: '',
+    notes: '',
+  };
+}
+
+function resolveFxForSubmit(
+  currency: AssetCurrency,
+  fxRateToUzs: string,
+  usdRate: number,
+  eurRate: number,
+): number {
+  if (currency === 'UZS') return 1;
+  const parsed = parseFloat(fxRateToUzs);
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  if (currency === 'USD' && usdRate > 0) return Math.round(usdRate);
+  if (currency === 'EUR' && eurRate > 0) return Math.round(eurRate);
+  return 1;
+}
 
 const ACTIVITY_ACTOR_SUFFIX = / · Kim: .+$/;
 
@@ -181,24 +223,7 @@ export function CompanyAssets() {
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({
-    inventoryNumber: '',
-    name: '',
-    serialNumber: '',
-    category: 'OTHER' as (typeof ASSET_CATEGORIES)[number],
-    manufacturer: '',
-    model: '',
-    purchasedAt: todayYmd(),
-    purchasePrice: '',
-    currency: 'UZS' as AssetCurrency,
-    fxRateToUzs: '',
-    warrantyUntil: '',
-    assignedUserId: '',
-    location: '',
-    status: 'ACTIVE' as CompanyAssetStatus,
-    imageUrl: '',
-    notes: '',
-  });
+  const [form, setForm] = useState(createEmptyAssetForm);
   const [pendingDocs, setPendingDocs] = useState<{ fileName: string; fileUrl: string }[]>([]);
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [lastDocFileName, setLastDocFileName] = useState<string | null>(null);
@@ -288,32 +313,51 @@ export function CompanyAssets() {
   );
 
   const resetForm = () => {
-    setForm({
-      inventoryNumber: '',
-      name: '',
-      serialNumber: '',
-      category: 'OTHER',
-      manufacturer: '',
-      model: '',
-      purchasedAt: todayYmd(),
-      purchasePrice: '',
-      currency: 'UZS',
-      fxRateToUzs: '1',
-      warrantyUntil: '',
-      assignedUserId: '',
-      location: '',
-      status: 'ACTIVE',
-      imageUrl: '',
-      notes: '',
-    });
+    setForm(createEmptyAssetForm());
     setPendingDocs([]);
     setImageFileName(null);
     setLastDocFileName(null);
     setEditingId(null);
   };
 
+  const persistCreateDraft = useCallback(() => {
+    if (editingId) return;
+    const { imageUrl: _imageUrl, ...draftForm } = form;
+    saveCompanyAssetFormDraft({
+      form: draftForm,
+      imageFileName,
+      lastDocFileName,
+      docFileNames: pendingDocs.map((d) => d.fileName),
+    });
+  }, [editingId, form, imageFileName, lastDocFileName, pendingDocs]);
+
+  useEffect(() => {
+    if (!editingId && formOpen) persistCreateDraft();
+  }, [editingId, formOpen, persistCreateDraft]);
+
+  const closeFormDialog = () => {
+    setFormOpen(false);
+    if (editingId) {
+      resetForm();
+    } else {
+      persistCreateDraft();
+    }
+  };
+
   const openCreate = () => {
-    resetForm();
+    setEditingId(null);
+    const draft = loadCompanyAssetFormDraft();
+    if (draft) {
+      setForm({ ...createEmptyAssetForm(), ...draft.form, imageUrl: '' });
+      setImageFileName(draft.imageFileName);
+      setLastDocFileName(draft.lastDocFileName);
+      setPendingDocs([]);
+    } else {
+      setForm(createEmptyAssetForm());
+      setPendingDocs([]);
+      setImageFileName(null);
+      setLastDocFileName(null);
+    }
     setFormOpen(true);
   };
 
@@ -359,10 +403,18 @@ export function CompanyAssets() {
   };
 
   const fetchAllForExport = async () => {
-    const res = await apiRequest<CompanyAssetListResponse>(
-      `/company-assets?${buildQuery(1, 5000)}`,
-    );
-    return res.items;
+    const limit = 100;
+    let pageNum = 1;
+    const all: CompanyAssetListItem[] = [];
+    for (;;) {
+      const res = await apiRequest<CompanyAssetListResponse>(
+        `/company-assets?${buildQuery(pageNum, limit)}`,
+      );
+      all.push(...res.items);
+      if (pageNum >= res.totalPages || res.items.length === 0) break;
+      pageNum += 1;
+    }
+    return all;
   };
 
   const handleExportExcel = async () => {
@@ -371,7 +423,7 @@ export function CompanyAssets() {
       exportCompanyAssetsExcel(all, t);
       toast.success(t.caExportExcel);
     } catch {
-      toast.error(t.prEmployeeSaveError);
+      toast.error(t.caExportError);
     }
   };
 
@@ -381,7 +433,22 @@ export function CompanyAssets() {
       await exportCompanyAssetsPdf(all, t, t.caTitle);
       toast.success(t.caExportPdf);
     } catch {
-      toast.error(t.prEmployeeSaveError);
+      toast.error(t.caExportError);
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      const all = await fetchAllForExport();
+      const opened = printCompanyAssets({
+        items: all,
+        t,
+        usdRate: usdRate > 0 ? usdRate : 1,
+        eurRate: eurRate > 0 ? eurRate : 1,
+      });
+      if (!opened) toast.error(t.caPrintBlocked);
+    } catch {
+      toast.error(t.caExportError);
     }
   };
 
@@ -482,19 +549,14 @@ export function CompanyAssets() {
       return;
     }
     if (!editingId) {
-      if (!form.purchasedAt?.trim()) {
-        toast.error(t.caErrDateInvalid);
-        return;
-      }
       if (!Number.isFinite(purchaseAmountNum) || purchaseAmountNum <= 0) {
         toast.error(t.caErrPurchasePriceRequired);
         return;
       }
-      if (form.currency !== 'UZS' && (!Number.isFinite(fxNum) || fxNum <= 0)) {
-        toast.error(t.caErrFxRateRequired);
-        return;
-      }
     }
+
+    const purchasedAt = form.purchasedAt?.trim() || todayYmd();
+    const submitFx = resolveFxForSubmit(form.currency, form.fxRateToUzs, usdRate, eurRate);
 
     setSaving(true);
     try {
@@ -527,10 +589,10 @@ export function CompanyAssets() {
             category: form.category,
             manufacturer: form.manufacturer || undefined,
             model: form.model || undefined,
-            purchasedAt: form.purchasedAt,
+            purchasedAt,
             purchasePriceOriginal: purchaseAmountNum,
             currency: form.currency,
-            fxRateToUzs: fxNum,
+            fxRateToUzs: submitFx,
             warrantyUntil: form.warrantyUntil || undefined,
             assignedUserId: form.assignedUserId || undefined,
             location: form.location || undefined,
@@ -543,6 +605,7 @@ export function CompanyAssets() {
         await refresh();
       }
       toast.success(t.successAdded);
+      clearCompanyAssetFormDraft();
       setFormOpen(false);
       resetForm();
       await loadList();
@@ -582,6 +645,14 @@ export function CompanyAssets() {
           >
             <FileText size={16} />
             {t.caExportPdf}
+          </button>
+          <button
+            type="button"
+            onClick={() => void handlePrint()}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+          >
+            <Printer size={16} />
+            {t.caPrint}
           </button>
           {canManage && (
             <button
@@ -843,7 +914,7 @@ export function CompanyAssets() {
         </div>
       </div>
 
-      <Dialog open={formOpen} onOpenChange={(o) => { if (!o) { setFormOpen(false); resetForm(); } }}>
+      <Dialog open={formOpen} onOpenChange={(o) => { if (!o) closeFormDialog(); else setFormOpen(true); }}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? t.caEditAsset : t.caAddAsset}</DialogTitle>
@@ -1057,7 +1128,7 @@ export function CompanyAssets() {
             </label>
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <button type="button" onClick={() => { setFormOpen(false); resetForm(); }} className="rounded-xl border px-4 py-2 text-sm dark:border-slate-600">{t.caCancel}</button>
+            <button type="button" onClick={closeFormDialog} className="rounded-xl border px-4 py-2 text-sm dark:border-slate-600">{t.caCancel}</button>
             <button type="button" disabled={saving} onClick={() => void handleSave()} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
               {saving && <Loader2 size={14} className="animate-spin" />}
               {t.caSave}

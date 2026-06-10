@@ -112,6 +112,33 @@ export interface T {
   caAuditUnknown: string;
   caExportExcel: string;
   caExportPdf: string;
+  caPrint: string;
+  caPrintPrintedAt: string;
+  caPrintRecordCount: string;
+  caPrintTotalValue: string;
+  caPrintDocTitle: string;
+  caPrintAsOf: string;
+  caPrintUnit: string;
+  caPrintColNo: string;
+  caPrintColName: string;
+  caPrintColUnit: string;
+  caPrintColQty: string;
+  caPrintColInUse: string;
+  caPrintColUsableIdle: string;
+  caPrintColRepairable: string;
+  caPrintColObsolete: string;
+  caPrintColIrreparable: string;
+  caPrintColPriceUsd: string;
+  caPrintFxPerUsd: string;
+  caPrintCbuRate: string;
+  caPrintSom: string;
+  caPrintTotal: string;
+  caPrintSignShopHead: string;
+  caPrintSignChiefAccountant: string;
+  caPrintSignDirector: string;
+  caPrintSignFounder: string;
+  caPrintBlocked: string;
+  caExportError: string;
   caBulkStatus: string;
   caBulkApply: string;
   caSelected: string;
@@ -393,6 +420,33 @@ export interface T {
   whStockLinePacked: string;
   whStockLineUnpackaged: string;
   whStockLineAllPackaged: string;
+  whExportExcel: string;
+  whExportPrint: string;
+  whExportScopeTitle: string;
+  whExportScopeDescription: string;
+  whExportScopeCurrent: string;
+  whExportScopeBothCombined: string;
+  whExportScopeBothSeparate: string;
+  whExportConfirm: string;
+  whExportColNum: string;
+  whExportColName: string;
+  whExportColUnit: string;
+  whExportColSalePrice: string;
+  whExportColQty: string;
+  whExportColTotalUzs: string;
+  whExportColTotalUsd: string;
+  whExportColType: string;
+  whExportSectionSemi: string;
+  whExportSectionFinal: string;
+  whExportTypeSemi: string;
+  whExportTypeFinal: string;
+  whExportGrandTotal: string;
+  whExportPrintedAt: string;
+  whExportDocTitleSemi: string;
+  whExportDocTitleFinal: string;
+  whExportNoPrice: string;
+  whCatalogSearchPlaceholder: string;
+  whCatalogNoSearchResults: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1350,6 +1404,33 @@ const uz_cyrillic: T = {
   caAuditUnknown: 'Номаъlum',
   caExportExcel: 'Excel',
   caExportPdf: 'PDF',
+  caPrint: 'Чоп этиш',
+  caPrintPrintedAt: 'Чоп этилган сана',
+  caPrintRecordCount: 'Ёзувлар сони',
+  caPrintTotalValue: 'Жами қиймат',
+  caPrintDocTitle: "Asosiy vositalar inventarizatsiya ro'yxati (opis)",
+  caPrintAsOf: 'yil holatida',
+  caPrintUnit: 'шт',
+  caPrintColNo: 'T/r',
+  caPrintColName: "Asosiy vositalarning to'liq nomi",
+  caPrintColUnit: "O'lchov birligi",
+  caPrintColQty: 'Soni',
+  caPrintColInUse: 'yaroqli foydalanishda',
+  caPrintColUsableIdle: 'yaroqli foydalanilmayapti',
+  caPrintColRepairable: "foydalanilmayapti lekin ta'mirlab tiklab bo'ladi",
+  caPrintColObsolete: "texnik va ma'naviy eskirgan",
+  caPrintColIrreparable: 'yaroqsiz va tiklanmaydi',
+  caPrintColPriceUsd: 'Narxi $',
+  caPrintFxPerUsd: '1$=',
+  caPrintCbuRate: 'MB kursi',
+  caPrintSom: "so'm",
+  caPrintTotal: 'JAMI',
+  caPrintSignShopHead: "Sex boshlig'i:",
+  caPrintSignChiefAccountant: 'Bosh hisobchi:',
+  caPrintSignDirector: 'Korxona rahbari:',
+  caPrintSignFounder: 'Korxona tasischisi:',
+  caPrintBlocked: 'Чоп этиш ойнасини очиб бўлмади. Браузерда popup рухсатини ёқинг.',
+  caExportError: 'Экспортда хатолик. Қайта уриниб кўринг.',
   caBulkStatus: 'Статусни ўзгартириш',
   caBulkApply: 'Қўллаш',
   caSelected: 'танланди',
@@ -1910,6 +1991,33 @@ const uz_cyrillic: T = {
   whStockLinePacked: '{bags} пачка қадоқланган ({ppb} тадан)',
   whStockLineUnpackaged: '{rem} дона қадоқланмаган',
   whStockLineAllPackaged: 'Ҳаммаси қадоқланган',
+  whExportExcel: 'Excel юклаш',
+  whExportPrint: 'Чоп этиш',
+  whExportScopeTitle: 'Экспорт ва чоп',
+  whExportScopeDescription: 'Қайси маҳсулотларни қўшиш керак?',
+  whExportScopeCurrent: 'Фақат жорий бўлим ({type})',
+  whExportScopeBothCombined: 'Ярим тайёр + тайёр (бир жадвалда)',
+  whExportScopeBothSeparate: 'Алоҳида жадваллар (ярим / тайёр)',
+  whExportConfirm: 'Давом этиш',
+  whExportColNum: '№',
+  whExportColName: 'Маҳсулот номи',
+  whExportColUnit: 'Ўлчов бирлиги',
+  whExportColSalePrice: 'Сотиш нархи',
+  whExportColQty: 'Сони',
+  whExportColTotalUzs: 'Жами сумма (so‘m)',
+  whExportColTotalUsd: 'Жами ($)',
+  whExportColType: 'Тури',
+  whExportSectionSemi: 'Ярим тайёр маҳсулотлар',
+  whExportSectionFinal: 'Тайёр маҳсулотлар',
+  whExportTypeSemi: 'Ярим тайёр',
+  whExportTypeFinal: 'Тайёр',
+  whExportGrandTotal: 'Жами',
+  whExportPrintedAt: 'Сана',
+  whExportDocTitleSemi: 'Омбор — ярим тайёр маҳсулотлар',
+  whExportDocTitleFinal: 'Омбор — тайёр маҳсулотлар',
+  whExportNoPrice: '—',
+  whCatalogSearchPlaceholder: 'Маҳсулот номи ёки изоҳ бўйича қидирув…',
+  whCatalogNoSearchResults: 'Қидирув бўйича маҳсулот топилмади',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2558,6 +2666,33 @@ const uz_latin: T = {
   caAuditUnknown: 'Noma\'lum',
   caExportExcel: 'Excel',
   caExportPdf: 'PDF',
+  caPrint: 'Chop etish',
+  caPrintPrintedAt: 'Chop etilgan sana',
+  caPrintRecordCount: 'Yozuvlar soni',
+  caPrintTotalValue: 'Jami qiymat',
+  caPrintDocTitle: "Asosiy vositalar inventarizatsiya ro'yxati (opis)",
+  caPrintAsOf: 'yil holatida',
+  caPrintUnit: 'шт',
+  caPrintColNo: 'T/r',
+  caPrintColName: "Asosiy vositalarning to'liq nomi",
+  caPrintColUnit: "O'lchov birligi",
+  caPrintColQty: 'Soni',
+  caPrintColInUse: 'yaroqli foydalanishda',
+  caPrintColUsableIdle: 'yaroqli foydalanilmayapti',
+  caPrintColRepairable: "foydalanilmayapti lekin ta'mirlab tiklab bo'ladi",
+  caPrintColObsolete: "texnik va ma'naviy eskirgan",
+  caPrintColIrreparable: 'yaroqsiz va tiklanmaydi',
+  caPrintColPriceUsd: 'Narxi $',
+  caPrintFxPerUsd: '1$=',
+  caPrintCbuRate: 'MB kursi',
+  caPrintSom: "so'm",
+  caPrintTotal: 'JAMI',
+  caPrintSignShopHead: "Sex boshlig'i:",
+  caPrintSignChiefAccountant: 'Bosh hisobchi:',
+  caPrintSignDirector: 'Korxona rahbari:',
+  caPrintSignFounder: 'Korxona tasischisi:',
+  caPrintBlocked: 'Chop etish oynasini ochib bo\'lmadi. Brauzerda popup ruxsatini yoqing.',
+  caExportError: 'Eksportda xatolik. Qayta urinib ko\'ring.',
   caBulkStatus: 'Statusni o\'zgartirish',
   caBulkApply: 'Qo\'llash',
   caSelected: 'tanlandi',
@@ -3118,6 +3253,33 @@ const uz_latin: T = {
   whStockLinePacked: '{bags} pachka qadoqlangan ({ppb} tadan)',
   whStockLineUnpackaged: '{rem} dona qadoqlanmagan',
   whStockLineAllPackaged: 'Hammasi qadoqlangan',
+  whExportExcel: 'Excel yuklash',
+  whExportPrint: 'Chop etish',
+  whExportScopeTitle: 'Eksport va chop',
+  whExportScopeDescription: 'Qaysi mahsulotlar qo‘shilsin?',
+  whExportScopeCurrent: 'Faqat joriy bo‘lim ({type})',
+  whExportScopeBothCombined: 'Yarim tayyor + tayyor (bir jadvalda)',
+  whExportScopeBothSeparate: 'Alohida jadvallar (yarim / tayyor)',
+  whExportConfirm: 'Davom etish',
+  whExportColNum: '№',
+  whExportColName: 'Mahsulot nomi',
+  whExportColUnit: 'O‘lchov birligi',
+  whExportColSalePrice: 'Sotish narxi',
+  whExportColQty: 'Soni',
+  whExportColTotalUzs: 'Jami summa (so‘m)',
+  whExportColTotalUsd: 'Jami ($)',
+  whExportColType: 'Turi',
+  whExportSectionSemi: 'Yarim tayyor mahsulotlar',
+  whExportSectionFinal: 'Tayyor mahsulotlar',
+  whExportTypeSemi: 'Yarim tayyor',
+  whExportTypeFinal: 'Tayyor',
+  whExportGrandTotal: 'Jami',
+  whExportPrintedAt: 'Sana',
+  whExportDocTitleSemi: 'Ombor — yarim tayyor mahsulotlar',
+  whExportDocTitleFinal: 'Ombor — tayyor mahsulotlar',
+  whExportNoPrice: '—',
+  whCatalogSearchPlaceholder: 'Mahsulot nomi yoki izoh bo‘yicha qidiruv…',
+  whCatalogNoSearchResults: 'Qidiruv bo‘yicha mahsulot topilmadi',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -3767,6 +3929,33 @@ const ru: T = {
   caAuditUnknown: 'Неизвестно',
   caExportExcel: 'Excel',
   caExportPdf: 'PDF',
+  caPrint: 'Печать',
+  caPrintPrintedAt: 'Дата печати',
+  caPrintRecordCount: 'Записей',
+  caPrintTotalValue: 'Общая стоимость',
+  caPrintDocTitle: "Asosiy vositalar inventarizatsiya ro'yxati (opis)",
+  caPrintAsOf: 'yil holatida',
+  caPrintUnit: 'шт',
+  caPrintColNo: 'T/r',
+  caPrintColName: "Asosiy vositalarning to'liq nomi",
+  caPrintColUnit: "O'lchov birligi",
+  caPrintColQty: 'Soni',
+  caPrintColInUse: 'yaroqli foydalanishda',
+  caPrintColUsableIdle: 'yaroqli foydalanilmayapti',
+  caPrintColRepairable: "foydalanilmayapti lekin ta'mirlab tiklab bo'ladi",
+  caPrintColObsolete: "texnik va ma'naviy eskirgan",
+  caPrintColIrreparable: 'yaroqsiz va tiklanmaydi',
+  caPrintColPriceUsd: 'Narxi $',
+  caPrintFxPerUsd: '1$=',
+  caPrintCbuRate: 'MB kursi',
+  caPrintSom: "so'm",
+  caPrintTotal: 'JAMI',
+  caPrintSignShopHead: "Sex boshlig'i:",
+  caPrintSignChiefAccountant: 'Bosh hisobchi:',
+  caPrintSignDirector: 'Korxona rahbari:',
+  caPrintSignFounder: 'Korxona tasischisi:',
+  caPrintBlocked: 'Не удалось открыть окно печати. Разрешите всплывающие окна в браузере.',
+  caExportError: 'Ошибка экспорта. Попробуйте снова.',
   caBulkStatus: 'Изменить статус',
   caBulkApply: 'Применить',
   caSelected: 'выбрано',
@@ -4326,6 +4515,33 @@ const ru: T = {
   whStockLinePacked: '{bags} пачек упаковано (по {ppb} шт)',
   whStockLineUnpackaged: '{rem} шт не упаковано',
   whStockLineAllPackaged: 'Всё упаковано',
+  whExportExcel: 'Скачать Excel',
+  whExportPrint: 'Печать',
+  whExportScopeTitle: 'Экспорт и печать',
+  whExportScopeDescription: 'Какие товары включить?',
+  whExportScopeCurrent: 'Только текущий раздел ({type})',
+  whExportScopeBothCombined: 'Полуфабрикат + готовый (одна таблица)',
+  whExportScopeBothSeparate: 'Отдельные таблицы (полуф. / готов.)',
+  whExportConfirm: 'Продолжить',
+  whExportColNum: '№',
+  whExportColName: 'Наименование',
+  whExportColUnit: 'Ед. изм.',
+  whExportColSalePrice: 'Цена продажи',
+  whExportColQty: 'Кол-во',
+  whExportColTotalUzs: 'Итого (сум)',
+  whExportColTotalUsd: 'Итого ($)',
+  whExportColType: 'Тип',
+  whExportSectionSemi: 'Полуфабрикаты',
+  whExportSectionFinal: 'Готовая продукция',
+  whExportTypeSemi: 'Полуфабрикат',
+  whExportTypeFinal: 'Готовый',
+  whExportGrandTotal: 'Итого',
+  whExportPrintedAt: 'Дата',
+  whExportDocTitleSemi: 'Склад — полуфабрикаты',
+  whExportDocTitleFinal: 'Склад — готовая продукция',
+  whExportNoPrice: '—',
+  whCatalogSearchPlaceholder: 'Поиск по названию или описанию…',
+  whCatalogNoSearchResults: 'По запросу товары не найдены',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

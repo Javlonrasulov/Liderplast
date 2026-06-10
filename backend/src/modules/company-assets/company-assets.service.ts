@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service.js';
 import {
   CompanyAssetActionType,
+  CompanyAssetCategory,
   CompanyAssetCondition,
   CompanyAssetStatus,
   ExpenseType,
@@ -259,16 +260,18 @@ export class CompanyAssetsService {
       throw new BadRequestException('Inventory number already exists');
     }
 
+    let fx = dto.fxRateToUzs ?? 1;
+    if (dto.currency === PurchaseOrderCurrency.UZS) fx = 1;
+
     const amountUzs = this.computeAmountUzs(
       dto.currency,
       dto.purchasePriceOriginal,
-      dto.fxRateToUzs,
+      fx,
     );
-    let fx = dto.fxRateToUzs;
-    if (dto.currency === PurchaseOrderCurrency.UZS) fx = 1;
 
-    const category = await this.ensureCompanyAssetExpenseCategory();
-    const purchasedAt = new Date(dto.purchasedAt);
+    const assetCategory = dto.category ?? CompanyAssetCategory.OTHER;
+    const expenseCategory = await this.ensureCompanyAssetExpenseCategory();
+    const purchasedAt = dto.purchasedAt ? new Date(dto.purchasedAt) : new Date();
     const warrantyUntil = dto.warrantyUntil
       ? new Date(dto.warrantyUntil)
       : undefined;
@@ -286,13 +289,13 @@ export class CompanyAssetsService {
       const expense = await tx.expense.create({
         data: {
           title: `Korxona mulki: ${dto.name.trim()}`,
-          type: category.legacyExpenseType,
-          categoryId: category.id,
+          type: expenseCategory.legacyExpenseType,
+          categoryId: expenseCategory.id,
           amount: amountUzs,
           description: this.buildExpenseDescription({
             name: dto.name.trim(),
             inventoryNumber,
-            category: dto.category,
+            category: assetCategory,
             currency: dto.currency,
             amountOriginal: dto.purchasePriceOriginal,
             fx,
@@ -312,7 +315,7 @@ export class CompanyAssetsService {
           inventoryNumber,
           name: dto.name.trim(),
           serialNumber: dto.serialNumber?.trim() || null,
-          category: dto.category,
+          category: assetCategory,
           manufacturer: dto.manufacturer?.trim() || null,
           model: dto.model?.trim() || null,
           purchasedAt,
