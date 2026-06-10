@@ -79,6 +79,22 @@ export function formatAssetInitialValue(
   return parts.join(' · ');
 }
 
+/** Jami qiymat: 650 000 $ · 78 650 000 000 so'm */
+export function formatTotalAssetValue(
+  totalUzs: number,
+  cbuUsdRate: number,
+  labels: Pick<T, 'caValueUsdUnit'>,
+): string {
+  if (totalUzs <= 0) return EMPTY_PLACEHOLDER;
+  const usd =
+    cbuUsdRate > 0 ? Math.round((totalUzs / cbuUsdRate) * 100) / 100 : 0;
+  const usdStr = formatUsdAmount(usd);
+  if (usdStr) {
+    return `${usdStr} ${labels.caValueUsdUnit} · ${formatCurrency(totalUzs)}`;
+  }
+  return formatCurrency(totalUzs);
+}
+
 export function formatFormValuePreview(
   purchasePrice: number,
   currency: AssetCurrency,

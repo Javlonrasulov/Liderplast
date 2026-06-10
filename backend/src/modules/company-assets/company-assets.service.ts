@@ -172,7 +172,7 @@ export class CompanyAssetsService {
   }
 
   async getStats() {
-    const [total, active, writtenOff] = await Promise.all([
+    const [total, active, writtenOff, valueAgg] = await Promise.all([
       this.prisma.companyAsset.count({ where: activeOnly }),
       this.prisma.companyAsset.count({
         where: { ...activeOnly, status: CompanyAssetStatus.ACTIVE },
@@ -180,8 +180,17 @@ export class CompanyAssetsService {
       this.prisma.companyAsset.count({
         where: { ...activeOnly, status: CompanyAssetStatus.WRITTEN_OFF },
       }),
+      this.prisma.companyAsset.aggregate({
+        where: { ...activeOnly, status: CompanyAssetStatus.ACTIVE },
+        _sum: { initialValueUzs: true },
+      }),
     ]);
-    return { total, active, writtenOff };
+    return {
+      total,
+      active,
+      writtenOff,
+      totalValueUzs: valueAgg._sum.initialValueUzs ?? 0,
+    };
   }
 
   async list(dto: ListCompanyAssetsDto) {

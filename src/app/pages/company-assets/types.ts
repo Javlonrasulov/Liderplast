@@ -93,6 +93,7 @@ export interface CompanyAssetStats {
   total: number;
   active: number;
   writtenOff: number;
+  totalValueUzs: number;
 }
 
 export interface CompanyAssetListResponse {

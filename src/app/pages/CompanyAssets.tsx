@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  DollarSign,
   Plus,
   Search,
   FileSpreadsheet,
@@ -71,6 +72,7 @@ import { companyAssetsExportT } from './company-assets/export-i18n';
 import {
   formatAssetInitialValue,
   formatFormValuePreview,
+  formatTotalAssetValue,
 } from './company-assets/format-value';
 import { cn } from '../components/ui/utils';
 import { SingleDatePicker } from '../components/SingleDatePicker';
@@ -185,6 +187,34 @@ function StatCard({
           <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
         </div>
         <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', accent)}>
+          <Icon size={20} className="text-white" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ValueStatCard({
+  label,
+  display,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  display: string;
+  icon: typeof Building2;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
+          <p className="mt-1 text-base font-bold leading-snug text-red-600 dark:text-red-400 sm:text-lg">
+            {display}
+          </p>
+        </div>
+        <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', accent)}>
           <Icon size={20} className="text-white" />
         </div>
       </div>
@@ -679,10 +709,16 @@ export function CompanyAssets() {
       </div>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard label={t.caStatTotal} value={stats.total} icon={Building2} accent="bg-indigo-500" />
           <StatCard label={t.caStatActive} value={stats.active} icon={Building2} accent="bg-emerald-500" />
           <StatCard label={t.caStatWrittenOff} value={stats.writtenOff} icon={Archive} accent="bg-slate-500" />
+          <ValueStatCard
+            label={t.caStatTotalValue}
+            display={formatTotalAssetValue(stats.totalValueUzs, usdRate, t)}
+            icon={DollarSign}
+            accent="bg-red-500"
+          />
         </div>
       )}
 

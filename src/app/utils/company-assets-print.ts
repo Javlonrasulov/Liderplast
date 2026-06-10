@@ -1,6 +1,6 @@
 import type { T } from '../i18n/translations';
 import type { CompanyAssetListItem } from '../pages/company-assets/types';
-import { todayYmd } from './format';
+import { formatCurrency, todayYmd } from './format';
 
 const PRINT_ORG_NAME = '"SAM BC" MCHJ';
 
@@ -138,6 +138,14 @@ export type CompanyAssetsPrintInput = {
   eurRate: number;
 };
 
+function formatJamiPriceCell(totalUsd: number, totalUzs: number, t: T) {
+  const parts: string[] = [];
+  const usdStr = formatUsd(Math.round(totalUsd * 100) / 100);
+  if (usdStr) parts.push(`${esc(usdStr)} ${esc(t.caValueUsdUnit)}`);
+  if (totalUzs > 0) parts.push(esc(formatCurrency(totalUzs)));
+  return parts.join('<br>') || '—';
+}
+
 export function buildCompanyAssetsPrintHtml({
   items,
   t,
@@ -152,6 +160,7 @@ export function buildCompanyAssetsPrintHtml({
       : '';
   let totalQty = 0;
   let totalUsd = 0;
+  let totalUzs = 0;
 
   const bodyRows = items
     .map((asset, i) => {
@@ -159,6 +168,7 @@ export function buildCompanyAssetsPrintHtml({
       const { priceUsd, fxRate } = assetPriceInfo(asset, usdRate, eurRate);
       totalQty += 1;
       totalUsd += priceUsd;
+      totalUzs += asset.initialValueUzs ?? 0;
 
       return `
         <tr>
@@ -320,7 +330,7 @@ export function buildCompanyAssetsPrintHtml({
           <td colspan="3" class="c">${esc(t.caPrintTotal)}</td>
           <td class="c">${totalQty}</td>
           <td colspan="5"></td>
-          <td class="c price">${esc(formatUsd(Math.round(totalUsd * 100) / 100))}</td>
+          <td class="c price">${formatJamiPriceCell(totalUsd, totalUzs, t)}</td>
         </tr>
       </tbody>
     </table>

@@ -34,6 +34,7 @@ export interface T {
   caStatRepair: string;
   caStatWarehouse: string;
   caStatWrittenOff: string;
+  caStatTotalValue: string;
   caSearchName: string;
   caSearchInventory: string;
   caFilterStatus: string;
@@ -1338,6 +1339,7 @@ const uz_cyrillic: T = {
   caStatRepair: 'Таъмирда',
   caStatWarehouse: 'Омборда',
   caStatWrittenOff: 'Ҳисобдан чиқарилган',
+  caStatTotalValue: 'Жами қиймат',
   caSearchName: 'Мулк номи бўйича',
   caSearchInventory: 'Инвентар рақами',
   caFilterStatus: 'Статус',
@@ -2614,6 +2616,7 @@ const uz_latin: T = {
   caStatRepair: 'Ta\'mirda',
   caStatWarehouse: 'Omborda',
   caStatWrittenOff: 'Hisobdan chiqarilgan',
+  caStatTotalValue: 'Jami qiymat',
   caSearchName: 'Mulk nomi bo\'yicha',
   caSearchInventory: 'Inventar raqami',
   caFilterStatus: 'Status',
@@ -3891,6 +3894,7 @@ const ru: T = {
   caStatRepair: 'В ремонте',
   caStatWarehouse: 'На складе',
   caStatWrittenOff: 'Списано',
+  caStatTotalValue: 'Общая стоимость',
   caSearchName: 'По названию',
   caSearchInventory: 'Инвентарный №',
   caFilterStatus: 'Статус',
