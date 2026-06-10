@@ -2626,10 +2626,21 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         case 'UPDATE_WAREHOUSE_PRODUCT': {
           const { id, currentItemType, ...body } = action.payload;
-          await apiRequest(`/warehouse/products/${currentItemType}/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(body),
-          });
+          const payloadJson = JSON.stringify(body);
+          const primaryUrl = `/warehouse/products/${currentItemType}/${id}`;
+          const legacyUrl = `/warehouse/products/${id}`;
+          try {
+            await apiRequest(primaryUrl, {
+              method: 'PATCH',
+              body: payloadJson,
+            });
+          } catch (e) {
+            if (!isNotFoundApiError(e)) throw e;
+            await apiRequest(legacyUrl, {
+              method: 'PATCH',
+              body: payloadJson,
+            });
+          }
           break;
         }
         case 'DELETE_WAREHOUSE_PRODUCT': {

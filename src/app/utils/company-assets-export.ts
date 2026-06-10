@@ -39,7 +39,7 @@ export function exportCompanyAssetsExcel(
   ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Mulklar');
+  XLSX.utils.book_append_sheet(wb, ws, t.caExportSheetName);
   XLSX.writeFile(wb, fileName);
 }
 
@@ -83,7 +83,7 @@ export async function exportCompanyAssetsPdf(
         header: { fontSize: 14, bold: true },
         tableHeader: { bold: true, fillColor: '#e2e8f0' },
       },
-      defaultStyle: { fontSize: 9 },
+      defaultStyle: { font: 'Roboto', fontSize: 9 },
     },
     'korxona-mulki.pdf',
   );

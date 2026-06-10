@@ -7,6 +7,7 @@ import {
   ParseEnumPipe,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -31,7 +32,7 @@ export class WarehouseController {
   ) {}
 
   @Post('products')
-  @Roles(Role.ADMIN, Role.DIRECTOR)
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT)
   createProduct(
     @Body() dto: CreateProductDto,
     @CurrentUser('sub') userId?: string,
@@ -40,7 +41,8 @@ export class WarehouseController {
   }
 
   @Patch('products/:itemType/:id')
-  @Roles(Role.ADMIN, Role.DIRECTOR)
+  @Put('products/:itemType/:id')
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT)
   updateProduct(
     @Param('itemType', new ParseEnumPipe(InventoryItemType))
     itemType: InventoryItemType,
@@ -51,8 +53,20 @@ export class WarehouseController {
     return this.warehouseService.updateProduct(itemType, id, dto, userId);
   }
 
+  /** Eski frontend / proxy mosligi: tur avtomatik aniqlanadi */
+  @Patch('products/:id')
+  @Put('products/:id')
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT)
+  updateProductById(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.warehouseService.updateProductById(id, dto, userId);
+  }
+
   @Delete('products/:itemType/:id')
-  @Roles(Role.ADMIN, Role.DIRECTOR)
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT)
   deleteProduct(
     @Param('itemType', new ParseEnumPipe(InventoryItemType))
     itemType: InventoryItemType,

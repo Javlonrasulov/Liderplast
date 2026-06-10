@@ -64,7 +64,7 @@ type InventoryMarks = {
   irreparable: string;
 };
 
-function inventoryMarks(asset: CompanyAssetListItem): InventoryMarks {
+function inventoryMarks(asset: CompanyAssetListItem, t: T): InventoryMarks {
   const notes = (asset.notes ?? '').toLowerCase();
   const empty = { inUse: '', usableNotInUse: '', repairable: '', obsolete: '', irreparable: '' };
 
@@ -72,25 +72,45 @@ function inventoryMarks(asset: CompanyAssetListItem): InventoryMarks {
     return { ...empty, irreparable: '+' };
   }
 
-  if (notes.includes('tamirtalab') || notes.includes("ta'mir")) {
+  if (
+    notes.includes('tamirtalab') ||
+    notes.includes('таъмирталаб') ||
+    notes.includes("ta'mir") ||
+    notes.includes('таъмир')
+  ) {
     return {
       inUse: '',
       usableNotInUse: '+',
-      repairable: notes.includes('tiklanadi') ? 'tiklanadi' : '+',
+      repairable:
+        notes.includes('tiklanadi') || notes.includes('тикланади')
+          ? t.caPrintMarkRestore
+          : '+',
       obsolete: '',
       irreparable: '',
     };
   }
 
-  if (asset.condition === 'POOR' || notes.includes('eski')) {
-    return { ...empty, obsolete: 'eski' };
+  if (asset.condition === 'POOR' || notes.includes('eski') || notes.includes('эски')) {
+    return { ...empty, obsolete: t.caPrintMarkOld };
   }
 
   if (asset.condition === 'FAIR') {
-    return { inUse: '', usableNotInUse: '+', repairable: '', obsolete: 'yaxshi', irreparable: '' };
+    return {
+      inUse: '',
+      usableNotInUse: '+',
+      repairable: '',
+      obsolete: t.caPrintMarkGood,
+      irreparable: '',
+    };
   }
 
-  return { inUse: '1+', usableNotInUse: '', repairable: '', obsolete: 'yaxshi', irreparable: '' };
+  return {
+    inUse: '1+',
+    usableNotInUse: '',
+    repairable: '',
+    obsolete: t.caPrintMarkGood,
+    irreparable: '',
+  };
 }
 
 function formatUsd(value: number) {
@@ -135,7 +155,7 @@ export function buildCompanyAssetsPrintHtml({
 
   const bodyRows = items
     .map((asset, i) => {
-      const marks = inventoryMarks(asset);
+      const marks = inventoryMarks(asset, t);
       const { priceUsd, fxRate } = assetPriceInfo(asset, usdRate, eurRate);
       totalQty += 1;
       totalUsd += priceUsd;

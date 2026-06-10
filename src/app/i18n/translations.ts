@@ -132,6 +132,11 @@ export interface T {
   caPrintFxPerUsd: string;
   caPrintCbuRate: string;
   caPrintSom: string;
+  caPrintMarkGood: string;
+  caPrintMarkOld: string;
+  caPrintMarkRepair: string;
+  caPrintMarkRestore: string;
+  caExportSheetName: string;
   caPrintTotal: string;
   caPrintSignShopHead: string;
   caPrintSignChiefAccountant: string;
@@ -759,6 +764,9 @@ export interface T {
   whErrDeleteStockRemains: string;
   /** Xomashyoga bog‘langan qoplar bor */
   whErrDeleteRawBags: string;
+  whErrProductNotFound: string;
+  whErrRawMaterialsNotFound: string;
+  whErrMachinesNotFound: string;
   whSemi18Label: string;
   whSemi20Label: string;
   whFinal05Label: string;
@@ -1408,27 +1416,32 @@ const uz_cyrillic: T = {
   caPrintPrintedAt: 'Чоп этилган сана',
   caPrintRecordCount: 'Ёзувлар сони',
   caPrintTotalValue: 'Жами қиймат',
-  caPrintDocTitle: "Asosiy vositalar inventarizatsiya ro'yxati (opis)",
-  caPrintAsOf: 'yil holatida',
+  caPrintDocTitle: 'Асосий воситалар инвентаризатсия рўйхати (опис)',
+  caPrintAsOf: 'йил ҳолатида',
   caPrintUnit: 'шт',
-  caPrintColNo: 'T/r',
-  caPrintColName: "Asosiy vositalarning to'liq nomi",
-  caPrintColUnit: "O'lchov birligi",
-  caPrintColQty: 'Soni',
-  caPrintColInUse: 'yaroqli foydalanishda',
-  caPrintColUsableIdle: 'yaroqli foydalanilmayapti',
-  caPrintColRepairable: "foydalanilmayapti lekin ta'mirlab tiklab bo'ladi",
-  caPrintColObsolete: "texnik va ma'naviy eskirgan",
-  caPrintColIrreparable: 'yaroqsiz va tiklanmaydi',
-  caPrintColPriceUsd: 'Narxi $',
+  caPrintColNo: 'Т/р',
+  caPrintColName: 'Асосий воситаларнинг тўлиқ номи',
+  caPrintColUnit: 'Ўлчов бирлиги',
+  caPrintColQty: 'Сони',
+  caPrintColInUse: 'яроқли фойдаланишда',
+  caPrintColUsableIdle: 'яроқли фойдаланилмаяпти',
+  caPrintColRepairable: 'фойдаланилмаяпти лекин таъмирлаб тиклаб бўлади',
+  caPrintColObsolete: 'техник ва маънавий эскирган',
+  caPrintColIrreparable: 'яроқсиз ва тикланмайди',
+  caPrintColPriceUsd: 'Нархи $',
   caPrintFxPerUsd: '1$=',
-  caPrintCbuRate: 'MB kursi',
-  caPrintSom: "so'm",
-  caPrintTotal: 'JAMI',
-  caPrintSignShopHead: "Sex boshlig'i:",
-  caPrintSignChiefAccountant: 'Bosh hisobchi:',
-  caPrintSignDirector: 'Korxona rahbari:',
-  caPrintSignFounder: 'Korxona tasischisi:',
+  caPrintCbuRate: 'МБ курси',
+  caPrintSom: 'сўм',
+  caPrintMarkGood: 'яхши',
+  caPrintMarkOld: 'эски',
+  caPrintMarkRepair: 'таъмирталаб',
+  caPrintMarkRestore: 'тикланади',
+  caExportSheetName: 'Мулклар',
+  caPrintTotal: 'ЖАМИ',
+  caPrintSignShopHead: 'Цех бошлиғи:',
+  caPrintSignChiefAccountant: 'Бош ҳисобчи:',
+  caPrintSignDirector: 'Корхона раҳбари:',
+  caPrintSignFounder: 'Корхона таъсисчиси:',
   caPrintBlocked: 'Чоп этиш ойнасини очиб бўлмади. Браузерда popup рухсатини ёқинг.',
   caExportError: 'Экспортда хатолик. Қайта уриниб кўринг.',
   caBulkStatus: 'Статусни ўзгартириш',
@@ -2040,6 +2053,11 @@ const uz_cyrillic: T = {
     'Омборда қолдиқ бор. Аввал қолдиқни нолга туширинг, кейин ўчиринг.',
   whErrDeleteRawBags:
     'Бу хомашё турига боғланган қоплар мавжуд. Аввал қопларни ёпинг ёки бошқа турига уланг.',
+  whErrProductNotFound:
+    'Маҳсулот топилмади. Саҳифани янгиланг — каталог эски бўлиши мумкин.',
+  whErrRawMaterialsNotFound:
+    'Танланган хомашё топилмади. Таркибни қайта танланг.',
+  whErrMachinesNotFound: 'Танланган аппарат топилмади. Рўйхатни янгиланг.',
   whSemi18Label: '18g қолип',
   whSemi20Label: '20g қолип',
   whFinal05Label: '0.5L',
@@ -2686,6 +2704,11 @@ const uz_latin: T = {
   caPrintFxPerUsd: '1$=',
   caPrintCbuRate: 'MB kursi',
   caPrintSom: "so'm",
+  caPrintMarkGood: 'yaxshi',
+  caPrintMarkOld: 'eski',
+  caPrintMarkRepair: 'tamirtalab',
+  caPrintMarkRestore: 'tiklanadi',
+  caExportSheetName: 'Mulklar',
   caPrintTotal: 'JAMI',
   caPrintSignShopHead: "Sex boshlig'i:",
   caPrintSignChiefAccountant: 'Bosh hisobchi:',
@@ -3302,6 +3325,11 @@ const uz_latin: T = {
     'Omborda qoldiq bor. Avval qoldiqni nolga tushiring, keyin o‘chiring.',
   whErrDeleteRawBags:
     'Bu xomashyo turiga bog‘langan qoplar mavjud. Avval qoplarni yoping yoki boshqa turga ulang.',
+  whErrProductNotFound:
+    'Mahsulot topilmadi. Sahifani yangilang — katalog eski bo‘lishi mumkin.',
+  whErrRawMaterialsNotFound:
+    'Tanlangan xomashyo topilmadi. Tarkibni qayta tanlang.',
+  whErrMachinesNotFound: 'Tanlangan apparat topilmadi. Ro‘yxatni yangilang.',
   whSemi18Label: '18g qolip',
   whSemi20Label: '20g qolip',
   whFinal05Label: '0.5L',
@@ -3948,12 +3976,17 @@ const ru: T = {
   caPrintColPriceUsd: 'Narxi $',
   caPrintFxPerUsd: '1$=',
   caPrintCbuRate: 'MB kursi',
-  caPrintSom: "so'm",
-  caPrintTotal: 'JAMI',
-  caPrintSignShopHead: "Sex boshlig'i:",
-  caPrintSignChiefAccountant: 'Bosh hisobchi:',
-  caPrintSignDirector: 'Korxona rahbari:',
-  caPrintSignFounder: 'Korxona tasischisi:',
+  caPrintSom: 'сум',
+  caPrintMarkGood: 'хорошо',
+  caPrintMarkOld: 'старый',
+  caPrintMarkRepair: 'требует ремонта',
+  caPrintMarkRestore: 'восстанавливается',
+  caExportSheetName: 'Имущество',
+  caPrintTotal: 'ИТОГО',
+  caPrintSignShopHead: 'Начальник цеха:',
+  caPrintSignChiefAccountant: 'Главный бухгалтер:',
+  caPrintSignDirector: 'Руководитель предприятия:',
+  caPrintSignFounder: 'Учредитель предприятия:',
   caPrintBlocked: 'Не удалось открыть окно печати. Разрешите всплывающие окна в браузере.',
   caExportError: 'Ошибка экспорта. Попробуйте снова.',
   caBulkStatus: 'Изменить статус',
@@ -4564,6 +4597,11 @@ const ru: T = {
     'На складе есть остаток. Сначала обнулите остаток, затем удалите.',
   whErrDeleteRawBags:
     'Есть мешки, привязанные к этому сырью. Сначала закройте мешки или переключите на другой тип.',
+  whErrProductNotFound:
+    'Продукт не найден. Обновите страницу — каталог мог устареть.',
+  whErrRawMaterialsNotFound:
+    'Выбранное сырьё не найдено. Перевыберите состав.',
+  whErrMachinesNotFound: 'Выбранный аппарат не найден. Обновите список.',
   whSemi18Label: 'Заготовка 18g',
   whSemi20Label: 'Заготовка 20g',
   whFinal05Label: '0.5L',

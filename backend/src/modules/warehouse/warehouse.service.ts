@@ -200,6 +200,38 @@ export class WarehouseService {
     return payload;
   }
 
+  async updateProductById(
+    id: string,
+    dto: UpdateProductDto,
+    updatedById?: string,
+  ) {
+    const itemType = await this.resolveProductItemTypeById(id);
+    return this.updateProduct(itemType, id, dto, updatedById);
+  }
+
+  private async resolveProductItemTypeById(
+    id: string,
+  ): Promise<InventoryItemType> {
+    const [raw, semi, finished] = await Promise.all([
+      this.prisma.rawMaterial.findFirst({
+        where: { id, isDeleted: false },
+        select: { id: true },
+      }),
+      this.prisma.semiProduct.findFirst({
+        where: { id, isDeleted: false },
+        select: { id: true },
+      }),
+      this.prisma.finishedProduct.findFirst({
+        where: { id, isDeleted: false },
+        select: { id: true },
+      }),
+    ]);
+    if (semi) return InventoryItemType.SEMI_PRODUCT;
+    if (finished) return InventoryItemType.FINISHED_PRODUCT;
+    if (raw) return InventoryItemType.RAW_MATERIAL;
+    throw new NotFoundException('Product not found');
+  }
+
   async deleteProduct(
     itemType: InventoryItemType,
     id: string,

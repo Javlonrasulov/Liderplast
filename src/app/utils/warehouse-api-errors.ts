@@ -9,6 +9,11 @@ export function translateWarehouseApiError(message: string, t: T): string {
   if (code === WAREHOUSE_ERR_STOCK_REMAINS) return t.whErrDeleteStockRemains;
   if (code === WAREHOUSE_ERR_RAW_BAGS) return t.whErrDeleteRawBags;
   const lower = code.toLowerCase();
+  if (lower.includes('product not found')) return t.whErrProductNotFound;
+  if (lower.includes('raw materials were not found')) {
+    return t.whErrRawMaterialsNotFound;
+  }
+  if (lower.includes('machines were not found')) return t.whErrMachinesNotFound;
   if (
     lower.includes('rawmaterialkind') &&
     (lower.includes('should not exist') || lower.includes('should not be'))

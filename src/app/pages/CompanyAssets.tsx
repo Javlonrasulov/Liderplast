@@ -67,6 +67,7 @@ import {
   exportCompanyAssetsPdf,
 } from '../utils/company-assets-export';
 import { printCompanyAssets } from '../utils/company-assets-print';
+import { companyAssetsExportT } from './company-assets/export-i18n';
 import { cn } from '../components/ui/utils';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { FilePickerField } from '../components/FilePickerField';
@@ -418,37 +419,40 @@ export function CompanyAssets() {
   };
 
   const handleExportExcel = async () => {
+    const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
-      exportCompanyAssetsExcel(all, t);
+      exportCompanyAssetsExcel(all, et);
       toast.success(t.caExportExcel);
     } catch {
-      toast.error(t.caExportError);
+      toast.error(et.caExportError);
     }
   };
 
   const handleExportPdf = async () => {
+    const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
-      await exportCompanyAssetsPdf(all, t, t.caTitle);
+      await exportCompanyAssetsPdf(all, et, et.caTitle);
       toast.success(t.caExportPdf);
     } catch {
-      toast.error(t.caExportError);
+      toast.error(et.caExportError);
     }
   };
 
   const handlePrint = async () => {
+    const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
       const opened = printCompanyAssets({
         items: all,
-        t,
+        t: et,
         usdRate: usdRate > 0 ? usdRate : 1,
         eurRate: eurRate > 0 ? eurRate : 1,
       });
-      if (!opened) toast.error(t.caPrintBlocked);
+      if (!opened) toast.error(et.caPrintBlocked);
     } catch {
-      toast.error(t.caExportError);
+      toast.error(et.caExportError);
     }
   };
 
