@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
 import {
   ArrowLeft,
@@ -45,10 +45,13 @@ import { InventoryFilters } from './inventory/InventoryFilters';
 import { InventoryTable } from './inventory/InventoryTable';
 import { InventorySummary } from './inventory/InventorySummary';
 import {
-  loadInventoryRecords,
-  nextDocNumber,
-  saveInventoryRecords,
-} from './inventory/inventory-storage';
+  createInventoryDocument,
+  deleteInventoryDocument,
+  fetchInventoryDocuments,
+  fetchNextInventoryDocNumber,
+  migrateLocalInventoryToServer,
+  updateInventoryDocument,
+} from './inventory/inventory-api';
 import type {
   InventoryFilterValue,
   InventoryItemCategory,
@@ -119,9 +122,9 @@ export function Inventory() {
   const { state, refresh } = useERP();
   const { t } = useApp();
 
-  const [records, setRecords] = useState<InventoryRecord[]>(() =>
-    loadInventoryRecords(),
-  );
+  const [records, setRecords] = useState<InventoryRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [suggestedDocNumber, setSuggestedDocNumber] = useState('');
   const [filter, setFilter] = useState<InventoryFilterValue>(DEFAULT_FILTER);
   const [appliedFilter, setAppliedFilter] =
     useState<InventoryFilterValue>(DEFAULT_FILTER);
@@ -130,6 +133,9 @@ export function Inventory() {
   const [confirmFinishId, setConfirmFinishId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [toast, setToast] = useState<string>('');
+  const persistTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
 
   const warehouses = DEFAULT_WAREHOUSES;
   const localizedWarehouses = useMemo<InventoryWarehouseOption[]>(
@@ -142,14 +148,78 @@ export function Inventory() {
   );
 
   useEffect(() => {
-    saveInventoryRecords(records);
-  }, [records]);
+    let cancelled = false;
+    (async () => {
+      try {
+        let remote = await fetchInventoryDocuments();
+        if (!cancelled && remote.length === 0) {
+          remote = await migrateLocalInventoryToServer();
+        }
+        if (!cancelled) setRecords(remote);
+      } catch (err) {
+        if (!cancelled) {
+          const msg = err instanceof Error ? err.message : String(err);
+          setToast(msg || t.invLoadFailed);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [t.invLoadFailed]);
+
+  useEffect(() => {
+    if (!createOpen) return;
+    void fetchNextInventoryDocNumber()
+      .then(setSuggestedDocNumber)
+      .catch(() => setSuggestedDocNumber(''));
+  }, [createOpen]);
 
   useEffect(() => {
     if (!toast) return;
     const id = setTimeout(() => setToast(''), 2400);
     return () => clearTimeout(id);
   }, [toast]);
+
+  const buildPersistPatch = useCallback(
+    (record: InventoryRecord) => ({
+      warehouseId: record.warehouseId,
+      warehouseName: record.warehouseName,
+      dateFrom: record.dateFrom,
+      dateTo: record.dateTo,
+      status: record.status,
+      rows: record.rows,
+      expenseIds: record.expenseIds ?? [],
+      finishedAt: record.finishedAt ?? null,
+    }),
+    [],
+  );
+
+  const persistRecord = useCallback(
+    async (record: InventoryRecord) => {
+      await updateInventoryDocument(record.id, buildPersistPatch(record));
+    },
+    [buildPersistPatch],
+  );
+
+  const schedulePersist = useCallback(
+    (record: InventoryRecord) => {
+      const existing = persistTimers.current.get(record.id);
+      if (existing) clearTimeout(existing);
+      persistTimers.current.set(
+        record.id,
+        setTimeout(() => {
+          void persistRecord(record).catch((err) => {
+            const msg = err instanceof Error ? err.message : String(err);
+            setToast(msg || t.invSaveFailed);
+          });
+        }, 600),
+      );
+    },
+    [persistRecord, t.invSaveFailed],
+  );
 
   /**
    * `warehouseStock` dagi `id` — bu **stock yozuvining ID**'si, kataloq mahsulotining ID'si emas.
@@ -194,41 +264,59 @@ export function Inventory() {
     });
   };
 
-  const handleCreate = (values: CreateDialogValues) => {
-    const initialRows = buildRowsFromCatalog();
-    const warehouse =
-      localizedWarehouses.find((w) => w.id === values.warehouseId) ??
-      localizedWarehouses[0];
-    const newRecord: InventoryRecord = {
-      id: `inv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      docNumber: values.docNumber || nextDocNumber(records),
-      warehouseId: warehouse.id,
-      warehouseName: warehouse.name,
-      dateFrom: values.dateFrom,
-      dateTo: values.dateTo,
-      status: 'NOT_STARTED',
-      createdAt: new Date().toISOString(),
-      rows: initialRows,
-    };
-    setRecords((prev) => [newRecord, ...prev]);
-    setSelectedId(newRecord.id);
-    setCreateOpen(false);
-    setToast(t.invToastCreated);
+  const handleCreate = async (values: CreateDialogValues) => {
+    try {
+      const initialRows = buildRowsFromCatalog();
+      const warehouse =
+        localizedWarehouses.find((w) => w.id === values.warehouseId) ??
+        localizedWarehouses[0];
+      const created = await createInventoryDocument({
+        docNumber: values.docNumber.trim() || suggestedDocNumber,
+        warehouseId: warehouse.id,
+        warehouseName: warehouse.name,
+        dateFrom: values.dateFrom,
+        dateTo: values.dateTo,
+        status: 'NOT_STARTED',
+        rows: initialRows,
+      });
+      setRecords((prev) => [created, ...prev]);
+      setSelectedId(created.id);
+      setCreateOpen(false);
+      setToast(t.invToastCreated);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setToast(msg || t.invSaveFailed);
+    }
   };
 
   const updateRecord = (
     id: string,
     update: (r: InventoryRecord) => InventoryRecord,
+    options?: { immediate?: boolean },
   ) => {
-    setRecords((prev) => prev.map((r) => (r.id === id ? update(r) : r)));
+    setRecords((prev) => {
+      const next = prev.map((r) => (r.id === id ? update(r) : r));
+      const updated = next.find((r) => r.id === id);
+      if (updated) {
+        if (options?.immediate) {
+          void persistRecord(updated).catch((err) => {
+            const msg = err instanceof Error ? err.message : String(err);
+            setToast(msg || t.invSaveFailed);
+          });
+        } else {
+          schedulePersist(updated);
+        }
+      }
+      return next;
+    });
   };
 
   const handleStart = (id: string) => {
-    updateRecord(id, (r) => ({ ...r, status: 'IN_PROGRESS' }));
+    updateRecord(id, (r) => ({ ...r, status: 'IN_PROGRESS' }), { immediate: true });
   };
 
   const handlePause = (id: string) => {
-    updateRecord(id, (r) => ({ ...r, status: 'NOT_STARTED' }));
+    updateRecord(id, (r) => ({ ...r, status: 'NOT_STARTED' }), { immediate: true });
   };
 
   const handleFinish = async (id: string) => {
@@ -362,22 +450,26 @@ export function Inventory() {
 
       await refresh();
 
-      updateRecord(id, (r) => {
-        const finalRows = r.rows.map((row) => ({
-          ...row,
-          systemQuantityEnd: row.realQuantityEnd,
-        }));
-        return {
-          ...r,
-          rows: finalRows,
-          status: 'COMPLETED',
-          finishedAt: new Date().toISOString(),
-          expenseIds:
-            createdExpenseIds.length > 0
-              ? [...(r.expenseIds ?? []), ...createdExpenseIds]
-              : r.expenseIds,
-        };
-      });
+      updateRecord(
+        id,
+        (r) => {
+          const finalRows = r.rows.map((row) => ({
+            ...row,
+            systemQuantityEnd: row.realQuantityEnd,
+          }));
+          return {
+            ...r,
+            rows: finalRows,
+            status: 'COMPLETED',
+            finishedAt: new Date().toISOString(),
+            expenseIds:
+              createdExpenseIds.length > 0
+                ? [...(r.expenseIds ?? []), ...createdExpenseIds]
+                : r.expenseIds,
+          };
+        },
+        { immediate: true },
+      );
       setConfirmFinishId(null);
       setToast(`${t.invToastFinished} • ${t.invStockUpdated}`);
     } catch (err) {
@@ -399,10 +491,17 @@ export function Inventory() {
       }
       await refresh();
     }
-    setRecords((prev) => prev.filter((r) => r.id !== id));
-    if (selectedId === id) setSelectedId(null);
-    setConfirmDeleteId(null);
-    setToast(t.invToastDeleted);
+    try {
+      await deleteInventoryDocument(id);
+      setRecords((prev) => prev.filter((r) => r.id !== id));
+      if (selectedId === id) setSelectedId(null);
+      setConfirmDeleteId(null);
+      setToast(t.invToastDeleted);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setToast(msg || t.invSaveFailed);
+      setConfirmDeleteId(null);
+    }
   };
 
   const handleRowChange = (
@@ -548,6 +647,14 @@ export function Inventory() {
 
   const isCatalogEmpty = (state.warehouseProducts ?? []).length === 0;
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center p-8 text-sm text-slate-500 dark:text-slate-400">
+        {t.invLoading}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 p-3 sm:p-5">
       {/* Header */}
@@ -668,9 +775,9 @@ export function Inventory() {
       <CreateInventoryDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        nextNumber={nextDocNumber(records)}
+        nextNumber={suggestedDocNumber}
         warehouses={localizedWarehouses}
-        onSubmit={handleCreate}
+        onSubmit={(values) => void handleCreate(values)}
       />
 
       {/* Confirm finish */}

@@ -217,3 +217,8 @@ export type CompanyAssetActivityLog = Prisma.CompanyAssetActivityLogModel
  * 
  */
 export type CompanyAssetDocument = Prisma.CompanyAssetDocumentModel
+/**
+ * Model InventoryDocument
+ * Ombor inventarizatsiya hujjatlari (brauzer localStorage o‘rniga serverda)
+ */
+export type InventoryDocument = Prisma.InventoryDocumentModel

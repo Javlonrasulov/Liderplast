@@ -104,6 +104,8 @@ export interface T {
   caExpenseAssetPrefix: string;
   caViewImageFullscreen: string;
   caCloseImage: string;
+  caNoImage: string;
+  caImageUploaded: string;
   caActCreated: string;
   caActUpdated: string;
   caActAssigned: string;
@@ -444,6 +446,10 @@ export interface T {
   whExportScopeCurrent: string;
   whExportScopeBothCombined: string;
   whExportScopeBothSeparate: string;
+  whExportSelectProducts: string;
+  whExportSelectAll: string;
+  whExportSelectedCount: string;
+  whExportNoneSelected: string;
   whExportConfirm: string;
   whExportColNum: string;
   whExportColName: string;
@@ -1309,6 +1315,10 @@ export interface T {
   invToastDeleted: string;
   invUnitPiece: string;
   invUnitKg: string;
+  invQtyKgHint: string;
+  invLoadFailed: string;
+  invSaveFailed: string;
+  invLoading: string;
   invShowing: string;
   invMobileSwipeHint: string;
   invFilterRangeLabel: string;
@@ -1421,6 +1431,8 @@ const uz_cyrillic: T = {
   caExpenseAssetPrefix: 'Корхона мулки',
   caViewImageFullscreen: 'Тўлиқ экранда кўриш',
   caCloseImage: 'Ёпиш',
+  caNoImage: 'Расм йўқ',
+  caImageUploaded: 'Расм сақланди',
   caActCreated: 'Қўшилди',
   caActUpdated: 'Таҳрирланди',
   caActAssigned: 'Ходимга бириктирилди',
@@ -2040,6 +2052,10 @@ const uz_cyrillic: T = {
   whExportScopeCurrent: 'Фақат жорий бўлим ({type})',
   whExportScopeBothCombined: 'Ярим тайёр + тайёр (бир жадвалда)',
   whExportScopeBothSeparate: 'Алоҳида жадваллар (ярим / тайёр)',
+  whExportSelectProducts: 'Маҳсулотлар',
+  whExportSelectAll: 'Ҳаммасини танлаш',
+  whExportSelectedCount: '{n} / {total} танланган',
+  whExportNoneSelected: 'Камида битта маҳсулотни танланг',
   whExportConfirm: 'Давом этиш',
   whExportColNum: '№',
   whExportColName: 'Маҳсулот номи',
@@ -2599,6 +2615,10 @@ const uz_cyrillic: T = {
   invToastDeleted: 'Инвентаризация ўчирилди',
   invUnitPiece: 'дона',
   invUnitKg: 'кг',
+  invQtyKgHint: 'Масалан: 12.560 ёки 12 560 = 12 кг 560 г',
+  invLoadFailed: 'Инвентаризация юкланмади',
+  invSaveFailed: 'Сақлашда хатолик',
+  invLoading: 'Юкланмоқда…',
   invShowing: 'Кўрсатилмоқда',
   invMobileSwipeHint: 'Жадвални ўнгга суринг — қўшимча устунлар бор',
   invFilterRangeLabel: 'Танланган давр',
@@ -3329,6 +3349,10 @@ const uz_latin: T = {
   whExportScopeCurrent: 'Faqat joriy bo‘lim ({type})',
   whExportScopeBothCombined: 'Yarim tayyor + tayyor (bir jadvalda)',
   whExportScopeBothSeparate: 'Alohida jadvallar (yarim / tayyor)',
+  whExportSelectProducts: 'Mahsulotlar',
+  whExportSelectAll: 'Hammasini tanlash',
+  whExportSelectedCount: '{n} / {total} tanlangan',
+  whExportNoneSelected: 'Kamida bitta mahsulotni tanlang',
   whExportConfirm: 'Davom etish',
   whExportColNum: '№',
   whExportColName: 'Mahsulot nomi',
@@ -3889,6 +3913,10 @@ const uz_latin: T = {
   invToastDeleted: 'Inventarizatsiya o‘chirildi',
   invUnitPiece: 'dona',
   invUnitKg: 'kg',
+  invQtyKgHint: 'Masalan: 12.560 yoki 12 560 = 12 kg 560 g',
+  invLoadFailed: 'Inventarizatsiya yuklanmadi',
+  invSaveFailed: 'Saqlashda xatolik',
+  invLoading: 'Yuklanmoqda…',
   invShowing: 'Ko‘rsatilmoqda',
   invMobileSwipeHint: 'Jadvalni o‘ngga suring — qo‘shimcha ustunlar bor',
   invFilterRangeLabel: 'Tanlangan davr',
@@ -4618,6 +4646,10 @@ const ru: T = {
   whExportScopeCurrent: 'Только текущий раздел ({type})',
   whExportScopeBothCombined: 'Полуфабрикат + готовый (одна таблица)',
   whExportScopeBothSeparate: 'Отдельные таблицы (полуф. / готов.)',
+  whExportSelectProducts: 'Товары',
+  whExportSelectAll: 'Выбрать все',
+  whExportSelectedCount: '{n} / {total} выбрано',
+  whExportNoneSelected: 'Выберите хотя бы один товар',
   whExportConfirm: 'Продолжить',
   whExportColNum: '№',
   whExportColName: 'Наименование',
@@ -5178,6 +5210,10 @@ const ru: T = {
   invToastDeleted: 'Инвентаризация удалена',
   invUnitPiece: 'шт',
   invUnitKg: 'кг',
+  invQtyKgHint: 'Например: 12.560 или 12 560 = 12 кг 560 г',
+  invLoadFailed: 'Не удалось загрузить инвентаризацию',
+  invSaveFailed: 'Ошибка сохранения',
+  invLoading: 'Загрузка…',
   invShowing: 'Отображено',
   invMobileSwipeHint: 'Прокрутите таблицу вправо — есть дополнительные колонки',
   invFilterRangeLabel: 'Выбранный период',

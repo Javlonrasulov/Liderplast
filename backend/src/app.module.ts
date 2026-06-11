@@ -18,6 +18,7 @@ import { CrmModule } from './modules/crm/crm.module.js';
 import { FinanceModule } from './modules/finance/finance.module.js';
 import { FileUploadModule } from './modules/file-upload/file-upload.module.js';
 import { CompanyAssetsModule } from './modules/company-assets/company-assets.module.js';
+import { InventoryDocumentsModule } from './modules/inventory-documents/inventory-documents.module.js';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CompanyAssetsModule } from './modules/company-assets/company-assets.mod
     FinanceModule,
     FileUploadModule,
     CompanyAssetsModule,
+    InventoryDocumentsModule,
   ],
   controllers: [AppController],
   providers: [

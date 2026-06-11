@@ -79,6 +79,12 @@ enum ShiftRecordKind {
   PACKAGING
 }
 
+enum InventoryDocumentStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
 enum TokenType {
   REFRESH
 }
@@ -231,6 +237,7 @@ model User {
   companyAssetsUpdated             CompanyAsset[]             @relation("CompanyAssetUpdater")
   companyAssetsDeleted             CompanyAsset[]             @relation("CompanyAssetDeleter")
   companyAssetActivityLogs         CompanyAssetActivityLog[]  @relation("CompanyAssetActivityActor")
+  inventoryDocumentsCreated        InventoryDocument[]        @relation("InventoryDocumentCreator")
 
   @@index([stir])
 }
@@ -977,4 +984,27 @@ model CompanyAssetDocument {
   uploadedAt DateTime     @default(now())
 
   @@index([assetId])
+}
+
+/// Ombor inventarizatsiya hujjatlari (brauzer localStorage o‘rniga serverda)
+model InventoryDocument {
+  id            String                   @id @default(cuid())
+  docNumber     String                   @unique
+  warehouseId   String                   @default("main")
+  warehouseName String
+  dateFrom      String
+  dateTo        String
+  status        InventoryDocumentStatus  @default(NOT_STARTED)
+  expenseIds    String[]                 @default([])
+  rows          Json
+  createdById   String?
+  createdBy     User?                    @relation("InventoryDocumentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  finishedAt    DateTime?
+
+  @@index([status])
+  @@index([dateFrom, dateTo])
+  @@index([warehouseId])
+  @@index([docNumber])
 }

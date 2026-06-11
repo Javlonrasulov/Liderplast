@@ -117,6 +117,15 @@ export const ShiftRecordKind = {
 export type ShiftRecordKind = (typeof ShiftRecordKind)[keyof typeof ShiftRecordKind]
 
 
+export const InventoryDocumentStatus = {
+  NOT_STARTED: 'NOT_STARTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type InventoryDocumentStatus = (typeof InventoryDocumentStatus)[keyof typeof InventoryDocumentStatus]
+
+
 export const TokenType = {
   REFRESH: 'REFRESH'
 } as const

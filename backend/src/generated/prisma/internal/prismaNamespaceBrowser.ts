@@ -90,7 +90,8 @@ export const ModelName = {
   UploadJob: 'UploadJob',
   CompanyAsset: 'CompanyAsset',
   CompanyAssetActivityLog: 'CompanyAssetActivityLog',
-  CompanyAssetDocument: 'CompanyAssetDocument'
+  CompanyAssetDocument: 'CompanyAssetDocument',
+  InventoryDocument: 'InventoryDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -780,6 +781,25 @@ export const CompanyAssetDocumentScalarFieldEnum = {
 export type CompanyAssetDocumentScalarFieldEnum = (typeof CompanyAssetDocumentScalarFieldEnum)[keyof typeof CompanyAssetDocumentScalarFieldEnum]
 
 
+export const InventoryDocumentScalarFieldEnum = {
+  id: 'id',
+  docNumber: 'docNumber',
+  warehouseId: 'warehouseId',
+  warehouseName: 'warehouseName',
+  dateFrom: 'dateFrom',
+  dateTo: 'dateTo',
+  status: 'status',
+  expenseIds: 'expenseIds',
+  rows: 'rows',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type InventoryDocumentScalarFieldEnum = (typeof InventoryDocumentScalarFieldEnum)[keyof typeof InventoryDocumentScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -794,6 +814,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

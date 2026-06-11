@@ -423,7 +423,8 @@ export const ModelName = {
   UploadJob: 'UploadJob',
   CompanyAsset: 'CompanyAsset',
   CompanyAssetActivityLog: 'CompanyAssetActivityLog',
-  CompanyAssetDocument: 'CompanyAssetDocument'
+  CompanyAssetDocument: 'CompanyAssetDocument',
+  InventoryDocument: 'InventoryDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -439,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3403,6 +3404,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InventoryDocument: {
+      payload: Prisma.$InventoryDocumentPayload<ExtArgs>
+      fields: Prisma.InventoryDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InventoryDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InventoryDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.InventoryDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InventoryDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.InventoryDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.InventoryDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.InventoryDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InventoryDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.InventoryDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        update: {
+          args: Prisma.InventoryDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.InventoryDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InventoryDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InventoryDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.InventoryDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.InventoryDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInventoryDocument>
+        }
+        groupBy: {
+          args: Prisma.InventoryDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InventoryDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InventoryDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InventoryDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4113,6 +4188,25 @@ export const CompanyAssetDocumentScalarFieldEnum = {
 export type CompanyAssetDocumentScalarFieldEnum = (typeof CompanyAssetDocumentScalarFieldEnum)[keyof typeof CompanyAssetDocumentScalarFieldEnum]
 
 
+export const InventoryDocumentScalarFieldEnum = {
+  id: 'id',
+  docNumber: 'docNumber',
+  warehouseId: 'warehouseId',
+  warehouseName: 'warehouseName',
+  dateFrom: 'dateFrom',
+  dateTo: 'dateTo',
+  status: 'status',
+  expenseIds: 'expenseIds',
+  rows: 'rows',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type InventoryDocumentScalarFieldEnum = (typeof InventoryDocumentScalarFieldEnum)[keyof typeof InventoryDocumentScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4127,6 +4221,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -4628,6 +4729,20 @@ export type EnumCompanyAssetActionTypeFieldRefInput<$PrismaModel> = FieldRefInpu
 export type ListEnumCompanyAssetActionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyAssetActionType[]'>
     
 
+
+/**
+ * Reference to a field of type 'InventoryDocumentStatus'
+ */
+export type EnumInventoryDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryDocumentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InventoryDocumentStatus[]'
+ */
+export type ListEnumInventoryDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryDocumentStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -4763,6 +4878,7 @@ export type GlobalOmitConfig = {
   companyAsset?: Prisma.CompanyAssetOmit
   companyAssetActivityLog?: Prisma.CompanyAssetActivityLogOmit
   companyAssetDocument?: Prisma.CompanyAssetDocumentOmit
+  inventoryDocument?: Prisma.InventoryDocumentOmit
 }
 
 /* Types for Logging */

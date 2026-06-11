@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../../i18n/app-context';
 import { formatNumber } from '../../utils/format';
+import {
+  formatInventoryQuantityDisplay,
+  parseInventoryQuantityInput,
+} from '../../utils/inventory-quantity';
 import type { InventoryRecord, InventoryRow } from './types';
 
 interface InventoryTableProps {
@@ -31,46 +35,63 @@ function diffClass(diff: number): string {
  */
 function InventoryEditableQtyInput({
   quantity,
+  unit,
   onCommit,
   className,
 }: {
   quantity: number;
+  unit: 'kg' | 'pcs';
   onCommit: (n: number) => void;
   className?: string;
 }) {
+  const { t } = useApp();
   const [focused, setFocused] = useState(false);
   const [text, setText] = useState('');
+  const [invalid, setInvalid] = useState(false);
 
   const displayQty = Number.isFinite(quantity) ? quantity : 0;
-  const shownValue = focused ? text : String(displayQty);
+  const shownValue = focused
+    ? text
+    : formatInventoryQuantityDisplay(displayQty, unit);
 
   return (
     <input
       type="text"
       inputMode="decimal"
       autoComplete="off"
+      title={unit === 'kg' ? t.invQtyKgHint : undefined}
       value={shownValue}
       onFocus={() => {
         setFocused(true);
-        setText(displayQty === 0 ? '' : String(displayQty));
+        setInvalid(false);
+        setText(displayQty === 0 ? '' : formatInventoryQuantityDisplay(displayQty, unit));
       }}
       onBlur={() => {
-        const raw = text.trim().replace(/\s/g, '').replace(',', '.');
-        let n = 0;
-        if (raw !== '' && raw !== '.' && raw !== '-') {
-          const parsed = Number(raw);
-          if (Number.isFinite(parsed) && parsed >= 0) n = parsed;
+        const parsed = parseInventoryQuantityInput(text, unit);
+        if (parsed === null) {
+          setInvalid(true);
+          setFocused(false);
+          return;
         }
-        onCommit(n);
+        onCommit(parsed);
+        setInvalid(false);
         setFocused(false);
       }}
       onChange={(e) => {
-        const raw = e.target.value.replace(/\s/g, '').replace(',', '.');
-        if (raw === '' || /^\d*\.?\d*$/.test(raw)) {
+        const raw = e.target.value;
+        const allowed =
+          unit === 'kg'
+            ? raw === '' || /^[\d\s.,-]*$/.test(raw)
+            : (() => {
+                const n = raw.replace(/\s/g, '').replace(',', '.');
+                return n === '' || /^\d*\.?\d*$/.test(n);
+              })();
+        if (allowed) {
           setText(raw);
+          setInvalid(false);
         }
       }}
-      className={className}
+      className={`${className ?? ''}${invalid ? ' border-red-500 ring-1 ring-red-400' : ''}`}
     />
   );
 }
@@ -258,6 +279,7 @@ export function InventoryTable({
                     {editable ? (
                       <InventoryEditableQtyInput
                         quantity={row.realQuantityStart}
+                        unit={row.unit}
                         onCommit={(n) =>
                           onChangeRow(row.productId, {
                             realQuantityStart: n,
@@ -275,6 +297,7 @@ export function InventoryTable({
                     {editable ? (
                       <InventoryEditableQtyInput
                         quantity={row.income}
+                        unit={row.unit}
                         onCommit={(n) =>
                           onChangeRow(row.productId, { income: n })
                         }
@@ -290,6 +313,7 @@ export function InventoryTable({
                     {editable ? (
                       <InventoryEditableQtyInput
                         quantity={row.expense}
+                        unit={row.unit}
                         onCommit={(n) =>
                           onChangeRow(row.productId, { expense: n })
                         }
@@ -308,6 +332,7 @@ export function InventoryTable({
                     {editable ? (
                       <InventoryEditableQtyInput
                         quantity={row.realQuantityEnd}
+                        unit={row.unit}
                         onCommit={(n) =>
                           onChangeRow(row.productId, {
                             realQuantityEnd: n,

@@ -81,6 +81,37 @@ function requiredPermissionGroups(
     },
 
     {
+      test: /^\/inventory\/documents$/,
+      method: 'GET',
+      anyOf: ['view_inventory'],
+    },
+    {
+      test: /^\/inventory\/documents\/next-doc-number$/,
+      method: 'GET',
+      anyOf: ['view_inventory'],
+    },
+    {
+      test: /^\/inventory\/documents\/[^/]+$/,
+      method: 'GET',
+      anyOf: ['view_inventory'],
+    },
+    {
+      test: /^\/inventory\/documents$/,
+      method: 'POST',
+      anyOf: ['view_inventory'],
+    },
+    {
+      test: /^\/inventory\/documents\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_inventory'],
+    },
+    {
+      test: /^\/inventory\/documents\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['view_inventory'],
+    },
+
+    {
       test: /^\/raw-material-bags$/,
       method: 'GET',
       anyOf: ['view_raw_material_bags', 'view_raw_material'],
