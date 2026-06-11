@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
+import { AlertTriangle, Maximize2, Pencil, Trash2 } from 'lucide-react';
 import type { RawMaterialKind } from '../store/erp-store';
 import { formatKgAmount, formatNumber } from '../utils/format';
 import { Button } from './ui/button';
@@ -47,6 +47,8 @@ type Props = {
   canDelete?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEnterFullscreen?: () => void;
+  fullscreenEnterLabel?: string;
 };
 
 function fillBadgeClass(pct: number) {
@@ -70,6 +72,8 @@ export function RawMaterialOverviewStockTable({
   canDelete = false,
   onEdit,
   onDelete,
+  onEnterFullscreen,
+  fullscreenEnterLabel,
 }: Props) {
   const showActions = (canManage || canDelete) && (onEdit || onDelete);
 
@@ -82,7 +86,18 @@ export function RawMaterialOverviewStockTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40">
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40">
+      {onEnterFullscreen ? (
+        <button
+          type="button"
+          onClick={onEnterFullscreen}
+          title={fullscreenEnterLabel}
+          aria-label={fullscreenEnterLabel}
+          className="absolute right-3 top-3 z-10 rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-600 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+        >
+          <Maximize2 size={18} />
+        </button>
+      ) : null}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
           <thead>

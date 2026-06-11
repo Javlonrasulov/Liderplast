@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
-import { Checkbox } from './ui/checkbox';
-import { Label } from './ui/label';
 import { formatNumber } from '../utils/format';
 
 export type WarehouseOverviewStockRow = {
@@ -45,8 +43,6 @@ type Labels = {
   empty: string;
   fullscreenEnter: string;
   fullscreenExit: string;
-  showProfitLabel: string;
-  includeSemiProfitLabel: string;
 };
 
 type Props = {
@@ -59,10 +55,6 @@ type Props = {
   unit: string;
   showSpecColumn?: boolean;
   showProfit: boolean;
-  includeSemiProfit: boolean;
-  showSemiProfitToggle?: boolean;
-  onShowProfitChange: (value: boolean) => void;
-  onIncludeSemiProfitChange: (value: boolean) => void;
 };
 
 function fillBadgeClass(pct: number) {
@@ -87,10 +79,6 @@ export function WarehouseOverviewStockTable({
   unit,
   showSpecColumn = true,
   showProfit,
-  includeSemiProfit,
-  showSemiProfitToggle = false,
-  onShowProfitChange,
-  onIncludeSemiProfitChange,
 }: Props) {
   const middleColSpan = showProfit
     ? showSpecColumn
@@ -150,58 +138,19 @@ export function WarehouseOverviewStockTable({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40 ${
+      className={`relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40 ${
         isFullscreen ? 'flex h-full flex-col p-4' : ''
       }`}
     >
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 dark:border-slate-600 dark:bg-slate-800/60">
-            <Checkbox
-              id="wh-overview-show-profit"
-              checked={showProfit}
-              onCheckedChange={(checked) => onShowProfitChange(checked === true)}
-            />
-            <Label
-              htmlFor="wh-overview-show-profit"
-              className="cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-200"
-            >
-              {labels.colProfit}
-            </Label>
-          </div>
-          {showSemiProfitToggle ? (
-            <div className="flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 dark:border-violet-800 dark:bg-violet-950/40">
-              <Checkbox
-                id="wh-overview-include-semi-profit"
-                checked={includeSemiProfit}
-                disabled={!showProfit}
-                onCheckedChange={(checked) =>
-                  onIncludeSemiProfitChange(checked === true)
-                }
-              />
-              <Label
-                htmlFor="wh-overview-include-semi-profit"
-                className={`cursor-pointer text-xs font-semibold ${
-                  showProfit
-                    ? 'text-violet-800 dark:text-violet-200'
-                    : 'text-slate-400 dark:text-slate-500'
-                }`}
-              >
-                {labels.includeSemiProfitLabel}
-              </Label>
-            </div>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          title={isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-        >
-          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          {isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        title={isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
+        aria-label={isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
+        className="absolute right-3 top-3 z-10 rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-600 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+      >
+        {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+      </button>
       <div className={`overflow-x-auto ${isFullscreen ? 'min-h-0 flex-1' : ''}`}>
         <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
           <thead>

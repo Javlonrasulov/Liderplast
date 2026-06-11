@@ -1182,8 +1182,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       empty: t.whStockBreakdownEmpty,
       fullscreenEnter: t.whOverviewFullscreenEnter,
       fullscreenExit: t.whOverviewFullscreenExit,
-      showProfitLabel: t.whOverviewShowProfit,
-      includeSemiProfitLabel: t.whOverviewIncludeSemiProfit,
     }),
     [t, mode],
   );
@@ -2473,6 +2471,41 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     {t.whOverviewViewTable}
                   </button>
                 </div>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                  <Checkbox
+                    id="wh-overview-toolbar-show-profit"
+                    checked={showOverviewProfit}
+                    onCheckedChange={(checked) => setOverviewProfitVisible(checked === true)}
+                  />
+                  <Label
+                    htmlFor="wh-overview-toolbar-show-profit"
+                    className="cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
+                    {t.whOverviewColProfit}
+                  </Label>
+                </div>
+                {mode === 'final' ? (
+                  <div className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-2.5 py-1.5 shadow-sm dark:border-violet-800 dark:bg-violet-950/40">
+                    <Checkbox
+                      id="wh-overview-toolbar-include-semi-profit"
+                      checked={includeSemiProfit}
+                      disabled={!showOverviewProfit}
+                      onCheckedChange={(checked) =>
+                        setOverviewIncludeSemiProfit(checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="wh-overview-toolbar-include-semi-profit"
+                      className={`cursor-pointer text-xs font-semibold ${
+                        showOverviewProfit
+                          ? 'text-violet-800 dark:text-violet-200'
+                          : 'text-slate-400 dark:text-slate-500'
+                      }`}
+                    >
+                      {t.whOverviewIncludeSemiProfit}
+                    </Label>
+                  </div>
+                ) : null}
                 <Button
                   type="button"
                   variant="outline"
@@ -2603,10 +2636,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     unit={t.unitPiece}
                     showSpecColumn={mode === 'semi'}
                     showProfit={showOverviewProfit}
-                    includeSemiProfit={includeSemiProfit}
-                    showSemiProfitToggle={mode === 'final'}
-                    onShowProfitChange={setOverviewProfitVisible}
-                    onIncludeSemiProfitChange={setOverviewIncludeSemiProfit}
                   />
                 ) : (
                   <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">

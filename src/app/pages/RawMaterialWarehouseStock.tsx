@@ -11,7 +11,6 @@ import {
   Table2,
   Printer,
   Search,
-  Maximize2,
 } from 'lucide-react';
 import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -351,6 +350,10 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
       footerTotals={filteredFooterTotals}
       canManage={canManage}
       canDelete={canDelete}
+      onEnterFullscreen={
+        tableFullscreen ? undefined : () => setTableFullscreen(true)
+      }
+      fullscreenEnterLabel={t.exHistoryFullscreenEnter}
       onEdit={(id) => {
         const rm = rowById.get(id);
         if (rm) openEdit(rm);
@@ -518,20 +521,6 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
                 <Printer size={16} />
                 {t.whExportPrint}
               </Button>
-              {viewMode === 'table' ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => setTableFullscreen(true)}
-                  title={t.exHistoryFullscreenEnter}
-                  aria-label={t.exHistoryFullscreenEnter}
-                >
-                  <Maximize2 size={16} />
-                  {t.exHistoryFullscreenEnter}
-                </Button>
-              ) : null}
               <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
               <button
                 type="button"
@@ -758,10 +747,11 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
                 <button
                   type="button"
                   onClick={() => setTableFullscreen(false)}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                  className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-600 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                  title={t.exHistoryFullscreenExit}
+                  aria-label={t.exHistoryFullscreenExit}
                 >
                   <X size={18} aria-hidden />
-                  {t.exHistoryFullscreenExit}
                 </button>
               </div>
             </div>
