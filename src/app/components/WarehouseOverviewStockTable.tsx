@@ -39,6 +39,8 @@ type Props = {
   rows: WarehouseOverviewStockRow[];
   labels: Labels;
   totalQty: number;
+  totalUzs: string;
+  totalUsd: string;
   unit: string;
   showSpecColumn?: boolean;
 };
@@ -59,9 +61,12 @@ export function WarehouseOverviewStockTable({
   rows,
   labels,
   totalQty,
+  totalUzs,
+  totalUsd,
   unit,
   showSpecColumn = true,
 }: Props) {
+  const middleColSpan = showSpecColumn ? 4 : 3;
   if (rows.length === 0) {
     return (
       <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
@@ -173,7 +178,14 @@ export function WarehouseOverviewStockTable({
               <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-slate-900 dark:text-white">
                 {formatNumber(totalQty)} {unit}
               </td>
-              <td colSpan={showSpecColumn ? 7 : 6} />
+              <td colSpan={middleColSpan} />
+              <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                {totalUzs}
+              </td>
+              <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-blue-700 dark:text-blue-400">
+                {totalUsd}
+              </td>
+              <td />
             </tr>
           </tfoot>
         </table>

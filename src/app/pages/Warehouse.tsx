@@ -974,6 +974,42 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     t,
   ]);
 
+  const overviewGrandTotals = useMemo(() => {
+    const empty = t.whExportNoPrice;
+    let uzs = 0;
+    let usd = 0;
+    let hasUzs = false;
+    let hasUsd = false;
+    const products = mode === 'semi' ? semiProducts : finishedProducts;
+    const stockByName =
+      mode === 'semi' ? semiStockByProductName : finalStockByProductName;
+    products.forEach((p) => {
+      const qty = stockByName[p.name] ?? 0;
+      const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
+      if (totals.totalUzs != null) {
+        uzs += totals.totalUzs;
+        hasUzs = true;
+      }
+      if (totals.totalUsd != null) {
+        usd += totals.totalUsd;
+        hasUsd = true;
+      }
+    });
+    return {
+      totalUzs: formatOverviewMoney(hasUzs ? uzs : null, "so'm", empty),
+      totalUsd: formatOverviewMoney(hasUsd ? usd : null, '$', empty),
+    };
+  }, [
+    mode,
+    semiProducts,
+    finishedProducts,
+    semiStockByProductName,
+    finalStockByProductName,
+    cbuUsdFx,
+    cbuEurFx,
+    t,
+  ]);
+
   const overviewTableLabels = useMemo(
     () => ({
       colNum: t.whExportColNum,
@@ -2290,6 +2326,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                   totalQty={
                     mode === 'semi' ? totalSemiInCatalogStock : totalFinalInCatalogStock
                   }
+                  totalUzs={overviewGrandTotals.totalUzs}
+                  totalUsd={overviewGrandTotals.totalUsd}
                   unit={t.unitPiece}
                   showSpecColumn={mode === 'semi'}
                 />
