@@ -62,6 +62,8 @@ export type WarehouseStockExportInput = {
   selectedFinalIds?: string[];
   cbuUsdRate?: number;
   cbuEurRate?: number;
+  /** Chop — ixcham jadval (bitta varaqka sig‘ishi uchun) */
+  compact?: boolean;
 };
 
 function esc(value: string) {
@@ -115,6 +117,7 @@ function formatSalePriceHtml(
   labels: Pick<WarehouseStockExportLabels, 'noPrice' | 'priceInUzs' | 'fxValue'>,
   cbuUsdRate = 0,
   cbuEurRate = 0,
+  compact = false,
 ): string {
   const { main, sub, fxRate } = formatWarehouseSalePriceDisplay(
     product,
@@ -123,6 +126,12 @@ function formatSalePriceHtml(
     labels.fxValue,
     { fallbackUsdRate: cbuUsdRate, fallbackEurRate: cbuEurRate },
   );
+  if (compact) {
+    const secondLine = [sub, fxRate].filter(Boolean).join(' · ');
+    return [main ? `<b>${esc(main)}</b>` : '', secondLine ? esc(secondLine) : '']
+      .filter(Boolean)
+      .join('<br/>');
+  }
   return [
     main ? `<b>${esc(main)}</b>` : '',
     sub ? `<span class="price-uzs">${esc(sub)}</span>` : '',
@@ -140,6 +149,7 @@ function buildProductRow(
   typeLabel?: string,
   cbuUsdRate = 0,
   cbuEurRate = 0,
+  compact = false,
 ): WarehouseStockExportRow {
   const unitUzs = unitPriceUzs(
     product.salePrice,
@@ -154,7 +164,13 @@ function buildProductRow(
   return {
     name: product.name,
     unit,
-    salePriceHtml: formatSalePriceHtml(product, labels, cbuUsdRate, cbuEurRate),
+    salePriceHtml: formatSalePriceHtml(
+      product,
+      labels,
+      cbuUsdRate,
+      cbuEurRate,
+      compact,
+    ),
     quantity,
     totalUzs: unitUzs != null ? unitUzs * quantity : null,
     totalUsd: unitUsd != null ? unitUsd * quantity : null,
@@ -190,6 +206,7 @@ export function buildWarehouseStockExportSections(
     selectedFinalIds,
     cbuUsdRate = 0,
     cbuEurRate = 0,
+    compact = false,
   } = input;
 
   const semiList =
@@ -210,6 +227,7 @@ export function buildWarehouseStockExportSections(
       labels.typeSemi,
       cbuUsdRate,
       cbuEurRate,
+      compact,
     ),
   );
   const finalRows = sortByName(finalList).map((p) =>
@@ -221,6 +239,7 @@ export function buildWarehouseStockExportSections(
       labels.typeFinal,
       cbuUsdRate,
       cbuEurRate,
+      compact,
     ),
   );
 
@@ -267,8 +286,12 @@ function renderTableSection(
   section: WarehouseStockExportSection,
   labels: WarehouseStockExportLabels,
   showTypeColumn: boolean,
+  compact = false,
+  hideSectionTitle = false,
 ): string {
   const totals = sectionTotals(section.rows);
+  const colCount = (showTypeColumn ? 1 : 0) + (compact ? 6 : 7);
+  const footerLabelSpan = (showTypeColumn ? 1 : 0) + (compact ? 3 : 4);
   const bodyRows = section.rows
     .map(
       (row, i) => `
@@ -276,38 +299,43 @@ function renderTableSection(
           <td class="c num">${i + 1}</td>
           ${showTypeColumn ? `<td class="c type">${esc(row.typeLabel ?? '—')}</td>` : ''}
           <td class="l name"><b>${esc(row.name)}</b></td>
-          <td class="c">${esc(row.unit)}</td>
+          ${compact ? '' : `<td class="c unit">${esc(row.unit)}</td>`}
           <td class="l price">${row.salePriceHtml}</td>
-          <td class="r qty"><b>${formatNumber(row.quantity)}</b></td>
+          <td class="r qty"><b>${formatNumber(row.quantity)}${compact ? ` ${esc(row.unit)}` : ''}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUzs, "so'm")}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUsd, '$')}</b></td>
         </tr>`,
     )
     .join('');
 
+  const sectionTitle =
+    hideSectionTitle || compact
+      ? ''
+      : `<h2 class="section-title"><b>${esc(section.title)}</b></h2>`;
+
   return `
     <div class="section">
-      <h2 class="section-title"><b>${esc(section.title)}</b></h2>
+      ${sectionTitle}
       <table class="data">
         <thead>
           <tr>
-            <th>${esc(labels.colNum)}</th>
+            <th class="col-num">${esc(labels.colNum)}</th>
             ${showTypeColumn ? `<th>${esc(labels.colType)}</th>` : ''}
-            <th>${esc(labels.colName)}</th>
-            <th>${esc(labels.colUnit)}</th>
-            <th>${esc(labels.colSalePrice)}</th>
-            <th>${esc(labels.colQty)}</th>
-            <th>${esc(labels.colTotalUzs)}</th>
-            <th>${esc(labels.colTotalUsd)}</th>
+            <th class="col-name">${esc(labels.colName)}</th>
+            ${compact ? '' : `<th>${esc(labels.colUnit)}</th>`}
+            <th class="col-price">${esc(labels.colSalePrice)}</th>
+            <th class="col-qty">${esc(labels.colQty)}</th>
+            <th class="col-uzs">${esc(labels.colTotalUzs)}</th>
+            <th class="col-usd">${esc(labels.colTotalUsd)}</th>
           </tr>
         </thead>
         <tbody>
-          ${bodyRows || `<tr><td colspan="${showTypeColumn ? 8 : 7}" class="c empty">—</td></tr>`}
+          ${bodyRows || `<tr><td colspan="${colCount}" class="c empty">—</td></tr>`}
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td colspan="${showTypeColumn ? 5 : 4}" class="total-label"><b>${esc(labels.grandTotal)}</b></td>
-            <td class="r qty"><b>${formatNumber(totals.qty)}</b></td>
+            <td colspan="${footerLabelSpan}" class="total-label"><b>${esc(labels.grandTotal)}</b></td>
+            <td class="r qty"><b>${formatNumber(totals.qty)}${compact ? ` ${esc(labels.unitPiece)}` : ''}</b></td>
             <td class="r money"><b>${formatMoney(totals.uzs || null, "so'm")}</b></td>
             <td class="r money"><b>${formatMoney(totals.usd || null, '$')}</b></td>
           </tr>
@@ -322,15 +350,19 @@ export function buildWarehouseStockExportHtml(
   printedAtIso: string,
   forPrint = false,
 ): string {
+  const compact = forPrint;
   const showTypeColumn = sections.some((s) => s.key === 'combined');
+  const hideSectionTitles = compact && sections.length === 1;
   const sectionsHtml = sections
-    .map((section) => renderTableSection(section, labels, showTypeColumn))
+    .map((section) =>
+      renderTableSection(section, labels, showTypeColumn, compact, hideSectionTitles),
+    )
     .join('');
 
   const allRows = sections.flatMap((s) => s.rows);
   const grand = sectionTotals(allRows);
   const grandHtml =
-    sections.length > 1
+    sections.length > 1 && !compact
       ? `
     <table class="data grand">
       <tr class="total-row">
@@ -342,6 +374,21 @@ export function buildWarehouseStockExportHtml(
     </table>`
       : '';
 
+  const bodyClass = compact ? ' class="print-compact"' : '';
+  const headerHtml = compact
+    ? `<div class="header header-inline">
+      <span class="org"><b>${esc(PRINT_ORG_NAME)}</b></span>
+      <span class="sep">|</span>
+      <span class="doc-title"><b>${esc(labels.docTitle)}</b></span>
+      <span class="sep">|</span>
+      <span class="meta">${esc(labels.printedAt)}: <b>${esc(formatDate(printedAtIso))}</b></span>
+    </div>`
+    : `<div class="header">
+      <p class="org"><b>${esc(PRINT_ORG_NAME)}</b></p>
+      <p class="doc-title"><b>${esc(labels.docTitle)}</b></p>
+      <p class="meta">${esc(labels.printedAt)}: <b>${esc(formatDate(printedAtIso))}</b></p>
+    </div>`;
+
   return `<!doctype html>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
   <head>
@@ -352,28 +399,30 @@ export function buildWarehouseStockExportHtml(
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        padding: 8mm;
+        padding: ${compact ? '3mm 4mm' : '8mm'};
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 11pt;
+        font-size: ${compact ? '8pt' : '11pt'};
         color: #000;
         background: #fff;
       }
       .header {
-        margin-bottom: 6mm;
+        margin-bottom: ${compact ? '2mm' : '6mm'};
         padding: 0;
         border: none;
         background: none;
         color: #000;
       }
-      .org { font-size: 12pt; font-weight: bold; margin: 0 0 2mm; }
-      .doc-title { font-size: 11pt; font-weight: bold; margin: 0 0 2mm; }
-      .meta { font-size: 10pt; margin: 0; }
-      .section { margin-bottom: 6mm; page-break-inside: avoid; }
-      .section + .section { page-break-before: ${forPrint ? 'always' : 'auto'}; }
+      .header-inline { font-size: 8pt; line-height: 1.2; }
+      .header-inline .sep { margin: 0 4px; color: #666; }
+      .org { font-size: ${compact ? '8pt' : '12pt'}; font-weight: bold; margin: 0 0 ${compact ? '0' : '2mm'}; }
+      .doc-title { font-size: ${compact ? '8pt' : '11pt'}; font-weight: bold; margin: 0 0 ${compact ? '0' : '2mm'}; }
+      .meta { font-size: ${compact ? '8pt' : '10pt'}; margin: 0; }
+      .section { margin-bottom: ${compact ? '1mm' : '6mm'}; page-break-inside: ${compact ? 'auto' : 'avoid'}; }
+      .section + .section { page-break-before: auto; }
       .section-title {
         margin: 0 0 2mm;
         padding: 0;
-        font-size: 11pt;
+        font-size: ${compact ? '8pt' : '11pt'};
         font-weight: bold;
         color: #000;
         background: none;
@@ -382,24 +431,25 @@ export function buildWarehouseStockExportHtml(
       table.data {
         width: 100%;
         border-collapse: collapse;
-        font-size: 10pt;
-        table-layout: auto;
+        font-size: ${compact ? '7pt' : '10pt'};
+        table-layout: ${compact ? 'fixed' : 'auto'};
       }
       table.data th,
       table.data td {
         border: 1px solid #000;
-        padding: 3px 5px;
+        padding: ${compact ? '1px 2px' : '3px 5px'};
         vertical-align: middle;
         color: #000;
         background: #fff;
+        line-height: ${compact ? '1.1' : '1.25'};
       }
       table.data thead th {
         background: #d9d9d9;
         color: #000;
         font-weight: bold;
         text-align: center;
-        font-size: 10pt;
-        line-height: 1.25;
+        font-size: ${compact ? '6.5pt' : '10pt'};
+        line-height: 1.1;
         white-space: nowrap;
       }
       table.data tfoot td,
@@ -408,37 +458,35 @@ export function buildWarehouseStockExportHtml(
         font-weight: bold;
         border: 1px solid #000;
       }
-      table.grand {
-        margin-top: 4mm;
-      }
-      table.grand .grand-label {
-        text-align: left;
-        padding-left: 5px;
-      }
+      table.grand { margin-top: 4mm; }
+      table.grand .grand-label { text-align: left; padding-left: 5px; }
       .c { text-align: center; }
       .r { text-align: right; white-space: nowrap; }
       .l { text-align: left; }
-      .name { min-width: 140px; }
-      .price { font-size: 10pt; line-height: 1.35; min-width: 120px; }
-      .price-uzs { font-size: 9pt; color: #166534; }
-      .price-fx { font-size: 8.5pt; color: #475569; }
+      .col-num { width: ${compact ? '3%' : 'auto'}; }
+      .col-name { width: ${compact ? '22%' : 'auto'}; }
+      .col-price { width: ${compact ? '18%' : 'auto'}; }
+      .col-qty { width: ${compact ? '10%' : 'auto'}; }
+      .col-uzs { width: ${compact ? '12%' : 'auto'}; }
+      .col-usd { width: ${compact ? '8%' : 'auto'}; }
+      .name { word-break: break-word; }
+      .price { font-size: ${compact ? '6.5pt' : '10pt'}; line-height: ${compact ? '1.1' : '1.35'}; }
+      .price-uzs { font-size: ${compact ? '6pt' : '9pt'}; color: #166534; }
+      .price-fx { font-size: ${compact ? '6pt' : '8.5pt'}; color: #475569; }
       .total-label { text-align: right; }
       .empty { color: #666; font-style: italic; }
-      @page { size: A4 landscape; margin: 10mm; }
+      @page { size: A4 landscape; margin: ${compact ? '4mm' : '10mm'}; }
       @media print {
         body { padding: 0; }
         thead { display: table-header-group; }
         tfoot { display: table-footer-group; }
-        tr { page-break-inside: avoid; }
+        tr { page-break-inside: ${compact ? 'auto' : 'avoid'}; }
+        .print-compact .section { page-break-before: auto !important; page-break-after: auto !important; }
       }
     </style>
   </head>
-  <body>
-    <div class="header">
-      <p class="org"><b>${esc(PRINT_ORG_NAME)}</b></p>
-      <p class="doc-title"><b>${esc(labels.docTitle)}</b></p>
-      <p class="meta">${esc(labels.printedAt)}: <b>${esc(formatDate(printedAtIso))}</b></p>
-    </div>
+  <body${bodyClass}>
+    ${headerHtml}
     ${sectionsHtml}
     ${grandHtml}
     ${forPrint ? `<script>window.addEventListener('load', () => setTimeout(() => window.print(), 300));</script>` : ''}

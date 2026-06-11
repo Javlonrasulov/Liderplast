@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { formatNumber } from '../utils/format';
 
 export type WarehouseOverviewStockRow = {
@@ -17,6 +18,10 @@ export type WarehouseOverviewStockRow = {
   totalUzs: string;
   totalUsd: string;
   fillPct: number;
+  profitCostLines: string[];
+  profitSaleLine?: string;
+  profitLine?: string;
+  profitPerPieceUzs: number | null;
 };
 
 type Labels = {
@@ -28,11 +33,14 @@ type Labels = {
   colPiecesPerBag: string;
   colSpec: string;
   colSalePrice: string;
+  colProfit: string;
   colTotalUzs: string;
   colTotalUsd: string;
   colFill: string;
   grandTotal: string;
   empty: string;
+  fullscreenEnter: string;
+  fullscreenExit: string;
 };
 
 type Props = {
@@ -41,6 +49,7 @@ type Props = {
   totalQty: number;
   totalUzs: string;
   totalUsd: string;
+  totalProfit: string;
   unit: string;
   showSpecColumn?: boolean;
 };
@@ -63,10 +72,51 @@ export function WarehouseOverviewStockTable({
   totalQty,
   totalUzs,
   totalUsd,
+  totalProfit,
   unit,
   showSpecColumn = true,
 }: Props) {
   const middleColSpan = showSpecColumn ? 4 : 3;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    };
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = containerRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) {
+          await el.requestFullscreen();
+        } else {
+          const wk = (el as HTMLElement & { webkitRequestFullscreen?: () => void })
+            .webkitRequestFullscreen;
+          if (wk) wk.call(el);
+        }
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        const doc = document as Document & { webkitExitFullscreen?: () => void };
+        doc.webkitExitFullscreen?.();
+      }
+    } catch {
+      /* fullscreen declined or unsupported */
+    }
+  }, []);
+
+  function profitClass(value: number | null) {
+    if (value == null) return 'text-slate-500';
+    if (value < 0) return 'text-red-700 dark:text-red-400';
+    if (value === 0) return 'text-slate-600 dark:text-slate-300';
+    return 'text-violet-700 dark:text-violet-300';
+  }
   if (rows.length === 0) {
     return (
       <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
@@ -76,9 +126,25 @@ export function WarehouseOverviewStockTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+    <div
+      ref={containerRef}
+      className={`overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40 ${
+        isFullscreen ? 'flex h-full flex-col p-4' : ''
+      }`}
+    >
+      <div className="mb-2 flex justify-end">
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          title={isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {isFullscreen ? labels.fullscreenExit : labels.fullscreenEnter}
+        </button>
+      </div>
+      <div className={`overflow-x-auto ${isFullscreen ? 'min-h-0 flex-1' : ''}`}>
+        <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-100 via-indigo-50 to-slate-100 dark:border-slate-700 dark:from-slate-800 dark:via-indigo-950/40 dark:to-slate-800">
               {[
@@ -90,6 +156,7 @@ export function WarehouseOverviewStockTable({
                 labels.colPiecesPerBag,
                 ...(showSpecColumn ? [labels.colSpec] : []),
                 labels.colSalePrice,
+                labels.colProfit,
                 labels.colTotalUzs,
                 labels.colTotalUsd,
                 labels.colFill,
@@ -154,6 +221,30 @@ export function WarehouseOverviewStockTable({
                     </div>
                   ) : null}
                 </td>
+                <td className="min-w-[11rem] max-w-[16rem] px-3 py-2.5">
+                  {row.profitCostLines.map((line) => (
+                    <div
+                      key={line}
+                      className="text-[10px] leading-snug text-slate-600 dark:text-slate-400"
+                    >
+                      {line}
+                    </div>
+                  ))}
+                  {row.profitSaleLine ? (
+                    <div className="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">
+                      {row.profitSaleLine}
+                    </div>
+                  ) : null}
+                  {row.profitLine ? (
+                    <div
+                      className={`mt-1 text-sm font-extrabold tracking-tight ${profitClass(row.profitPerPieceUzs)}`}
+                    >
+                      {row.profitLine}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-400">—</div>
+                  )}
+                </td>
                 <td className="whitespace-nowrap px-3 py-2.5 font-semibold text-emerald-700 dark:text-emerald-400">
                   {row.totalUzs}
                 </td>
@@ -179,6 +270,9 @@ export function WarehouseOverviewStockTable({
                 {formatNumber(totalQty)} {unit}
               </td>
               <td colSpan={middleColSpan} />
+              <td className="whitespace-nowrap px-3 py-3 text-sm font-extrabold text-violet-700 dark:text-violet-300">
+                {totalProfit}
+              </td>
               <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-400">
                 {totalUzs}
               </td>

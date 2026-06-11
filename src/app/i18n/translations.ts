@@ -474,6 +474,13 @@ export interface T {
   whOverviewViewTable: string;
   whOverviewColPack: string;
   whOverviewColFill: string;
+  whOverviewColProfit: string;
+  whProfitRawLine: string;
+  whProfitSemiLine: string;
+  whProfitSaleLine: string;
+  whProfitValueLine: string;
+  whOverviewFullscreenEnter: string;
+  whOverviewFullscreenExit: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -2083,6 +2090,13 @@ const uz_cyrillic: T = {
   whOverviewViewTable: 'Жадвал',
   whOverviewColPack: 'Қадоқлаш',
   whOverviewColFill: 'Тўлдириш %',
+  whOverviewColProfit: 'Фойда',
+  whProfitRawLine: '{name}: {kgPrice} so‘m/kg · {grams} g → {cost} so‘m',
+  whProfitSemiLine: '{name}: {cost} so‘m',
+  whProfitSaleLine: 'Сотиш: {amount} so‘m',
+  whProfitValueLine: 'Фойда: {amount} so‘m',
+  whOverviewFullscreenEnter: 'Тўлиқ экран',
+  whOverviewFullscreenExit: 'Экрандан чиқиш',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -3385,6 +3399,13 @@ const uz_latin: T = {
   whOverviewViewTable: 'Jadval',
   whOverviewColPack: 'Qadoqlash',
   whOverviewColFill: 'To‘ldirish %',
+  whOverviewColProfit: 'Foyda',
+  whProfitRawLine: '{name}: {kgPrice} so‘m/kg · {grams} g → {cost} so‘m',
+  whProfitSemiLine: '{name}: {cost} so‘m',
+  whProfitSaleLine: 'Sotish: {amount} so‘m',
+  whProfitValueLine: 'Foyda: {amount} so‘m',
+  whOverviewFullscreenEnter: 'To‘liq ekran',
+  whOverviewFullscreenExit: 'Ekrandan chiqish',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -4687,6 +4708,13 @@ const ru: T = {
   whOverviewViewTable: 'Таблица',
   whOverviewColPack: 'Упаковка',
   whOverviewColFill: 'Заполнение %',
+  whOverviewColProfit: 'Прибыль',
+  whProfitRawLine: '{name}: {kgPrice} сум/кг · {grams} г → {cost} сум',
+  whProfitSemiLine: '{name}: {cost} сум',
+  whProfitSaleLine: 'Продажа: {amount} сум',
+  whProfitValueLine: 'Прибыль: {amount} сум',
+  whOverviewFullscreenEnter: 'Полный экран',
+  whOverviewFullscreenExit: 'Выйти из экрана',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

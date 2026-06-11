@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Droplets,
   Palette,
@@ -8,6 +9,9 @@ import {
   X,
   LayoutGrid,
   Table2,
+  Printer,
+  Search,
+  Maximize2,
 } from 'lucide-react';
 import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
@@ -26,6 +30,7 @@ import {
   warehouseProductPurchaseTotals,
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
+import { printRawMaterialStock } from '../utils/raw-material-stock-print';
 import { Button } from '../components/ui/button';
 import {
   AlertDialog,
@@ -88,6 +93,26 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
     if (saved === 'cards' || saved === 'table') return saved;
     return 'table';
   });
+  const [stockSearch, setStockSearch] = useState('');
+  const [tableFullscreen, setTableFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (viewMode !== 'table') setTableFullscreen(false);
+  }, [viewMode]);
+
+  useEffect(() => {
+    if (!tableFullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setTableFullscreen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [tableFullscreen]);
 
   const setStockView = (next: 'cards' | 'table') => {
     setViewMode(next);
@@ -203,15 +228,45 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
     });
   }, [rows, qtyByName, t, cbuUsdFx, cbuEurFx]);
 
-  const overviewFooterTotals = useMemo(() => {
+  const filteredOverviewRows = useMemo(() => {
+    const q = stockSearch.trim().toLowerCase();
+    if (!q) return overviewTableRows;
+    return overviewTableRows.filter(
+      (row) =>
+        row.name.toLowerCase().includes(q) ||
+        row.typeLabel.toLowerCase().includes(q) ||
+        row.description?.toLowerCase().includes(q),
+    );
+  }, [overviewTableRows, stockSearch]);
+
+  const filteredRows = useMemo(() => {
+    const q = stockSearch.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((rm) => {
+      const typeLabel = rm.rawMaterialKind === 'PAINT' ? t.rmKindPaint : t.rmKindSiro;
+      return (
+        rm.name.toLowerCase().includes(q) ||
+        typeLabel.toLowerCase().includes(q) ||
+        rm.description?.toLowerCase().includes(q)
+      );
+    });
+  }, [rows, stockSearch, t]);
+
+  const filteredTotalKg = useMemo(
+    () => filteredOverviewRows.reduce((s, row) => s + row.quantityKg, 0),
+    [filteredOverviewRows],
+  );
+
+  const filteredFooterTotals = useMemo(() => {
     const empty = t.whExportNoPrice;
     let uzs = 0;
     let usd = 0;
     let hasUzs = false;
     let hasUsd = false;
-    rows.forEach((rm) => {
-      const kg = qtyByName.get(rm.name) ?? 0;
-      const totals = warehouseProductPurchaseTotals(rm, kg, cbuUsdFx, cbuEurFx);
+    filteredOverviewRows.forEach((row) => {
+      const rm = rowById.get(row.id);
+      if (!rm) return;
+      const totals = warehouseProductPurchaseTotals(rm, row.quantityKg, cbuUsdFx, cbuEurFx);
       if (totals.totalUzs != null) {
         uzs += totals.totalUzs;
         hasUzs = true;
@@ -225,7 +280,41 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
       totalUzs: formatOverviewMoney(hasUzs ? uzs : null, "so'm", empty),
       totalUsd: formatOverviewMoney(hasUsd ? usd : null, '$', empty),
     };
-  }, [rows, qtyByName, cbuUsdFx, cbuEurFx, t]);
+  }, [filteredOverviewRows, rowById, cbuUsdFx, cbuEurFx, t]);
+
+  const printLabels = useMemo(
+    () => ({
+      docTitle: t.rmSidebarWarehouseStock,
+      printedAt: t.whExportPrintedAt,
+      colNum: t.whExportColNum,
+      colType: t.whExportColType,
+      colName: t.whExportColName,
+      colStock: t.rmRemaining,
+      colPurchasePrice: t.whPurchasePrice,
+      colTotalUzs: t.whExportColTotalUzs,
+      colTotalUsd: t.whExportColTotalUsd,
+      grandTotal: t.whExportGrandTotal,
+      unitKg: t.unitKg,
+    }),
+    [t],
+  );
+
+  const handlePrint = () => {
+    printRawMaterialStock(
+      filteredOverviewRows.map((row) => ({
+        typeLabel: row.typeLabel,
+        name: row.name,
+        quantityKg: row.quantityKg,
+        purchasePrice: row.purchasePrice,
+        purchasePriceUzs: row.purchasePriceUzs,
+        purchasePriceFx: row.purchasePriceFx,
+        totalUzs: row.totalUzs,
+        totalUsd: row.totalUsd,
+      })),
+      printLabels,
+      new Date().toISOString().slice(0, 10),
+    );
+  };
 
   const overviewTableLabels = useMemo(
     () => ({
@@ -253,6 +342,28 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
     setNameDraft(rm.name);
     setPricingDraft(pricingFieldsFromProduct(rm));
   };
+
+  const stockTableNode = (
+    <RawMaterialOverviewStockTable
+      rows={filteredOverviewRows}
+      labels={overviewTableLabels}
+      totalKg={filteredTotalKg}
+      footerTotals={filteredFooterTotals}
+      canManage={canManage}
+      canDelete={canDelete}
+      onEdit={(id) => {
+        const rm = rowById.get(id);
+        if (rm) openEdit(rm);
+      }}
+      onDelete={(id) => {
+        const rm = rowById.get(id);
+        if (rm) {
+          setError('');
+          setDeleteTarget(rm);
+        }
+      }}
+    />
+  );
 
   const closeEdit = () => {
     if (submitting) return;
@@ -378,11 +489,50 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
 
       {rows.length > 0 && (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {t.whDetailed}
             </h3>
-            <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+            <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+              <div className="relative min-w-0 flex-1 sm:min-w-[14rem] sm:flex-initial">
+                <Search
+                  size={16}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="search"
+                  value={stockSearch}
+                  onChange={(e) => setStockSearch(e.target.value)}
+                  placeholder={t.whCatalogSearchPlaceholder}
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handlePrint}
+                disabled={filteredOverviewRows.length === 0}
+              >
+                <Printer size={16} />
+                {t.whExportPrint}
+              </Button>
+              {viewMode === 'table' ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setTableFullscreen(true)}
+                  title={t.exHistoryFullscreenEnter}
+                  aria-label={t.exHistoryFullscreenEnter}
+                >
+                  <Maximize2 size={16} />
+                  {t.exHistoryFullscreenEnter}
+                </Button>
+              ) : null}
+              <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
               <button
                 type="button"
                 onClick={() => setStockView('cards')}
@@ -407,10 +557,17 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
                 <Table2 size={14} />
                 {t.whOverviewViewTable}
               </button>
+              </div>
             </div>
           </div>
 
-          {(lowSiro.length > 0 || lowPaint.length > 0) && (
+          {stockSearch.trim() && filteredRows.length === 0 ? (
+            <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+              {t.whCatalogNoSearchResults}
+            </p>
+          ) : null}
+
+          {filteredRows.length > 0 && (lowSiro.length > 0 || lowPaint.length > 0) && !stockSearch.trim() ? (
             <div className="space-y-3">
               {lowSiro.length > 0 && (
                 <details className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
@@ -447,11 +604,11 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
                 </details>
               )}
             </div>
-          )}
+          ) : null}
 
-          {viewMode === 'cards' ? (
+          {filteredRows.length > 0 && viewMode === 'cards' ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {rows.map((rm) => {
+            {filteredRows.map((rm) => {
             const kg = qtyByName.get(rm.name) ?? 0;
             const isPaint = rm.rawMaterialKind === 'PAINT';
             const max = isPaint ? 2000 : 5000;
@@ -549,29 +706,71 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
               );
             })}
           </div>
-          ) : (
-            <RawMaterialOverviewStockTable
-              rows={overviewTableRows}
-              labels={overviewTableLabels}
-              totalKg={totalKg}
-              footerTotals={overviewFooterTotals}
-              canManage={canManage}
-              canDelete={canDelete}
-              onEdit={(id) => {
-                const rm = rowById.get(id);
-                if (rm) openEdit(rm);
-              }}
-              onDelete={(id) => {
-                const rm = rowById.get(id);
-                if (rm) {
-                  setError('');
-                  setDeleteTarget(rm);
-                }
-              }}
-            />
-          )}
+          ) : filteredRows.length > 0 ? (
+            stockTableNode
+          ) : null}
         </>
       )}
+
+      {tableFullscreen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[130] flex flex-col bg-white dark:bg-slate-900"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.whDetailed}
+          >
+            <div className="flex shrink-0 flex-col gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold text-slate-900 dark:text-white">
+                  {t.whDetailed}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {filteredOverviewRows.length} {t.totalRecords}
+                </p>
+              </div>
+              <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                <div className="relative min-w-0 flex-1 sm:min-w-[14rem] sm:flex-initial">
+                  <Search
+                    size={16}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="search"
+                    value={stockSearch}
+                    onChange={(e) => setStockSearch(e.target.value)}
+                    placeholder={t.whCatalogSearchPlaceholder}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handlePrint}
+                  disabled={filteredOverviewRows.length === 0}
+                >
+                  <Printer size={16} />
+                  {t.whExportPrint}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setTableFullscreen(false)}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <X size={18} aria-hidden />
+                  {t.exHistoryFullscreenExit}
+                </button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto px-3 pb-6 pt-2 sm:px-5">
+              {stockTableNode}
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <AlertDialog
         open={Boolean(deleteTarget)}

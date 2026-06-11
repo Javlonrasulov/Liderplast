@@ -17,8 +17,11 @@ import {
   ChevronRight,
   Loader2,
   ZoomIn,
+  Maximize2,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import type { T } from '../i18n/translations';
 import { useApp } from '../i18n/app-context';
 import { useERP } from '../store/erp-store';
 import { useAuth } from '../auth/auth-context';
@@ -111,6 +114,9 @@ const SELECT_TRIGGER_CLS =
 
 const SELECT_CONTENT_CLS =
   'z-[120] min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900';
+
+const SELECT_CONTENT_FULLSCREEN_CLS =
+  'z-[150] min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900';
 
 /** Dialog (z-130) ustida ochilishi uchun */
 const SELECT_CONTENT_DIALOG_CLS =
@@ -219,6 +225,209 @@ function ValueStatCard({
   );
 }
 
+type CompanyAssetsTablePanelProps = {
+  items: CompanyAssetListItem[];
+  loading: boolean;
+  canManage: boolean;
+  selectedIds: Set<string>;
+  t: T;
+  usdRate: number;
+  eurRate: number;
+  page: number;
+  totalPages: number;
+  total: number;
+  wideNotes?: boolean;
+  selectContentClass?: string;
+  onPagePrev: () => void;
+  onPageNext: () => void;
+  onToggleSelectAll: () => void;
+  onToggleSelect: (id: string) => void;
+  onOpenDetail: (id: string) => void;
+  onOpenEdit: (id: string) => void;
+  onStatusChange: (id: string, status: CompanyAssetStatus) => void;
+  onDeleteRequest: (id: string) => void;
+};
+
+function CompanyAssetsTablePanel({
+  items,
+  loading,
+  canManage,
+  selectedIds,
+  t,
+  usdRate,
+  eurRate,
+  page,
+  totalPages,
+  total,
+  wideNotes = false,
+  selectContentClass = SELECT_CONTENT_CLS,
+  onPagePrev,
+  onPageNext,
+  onToggleSelectAll,
+  onToggleSelect,
+  onOpenDetail,
+  onOpenEdit,
+  onStatusChange,
+  onDeleteRequest,
+}: CompanyAssetsTablePanelProps) {
+  return (
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1100px] text-sm">
+          <thead>
+            <tr className="bg-slate-50 dark:bg-slate-700/50">
+              {canManage && (
+                <th className="w-10 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={items.length > 0 && selectedIds.size === items.length}
+                    onChange={onToggleSelectAll}
+                  />
+                </th>
+              )}
+              {[t.caColId, t.caColInventory, t.caColName, t.caColCategory, t.caColEmployee, t.caColLocation, t.caColPurchased, t.caColInitialValue, t.caColStatus, t.caColNotes, t.caColActions].map((h) => (
+                <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={canManage ? 12 : 11} className="py-16 text-center text-slate-400">
+                  <Loader2 className="mx-auto animate-spin" size={24} />
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={canManage ? 12 : 11} className="py-16 text-center text-slate-400">{t.noData}</td>
+              </tr>
+            ) : (
+              items.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-t border-slate-100 hover:bg-slate-50/80 dark:border-slate-700 dark:hover:bg-slate-700/30"
+                >
+                  {canManage && (
+                    <td className="px-3 py-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => onToggleSelect(row.id)}
+                      />
+                    </td>
+                  )}
+                  <td className="max-w-[4rem] truncate px-3 py-2 font-mono text-xs text-slate-500" title={row.id}>{row.id.slice(-6)}</td>
+                  <td className="px-3 py-2 font-medium">{row.inventoryNumber}</td>
+                  <td className="px-3 py-2">
+                    <button type="button" className="text-left font-medium text-indigo-600 hover:underline dark:text-indigo-400" onClick={() => void onOpenDetail(row.id)}>
+                      {row.name}
+                    </button>
+                  </td>
+                  <td className="px-3 py-2">{assetCategoryLabel(row.category, t)}</td>
+                  <td className="px-3 py-2">{row.assignedUser?.fullName ?? t.caNoEmployee}</td>
+                  <td className="px-3 py-2">{row.location ?? '—'}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{formatDate(row.purchasedAt)}</td>
+                  <td className="px-3 py-2 text-xs font-medium leading-snug text-red-600 dark:text-red-400">
+                    {formatAssetInitialValue(row, usdRate, eurRate, t)}
+                  </td>
+                  <td className="px-3 py-2">
+                    {canManage ? (
+                      <Select
+                        value={row.status}
+                        onValueChange={(v) => void onStatusChange(row.id, v as CompanyAssetStatus)}
+                      >
+                        <SelectTrigger
+                          className={cn(
+                            'h-7 w-auto min-w-[7.5rem] rounded-full border-0 px-2 py-0.5 text-xs font-medium shadow-none focus:ring-2 focus:ring-indigo-400',
+                            statusBadgeClass(row.status),
+                          )}
+                        >
+                          <SelectValue>{assetStatusLabel(row.status, t)}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent position="popper" className={selectContentClass}>
+                          {ASSET_STATUSES.map((s) => (
+                            <SelectItem key={s} value={s} className={SELECT_ITEM_CLS}>
+                              {assetStatusLabel(s, t)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+                          statusBadgeClass(row.status),
+                        )}
+                      >
+                        {assetStatusLabel(row.status, t)}
+                      </span>
+                    )}
+                  </td>
+                  <td
+                    className={cn(
+                      'px-3 py-2 text-slate-500',
+                      wideNotes ? 'max-w-none whitespace-normal' : 'max-w-[8rem] truncate',
+                    )}
+                    title={row.notes ?? ''}
+                  >
+                    {row.notes ?? '—'}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex gap-1">
+                      <button type="button" title={t.caView} onClick={() => void onOpenDetail(row.id)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <Eye size={16} />
+                      </button>
+                      {canManage && (
+                        <>
+                          <button type="button" title={t.caEditAsset} onClick={() => void onOpenEdit(row.id)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            title={t.caDelete}
+                            onClick={() => void onDeleteRequest(row.id)}
+                            className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700">
+        <p className="text-sm text-slate-500">
+          {t.caPage} {page} {t.caOf} {totalPages} · {total}
+        </p>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={onPagePrev}
+            className="rounded-lg border border-slate-200 p-2 disabled:opacity-40 dark:border-slate-600"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={onPageNext}
+            className="rounded-lg border border-slate-200 p-2 disabled:opacity-40 dark:border-slate-600"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function CompanyAssets() {
   const { t } = useApp();
   const { refresh } = useERP();
@@ -261,6 +470,7 @@ export function CompanyAssets() {
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [lastDocFileName, setLastDocFileName] = useState<string | null>(null);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
+  const [tableFullscreen, setTableFullscreen] = useState(false);
   const [detailImageSaving, setDetailImageSaving] = useState(false);
   const [detailImageFileName, setDetailImageFileName] = useState<string | null>(null);
 
@@ -373,6 +583,24 @@ export function CompanyAssets() {
       window.removeEventListener('keydown', onKey);
     };
   }, [fullscreenImageUrl]);
+
+  useEffect(() => {
+    if (!tableFullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setTableFullscreen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tableFullscreen]);
+
+  useEffect(() => {
+    if (!tableFullscreen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [tableFullscreen]);
 
   useEffect(() => {
     void apiRequest<CompanyAssetStats>('/company-assets/stats').then(setStats).catch(() => {});
@@ -607,6 +835,15 @@ export function CompanyAssets() {
     }
   };
 
+  const handleDeleteRequest = async (id: string) => {
+    try {
+      const asset = await apiRequest<CompanyAssetDetail>(`/company-assets/${id}`);
+      setDeleteTarget(asset);
+    } catch {
+      toast.error(t.prEmployeeSaveError);
+    }
+  };
+
   const handleImageFile = async (file: File | null) => {
     if (!file) {
       setImageFileName(null);
@@ -744,6 +981,27 @@ export function CompanyAssets() {
 
   const inputCls =
     'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100';
+
+  const tablePanelProps = {
+    items,
+    loading,
+    canManage,
+    selectedIds,
+    t,
+    usdRate,
+    eurRate,
+    page,
+    totalPages,
+    total,
+    onPagePrev: () => setPage((p) => Math.max(1, p - 1)),
+    onPageNext: () => setPage((p) => p + 1),
+    onToggleSelectAll: toggleSelectAll,
+    onToggleSelect: toggleSelect,
+    onOpenDetail: openDetail,
+    onOpenEdit: openEdit,
+    onStatusChange: handleRowStatusChange,
+    onDeleteRequest: handleDeleteRequest,
+  };
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -946,164 +1204,61 @@ export function CompanyAssets() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-sm">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-700/50">
-                {canManage && (
-                  <th className="w-10 px-3 py-3">
-                    <input
-                      type="checkbox"
-                      checked={items.length > 0 && selectedIds.size === items.length}
-                      onChange={toggleSelectAll}
-                    />
-                  </th>
-                )}
-                {[t.caColId, t.caColInventory, t.caColName, t.caColCategory, t.caColEmployee, t.caColLocation, t.caColPurchased, t.caColInitialValue, t.caColStatus, t.caColNotes, t.caColActions].map((h) => (
-                  <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={canManage ? 12 : 11} className="py-16 text-center text-slate-400">
-                    <Loader2 className="mx-auto animate-spin" size={24} />
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={canManage ? 12 : 11} className="py-16 text-center text-slate-400">{t.noData}</td>
-                </tr>
-              ) : (
-                items.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-t border-slate-100 hover:bg-slate-50/80 dark:border-slate-700 dark:hover:bg-slate-700/30"
-                  >
-                    {canManage && (
-                      <td className="px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(row.id)}
-                          onChange={() => toggleSelect(row.id)}
-                        />
-                      </td>
-                    )}
-                    <td className="max-w-[4rem] truncate px-3 py-2 font-mono text-xs text-slate-500" title={row.id}>{row.id.slice(-6)}</td>
-                    <td className="px-3 py-2 font-medium">{row.inventoryNumber}</td>
-                    <td className="px-3 py-2">
-                      <button type="button" className="text-left font-medium text-indigo-600 hover:underline dark:text-indigo-400" onClick={() => void openDetail(row.id)}>
-                        {row.name}
-                      </button>
-                    </td>
-                    <td className="px-3 py-2">{assetCategoryLabel(row.category, t)}</td>
-                    <td className="px-3 py-2">{row.assignedUser?.fullName ?? t.caNoEmployee}</td>
-                    <td className="px-3 py-2">{row.location ?? '—'}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{formatDate(row.purchasedAt)}</td>
-                    <td className="px-3 py-2 text-xs font-medium leading-snug text-red-600 dark:text-red-400">
-                      {formatAssetInitialValue(row, usdRate, eurRate, t)}
-                    </td>
-                    <td className="px-3 py-2">
-                      {canManage ? (
-                        <Select
-                          value={row.status}
-                          onValueChange={(v) =>
-                            void handleRowStatusChange(row.id, v as CompanyAssetStatus)
-                          }
-                        >
-                          <SelectTrigger
-                            className={cn(
-                              'h-7 w-auto min-w-[7.5rem] rounded-full border-0 px-2 py-0.5 text-xs font-medium shadow-none focus:ring-2 focus:ring-indigo-400',
-                              statusBadgeClass(row.status),
-                            )}
-                          >
-                            <SelectValue>{assetStatusLabel(row.status, t)}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-                            {ASSET_STATUSES.map((s) => (
-                              <SelectItem key={s} value={s} className={SELECT_ITEM_CLS}>
-                                {assetStatusLabel(s, t)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <span
-                          className={cn(
-                            'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
-                            statusBadgeClass(row.status),
-                          )}
-                        >
-                          {assetStatusLabel(row.status, t)}
-                        </span>
-                      )}
-                    </td>
-                    <td className="max-w-[8rem] truncate px-3 py-2 text-slate-500" title={row.notes ?? ''}>{row.notes ?? '—'}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex gap-1">
-                        <button type="button" title={t.caView} onClick={() => void openDetail(row.id)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
-                          <Eye size={16} />
-                        </button>
-                        {canManage && (
-                          <>
-                            <button type="button" title={t.caEditAsset} onClick={() => void openEdit(row.id)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              type="button"
-                              title={t.caDelete}
-                              onClick={() => {
-                                void (async () => {
-                                  try {
-                                    const asset = await apiRequest<CompanyAssetDetail>(
-                                      `/company-assets/${row.id}`,
-                                    );
-                                    setDeleteTarget(asset);
-                                  } catch {
-                                    toast.error(t.prEmployeeSaveError);
-                                  }
-                                })();
-                              }}
-                              className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700">
-          <p className="text-sm text-slate-500">
-            {t.caPage} {page} {t.caOf} {totalPages} · {total}
-          </p>
-          <div className="flex gap-1">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-lg border border-slate-200 p-2 disabled:opacity-40 dark:border-slate-600"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              type="button"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-slate-200 p-2 disabled:opacity-40 dark:border-slate-600"
-            >
-              <ChevronRight size={16} />
-            </button>
+        <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-5">
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-white">{t.caTitle}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {total} {t.totalRecords}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setTableFullscreen(true)}
+            className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+            title={t.exHistoryFullscreenEnter}
+            aria-label={t.exHistoryFullscreenEnter}
+          >
+            <Maximize2 size={18} />
+          </button>
         </div>
+        <CompanyAssetsTablePanel {...tablePanelProps} />
       </div>
+
+      {tableFullscreen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[130] flex flex-col bg-white dark:bg-slate-900"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.caTitle}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-5">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold text-slate-900 dark:text-white">{t.caTitle}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {total} {t.totalRecords} · {t.caPage} {page} {t.caOf} {totalPages}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTableFullscreen(false)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                <X size={18} aria-hidden />
+                {t.exHistoryFullscreenExit}
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto">
+              <CompanyAssetsTablePanel
+                {...tablePanelProps}
+                wideNotes
+                selectContentClass={SELECT_CONTENT_FULLSCREEN_CLS}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <Dialog open={formOpen} onOpenChange={(o) => { if (!o) closeFormDialog(); else setFormOpen(true); }}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">

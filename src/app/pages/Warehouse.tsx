@@ -64,6 +64,7 @@ import {
   warehouseProductStockTotals,
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
+import { buildWarehouseProductProfitDisplay } from '../utils/warehouse-product-profit';
 import { useCbuRates } from '../hooks/use-cbu-rates';
 import { cbuEurRate, cbuUsdRate } from '../utils/sales-currency';
 import { Button } from '../components/ui/button';
@@ -105,6 +106,15 @@ import {
 
 function catalogNamesMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function matchesWarehouseProductSearch(
+  product: { name: string; description?: string },
+  query: string,
+): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [product.name, product.description ?? ''].join(' ').toLowerCase().includes(q);
 }
 
 function formatOverviewMoney(amount: number | null, suffix: string, empty: string): string {
@@ -491,6 +501,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       selectedFinalIds: options.selectedFinalIds,
       cbuUsdRate: cbuUsdFx,
       cbuEurRate: cbuEurFx,
+      compact: action === 'print',
     });
     if (action === 'excel') {
       downloadWarehouseStockExcel(
@@ -577,6 +588,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const [exportScope, setExportScope] = useState<WarehouseExportScope>('current_only');
   const [exportSelectedIds, setExportSelectedIds] = useState<Set<string>>(new Set());
   const [catalogSearch, setCatalogSearch] = useState('');
+  const [overviewSearch, setOverviewSearch] = useState('');
   const [overviewViewMode, setOverviewViewMode] = useState<'cards' | 'table'>(() => {
     if (typeof window === 'undefined') return 'table';
     const saved = window.localStorage.getItem('wh-overview-view');
@@ -701,6 +713,16 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         (item): item is FinishedProductCatalogItem => item.itemType === 'FINISHED_PRODUCT',
       ),
     [state.warehouseProducts],
+  );
+
+  const rawMaterialById = useMemo(
+    () => new Map(rawMaterials.map((rm) => [rm.id, rm])),
+    [rawMaterials],
+  );
+
+  const semiProductById = useMemo(
+    () => new Map(allSemiProducts.map((semi) => [semi.id, semi])),
+    [allSemiProducts],
   );
 
   const exportableProducts = useMemo(() => {
@@ -885,11 +907,64 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   // Ombor (yarim/tayyor) sahifasida faqat yarim tayyor va tayyor mahsulotlar qoldig‘ini ko‘rsatamiz.
   const hasAnyStockDetailCard = hasCatalogSemi || hasCatalogFinal;
 
+  const overviewFilteredProducts = useMemo(() => {
+    const list = mode === 'semi' ? semiProducts : finishedProducts;
+    return list.filter((p) => matchesWarehouseProductSearch(p, overviewSearch));
+  }, [mode, semiProducts, finishedProducts, overviewSearch]);
+
+  const overviewFilteredQty = useMemo(
+    () =>
+      overviewFilteredProducts.reduce((sum, p) => {
+        const qty =
+          mode === 'semi'
+            ? (semiStockByProductName[p.name] ?? 0)
+            : (finalStockByProductName[p.name] ?? 0);
+        return sum + qty;
+      }, 0),
+    [
+      overviewFilteredProducts,
+      mode,
+      semiStockByProductName,
+      finalStockByProductName,
+    ],
+  );
+
+  const profitLabels = useMemo(
+    () => ({
+      rawLine: t.whProfitRawLine,
+      semiLine: t.whProfitSemiLine,
+      saleLine: t.whProfitSaleLine,
+      profitLine: t.whProfitValueLine,
+      unavailable: t.whExportNoPrice,
+    }),
+    [t],
+  );
+
   const overviewStockRows = useMemo((): WarehouseOverviewStockRow[] => {
     const rows: WarehouseOverviewStockRow[] = [];
     const empty = t.whExportNoPrice;
 
-    semiProducts.forEach((p) => {
+    const pushProfit = (
+      product: SemiProductCatalogItem | FinishedProductCatalogItem,
+    ) => {
+      const profit = buildWarehouseProductProfitDisplay(
+        product,
+        rawMaterialById,
+        semiProductById,
+        cbuUsdFx,
+        cbuEurFx,
+        profitLabels,
+      );
+      return {
+        profitCostLines: profit.costLines,
+        profitSaleLine: profit.saleUzsLine ?? undefined,
+        profitLine: profit.profitLine ?? undefined,
+        profitPerPieceUzs: profit.profitPerPieceUzs,
+      };
+    };
+
+    if (mode === 'semi') {
+    overviewFilteredProducts.forEach((p) => {
       const qty = semiStockByProductName[p.name] ?? 0;
       const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
       const packLines = getWarehousePackBreakdownLines(
@@ -922,10 +997,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 100000),
+        ...pushProfit(p),
       });
     });
-
-    finishedProducts.forEach((p) => {
+    } else {
+    overviewFilteredProducts.forEach((p) => {
       const qty = finalStockByProductName[p.name] ?? 0;
       const ppb = p.piecesPerBag ?? 0;
       const packLines = getWarehousePackBreakdownLines(
@@ -957,18 +1033,23 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 20000),
+        ...pushProfit(p),
       });
     });
+    }
 
     return rows.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
   }, [
-    semiProducts,
-    finishedProducts,
+    mode,
+    overviewFilteredProducts,
     semiStockByProductName,
     finalStockByProductName,
     semiPackPiecesPerBag,
     packagedBySemiName,
     packagedByFinalName,
+    rawMaterialById,
+    semiProductById,
+    profitLabels,
     cbuUsdFx,
     cbuEurFx,
     t,
@@ -978,12 +1059,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     const empty = t.whExportNoPrice;
     let uzs = 0;
     let usd = 0;
+    let profit = 0;
     let hasUzs = false;
     let hasUsd = false;
-    const products = mode === 'semi' ? semiProducts : finishedProducts;
+    let hasProfit = false;
     const stockByName =
       mode === 'semi' ? semiStockByProductName : finalStockByProductName;
-    products.forEach((p) => {
+    overviewFilteredProducts.forEach((p) => {
       const qty = stockByName[p.name] ?? 0;
       const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
       if (totals.totalUzs != null) {
@@ -994,17 +1076,32 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         usd += totals.totalUsd;
         hasUsd = true;
       }
+      const profitDisplay = buildWarehouseProductProfitDisplay(
+        p,
+        rawMaterialById,
+        semiProductById,
+        cbuUsdFx,
+        cbuEurFx,
+        profitLabels,
+      );
+      if (profitDisplay.profitPerPieceUzs != null && qty > 0) {
+        profit += profitDisplay.profitPerPieceUzs * qty;
+        hasProfit = true;
+      }
     });
     return {
       totalUzs: formatOverviewMoney(hasUzs ? uzs : null, "so'm", empty),
       totalUsd: formatOverviewMoney(hasUsd ? usd : null, '$', empty),
+      totalProfit: formatOverviewMoney(hasProfit ? profit : null, "so'm", empty),
     };
   }, [
     mode,
-    semiProducts,
-    finishedProducts,
+    overviewFilteredProducts,
     semiStockByProductName,
     finalStockByProductName,
+    rawMaterialById,
+    semiProductById,
+    profitLabels,
     cbuUsdFx,
     cbuEurFx,
     t,
@@ -1020,11 +1117,14 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       colPiecesPerBag: t.whCatalogPackLabel,
       colSpec: t.whWeightGram,
       colSalePrice: t.whSalePrice,
+      colProfit: t.whOverviewColProfit,
       colTotalUzs: t.whExportColTotalUzs,
       colTotalUsd: t.whExportColTotalUsd,
       colFill: t.whOverviewColFill,
       grandTotal: t.whExportGrandTotal,
       empty: t.whStockBreakdownEmpty,
+      fullscreenEnter: t.whOverviewFullscreenEnter,
+      fullscreenExit: t.whOverviewFullscreenExit,
     }),
     [t, mode],
   );
@@ -1039,7 +1139,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       shadow: string;
       icon: React.ComponentType<{ size?: number; className?: string }>;
     }> = [];
-    semiProducts.forEach((p, i) => {
+    const filteredSemi = semiProducts.filter((p) =>
+      matchesWarehouseProductSearch(p, overviewSearch),
+    );
+    const filteredFinal = finishedProducts.filter((p) =>
+      matchesWarehouseProductSearch(p, overviewSearch),
+    );
+    filteredSemi.forEach((p, i) => {
       const st = SEMI_SUMMARY_GRADIENTS[i % SEMI_SUMMARY_GRADIENTS.length];
       const qty = semiStockByProductName[p.name] ?? 0;
       const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
@@ -1059,7 +1165,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         icon: Factory,
       });
     });
-    finishedProducts.forEach((p, i) => {
+    filteredFinal.forEach((p, i) => {
       const st = FINAL_SUMMARY_GRADIENTS[i % FINAL_SUMMARY_GRADIENTS.length];
       const qty = finalStockByProductName[p.name] ?? 0;
       const ppb = p.piecesPerBag ?? 0;
@@ -1079,12 +1185,19 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         icon: Package,
       });
     });
-    if (hasCatalogSemi || hasCatalogFinal) {
+    if (
+      (mode === 'semi' ? hasCatalogSemi : hasCatalogFinal) &&
+      (filteredSemi.length > 0 || filteredFinal.length > 0 || !overviewSearch.trim())
+    ) {
+      const totalQty =
+        overviewSearch.trim() ? overviewFilteredQty : (
+          mode === 'semi' ? totalSemiInCatalogStock : totalFinalInCatalogStock
+        );
       cards.push({
         key: 'total-pieces',
         label: t.whTotalProd,
         sub: t.whInWarehouse,
-        val: `${formatNumber(totalPiecesInCatalogStock)} ${t.unitPiece}`,
+        val: `${formatNumber(totalQty)} ${t.unitPiece}`,
         from: 'from-emerald-500 to-emerald-600',
         shadow: 'shadow-emerald-200 dark:shadow-emerald-900/30',
         icon: Boxes,
@@ -1092,6 +1205,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     }
     return cards;
   }, [
+    mode,
     hasCatalogSemi,
     hasCatalogFinal,
     semiProducts,
@@ -1101,7 +1215,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     semiPackPiecesPerBag,
     packagedBySemiName,
     packagedByFinalName,
-    totalPiecesInCatalogStock,
+    totalSemiInCatalogStock,
+    totalFinalInCatalogStock,
+    overviewSearch,
+    overviewFilteredQty,
     t,
   ]);
 
@@ -1206,6 +1323,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
   useEffect(() => {
     setCatalogSearch('');
+    setOverviewSearch('');
   }, [mode]);
 
   const setOverviewView = (next: 'cards' | 'table') => {
@@ -2229,6 +2347,20 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               </div>
             </div>
 
+            <div className="relative max-w-md">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={overviewSearch}
+                onChange={(e) => setOverviewSearch(e.target.value)}
+                placeholder={t.whCatalogSearchPlaceholder}
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-500"
+              />
+            </div>
+
             {overviewViewMode === 'cards' ? (
               <>
                 {warehouseSummaryCards.length > 0 ? (
@@ -2249,7 +2381,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                   </div>
                 ) : (
                   <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
-                    {t.whStockBreakdownEmpty}
+                    {overviewSearch.trim() ? t.whCatalogNoSearchResults : t.whStockBreakdownEmpty}
                   </p>
                 )}
 
@@ -2257,15 +2389,24 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                   <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
                     {t.whDetailed}
                   </h3>
-                  {hasAnyStockDetailCard ? (
+                  {overviewFilteredProducts.length > 0 ? (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {semiProducts.map((p, idx) => {
-                        const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
-                        const qty = semiStockByProductName[p.name] ?? 0;
-                        const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
+                      {overviewFilteredProducts.map((p, idx) => {
+                        const isSemi = mode === 'semi';
+                        const st = isSemi
+                          ? SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length]
+                          : FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
+                        const qty = isSemi
+                          ? (semiStockByProductName[p.name] ?? 0)
+                          : (finalStockByProductName[p.name] ?? 0);
+                        const ppb = isSemi
+                          ? (semiPackPiecesPerBag.get(p.name) ?? 0)
+                          : ((p as FinishedProductCatalogItem).piecesPerBag ?? 0);
                         const detailLines = getWarehousePackBreakdownLines(
                           qty,
-                          packagedBySemiName[p.name] ?? 0,
+                          isSemi
+                            ? (packagedBySemiName[p.name] ?? 0)
+                            : (packagedByFinalName[p.name] ?? 0),
                           ppb,
                           t,
                         );
@@ -2275,42 +2416,24 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                             title={p.name}
                             detailLines={detailLines}
                             value={qty}
-                            max={100000}
+                            max={isSemi ? 100000 : 20000}
                             unit={t.unitPiece}
                             color={st.color}
                             bgColor={st.bgColor}
-                            icon={<Factory size={18} className={st.iconColor} />}
-                          />
-                        );
-                      })}
-                      {finishedProducts.map((p, idx) => {
-                        const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
-                        const qty = finalStockByProductName[p.name] ?? 0;
-                        const ppb = p.piecesPerBag ?? 0;
-                        const detailLines = getWarehousePackBreakdownLines(
-                          qty,
-                          packagedByFinalName[p.name] ?? 0,
-                          ppb,
-                          t,
-                        );
-                        return (
-                          <StockItem
-                            key={p.id}
-                            title={p.name}
-                            detailLines={detailLines}
-                            value={qty}
-                            max={20000}
-                            unit={t.unitPiece}
-                            color={st.color}
-                            bgColor={st.bgColor}
-                            icon={<Package size={18} className={st.iconColor} />}
+                            icon={
+                              isSemi ? (
+                                <Factory size={18} className={st.iconColor} />
+                              ) : (
+                                <Package size={18} className={st.iconColor} />
+                              )
+                            }
                           />
                         );
                       })}
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t.whStockBreakdownEmpty}
+                      {overviewSearch.trim() ? t.whCatalogNoSearchResults : t.whStockBreakdownEmpty}
                     </p>
                   )}
                 </div>
@@ -2320,17 +2443,22 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   {t.whDetailed}
                 </p>
-                <WarehouseOverviewStockTable
-                  rows={overviewStockRows}
-                  labels={overviewTableLabels}
-                  totalQty={
-                    mode === 'semi' ? totalSemiInCatalogStock : totalFinalInCatalogStock
-                  }
-                  totalUzs={overviewGrandTotals.totalUzs}
-                  totalUsd={overviewGrandTotals.totalUsd}
-                  unit={t.unitPiece}
-                  showSpecColumn={mode === 'semi'}
-                />
+                {overviewStockRows.length > 0 ? (
+                  <WarehouseOverviewStockTable
+                    rows={overviewStockRows}
+                    labels={overviewTableLabels}
+                    totalQty={overviewFilteredQty}
+                    totalUzs={overviewGrandTotals.totalUzs}
+                    totalUsd={overviewGrandTotals.totalUsd}
+                    totalProfit={overviewGrandTotals.totalProfit}
+                    unit={t.unitPiece}
+                    showSpecColumn={mode === 'semi'}
+                  />
+                ) : (
+                  <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+                    {overviewSearch.trim() ? t.whCatalogNoSearchResults : t.whStockBreakdownEmpty}
+                  </p>
+                )}
               </div>
             )}
 
