@@ -877,7 +877,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         t,
       );
       const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
-      const salePriceDisplay = formatWarehouseSalePriceDisplay(p, empty, t.whPriceInUzs);
+      const salePriceDisplay = formatWarehouseSalePriceDisplay(
+        p,
+        empty,
+        t.whPriceInUzs,
+        t.whCatalogFxValue,
+      );
       rows.push({
         id: p.id,
         kind: 'SEMI_PRODUCT',
@@ -890,6 +895,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         spec: `${formatNumber(p.weightGram)} g`,
         salePrice: salePriceDisplay.main,
         salePriceUzs: salePriceDisplay.sub,
+        salePriceFx: salePriceDisplay.fxRate,
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 100000),
@@ -906,7 +912,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         t,
       );
       const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
-      const salePriceDisplay = formatWarehouseSalePriceDisplay(p, empty, t.whPriceInUzs);
+      const salePriceDisplay = formatWarehouseSalePriceDisplay(
+        p,
+        empty,
+        t.whPriceInUzs,
+        t.whCatalogFxValue,
+      );
       rows.push({
         id: p.id,
         kind: 'FINISHED_PRODUCT',
@@ -918,6 +929,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         piecesPerBag: ppb > 0 ? formatNumber(ppb) : empty,
         salePrice: salePriceDisplay.main,
         salePriceUzs: salePriceDisplay.sub,
+        salePriceFx: salePriceDisplay.fxRate,
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 20000),

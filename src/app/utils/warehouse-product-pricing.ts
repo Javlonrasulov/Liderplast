@@ -148,6 +148,8 @@ function currencyDisplay(cur: SaleCurrency): string {
 export type WarehouseSalePriceDisplay = {
   main: string;
   sub?: string;
+  /** Masalan: 1 USD (USDT) = 12 100 so'm */
+  fxRate?: string;
 };
 
 /** Jadval/chop uchun sotuv narxi — USD kichik kasrlar va so'm ekvivalenti */
@@ -189,6 +191,7 @@ export function formatWarehouseSalePriceDisplay(
   },
   noPrice: string,
   priceInUzsLabel: string,
+  fxValueLabel?: string,
 ): WarehouseSalePriceDisplay {
   const sp = product.salePrice;
   if (sp == null || sp <= 0) return { main: noPrice };
@@ -202,6 +205,11 @@ export function formatWarehouseSalePriceDisplay(
   return {
     main,
     sub: priceInUzsLabel.replace('{amount}', formatNumber(uzs)),
+    fxRate: fxValueLabel
+      ? fxValueLabel
+          .replace('{currency}', currencyDisplay(cur))
+          .replace('{rate}', formatNumber(fx))
+      : undefined,
   };
 }
 

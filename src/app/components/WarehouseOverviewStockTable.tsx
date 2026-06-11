@@ -13,6 +13,7 @@ export type WarehouseOverviewStockRow = {
   spec?: string;
   salePrice: string;
   salePriceUzs?: string;
+  salePriceFx?: string;
   totalUzs: string;
   totalUsd: string;
   fillPct: number;
@@ -135,11 +136,16 @@ export function WarehouseOverviewStockTable({
                     {row.spec ?? '—'}
                   </td>
                 ) : null}
-                <td className="min-w-[7rem] px-3 py-2.5 text-slate-700 dark:text-slate-200">
+                <td className="min-w-[8rem] px-3 py-2.5 text-slate-700 dark:text-slate-200">
                   <div className="font-semibold whitespace-nowrap">{row.salePrice}</div>
                   {row.salePriceUzs ? (
                     <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                       {row.salePriceUzs}
+                    </div>
+                  ) : null}
+                  {row.salePriceFx ? (
+                    <div className="mt-0.5 text-[10px] font-medium leading-snug text-slate-500 dark:text-slate-400">
+                      {row.salePriceFx}
                     </div>
                   ) : null}
                 </td>
