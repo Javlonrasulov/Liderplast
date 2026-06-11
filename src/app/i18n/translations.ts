@@ -1318,6 +1318,7 @@ export interface T {
   invQtyKgHint: string;
   invLoadFailed: string;
   invSaveFailed: string;
+  invStockNegativeError: string;
   invLoading: string;
   invShowing: string;
   invMobileSwipeHint: string;
@@ -2618,6 +2619,8 @@ const uz_cyrillic: T = {
   invQtyKgHint: 'Масалан: 12.560 ёки 12 560 = 12 кг 560 г',
   invLoadFailed: 'Инвентаризация юкланмади',
   invSaveFailed: 'Сақлашда хатолик',
+  invStockNegativeError:
+    'Омборда етарли қолдиқ йўқ — ҳужжатдаги «ҳисобда» ва сервер қолдиғи мос келмаслиги мумкин. Саҳифани янгилаб, реал қийматларни қайта текширинг.',
   invLoading: 'Юкланмоқда…',
   invShowing: 'Кўрсатилмоқда',
   invMobileSwipeHint: 'Жадвални ўнгга суринг — қўшимча устунлар бор',
@@ -3918,6 +3921,8 @@ const uz_latin: T = {
   invQtyKgHint: 'Masalan: 12.560 yoki 12 560 = 12 kg 560 g',
   invLoadFailed: 'Inventarizatsiya yuklanmadi',
   invSaveFailed: 'Saqlashda xatolik',
+  invStockNegativeError:
+    'Omborda yetarli qoldiq yo‘q — hujjatdagi «hisobda» va server qoldig‘i mos kelmasligi mumkin. Sahifani yangilab, real qiymatlarni qayta tekshiring.',
   invLoading: 'Yuklanmoqda…',
   invShowing: 'Ko‘rsatilmoqda',
   invMobileSwipeHint: 'Jadvalni o‘ngga suring — qo‘shimcha ustunlar bor',
@@ -5217,6 +5222,8 @@ const ru: T = {
   invQtyKgHint: 'Например: 12.560 или 12 560 = 12 кг 560 г',
   invLoadFailed: 'Не удалось загрузить инвентаризацию',
   invSaveFailed: 'Ошибка сохранения',
+  invStockNegativeError:
+    'Недостаточно остатка на складе — учётный остаток в документе может не совпадать с фактическим. Обновите страницу и проверьте реальные значения.',
   invLoading: 'Загрузка…',
   invShowing: 'Отображено',
   invMobileSwipeHint: 'Прокрутите таблицу вправо — есть дополнительные колонки',

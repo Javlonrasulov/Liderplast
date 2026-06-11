@@ -52,6 +52,10 @@ import {
   migrateLocalInventoryToServer,
   updateInventoryDocument,
 } from './inventory/inventory-api';
+import {
+  buildStockByProductId,
+  type WarehouseStockSnapshot,
+} from './inventory/inventory-stock';
 import type {
   InventoryFilterValue,
   InventoryItemCategory,
@@ -68,6 +72,11 @@ function inventoryQtyEpsilon(unit: 'kg' | 'pcs'): number {
 
 function isNegligibleInventoryDiff(diff: number, unit: 'kg' | 'pcs'): boolean {
   return !Number.isFinite(diff) || Math.abs(diff) < inventoryQtyEpsilon(unit);
+}
+
+function roundInventoryQty(n: number, unit: 'kg' | 'pcs'): number {
+  if (!Number.isFinite(n)) return 0;
+  return unit === 'kg' ? Math.round(n * 1000) / 1000 : Math.round(n);
 }
 
 const DEFAULT_WAREHOUSES: InventoryWarehouseOption[] = [
@@ -412,11 +421,30 @@ export function Inventory() {
         createdExpenseIds.push(created.id);
       }
 
+      // Hujjatdagi «hisobda» emas, serverdagi joriy qoldiqdan realga moslashtiramiz —
+      // aks holda qoldiq allaqachon 0 bo‘lsa ham system farqi uchun CONSUMPTION yuboriladi va 400 beradi.
+      const stockRows = await apiRequest<WarehouseStockSnapshot[]>(
+        '/warehouse/stock',
+      );
+      const stockByProductId = buildStockByProductId(
+        current.rows.map((row) => ({
+          productId: row.productId,
+          productName: row.productName,
+          category: row.category,
+        })),
+        stockRows,
+      );
+
       const movements = current.rows
         .map((row) => {
-          const diff = row.realQuantityEnd - row.systemQuantityEnd;
-          if (!Number.isFinite(diff) || isNegligibleInventoryDiff(diff, row.unit))
+          const currentBalance = stockByProductId.get(row.productId) ?? 0;
+          const adjustment = row.realQuantityEnd - currentBalance;
+          if (
+            !Number.isFinite(adjustment) ||
+            isNegligibleInventoryDiff(adjustment, row.unit)
+          ) {
             return null;
+          }
 
           const itemType =
             row.category === 'RAW_MATERIAL'
@@ -425,10 +453,19 @@ export function Inventory() {
                 ? ('SEMI_PRODUCT' as const)
                 : ('FINISHED_PRODUCT' as const);
 
+          let quantity = roundInventoryQty(Math.abs(adjustment), row.unit);
+          if (adjustment < 0) {
+            quantity = roundInventoryQty(
+              Math.min(quantity, Math.max(0, currentBalance)),
+              row.unit,
+            );
+          }
+          if (quantity < inventoryQtyEpsilon(row.unit)) return null;
+
           const dto: Record<string, unknown> = {
             itemType,
-            movementType: diff > 0 ? 'INCOMING' : 'CONSUMPTION',
-            quantity: Math.abs(diff),
+            movementType: adjustment > 0 ? 'INCOMING' : 'CONSUMPTION',
+            quantity,
             note: `Inventory ${current.docNumber}`,
           };
 
@@ -475,7 +512,11 @@ export function Inventory() {
     } catch (err) {
       setConfirmFinishId(null);
       const msg = err instanceof Error ? err.message : String(err);
-      setToast(msg || 'Warehouse update failed');
+      if (/stock cannot go negative/i.test(msg)) {
+        setToast(t.invStockNegativeError);
+      } else {
+        setToast(msg || t.invSaveFailed);
+      }
     }
   };
 
