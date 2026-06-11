@@ -677,6 +677,7 @@ export interface T {
   rmSectionLedgerDesc: string;
   rmSectionBags: string;
   rmSectionBagsDesc: string;
+  rmStatsCatalogTotal: string;
 
   // Semi Production
   spTitle: string;
@@ -1874,6 +1875,7 @@ const uz_cyrillic: T = {
   rmSectionLedgerDesc: 'Кирим ва сарф ёзувлари',
   rmSectionBags: 'Қоплар ва аппарат',
   rmSectionBagsDesc: 'Фаол қоп, улаш / алмаштириш ва қоплар рўйхати',
+  rmStatsCatalogTotal: 'Каталог турлари',
 
   dashTitle: 'Ишлаб чиқариш бошқарув панели',
   dashSubtitle: 'Реал вақт маълумотлари',
@@ -3175,6 +3177,7 @@ const uz_latin: T = {
   rmSectionLedgerDesc: 'Kirim va sarf yozuvlari',
   rmSectionBags: 'Qoplar va apparat',
   rmSectionBagsDesc: 'Faol qop, ulash / almashtirish va qoplar ro‘yxati',
+  rmStatsCatalogTotal: 'Katalog turlari',
 
   dashTitle: 'Ishlab chiqarish boshqaruv paneli',
   dashSubtitle: 'Real vaqt ma\'lumotlari',
@@ -4477,6 +4480,7 @@ const ru: T = {
   rmSectionLedgerDesc: 'Записи поступлений и расхода',
   rmSectionBags: 'Мешки и аппарат',
   rmSectionBagsDesc: 'Активный мешок, подключение и списки',
+  rmStatsCatalogTotal: 'Типы в каталоге',
 
   dashTitle: 'Панель управления производством',
   dashSubtitle: 'Данные в реальном времени',

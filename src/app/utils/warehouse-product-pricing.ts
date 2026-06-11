@@ -152,7 +152,7 @@ export type WarehouseSalePriceDisplay = {
   fxRate?: string;
 };
 
-/** Jadval/chop uchun sotuv narxi — USD kichik kasrlar va so'm ekvivalenti */
+/** Jadval/chop uchun narx bo‘yicha jami qiymat */
 export function warehouseProductStockTotals(
   product: {
     salePrice?: number;
@@ -181,6 +181,52 @@ export function warehouseProductStockTotals(
     totalUzs: unitUzs != null ? unitUzs * quantity : null,
     totalUsd: unitUsd != null ? unitUsd * quantity : null,
   };
+}
+
+export function warehouseProductPurchaseTotals(
+  product: {
+    purchasePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
+  },
+  quantityKg: number,
+  usdRate: number,
+  eurRate: number,
+): { totalUzs: number | null; totalUsd: number | null } {
+  return warehouseProductStockTotals(
+    {
+      salePrice: product.purchasePrice,
+      priceCurrency: product.priceCurrency,
+      fxRateToUzs: product.fxRateToUzs,
+    },
+    quantityKg,
+    usdRate,
+    eurRate,
+  );
+}
+
+export function formatWarehousePurchasePriceDisplay(
+  product: {
+    purchasePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
+  },
+  noPrice: string,
+  priceInUzsLabel: string,
+  fxValueLabel?: string,
+  options?: { fallbackUsdRate?: number; fallbackEurRate?: number },
+): WarehouseSalePriceDisplay {
+  return formatWarehouseSalePriceDisplay(
+    {
+      salePrice: product.purchasePrice,
+      priceCurrency: product.priceCurrency,
+      fxRateToUzs: product.fxRateToUzs,
+    },
+    noPrice,
+    priceInUzsLabel,
+    fxValueLabel,
+    options,
+  );
 }
 
 export function formatWarehouseSalePriceDisplay(

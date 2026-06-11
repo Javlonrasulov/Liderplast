@@ -1,15 +1,29 @@
 import React, { useMemo, useState } from 'react';
-import { Droplets, Palette, AlertTriangle, Pencil, Trash2, X } from 'lucide-react';
+import {
+  Droplets,
+  Palette,
+  AlertTriangle,
+  Pencil,
+  Trash2,
+  X,
+  LayoutGrid,
+  Table2,
+} from 'lucide-react';
 import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { calcPercent, formatKgAmount, formatNumber } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { useAuth } from '../auth/auth-context';
+import { useCbuRates } from '../hooks/use-cbu-rates';
+import { cbuEurRate, cbuUsdRate } from '../utils/sales-currency';
 import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
+import { RawMaterialOverviewStockTable } from '../components/RawMaterialOverviewStockTable';
 import {
   EMPTY_WAREHOUSE_PRICING,
+  formatWarehousePurchasePriceDisplay,
   parseWarehousePurchasePricingPayload,
   pricingFieldsFromProduct,
+  warehouseProductPurchaseTotals,
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
 import { Button } from '../components/ui/button';
@@ -36,9 +50,17 @@ const LOW_SIRO_KG = 1000;
 /** Kraska uchun эски Warehouse саҳифасидан килинган услуб */
 const LOW_PAINT_KG = 200;
 
-export function RawMaterialWarehouseStock() {
+function formatOverviewMoney(amount: number | null, suffix: string, empty: string): string {
+  if (amount == null || !Number.isFinite(amount)) return empty;
+  return `${formatNumber(Math.round(amount))} ${suffix}`;
+}
+
+export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopSummary?: boolean }) {
   const { state, dispatch } = useERP();
   const { t } = useApp();
+  const { usd: cbuUsd, eur: cbuEur } = useCbuRates();
+  const cbuUsdFx = cbuUsdRate(cbuUsd);
+  const cbuEurFx = cbuEurRate(cbuEur);
   const { user, hasPermission } = useAuth();
   /**
    * Xom ashyo katalogini boshqarish (qo‘shish/tahrirlash/o‘chirish):
@@ -60,6 +82,19 @@ export function RawMaterialWarehouseStock() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
+    if (typeof window === 'undefined') return 'table';
+    const saved = window.localStorage.getItem('rm-stock-view');
+    if (saved === 'cards' || saved === 'table') return saved;
+    return 'table';
+  });
+
+  const setStockView = (next: 'cards' | 'table') => {
+    setViewMode(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('rm-stock-view', next);
+    }
+  };
 
   const pricingFormLabels = useMemo(
     () => ({
@@ -126,6 +161,91 @@ export function RawMaterialWarehouseStock() {
       .filter((x) => x.kg < LOW_PAINT_KG)
       .sort((a, b) => a.kg - b.kg);
   }, [rows, qtyByName]);
+
+  const rowById = useMemo(() => new Map(rows.map((rm) => [rm.id, rm])), [rows]);
+
+  const overviewTableRows = useMemo(() => {
+    const empty = t.whExportNoPrice;
+    return rows.map((rm) => {
+      const kg = qtyByName.get(rm.name) ?? 0;
+      const isPaint = rm.rawMaterialKind === 'PAINT';
+      const max = isPaint ? 2000 : 5000;
+      const low = isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG;
+      const purchaseDisplay = formatWarehousePurchasePriceDisplay(
+        rm,
+        empty,
+        t.whPriceInUzs,
+        t.whCatalogFxValue,
+        { fallbackUsdRate: cbuUsdFx, fallbackEurRate: cbuEurFx },
+      );
+      const totals = warehouseProductPurchaseTotals(rm, kg, cbuUsdFx, cbuEurFx);
+      const bagWeight =
+        rm.defaultBagWeightKg != null && rm.defaultBagWeightKg > 0
+          ? `${formatKgAmount(rm.defaultBagWeightKg)} ${t.unitKg}`
+          : '—';
+
+      return {
+        id: rm.id,
+        kind: (rm.rawMaterialKind ?? 'SIRO') as RawMaterialKind,
+        typeLabel: isPaint ? t.rmKindPaint : t.rmKindSiro,
+        name: rm.name,
+        description: rm.description?.trim() || undefined,
+        quantityKg: kg,
+        defaultBagWeight: bagWeight,
+        purchasePrice: purchaseDisplay.main,
+        purchasePriceUzs: purchaseDisplay.sub,
+        purchasePriceFx: purchaseDisplay.fxRate,
+        totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
+        totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
+        fillPct: calcPercent(kg, max),
+        lowStock: low,
+      };
+    });
+  }, [rows, qtyByName, t, cbuUsdFx, cbuEurFx]);
+
+  const overviewFooterTotals = useMemo(() => {
+    const empty = t.whExportNoPrice;
+    let uzs = 0;
+    let usd = 0;
+    let hasUzs = false;
+    let hasUsd = false;
+    rows.forEach((rm) => {
+      const kg = qtyByName.get(rm.name) ?? 0;
+      const totals = warehouseProductPurchaseTotals(rm, kg, cbuUsdFx, cbuEurFx);
+      if (totals.totalUzs != null) {
+        uzs += totals.totalUzs;
+        hasUzs = true;
+      }
+      if (totals.totalUsd != null) {
+        usd += totals.totalUsd;
+        hasUsd = true;
+      }
+    });
+    return {
+      totalUzs: formatOverviewMoney(hasUzs ? uzs : null, "so'm", empty),
+      totalUsd: formatOverviewMoney(hasUsd ? usd : null, '$', empty),
+    };
+  }, [rows, qtyByName, cbuUsdFx, cbuEurFx, t]);
+
+  const overviewTableLabels = useMemo(
+    () => ({
+      colNum: t.whExportColNum,
+      colType: t.whExportColType,
+      colName: t.whExportColName,
+      colStock: t.rmRemaining,
+      colBagWeight: t.rmDefaultBagWeight,
+      colPurchasePrice: t.whPurchasePrice,
+      colTotalUzs: t.whExportColTotalUzs,
+      colTotalUsd: t.whExportColTotalUsd,
+      colFill: t.whOverviewColFill,
+      unitKg: t.unitKg,
+      grandTotal: t.whExportGrandTotal,
+      empty: t.rmWarehouseStockEmpty,
+      edit: t.whEdit,
+      delete: t.suDelete,
+    }),
+    [t],
+  );
 
   const openEdit = (rm: RawMaterialProduct) => {
     setError('');
@@ -223,7 +343,9 @@ export function RawMaterialWarehouseStock() {
 
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden">
-      <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
+      {!hideTopSummary ? (
+        <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
+      ) : null}
 
       {success ? (
         <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
@@ -240,21 +362,54 @@ export function RawMaterialWarehouseStock() {
         <p className="rounded-2xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
           {t.rmWarehouseStockEmpty}
         </p>
-      ) : (
-        <>
-          <div className="rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm dark:border-indigo-900/40 dark:from-indigo-950/30 dark:to-slate-900">
-            <p className="text-xs font-medium uppercase tracking-wide text-indigo-800/80 dark:text-indigo-200/90">
-              {t.rmWarehouseStockTotal}
-            </p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-              {formatKgAmount(totalKg)} <span className="text-base font-semibold text-slate-500 dark:text-slate-400">{t.unitKg}</span>
-            </p>
-          </div>
-        </>
-      )}
+      ) : null}
+
+      {rows.length > 0 && !hideTopSummary ? (
+        <div className="rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm dark:border-indigo-900/40 dark:from-indigo-950/30 dark:to-slate-900">
+          <p className="text-xs font-medium uppercase tracking-wide text-indigo-800/80 dark:text-indigo-200/90">
+            {t.rmWarehouseStockTotal}
+          </p>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+            {formatKgAmount(totalKg)}{' '}
+            <span className="text-base font-semibold text-slate-500 dark:text-slate-400">{t.unitKg}</span>
+          </p>
+        </div>
+      ) : null}
 
       {rows.length > 0 && (
         <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {t.whDetailed}
+            </h3>
+            <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+              <button
+                type="button"
+                onClick={() => setStockView('cards')}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  viewMode === 'cards'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                }`}
+              >
+                <LayoutGrid size={14} />
+                {t.whOverviewViewCards}
+              </button>
+              <button
+                type="button"
+                onClick={() => setStockView('table')}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  viewMode === 'table'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                }`}
+              >
+                <Table2 size={14} />
+                {t.whOverviewViewTable}
+              </button>
+            </div>
+          </div>
+
           {(lowSiro.length > 0 || lowPaint.length > 0) && (
             <div className="space-y-3">
               {lowSiro.length > 0 && (
@@ -294,6 +449,7 @@ export function RawMaterialWarehouseStock() {
             </div>
           )}
 
+          {viewMode === 'cards' ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {rows.map((rm) => {
             const kg = qtyByName.get(rm.name) ?? 0;
@@ -393,6 +549,27 @@ export function RawMaterialWarehouseStock() {
               );
             })}
           </div>
+          ) : (
+            <RawMaterialOverviewStockTable
+              rows={overviewTableRows}
+              labels={overviewTableLabels}
+              totalKg={totalKg}
+              footerTotals={overviewFooterTotals}
+              canManage={canManage}
+              canDelete={canDelete}
+              onEdit={(id) => {
+                const rm = rowById.get(id);
+                if (rm) openEdit(rm);
+              }}
+              onDelete={(id) => {
+                const rm = rowById.get(id);
+                if (rm) {
+                  setError('');
+                  setDeleteTarget(rm);
+                }
+              }}
+            />
+          )}
         </>
       )}
 

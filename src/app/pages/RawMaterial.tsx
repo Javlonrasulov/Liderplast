@@ -22,7 +22,7 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import { formatNumber, formatDate, todayYmd } from '../utils/format';
+import { formatNumber, formatDate, formatKgAmount, todayYmd } from '../utils/format';
 import { RawMaterialMovementHistoryTable } from '../components/RawMaterialMovementHistoryTable';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -67,6 +67,44 @@ const SELECT_CONTENT_CLS =
 const SELECT_ITEM_CLS =
   'cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900 dark:data-[highlighted]:bg-slate-800 dark:data-[highlighted]:text-white';
 
+function RmStatCard({
+  label,
+  value,
+  unit,
+  icon: Icon,
+  iconWrapClass,
+  valueClass = 'text-slate-900 dark:text-white',
+  hint,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconWrapClass: string;
+  valueClass?: string;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="mb-3 flex items-center gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconWrapClass}`}>
+          <Icon size={18} className="text-white" />
+        </div>
+        <span className="text-sm text-slate-500 dark:text-slate-400">{label}</span>
+      </div>
+      <p className={`text-2xl font-bold tabular-nums ${valueClass}`}>
+        {value}
+        {unit ? (
+          <span className="text-sm font-normal text-slate-400"> {unit}</span>
+        ) : null}
+      </p>
+      {hint ? (
+        <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function RawMaterial() {
   const { state, dispatch } = useERP();
   const { t, filterData } = useApp();
@@ -82,7 +120,7 @@ export function RawMaterial() {
   const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
   const [createTypeOpen, setCreateTypeOpen] = useState(false);
-  const [rmTab, setRmTab] = useState<'catalog' | 'overview' | 'stock'>('catalog');
+  const [rmTab, setRmTab] = useState<'catalog' | 'overview' | 'stock'>('stock');
   const [incomingQtyMismatchPayload, setIncomingQtyMismatchPayload] = useState<
     | null
     | {
@@ -245,6 +283,20 @@ export function RawMaterial() {
     [state.warehouseProducts, state.warehouseStock],
   );
 
+  const catalogStats = useMemo(() => {
+    const raw = state.warehouseProducts.filter(
+      (p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL',
+    );
+    return {
+      total: raw.length,
+      siro: raw.filter((p) => p.rawMaterialKind !== 'PAINT').length,
+      paint: raw.filter((p) => p.rawMaterialKind === 'PAINT').length,
+    };
+  }, [state.warehouseProducts]);
+
+  const lowStockTypeCount = siroMaterialAlerts.length + paintMaterialAlerts.length;
+  const totalStockKg = siroStockKg + paintStockKg;
+
   const resolvedIncomingRawMaterialId = useMemo(() => {
     if (incomingCatalogItems.length === 0) return '';
     if (incomingRawMaterialId && incomingCatalogItems.some((x) => x.id === incomingRawMaterialId)) {
@@ -362,11 +414,11 @@ export function RawMaterial() {
         <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-700 -mx-1 px-1 min-[400px]:mx-0 min-[400px]:px-0">
           <button
             type="button"
-            onClick={() => setRmTab('catalog')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            onClick={() => setRmTab('stock')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'stock' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
           >
-            <Plus size={14} className="shrink-0" />
-            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionCreateIncoming}</span>
+            <ClipboardList size={14} className="shrink-0" />
+            <span className="truncate max-w-[10rem] min-[360px]:max-w-none">{t.rmSidebarWarehouseStock}</span>
           </button>
           <button
             type="button"
@@ -378,17 +430,59 @@ export function RawMaterial() {
           </button>
           <button
             type="button"
-            onClick={() => setRmTab('stock')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'stock' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+            onClick={() => setRmTab('catalog')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 min-[400px]:px-3 sm:px-4 py-2 min-[400px]:py-3 text-xs min-[400px]:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${rmTab === 'catalog' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
           >
-            <ClipboardList size={14} className="shrink-0" />
-            <span className="truncate max-w-[10rem] min-[360px]:max-w-none">{t.rmSidebarWarehouseStock}</span>
+            <Plus size={14} className="shrink-0" />
+            <span className="truncate max-w-[9rem] min-[360px]:max-w-none">{t.rmSectionCreateIncoming}</span>
           </button>
         </div>
 
         {rmTab === 'stock' && (
-          <div className="mt-0 focus-visible:outline-none">
-            <RawMaterialWarehouseStock />
+          <div className="mt-0 space-y-4 focus-visible:outline-none">
+            <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <RmStatCard
+                label={t.rmWarehouseStockTotal}
+                value={formatKgAmount(totalStockKg)}
+                unit={t.unitKg}
+                icon={Package}
+                iconWrapClass="bg-indigo-500"
+              />
+              <RmStatCard
+                label={t.rmRemaining}
+                value={formatKgAmount(siroStockKg)}
+                unit={t.unitKg}
+                icon={Droplets}
+                iconWrapClass={
+                  criticalStock ? 'bg-red-500' : lowStock ? 'bg-amber-500' : 'bg-emerald-500'
+                }
+                valueClass={
+                  criticalStock
+                    ? 'text-red-600'
+                    : lowStock
+                      ? 'text-amber-600'
+                      : 'text-slate-900 dark:text-white'
+                }
+                hint={lowStock ? t.dashOrderMaterial : undefined}
+              />
+              <RmStatCard
+                label={t.rmRemainingPaint}
+                value={formatKgAmount(paintStockKg)}
+                unit={t.unitKg}
+                icon={Droplets}
+                iconWrapClass="bg-violet-500"
+              />
+              <RmStatCard
+                label={t.rmSectionAlerts}
+                value={formatNumber(lowStockTypeCount)}
+                icon={AlertTriangle}
+                iconWrapClass={lowStockTypeCount > 0 ? 'bg-amber-500' : 'bg-slate-400'}
+                valueClass={lowStockTypeCount > 0 ? 'text-amber-600' : 'text-slate-900 dark:text-white'}
+                hint={t.rmSectionAlertsDesc}
+              />
+            </div>
+            <RawMaterialWarehouseStock hideTopSummary />
           </div>
         )}
 
@@ -547,6 +641,38 @@ export function RawMaterial() {
         {rmTab === 'catalog' && (
         <div className="mt-0 space-y-4 focus-visible:outline-none">
           <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionCreateIncomingDesc}</p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <RmStatCard
+              label={t.rmStatsCatalogTotal}
+              value={formatNumber(catalogStats.total)}
+              icon={Package}
+              iconWrapClass="bg-indigo-500"
+            />
+            <RmStatCard
+              label={t.rmMetricsCaptionSiro}
+              value={formatNumber(catalogStats.siro)}
+              icon={Droplets}
+              iconWrapClass="bg-blue-500"
+            />
+            <RmStatCard
+              label={t.rmMetricsCaptionPaint}
+              value={formatNumber(catalogStats.paint)}
+              icon={Droplets}
+              iconWrapClass="bg-violet-500"
+            />
+            <RmStatCard
+              label={t.rmPendingExternalOrdersTitle}
+              value={formatNumber(pendingExternalOrders.length)}
+              icon={ArrowDownCircle}
+              iconWrapClass={pendingExternalOrders.length > 0 ? 'bg-amber-500' : 'bg-slate-400'}
+              valueClass={
+                pendingExternalOrders.length > 0
+                  ? 'text-amber-600'
+                  : 'text-slate-900 dark:text-white'
+              }
+            />
+          </div>
 
           {(siroMaterialAlerts.length > 0 || paintMaterialAlerts.length > 0) && (
             <div className="space-y-4">
