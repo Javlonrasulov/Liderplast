@@ -12,8 +12,10 @@ import {
   Building2,
   Archive,
   ChevronLeft,
+  ChevronDown,
   ChevronRight,
   Loader2,
+  ZoomIn,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useApp } from '../i18n/app-context';
@@ -56,7 +58,6 @@ import {
 } from './company-assets/labels';
 import type {
   AssetCurrency,
-  CompanyAssetActivityLog,
   CompanyAssetDetail,
   CompanyAssetListItem,
   CompanyAssetListResponse,
@@ -74,6 +75,14 @@ import {
   formatFormValuePreview,
   formatTotalAssetValue,
 } from './company-assets/format-value';
+import {
+  activityLogActorName,
+  activityLogSubtitle,
+} from './company-assets/activity-log';
+import {
+  formatCompanyAssetExpenseLines,
+  formatCompanyAssetExpenseTitle,
+} from './company-assets/expense-detail';
 import { cn } from '../components/ui/utils';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import { FilePickerField } from '../components/FilePickerField';
@@ -87,6 +96,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import {
   clearCompanyAssetFormDraft,
   loadCompanyAssetFormDraft,
@@ -143,20 +153,6 @@ function resolveFxForSubmit(
   if (currency === 'USD' && usdRate > 0) return Math.round(usdRate);
   if (currency === 'EUR' && eurRate > 0) return Math.round(eurRate);
   return 1;
-}
-
-const ACTIVITY_ACTOR_SUFFIX = / · Kim: .+$/;
-
-function activityActorName(log: CompanyAssetActivityLog, fallback: string): string {
-  if (log.performedBy?.fullName?.trim()) return log.performedBy.fullName;
-  const match = log.details?.match(/ · Kim: (.+)$/);
-  return match?.[1]?.trim() || fallback;
-}
-
-function activityMessage(log: CompanyAssetActivityLog): string | null {
-  if (!log.details?.trim()) return null;
-  const message = log.details.replace(ACTIVITY_ACTOR_SUFFIX, '').trim();
-  return message || null;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -242,7 +238,7 @@ export function CompanyAssets() {
 
   const [searchName, setSearchName] = useState('');
   const [searchInventory, setSearchInventory] = useState('');
-  const [filterStatus, setFilterStatus] = useState<CompanyAssetStatus | ''>('');
+  const [filterStatuses, setFilterStatuses] = useState<CompanyAssetStatus[]>([]);
   const [filterCategory, setFilterCategory] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
@@ -263,6 +259,7 @@ export function CompanyAssets() {
   const [pendingDocs, setPendingDocs] = useState<{ fileName: string; fileUrl: string }[]>([]);
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [lastDocFileName, setLastDocFileName] = useState<string | null>(null);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   const usdRate = cbuUsdRate(usd);
   const eurRate = cbuEurRate(eur);
@@ -290,7 +287,12 @@ export function CompanyAssets() {
       const q = new URLSearchParams();
       if (searchName.trim()) q.set('search', searchName.trim());
       if (searchInventory.trim()) q.set('inventorySearch', searchInventory.trim());
-      if (filterStatus) q.set('status', filterStatus);
+      if (
+        filterStatuses.length > 0 &&
+        filterStatuses.length < ASSET_STATUSES.length
+      ) {
+        q.set('statuses', filterStatuses.join(','));
+      }
       if (filterCategory) q.set('category', filterCategory);
       if (filterLocation) q.set('location', filterLocation);
       if (filterEmployee) q.set('assignedUserId', filterEmployee);
@@ -298,7 +300,32 @@ export function CompanyAssets() {
       setPage(1);
     }, 400);
     return () => clearTimeout(tmr);
-  }, [searchName, searchInventory, filterStatus, filterCategory, filterLocation, filterEmployee]);
+  }, [searchName, searchInventory, filterStatuses, filterCategory, filterLocation, filterEmployee]);
+
+  const filterStatusLabel = useMemo(() => {
+    if (filterStatuses.length === 0 || filterStatuses.length === ASSET_STATUSES.length) {
+      return `${t.caFilterStatus}: ${t.caAll}`;
+    }
+    if (filterStatuses.length === 1) {
+      return assetStatusLabel(filterStatuses[0], t);
+    }
+    return `${filterStatuses.length} ${t.caFilterStatusesSelected}`;
+  }, [filterStatuses, t]);
+
+  const isStatusFilterChecked = (status: CompanyAssetStatus) =>
+    filterStatuses.length === 0 || filterStatuses.includes(status);
+
+  const toggleFilterStatus = (status: CompanyAssetStatus) => {
+    setFilterStatuses((prev) => {
+      const effective = prev.length === 0 ? [...ASSET_STATUSES] : [...prev];
+      if (effective.includes(status)) {
+        const next = effective.filter((s) => s !== status);
+        return next.length === ASSET_STATUSES.length ? [] : next;
+      }
+      const next = [...effective, status];
+      return next.length === ASSET_STATUSES.length ? [] : next;
+    });
+  };
 
   const buildQuery = useCallback(
     (p: number, limit: number) => {
@@ -488,6 +515,20 @@ export function CompanyAssets() {
       if (!opened) toast.error(et.caPrintBlocked);
     } catch {
       toast.error(et.caExportError);
+    }
+  };
+
+  const handleRowStatusChange = async (id: string, status: CompanyAssetStatus) => {
+    try {
+      await apiRequest(`/company-assets/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      await loadList();
+      const s = await apiRequest<CompanyAssetStats>('/company-assets/stats');
+      setStats(s);
+    } catch {
+      toast.error(t.prEmployeeSaveError);
     }
   };
 
@@ -739,22 +780,52 @@ export function CompanyAssets() {
             value={searchInventory}
             onChange={(e) => setSearchInventory(e.target.value)}
           />
-          <Select
-            value={filterStatus || 'all'}
-            onValueChange={(v) => setFilterStatus(v === 'all' ? '' : (v as CompanyAssetStatus))}
-          >
-            <SelectTrigger className={SELECT_TRIGGER_CLS}>
-              <SelectValue placeholder={`${t.caFilterStatus}: ${t.caAll}`} />
-            </SelectTrigger>
-            <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
-              <SelectItem value="all" className={SELECT_ITEM_CLS}>{t.caAll}</SelectItem>
-              {ASSET_STATUSES.map((s) => (
-                <SelectItem key={s} value={s} className={SELECT_ITEM_CLS}>
-                  {assetStatusLabel(s, t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(SELECT_TRIGGER_CLS, 'inline-flex items-center justify-between gap-2')}
+              >
+                <span className="truncate">{filterStatusLabel}</span>
+                <ChevronDown size={14} className="shrink-0 opacity-60" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="z-[120] w-56 rounded-xl p-2">
+              <div className="mb-2 flex gap-2 border-b border-slate-100 pb-2 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setFilterStatuses([])}
+                  className="flex-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+                >
+                  {t.caSelectAllStatuses}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterStatuses([])}
+                  className="flex-1 rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  {t.caClearStatuses}
+                </button>
+              </div>
+              <div className="space-y-1">
+                {ASSET_STATUSES.map((s) => (
+                  <label
+                    key={s}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isStatusFilterChecked(s)}
+                      onChange={() => toggleFilterStatus(s)}
+                    />
+                    <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', statusBadgeClass(s))}>
+                      {assetStatusLabel(s, t)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Select
             value={filterCategory || 'all'}
             onValueChange={(v) => setFilterCategory(v === 'all' ? '' : v)}
@@ -893,9 +964,39 @@ export function CompanyAssets() {
                       {formatAssetInitialValue(row, usdRate, eurRate, t)}
                     </td>
                     <td className="px-3 py-2">
-                      <span className={cn('inline-flex rounded-full px-2 py-0.5 text-xs font-medium', statusBadgeClass(row.status))}>
-                        {assetStatusLabel(row.status, t)}
-                      </span>
+                      {canManage ? (
+                        <Select
+                          value={row.status}
+                          onValueChange={(v) =>
+                            void handleRowStatusChange(row.id, v as CompanyAssetStatus)
+                          }
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              'h-7 w-auto min-w-[7.5rem] rounded-full border-0 px-2 py-0.5 text-xs font-medium shadow-none focus:ring-2 focus:ring-indigo-400',
+                              statusBadgeClass(row.status),
+                            )}
+                          >
+                            <SelectValue>{assetStatusLabel(row.status, t)}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent position="popper" className={SELECT_CONTENT_CLS}>
+                            {ASSET_STATUSES.map((s) => (
+                              <SelectItem key={s} value={s} className={SELECT_ITEM_CLS}>
+                                {assetStatusLabel(s, t)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span
+                          className={cn(
+                            'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+                            statusBadgeClass(row.status),
+                          )}
+                        >
+                          {assetStatusLabel(row.status, t)}
+                        </span>
+                      )}
                     </td>
                     <td className="max-w-[8rem] truncate px-3 py-2 text-slate-500" title={row.notes ?? ''}>{row.notes ?? '—'}</td>
                     <td className="px-3 py-2">
@@ -1197,7 +1298,13 @@ export function CompanyAssets() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+      <Dialog
+        open={detailOpen}
+        onOpenChange={(o) => {
+          setDetailOpen(o);
+          if (!o) setFullscreenImageUrl(null);
+        }}
+      >
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           {detail && (
             <>
@@ -1206,7 +1313,22 @@ export function CompanyAssets() {
                 <p className="text-sm text-slate-500">{detail.inventoryNumber}</p>
               </DialogHeader>
               {detail.imageUrl && (
-                <img src={detail.imageUrl} alt="" className="max-h-48 w-full rounded-xl object-contain" />
+                <button
+                  type="button"
+                  onClick={() => setFullscreenImageUrl(detail.imageUrl!)}
+                  className="group relative block w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-900/40"
+                  title={t.caViewImageFullscreen}
+                >
+                  <img
+                    src={detail.imageUrl}
+                    alt=""
+                    className="max-h-48 w-full cursor-zoom-in object-contain transition group-hover:opacity-90"
+                  />
+                  <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-lg bg-black/55 px-2 py-1 text-xs text-white">
+                    <ZoomIn size={14} />
+                    {t.caViewImageFullscreen}
+                  </span>
+                </button>
               )}
               <div className="grid gap-2 text-sm sm:grid-cols-2">
                 <p><span className="text-slate-500">{t.caColCategory}:</span> {assetCategoryLabel(detail.category, t)}</p>
@@ -1246,15 +1368,21 @@ export function CompanyAssets() {
               {detail.expense && (
                 <div className="rounded-xl border border-red-100 bg-red-50/50 p-3 text-sm dark:border-red-900/40 dark:bg-red-950/20">
                   <p className="font-semibold text-red-800 dark:text-red-300">{t.caTabExpense}</p>
-                  <p className="mt-1">{detail.expense.title}</p>
-                  <p className="font-medium text-red-600">{formatCurrency(detail.expense.amount)}</p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{detail.expense.description}</p>
+                  <p className="mt-1">{formatCompanyAssetExpenseTitle(detail, t)}</p>
+                  <p className="font-medium text-red-600 dark:text-red-400">
+                    {formatAssetInitialValue(detail, usdRate, eurRate, t)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                    {formatCompanyAssetExpenseLines(detail, usdRate, eurRate, t)}
+                  </p>
                 </div>
               )}
               <div>
                 <p className="mb-2 text-sm font-semibold">{t.caTabHistory}</p>
                 <ul className="max-h-48 space-y-2 overflow-y-auto text-sm">
-                  {detail.activityLogs.map((log) => (
+                  {detail.activityLogs.map((log) => {
+                    const subtitle = activityLogSubtitle(log);
+                    return (
                     <li
                       key={log.id}
                       className={cn(
@@ -1274,14 +1402,20 @@ export function CompanyAssets() {
                         </span>
                         <span className="text-xs text-slate-400">{formatDateTime(log.performedAt)}</span>
                       </div>
-                      <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">
-                        {t.caAuditPerformedBy}: {activityActorName(log, t.caAuditUnknown)}
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                        {t.caAuditPerformedBy}:{' '}
+                        <span className="font-medium text-slate-800 dark:text-slate-100">
+                          {activityLogActorName(log, t.caAuditUnknown)}
+                        </span>
                       </p>
-                      {activityMessage(log) && (
-                        <p className="text-xs text-slate-500">{activityMessage(log)}</p>
+                      {subtitle && (
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                          {subtitle}
+                        </p>
                       )}
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
               {detail.documents.length > 0 && (
@@ -1320,6 +1454,25 @@ export function CompanyAssets() {
               )}
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!fullscreenImageUrl} onOpenChange={(o) => !o && setFullscreenImageUrl(null)}>
+        <DialogContent className="z-[140] max-h-[96vh] max-w-[96vw] gap-0 overflow-hidden border-0 bg-black/95 p-2 sm:p-4">
+          {fullscreenImageUrl && (
+            <img
+              src={fullscreenImageUrl}
+              alt=""
+              className="mx-auto max-h-[88vh] w-full object-contain"
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setFullscreenImageUrl(null)}
+            className="absolute right-3 top-3 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/20"
+          >
+            {t.caCloseImage}
+          </button>
         </DialogContent>
       </Dialog>
 

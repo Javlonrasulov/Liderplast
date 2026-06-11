@@ -28,6 +28,8 @@ export interface InventoryRecord {
   status: InventoryStatus;
   createdAt: string;
   finishedAt?: string;
+  /** Tugatishda yaratilgan xarajatlar — hujjat o‘chirilganda tozalanadi */
+  expenseIds?: string[];
   rows: InventoryRow[];
 }
 

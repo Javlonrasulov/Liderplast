@@ -58,6 +58,15 @@ import type {
   InventoryWarehouseOption,
 } from './inventory/types';
 
+/** Float xatoliklari uchun minimal farq (kg yoki dona) */
+function inventoryQtyEpsilon(unit: 'kg' | 'pcs'): number {
+  return unit === 'kg' ? 0.01 : 1;
+}
+
+function isNegligibleInventoryDiff(diff: number, unit: 'kg' | 'pcs'): boolean {
+  return !Number.isFinite(diff) || Math.abs(diff) < inventoryQtyEpsilon(unit);
+}
+
 const DEFAULT_WAREHOUSES: InventoryWarehouseOption[] = [
   { id: 'main', name: 'main' },
 ];
@@ -283,10 +292,13 @@ export function Inventory() {
         'Inventarizatsiya chiqim',
       );
 
+      const createdExpenseIds: string[] = [];
+
       // Shortage -> auto expense (amount is positive; it's an expense)
       for (const row of current.rows) {
         const diff = row.realQuantityEnd - row.systemQuantityEnd;
         if (!Number.isFinite(diff) || diff >= 0) continue;
+        if (isNegligibleInventoryDiff(diff, row.unit)) continue;
 
         const qty = Math.abs(diff);
         const unitPrice =
@@ -297,8 +309,9 @@ export function Inventory() {
               : pickLastSalePrice('final', row.productName);
 
         const amount = qty * (Number.isFinite(unitPrice) ? unitPrice : 0);
+        if (!Number.isFinite(amount) || amount < 1) continue;
 
-        await apiRequest('/finance/expenses', {
+        const created = await apiRequest<{ id: string }>('/finance/expenses', {
           method: 'POST',
           body: JSON.stringify({
             title: `Inventarizatsiya chiqim: ${row.productName}`,
@@ -308,12 +321,14 @@ export function Inventory() {
             incurredAt: current.dateTo || current.dateFrom || todayYmd(),
           }),
         });
+        createdExpenseIds.push(created.id);
       }
 
       const movements = current.rows
         .map((row) => {
           const diff = row.realQuantityEnd - row.systemQuantityEnd;
-          if (!Number.isFinite(diff) || diff === 0) return null;
+          if (!Number.isFinite(diff) || isNegligibleInventoryDiff(diff, row.unit))
+            return null;
 
           const itemType =
             row.category === 'RAW_MATERIAL'
@@ -357,6 +372,10 @@ export function Inventory() {
           rows: finalRows,
           status: 'COMPLETED',
           finishedAt: new Date().toISOString(),
+          expenseIds:
+            createdExpenseIds.length > 0
+              ? [...(r.expenseIds ?? []), ...createdExpenseIds]
+              : r.expenseIds,
         };
       });
       setConfirmFinishId(null);
@@ -368,7 +387,18 @@ export function Inventory() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    const record = records.find((r) => r.id === id);
+    if (record?.expenseIds?.length) {
+      for (const expenseId of record.expenseIds) {
+        try {
+          await apiRequest(`/finance/expenses/${expenseId}`, { method: 'DELETE' });
+        } catch {
+          /* allaqachon o‘chirilgan bo‘lishi mumkin */
+        }
+      }
+      await refresh();
+    }
     setRecords((prev) => prev.filter((r) => r.id !== id));
     if (selectedId === id) setSelectedId(null);
     setConfirmDeleteId(null);
@@ -682,7 +712,7 @@ export function Inventory() {
             <AlertDialogCancel>{t.invBack}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+              onClick={() => confirmDeleteId && void handleDelete(confirmDeleteId)}
             >
               {t.invActionDeleteConfirm}
             </AlertDialogAction>

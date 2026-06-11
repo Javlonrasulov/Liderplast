@@ -78,9 +78,22 @@ export class CompanyAssetsService {
   private statusLabel(status: CompanyAssetStatus): string {
     const map: Record<CompanyAssetStatus, string> = {
       ACTIVE: 'Faol',
+      NEEDS_REPAIR: 'Tamir talab',
+      UNDER_REPAIR: 'Tuzatiladi',
       WRITTEN_OFF: 'Hisobdan chiqarilgan',
     };
     return map[status] ?? status;
+  }
+
+  private parseStatusList(raw?: string): CompanyAssetStatus[] {
+    if (!raw?.trim()) return [];
+    const allowed = new Set(Object.values(CompanyAssetStatus));
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s): s is CompanyAssetStatus =>
+        allowed.has(s as CompanyAssetStatus),
+      );
   }
 
   private computeAmountUzs(
@@ -181,7 +194,16 @@ export class CompanyAssetsService {
         where: { ...activeOnly, status: CompanyAssetStatus.WRITTEN_OFF },
       }),
       this.prisma.companyAsset.aggregate({
-        where: { ...activeOnly, status: CompanyAssetStatus.ACTIVE },
+        where: {
+          ...activeOnly,
+          status: {
+            in: [
+              CompanyAssetStatus.ACTIVE,
+              CompanyAssetStatus.NEEDS_REPAIR,
+              CompanyAssetStatus.UNDER_REPAIR,
+            ],
+          },
+        },
         _sum: { initialValueUzs: true },
       }),
     ]);
@@ -220,7 +242,12 @@ export class CompanyAssetsService {
       });
     }
 
-    if (dto.status) and.push({ status: dto.status });
+    const statusList = this.parseStatusList(dto.statuses);
+    if (statusList.length > 0) {
+      and.push({ status: { in: statusList } });
+    } else if (dto.status) {
+      and.push({ status: dto.status });
+    }
     if (dto.category) and.push({ category: dto.category });
     if (dto.location?.trim()) {
       and.push({
@@ -513,6 +540,12 @@ export class CompanyAssetsService {
         if (dto.status === CompanyAssetStatus.WRITTEN_OFF) {
           actionType = CompanyAssetActionType.WRITTEN_OFF;
           message = 'Hisobdan chiqarildi';
+        } else if (
+          dto.status === CompanyAssetStatus.NEEDS_REPAIR ||
+          dto.status === CompanyAssetStatus.UNDER_REPAIR
+        ) {
+          actionType = CompanyAssetActionType.SENT_TO_REPAIR;
+          message = this.statusLabel(dto.status);
         }
         await tx.companyAssetActivityLog.create({
           data: {
@@ -560,6 +593,12 @@ export class CompanyAssetsService {
         if (dto.status === CompanyAssetStatus.WRITTEN_OFF) {
           actionType = CompanyAssetActionType.WRITTEN_OFF;
           message = 'Hisobdan chiqarildi';
+        } else if (
+          dto.status === CompanyAssetStatus.NEEDS_REPAIR ||
+          dto.status === CompanyAssetStatus.UNDER_REPAIR
+        ) {
+          actionType = CompanyAssetActionType.SENT_TO_REPAIR;
+          message = this.statusLabel(dto.status);
         }
         await tx.companyAssetActivityLog.create({
           data: {

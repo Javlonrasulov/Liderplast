@@ -9,6 +9,8 @@ import type {
 export function assetStatusLabel(status: CompanyAssetStatus, t: T): string {
   const map: Record<CompanyAssetStatus, string> = {
     ACTIVE: t.caStatusActive,
+    NEEDS_REPAIR: t.caStatusNeedsRepair,
+    UNDER_REPAIR: t.caStatusUnderRepair,
     WRITTEN_OFF: t.caStatusWrittenOff,
   };
   return map[status];
@@ -50,7 +52,12 @@ export function assetActionLabel(action: CompanyAssetActionType, t: T): string {
   return map[action];
 }
 
-export const ASSET_STATUSES: CompanyAssetStatus[] = ['ACTIVE', 'WRITTEN_OFF'];
+export const ASSET_STATUSES: CompanyAssetStatus[] = [
+  'ACTIVE',
+  'NEEDS_REPAIR',
+  'UNDER_REPAIR',
+  'WRITTEN_OFF',
+];
 
 export const ASSET_CATEGORIES: CompanyAssetCategory[] = [
   'TRANSPORT',
@@ -73,6 +80,10 @@ export function statusBadgeClass(status: CompanyAssetStatus): string {
   switch (status) {
     case 'ACTIVE':
       return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
+    case 'NEEDS_REPAIR':
+      return 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300';
+    case 'UNDER_REPAIR':
+      return 'bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-300';
     case 'WRITTEN_OFF':
       return 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
     default:

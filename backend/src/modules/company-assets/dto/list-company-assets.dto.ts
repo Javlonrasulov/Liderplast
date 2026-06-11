@@ -31,6 +31,11 @@ export class ListCompanyAssetsDto {
   @IsEnum(CompanyAssetStatus)
   status?: CompanyAssetStatus;
 
+  /** Vergul bilan: ACTIVE,NEEDS_REPAIR */
+  @IsOptional()
+  @IsString()
+  statuses?: string;
+
   @IsOptional()
   @IsEnum(CompanyAssetCategory)
   category?: CompanyAssetCategory;

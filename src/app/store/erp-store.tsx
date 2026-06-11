@@ -26,6 +26,7 @@ export interface RawMaterialEntry {
   createdAt: string;
   /** Кирим/чиқим қайси хомашё учун — SIRO/PAINT ажратиши учун */
   rawMaterialId?: string;
+  rawMaterialName?: string;
 }
 
 export interface RawMaterialBagSession {
@@ -2205,9 +2206,10 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       date: item.createdAt.slice(0, 10),
       type: item.movementType === 'INCOMING' ? 'incoming' : 'outgoing',
       amount: item.quantity,
-      description: item.note || item.rawMaterial?.name || 'Warehouse movement',
+      description: item.note?.trim() || '',
       createdAt: item.createdAt,
       rawMaterialId: item.rawMaterial?.id,
+      rawMaterialName: item.rawMaterial?.name,
     }));
 
   const rawMaterialEntries: RawMaterialEntry[] =
@@ -2220,10 +2222,11 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
             date: new Date().toISOString().slice(0, 10),
             type: 'incoming',
             amount: item.quantity,
-            description: item.itemName ?? 'Warehouse stock',
+            description: 'Warehouse stock',
             createdAt: new Date().toISOString(),
             rawMaterialId:
               item.itemName != null ? nameToRawMaterialId.get(item.itemName) : undefined,
+            rawMaterialName: item.itemName,
           }));
 
   const rawMaterialBags = bags.map(mapBag);

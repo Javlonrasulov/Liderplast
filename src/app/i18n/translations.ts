@@ -55,9 +55,14 @@ export interface T {
   caColNotes: string;
   caColActions: string;
   caStatusActive: string;
+  caStatusNeedsRepair: string;
+  caStatusUnderRepair: string;
   caStatusRepair: string;
   caStatusWarehouse: string;
   caStatusWrittenOff: string;
+  caSelectAllStatuses: string;
+  caClearStatuses: string;
+  caFilterStatusesSelected: string;
   caCatTransport: string;
   caCatOffice: string;
   caCatComputer: string;
@@ -96,6 +101,9 @@ export interface T {
   caTabHistory: string;
   caTabDocuments: string;
   caTabExpense: string;
+  caExpenseAssetPrefix: string;
+  caViewImageFullscreen: string;
+  caCloseImage: string;
   caActCreated: string;
   caActUpdated: string;
   caActAssigned: string;
@@ -456,6 +464,10 @@ export interface T {
   whExportNoPrice: string;
   whCatalogSearchPlaceholder: string;
   whCatalogNoSearchResults: string;
+  whOverviewViewCards: string;
+  whOverviewViewTable: string;
+  whOverviewColPack: string;
+  whOverviewColFill: string;
   statusLow: string;
   statusCritical: string;
   statusOk: string;
@@ -1360,9 +1372,14 @@ const uz_cyrillic: T = {
   caColNotes: 'Изоҳ',
   caColActions: 'Амаллар',
   caStatusActive: 'Фаол',
+  caStatusNeedsRepair: 'Таъмир талаб',
+  caStatusUnderRepair: 'Тузатилмоқда',
   caStatusRepair: 'Таъмирда',
   caStatusWarehouse: 'Омборда',
   caStatusWrittenOff: 'Ҳисобдан чиқарилган',
+  caSelectAllStatuses: 'Барча статуслар',
+  caClearStatuses: 'Тозалаш',
+  caFilterStatusesSelected: 'та статус',
   caCatTransport: 'Транспорт воситалари',
   caCatOffice: 'Офис жиҳозлари',
   caCatComputer: 'Компьютер техникаси',
@@ -1383,7 +1400,7 @@ const uz_cyrillic: T = {
   caFieldPurchaseDate: 'Харид санаси',
   caFieldPurchasePrice: 'Харид нархи',
   caFieldCurrency: 'Валюта',
-  caFieldFxRate: 'Курс (1 valyuta = soʻm)',
+  caFieldFxRate: 'Курс (1 валюта = сўм)',
   caFxCbuHint: 'Ўзбекистон Марказий банки курси (cbu.uz); керак бўлса қўлда ўзгартирилади',
   caFieldWarranty: 'Кафолат муддати',
   caFieldEmployee: 'Бириктирилган ходим',
@@ -1401,6 +1418,9 @@ const uz_cyrillic: T = {
   caTabHistory: 'Тарих',
   caTabDocuments: 'Ҳужжатлар',
   caTabExpense: 'Харажат',
+  caExpenseAssetPrefix: 'Корхона мулки',
+  caViewImageFullscreen: 'Тўлиқ экранда кўриш',
+  caCloseImage: 'Ёпиш',
   caActCreated: 'Қўшилди',
   caActUpdated: 'Таҳрирланди',
   caActAssigned: 'Ходимга бириктирилди',
@@ -1416,8 +1436,8 @@ const uz_cyrillic: T = {
   caAuditCreated: 'Қўшган',
   caAuditUpdated: 'Охирги таҳрирлаган',
   caAuditDeleted: 'Ўчирган',
-  caAuditPerformedBy: 'Ким қilgan',
-  caAuditUnknown: 'Номаъlum',
+  caAuditPerformedBy: 'Ким қилган',
+  caAuditUnknown: 'Номаълум',
   caExportExcel: 'Excel',
   caExportPdf: 'PDF',
   caPrint: 'Чоп этиш',
@@ -1462,7 +1482,7 @@ const uz_cyrillic: T = {
   caOf: '/',
   caNoEmployee: '—',
   caAutoInventory: 'Автоматик',
-  caExpenseLinked: 'Xarajatlar bo‘limida ko‘rinadi',
+  caExpenseLinked: 'Харажатлар бўлимида кўринади',
   caChooseFile: 'Файл танлаш',
   caNoFileChosen: 'Файл танланмади',
   caRemoveFile: 'Ўчириш',
@@ -2040,6 +2060,10 @@ const uz_cyrillic: T = {
   whExportNoPrice: '—',
   whCatalogSearchPlaceholder: 'Маҳсулот номи ёки изоҳ бўйича қидирув…',
   whCatalogNoSearchResults: 'Қидирув бўйича маҳсулот топилмади',
+  whOverviewViewCards: 'Карточка',
+  whOverviewViewTable: 'Жадвал',
+  whOverviewColPack: 'Қадоқлаш',
+  whOverviewColFill: 'Тўлдириш %',
   whProductsList: 'Маҳсулотлар рўйхати',
   whCreatedAt: 'Яратилган сана',
   whCreatedBy: 'Яратган',
@@ -2637,9 +2661,14 @@ const uz_latin: T = {
   caColNotes: 'Izoh',
   caColActions: 'Amallar',
   caStatusActive: 'Faol',
+  caStatusNeedsRepair: 'Ta\'mir talab',
+  caStatusUnderRepair: 'Tuzatiladi',
   caStatusRepair: 'Ta\'mirda',
   caStatusWarehouse: 'Omborda',
   caStatusWrittenOff: 'Hisobdan chiqarilgan',
+  caSelectAllStatuses: 'Barcha statuslar',
+  caClearStatuses: 'Tozalash',
+  caFilterStatusesSelected: 'ta status',
   caCatTransport: 'Transport vositalari',
   caCatOffice: 'Ofis jihozlari',
   caCatComputer: 'Kompyuter texnikasi',
@@ -2678,6 +2707,9 @@ const uz_latin: T = {
   caTabHistory: 'Tarix',
   caTabDocuments: 'Hujjatlar',
   caTabExpense: 'Xarajat',
+  caExpenseAssetPrefix: 'Korxona mulki',
+  caViewImageFullscreen: 'To\'liq ekranda ko\'rish',
+  caCloseImage: 'Yopish',
   caActCreated: 'Qo\'shildi',
   caActUpdated: 'Tahrirlandi',
   caActAssigned: 'Xodimga biriktirildi',
@@ -3317,6 +3349,10 @@ const uz_latin: T = {
   whExportNoPrice: '—',
   whCatalogSearchPlaceholder: 'Mahsulot nomi yoki izoh bo‘yicha qidiruv…',
   whCatalogNoSearchResults: 'Qidiruv bo‘yicha mahsulot topilmadi',
+  whOverviewViewCards: 'Kartochka',
+  whOverviewViewTable: 'Jadval',
+  whOverviewColPack: 'Qadoqlash',
+  whOverviewColFill: 'To‘ldirish %',
   whProductsList: 'Mahsulotlar ro\'yxati',
   whCreatedAt: 'Yaratilgan sana',
   whCreatedBy: 'Yaratgan',
@@ -3915,9 +3951,14 @@ const ru: T = {
   caColNotes: 'Примечание',
   caColActions: 'Действия',
   caStatusActive: 'Активный',
+  caStatusNeedsRepair: 'Требует ремонта',
+  caStatusUnderRepair: 'Ремонтируется',
   caStatusRepair: 'В ремонте',
   caStatusWarehouse: 'На складе',
   caStatusWrittenOff: 'Списан',
+  caSelectAllStatuses: 'Все статусы',
+  caClearStatuses: 'Очистить',
+  caFilterStatusesSelected: 'статусов',
   caCatTransport: 'Транспорт',
   caCatOffice: 'Офисное оборудование',
   caCatComputer: 'Компьютерная техника',
@@ -3956,6 +3997,9 @@ const ru: T = {
   caTabHistory: 'История',
   caTabDocuments: 'Документы',
   caTabExpense: 'Расход',
+  caExpenseAssetPrefix: 'Имущество компании',
+  caViewImageFullscreen: 'Полный экран',
+  caCloseImage: 'Закрыть',
   caActCreated: 'Создано',
   caActUpdated: 'Изменено',
   caActAssigned: 'Назначено',
@@ -4594,6 +4638,10 @@ const ru: T = {
   whExportNoPrice: '—',
   whCatalogSearchPlaceholder: 'Поиск по названию или описанию…',
   whCatalogNoSearchResults: 'По запросу товары не найдены',
+  whOverviewViewCards: 'Карточки',
+  whOverviewViewTable: 'Таблица',
+  whOverviewColPack: 'Упаковка',
+  whOverviewColFill: 'Заполнение %',
   whProductsList: 'Список продуктов',
   whCreatedAt: 'Дата создания',
   whCreatedBy: 'Создал',

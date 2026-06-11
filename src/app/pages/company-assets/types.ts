@@ -1,4 +1,8 @@
-export type CompanyAssetStatus = 'ACTIVE' | 'WRITTEN_OFF';
+export type CompanyAssetStatus =
+  | 'ACTIVE'
+  | 'NEEDS_REPAIR'
+  | 'UNDER_REPAIR'
+  | 'WRITTEN_OFF';
 
 export type CompanyAssetCategory =
   | 'TRANSPORT'

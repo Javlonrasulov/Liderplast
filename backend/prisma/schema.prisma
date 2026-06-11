@@ -120,6 +120,8 @@ enum PurchaseQuantityUnit {
 
 enum CompanyAssetStatus {
   ACTIVE
+  NEEDS_REPAIR
+  UNDER_REPAIR
   WRITTEN_OFF
 }
 

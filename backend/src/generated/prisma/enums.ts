@@ -178,6 +178,8 @@ export type PurchaseQuantityUnit = (typeof PurchaseQuantityUnit)[keyof typeof Pu
 
 export const CompanyAssetStatus = {
   ACTIVE: 'ACTIVE',
+  NEEDS_REPAIR: 'NEEDS_REPAIR',
+  UNDER_REPAIR: 'UNDER_REPAIR',
   WRITTEN_OFF: 'WRITTEN_OFF'
 } as const
 

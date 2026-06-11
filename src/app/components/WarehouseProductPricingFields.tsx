@@ -39,12 +39,15 @@ type Props = {
   value: WarehouseProductPricingFields;
   onChange: (next: WarehouseProductPricingFields) => void;
   labels: Labels;
+  /** Faqat сотиб олиш нархи (хомашё омбор қолдиғи) */
+  purchaseOnly?: boolean;
 };
 
 export function WarehouseProductPricingFieldsBlock({
   value,
   onChange,
   labels,
+  purchaseOnly = false,
 }: Props) {
   const { usd: cbuUsd, eur: cbuEur, loading, error, refetch } = useCbuRates();
   const usdRate = cbuUsdRate(cbuUsd);
@@ -196,7 +199,7 @@ export function WarehouseProductPricingFieldsBlock({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={purchaseOnly ? 'space-y-4' : 'grid gap-4 sm:grid-cols-2'}>
         <div>
           <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
             {labels.purchasePrice}
@@ -211,20 +214,22 @@ export function WarehouseProductPricingFieldsBlock({
           />
           {renderUzsHint(value.purchasePrice)}
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
-            {labels.salePrice}
-          </label>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={value.salePrice}
-            onChange={(e) => patch({ salePrice: e.target.value })}
-            placeholder="—"
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
-          />
-          {renderUzsHint(value.salePrice)}
-        </div>
+        {!purchaseOnly ? (
+          <div>
+            <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+              {labels.salePrice}
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={value.salePrice}
+              onChange={(e) => patch({ salePrice: e.target.value })}
+              placeholder="—"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
+            />
+            {renderUzsHint(value.salePrice)}
+          </div>
+        ) : null}
       </div>
     </div>
   );

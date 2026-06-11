@@ -72,6 +72,26 @@ function inventoryMarks(asset: CompanyAssetListItem, t: T): InventoryMarks {
     return { ...empty, irreparable: '+' };
   }
 
+  if (asset.status === 'NEEDS_REPAIR') {
+    return {
+      inUse: '',
+      usableNotInUse: '+',
+      repairable: t.caPrintMarkRepair,
+      obsolete: '',
+      irreparable: '',
+    };
+  }
+
+  if (asset.status === 'UNDER_REPAIR') {
+    return {
+      inUse: '',
+      usableNotInUse: '',
+      repairable: t.caPrintMarkRestore,
+      obsolete: '',
+      irreparable: '',
+    };
+  }
+
   if (
     notes.includes('tamirtalab') ||
     notes.includes('таъмирталаб') ||

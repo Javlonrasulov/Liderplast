@@ -18,6 +18,7 @@ import {
   History,
   Printer,
   Search,
+  Table2,
   X,
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
@@ -49,13 +50,19 @@ import {
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
 import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
 import {
+  WarehouseOverviewStockTable,
+  type WarehouseOverviewStockRow,
+} from '../components/WarehouseOverviewStockTable';
+import {
   EMPTY_WAREHOUSE_PRICING,
   getProductCatalogDetailRows,
   type ProductCatalogDetailRow,
   parseWarehousePricingPayload,
+  priceAmountInUzs,
   pricingFieldsFromProduct,
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
+import type { SaleCurrency } from '../store/erp-store';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
@@ -95,6 +102,55 @@ import {
 
 function catalogNamesMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function formatOverviewSalePrice(
+  product: {
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+  },
+  noPrice: string,
+): string {
+  if (product.salePrice == null || product.salePrice <= 0) return noPrice;
+  const cur = product.priceCurrency ?? 'UZS';
+  const curLabel = cur === 'USD' ? 'USD (USDT)' : cur;
+  return `${formatNumber(product.salePrice)} ${curLabel}`;
+}
+
+function overviewProductTotals(
+  product: {
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
+  },
+  quantity: number,
+): { totalUzs: number | null; totalUsd: number | null } {
+  const sp = product.salePrice;
+  if (sp == null || sp <= 0 || quantity <= 0) {
+    return { totalUzs: null, totalUsd: null };
+  }
+  const cur = product.priceCurrency ?? 'UZS';
+  const fx = product.fxRateToUzs ?? 0;
+  let unitUzs: number | null = null;
+  let unitUsd: number | null = null;
+  if (cur === 'UZS') {
+    unitUzs = sp;
+    if (fx > 0) unitUsd = sp / fx;
+  } else if (fx > 0) {
+    unitUzs = priceAmountInUzs(String(sp), String(fx));
+    unitUsd = cur === 'USD' ? sp : unitUzs != null ? unitUzs / fx : null;
+  } else if (cur === 'USD') {
+    unitUsd = sp;
+  }
+  return {
+    totalUzs: unitUzs != null ? unitUzs * quantity : null,
+    totalUsd: unitUsd != null ? unitUsd * quantity : null,
+  };
+}
+
+function formatOverviewMoney(amount: number | null, suffix: string, empty: string): string {
+  if (amount == null || !Number.isFinite(amount)) return empty;
+  return `${formatNumber(Math.round(amount))} ${suffix}`;
 }
 
 function getWarehousePackBreakdownLines(
@@ -523,6 +579,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const [exportAction, setExportAction] = useState<'excel' | 'print'>('excel');
   const [exportScope, setExportScope] = useState<WarehouseExportScope>('current_only');
   const [catalogSearch, setCatalogSearch] = useState('');
+  const [overviewViewMode, setOverviewViewMode] = useState<'cards' | 'table'>(() => {
+    if (typeof window === 'undefined') return 'cards';
+    const saved = window.localStorage.getItem('wh-overview-view');
+    return saved === 'table' ? 'table' : 'cards';
+  });
 
   /**
    * Mahsulotlarni boshqarish: Admin, Director — har doim;
@@ -758,6 +819,95 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   // Ombor (yarim/tayyor) sahifasida faqat yarim tayyor va tayyor mahsulotlar qoldig‘ini ko‘rsatamiz.
   const hasAnyStockDetailCard = hasCatalogSemi || hasCatalogFinal;
 
+  const overviewStockRows = useMemo((): WarehouseOverviewStockRow[] => {
+    const rows: WarehouseOverviewStockRow[] = [];
+    const empty = t.whExportNoPrice;
+
+    semiProducts.forEach((p) => {
+      const qty = semiStockByProductName[p.name] ?? 0;
+      const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
+      const packLines = getWarehousePackBreakdownLines(
+        qty,
+        packagedBySemiName[p.name] ?? 0,
+        ppb,
+        t,
+      );
+      const totals = overviewProductTotals(p, qty);
+      rows.push({
+        id: p.id,
+        kind: 'SEMI_PRODUCT',
+        typeLabel: t.whSemi,
+        name: p.name,
+        quantity: qty,
+        unit: t.unitPiece,
+        packSummary: packLines.join(' · '),
+        piecesPerBag: ppb > 0 ? formatNumber(ppb) : empty,
+        spec: `${formatNumber(p.weightGram)} g`,
+        salePrice: formatOverviewSalePrice(p, empty),
+        totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
+        totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
+        fillPct: calcPercent(qty, 100000),
+      });
+    });
+
+    finishedProducts.forEach((p) => {
+      const qty = finalStockByProductName[p.name] ?? 0;
+      const ppb = p.piecesPerBag ?? 0;
+      const packLines = getWarehousePackBreakdownLines(
+        qty,
+        packagedByFinalName[p.name] ?? 0,
+        ppb,
+        t,
+      );
+      const totals = overviewProductTotals(p, qty);
+      rows.push({
+        id: p.id,
+        kind: 'FINISHED_PRODUCT',
+        typeLabel: t.whFinal,
+        name: p.name,
+        quantity: qty,
+        unit: t.unitPiece,
+        packSummary: packLines.join(' · '),
+        piecesPerBag: ppb > 0 ? formatNumber(ppb) : empty,
+        spec: `${formatNumber(p.volumeLiter)} L`,
+        salePrice: formatOverviewSalePrice(p, empty),
+        totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
+        totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
+        fillPct: calcPercent(qty, 20000),
+      });
+    });
+
+    return rows.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
+  }, [
+    semiProducts,
+    finishedProducts,
+    semiStockByProductName,
+    finalStockByProductName,
+    semiPackPiecesPerBag,
+    packagedBySemiName,
+    packagedByFinalName,
+    t,
+  ]);
+
+  const overviewTableLabels = useMemo(
+    () => ({
+      colNum: t.whExportColNum,
+      colType: t.whExportColType,
+      colName: t.whExportColName,
+      colStock: t.whExportColQty,
+      colPack: t.whOverviewColPack,
+      colPiecesPerBag: t.whCatalogPackLabel,
+      colSpec: mode === 'semi' ? t.whWeightGram : t.whVolumeLiter,
+      colSalePrice: t.whSalePrice,
+      colTotalUzs: t.whExportColTotalUzs,
+      colTotalUsd: t.whExportColTotalUsd,
+      colFill: t.whOverviewColFill,
+      grandTotal: t.whExportGrandTotal,
+      empty: t.whStockBreakdownEmpty,
+    }),
+    [t, mode],
+  );
+
   const warehouseSummaryCards = useMemo(() => {
     const cards: Array<{
       key: string;
@@ -936,6 +1086,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   useEffect(() => {
     setCatalogSearch('');
   }, [mode]);
+
+  const setOverviewView = (next: 'cards' | 'table') => {
+    setOverviewViewMode(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('wh-overview-view', next);
+    }
+  };
 
   const defaultFormType: ProductFormType = mode === 'final' ? 'FINISHED_PRODUCT' : 'SEMI_PRODUCT';
   const typeOptions: Array<{ value: ProductFormType; label: string; count: number }> =
@@ -1852,87 +2009,139 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
         {whTab === 'overview' && (
           <>
-            {warehouseSummaryCards.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                {warehouseSummaryCards.map((card) => (
-                  <div
-                    key={card.key}
-                    className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
-                  >
-                    <card.icon size={20} className="mb-3 opacity-80" />
-                    <p className="mb-1 text-xs text-white/80">{card.label}</p>
-                    <p className="text-2xl font-bold">{card.val}</p>
-                    <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-white/70">
-                      {card.sub}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
-                {t.whStockBreakdownEmpty}
-              </p>
-            )}
-
-            <div>
-              <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                {t.whDetailed}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {t.whTabOverview}
               </h3>
-              {hasAnyStockDetailCard ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {semiProducts.map((p, idx) => {
-              const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
-              const qty = semiStockByProductName[p.name] ?? 0;
-              const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
-              const detailLines = getWarehousePackBreakdownLines(
-                qty,
-                packagedBySemiName[p.name] ?? 0,
-                ppb,
-                t,
-              );
-              return (
-                <StockItem
-                  key={p.id}
-                  title={p.name}
-                  detailLines={detailLines}
-                  value={qty}
-                  max={100000}
-                  unit={t.unitPiece}
-                  color={st.color}
-                  bgColor={st.bgColor}
-                  icon={<Factory size={18} className={st.iconColor} />}
-                />
-              );
-            })}
-            {finishedProducts.map((p, idx) => {
-              const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
-              const qty = finalStockByProductName[p.name] ?? 0;
-              const ppb = p.piecesPerBag ?? 0;
-              const detailLines = getWarehousePackBreakdownLines(
-                qty,
-                packagedByFinalName[p.name] ?? 0,
-                ppb,
-                t,
-              );
-              return (
-                <StockItem
-                  key={p.id}
-                  title={p.name}
-                  detailLines={detailLines}
-                  value={qty}
-                  max={20000}
-                  unit={t.unitPiece}
-                  color={st.color}
-                  bgColor={st.bgColor}
-                  icon={<Package size={18} className={st.iconColor} />}
-                />
-              );
-            })}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.whStockBreakdownEmpty}</p>
-              )}
+              <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setOverviewView('cards')}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    overviewViewMode === 'cards'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <LayoutGrid size={14} />
+                  {t.whOverviewViewCards}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOverviewView('table')}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    overviewViewMode === 'table'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <Table2 size={14} />
+                  {t.whOverviewViewTable}
+                </button>
+              </div>
             </div>
+
+            {overviewViewMode === 'cards' ? (
+              <>
+                {warehouseSummaryCards.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    {warehouseSummaryCards.map((card) => (
+                      <div
+                        key={card.key}
+                        className={`rounded-2xl bg-gradient-to-br ${card.from} p-5 text-white shadow-lg ${card.shadow}`}
+                      >
+                        <card.icon size={20} className="mb-3 opacity-80" />
+                        <p className="mb-1 text-xs text-white/80">{card.label}</p>
+                        <p className="text-2xl font-bold">{card.val}</p>
+                        <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-white/70">
+                          {card.sub}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+                    {t.whStockBreakdownEmpty}
+                  </p>
+                )}
+
+                <div>
+                  <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {t.whDetailed}
+                  </h3>
+                  {hasAnyStockDetailCard ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {semiProducts.map((p, idx) => {
+                        const st = SEMI_DETAIL_CARD_STYLES[idx % SEMI_DETAIL_CARD_STYLES.length];
+                        const qty = semiStockByProductName[p.name] ?? 0;
+                        const ppb = semiPackPiecesPerBag.get(p.name) ?? 0;
+                        const detailLines = getWarehousePackBreakdownLines(
+                          qty,
+                          packagedBySemiName[p.name] ?? 0,
+                          ppb,
+                          t,
+                        );
+                        return (
+                          <StockItem
+                            key={p.id}
+                            title={p.name}
+                            detailLines={detailLines}
+                            value={qty}
+                            max={100000}
+                            unit={t.unitPiece}
+                            color={st.color}
+                            bgColor={st.bgColor}
+                            icon={<Factory size={18} className={st.iconColor} />}
+                          />
+                        );
+                      })}
+                      {finishedProducts.map((p, idx) => {
+                        const st = FINAL_DETAIL_CARD_STYLES[idx % FINAL_DETAIL_CARD_STYLES.length];
+                        const qty = finalStockByProductName[p.name] ?? 0;
+                        const ppb = p.piecesPerBag ?? 0;
+                        const detailLines = getWarehousePackBreakdownLines(
+                          qty,
+                          packagedByFinalName[p.name] ?? 0,
+                          ppb,
+                          t,
+                        );
+                        return (
+                          <StockItem
+                            key={p.id}
+                            title={p.name}
+                            detailLines={detailLines}
+                            value={qty}
+                            max={20000}
+                            unit={t.unitPiece}
+                            color={st.color}
+                            bgColor={st.bgColor}
+                            icon={<Package size={18} className={st.iconColor} />}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {t.whStockBreakdownEmpty}
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+                  {t.whDetailed}
+                </p>
+                <WarehouseOverviewStockTable
+                  rows={overviewStockRows}
+                  labels={overviewTableLabels}
+                  totalQty={
+                    mode === 'semi' ? totalSemiInCatalogStock : totalFinalInCatalogStock
+                  }
+                  unit={t.unitPiece}
+                />
+              </div>
+            )}
 
           </>
         )}

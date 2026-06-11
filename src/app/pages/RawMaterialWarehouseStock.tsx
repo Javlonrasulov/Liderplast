@@ -5,6 +5,13 @@ import { useApp } from '../i18n/app-context';
 import { calcPercent, formatKgAmount, formatNumber } from '../utils/format';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { useAuth } from '../auth/auth-context';
+import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
+import {
+  EMPTY_WAREHOUSE_PRICING,
+  parseWarehousePurchasePricingPayload,
+  pricingFieldsFromProduct,
+  type WarehouseProductPricingFields,
+} from '../utils/warehouse-product-pricing';
 import { Button } from '../components/ui/button';
 import {
   AlertDialog,
@@ -48,9 +55,35 @@ export function RawMaterialWarehouseStock() {
   const [editing, setEditing] = useState<RawMaterialProduct | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RawMaterialProduct | null>(null);
   const [nameDraft, setNameDraft] = useState('');
+  const [pricingDraft, setPricingDraft] =
+    useState<WarehouseProductPricingFields>(EMPTY_WAREHOUSE_PRICING);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const pricingFormLabels = useMemo(
+    () => ({
+      section: t.whPricingSection,
+      optional: t.whPricingOptional,
+      purchasePrice: t.whPurchasePrice,
+      salePrice: t.whSalePrice,
+      currency: t.labelCurrency,
+      fxRate: t.whFxRateToUzs,
+      fxHint: t.whFxRateHint,
+      fxApplyCbu: t.whFxApplyCbu,
+      cbuTitle: t.whCbuRatesTitle,
+      cbuLoading: t.whCbuRatesLoading,
+      cbuUsdLine: t.whCbuRatesUsd,
+      cbuEurLine: t.whCbuRatesEur,
+      cbuError: t.whCbuRatesError,
+      cbuRetry: t.whCbuRatesRetry,
+      currencyUzs: 'UZS',
+      currencyUsd: 'USD (USDT)',
+      currencyEur: 'EUR',
+      priceInUzs: t.whPriceInUzs,
+    }),
+    [t],
+  );
 
   const qtyByName = useMemo(() => {
     const m = new Map<string, number>();
@@ -98,12 +131,14 @@ export function RawMaterialWarehouseStock() {
     setError('');
     setEditing(rm);
     setNameDraft(rm.name);
+    setPricingDraft(pricingFieldsFromProduct(rm));
   };
 
   const closeEdit = () => {
     if (submitting) return;
     setEditing(null);
     setNameDraft('');
+    setPricingDraft(EMPTY_WAREHOUSE_PRICING);
     setError('');
   };
 
@@ -139,13 +174,23 @@ export function RawMaterialWarehouseStock() {
     }
   };
 
-  const submitRename = async (e: React.FormEvent) => {
+  const submitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
 
     const nextName = nameDraft.trim();
     if (!nextName) {
       setError(t.whNameRequired);
+      return;
+    }
+
+    const pricing = parseWarehousePurchasePricingPayload({
+      purchasePrice: pricingDraft.purchasePrice,
+      priceCurrency: pricingDraft.priceCurrency,
+      fxRateToUzs: pricingDraft.fxRateToUzs,
+    });
+    if (pricing === undefined) {
+      setError(t.whPricingInvalid);
       return;
     }
 
@@ -159,11 +204,16 @@ export function RawMaterialWarehouseStock() {
           currentItemType: 'RAW_MATERIAL',
           itemType: 'RAW_MATERIAL',
           name: nextName,
+          ...pricing,
         },
       });
       closeEdit();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.whRequestError);
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -386,13 +436,13 @@ export function RawMaterialWarehouseStock() {
       </AlertDialog>
 
       <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && closeEdit()}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>{t.whEdit}</DialogTitle>
             <DialogDescription>{t.labelName}</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={submitRename} className="space-y-4">
+          <form onSubmit={submitEdit} className="space-y-5">
             <div>
               <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                 {t.labelName}
@@ -403,6 +453,13 @@ export function RawMaterialWarehouseStock() {
                 className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700/80 dark:text-white"
               />
             </div>
+
+            <WarehouseProductPricingFieldsBlock
+              value={pricingDraft}
+              onChange={setPricingDraft}
+              labels={pricingFormLabels}
+              purchaseOnly
+            />
 
             {error ? (
               <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>

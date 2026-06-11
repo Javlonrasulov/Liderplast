@@ -46,6 +46,47 @@ export function pricingFieldsFromProduct(product: {
   };
 }
 
+export function parseWarehousePurchasePricingPayload(
+  fields: Pick<
+    WarehouseProductPricingFields,
+    'purchasePrice' | 'priceCurrency' | 'fxRateToUzs'
+  >,
+): Pick<
+  WarehouseProductPricingPayload,
+  'purchasePrice' | 'priceCurrency' | 'fxRateToUzs'
+> | undefined {
+  const purchasePrice = parseOptionalAmount(fields.purchasePrice);
+  if (purchasePrice === undefined) return undefined;
+
+  const currency = fields.priceCurrency;
+  let fxRateToUzs: number | null | undefined;
+  if (currency === 'UZS') {
+    fxRateToUzs = null;
+  } else {
+    fxRateToUzs = parseOptionalAmount(fields.fxRateToUzs);
+    if (fxRateToUzs === undefined) return undefined;
+  }
+
+  const hasAny =
+    purchasePrice != null ||
+    currency !== 'UZS' ||
+    (fxRateToUzs != null && fxRateToUzs > 0);
+
+  if (!hasAny) {
+    return {
+      purchasePrice: null,
+      priceCurrency: null,
+      fxRateToUzs: null,
+    };
+  }
+
+  return {
+    purchasePrice,
+    priceCurrency: currency,
+    fxRateToUzs,
+  };
+}
+
 export function parseWarehousePricingPayload(
   fields: WarehouseProductPricingFields,
 ): WarehouseProductPricingPayload | undefined {

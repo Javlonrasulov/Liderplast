@@ -106,6 +106,35 @@ export function formatKgAmount(kg: number): string {
   }).format(kg);
 }
 
+/**
+ * Xomashyo harakati: 1 kg dan kichik miqdorlar gramm ko‘rinishida (masalan 29 g).
+ */
+export function formatRawMaterialMovementQty(kg: number): {
+  amount: string;
+  unit: 'kg' | 'g';
+} {
+  if (!Number.isFinite(kg) || Math.abs(kg) < 1e-9) {
+    return { amount: '0', unit: 'kg' };
+  }
+
+  const abs = Math.abs(kg);
+  if (abs < 1) {
+    const grams = abs * 1000;
+    if (grams >= 0.5) {
+      const displayG = grams >= 10 ? Math.round(grams) : Math.round(grams * 10) / 10;
+      return {
+        amount: new Intl.NumberFormat('ru-RU', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: grams >= 10 ? 0 : 1,
+        }).format(displayG),
+        unit: 'g',
+      };
+    }
+  }
+
+  return { amount: formatKgAmount(abs), unit: 'kg' };
+}
+
 export function formatCurrency(num: number): string {
   return formatNumber(num) + " so'm";
 }
