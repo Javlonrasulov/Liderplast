@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 import { formatNumber } from '../utils/format';
 
 export type WarehouseOverviewStockRow = {
@@ -21,6 +23,8 @@ export type WarehouseOverviewStockRow = {
   profitCostLines: string[];
   profitSaleLine?: string;
   profitLine?: string;
+  profitSemiAddonLines?: string[];
+  profitTotalLine?: string;
   profitPerPieceUzs: number | null;
 };
 
@@ -41,6 +45,8 @@ type Labels = {
   empty: string;
   fullscreenEnter: string;
   fullscreenExit: string;
+  showProfitLabel: string;
+  includeSemiProfitLabel: string;
 };
 
 type Props = {
@@ -52,6 +58,11 @@ type Props = {
   totalProfit: string;
   unit: string;
   showSpecColumn?: boolean;
+  showProfit: boolean;
+  includeSemiProfit: boolean;
+  showSemiProfitToggle?: boolean;
+  onShowProfitChange: (value: boolean) => void;
+  onIncludeSemiProfitChange: (value: boolean) => void;
 };
 
 function fillBadgeClass(pct: number) {
@@ -75,8 +86,19 @@ export function WarehouseOverviewStockTable({
   totalProfit,
   unit,
   showSpecColumn = true,
+  showProfit,
+  includeSemiProfit,
+  showSemiProfitToggle = false,
+  onShowProfitChange,
+  onIncludeSemiProfitChange,
 }: Props) {
-  const middleColSpan = showSpecColumn ? 4 : 3;
+  const middleColSpan = showProfit
+    ? showSpecColumn
+      ? 4
+      : 3
+    : showSpecColumn
+      ? 5
+      : 4;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -132,7 +154,44 @@ export function WarehouseOverviewStockTable({
         isFullscreen ? 'flex h-full flex-col p-4' : ''
       }`}
     >
-      <div className="mb-2 flex justify-end">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 dark:border-slate-600 dark:bg-slate-800/60">
+            <Checkbox
+              id="wh-overview-show-profit"
+              checked={showProfit}
+              onCheckedChange={(checked) => onShowProfitChange(checked === true)}
+            />
+            <Label
+              htmlFor="wh-overview-show-profit"
+              className="cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-200"
+            >
+              {labels.colProfit}
+            </Label>
+          </div>
+          {showSemiProfitToggle ? (
+            <div className="flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 dark:border-violet-800 dark:bg-violet-950/40">
+              <Checkbox
+                id="wh-overview-include-semi-profit"
+                checked={includeSemiProfit}
+                disabled={!showProfit}
+                onCheckedChange={(checked) =>
+                  onIncludeSemiProfitChange(checked === true)
+                }
+              />
+              <Label
+                htmlFor="wh-overview-include-semi-profit"
+                className={`cursor-pointer text-xs font-semibold ${
+                  showProfit
+                    ? 'text-violet-800 dark:text-violet-200'
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {labels.includeSemiProfitLabel}
+              </Label>
+            </div>
+          ) : null}
+        </div>
         <button
           type="button"
           onClick={toggleFullscreen}
@@ -156,7 +215,7 @@ export function WarehouseOverviewStockTable({
                 labels.colPiecesPerBag,
                 ...(showSpecColumn ? [labels.colSpec] : []),
                 labels.colSalePrice,
-                labels.colProfit,
+                ...(showProfit ? [labels.colProfit] : []),
                 labels.colTotalUzs,
                 labels.colTotalUsd,
                 labels.colFill,
@@ -221,30 +280,47 @@ export function WarehouseOverviewStockTable({
                     </div>
                   ) : null}
                 </td>
-                <td className="min-w-[11rem] max-w-[16rem] px-3 py-2.5">
-                  {row.profitCostLines.map((line) => (
-                    <div
-                      key={line}
-                      className="text-[10px] leading-snug text-slate-600 dark:text-slate-400"
-                    >
-                      {line}
-                    </div>
-                  ))}
-                  {row.profitSaleLine ? (
-                    <div className="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">
-                      {row.profitSaleLine}
-                    </div>
-                  ) : null}
-                  {row.profitLine ? (
-                    <div
-                      className={`mt-1 text-sm font-extrabold tracking-tight ${profitClass(row.profitPerPieceUzs)}`}
-                    >
-                      {row.profitLine}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400">—</div>
-                  )}
-                </td>
+                {showProfit ? (
+                  <td className="min-w-[11rem] max-w-[16rem] px-3 py-2.5">
+                    {row.profitCostLines.map((line) => (
+                      <div
+                        key={line}
+                        className="text-[10px] leading-snug text-slate-600 dark:text-slate-400"
+                      >
+                        {line}
+                      </div>
+                    ))}
+                    {row.profitSaleLine ? (
+                      <div className="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">
+                        {row.profitSaleLine}
+                      </div>
+                    ) : null}
+                    {row.profitLine ? (
+                      <div
+                        className={`mt-1 text-sm font-extrabold tracking-tight ${profitClass(row.profitPerPieceUzs)}`}
+                      >
+                        {row.profitLine}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-400">—</div>
+                    )}
+                    {row.profitSemiAddonLines?.map((line) => (
+                      <div
+                        key={line}
+                        className="mt-0.5 text-[11px] font-semibold text-violet-700 dark:text-violet-300"
+                      >
+                        {line}
+                      </div>
+                    ))}
+                    {row.profitTotalLine ? (
+                      <div
+                        className={`mt-1 border-t border-slate-200 pt-1 text-sm font-extrabold tracking-tight dark:border-slate-700 ${profitClass(row.profitPerPieceUzs)}`}
+                      >
+                        {row.profitTotalLine}
+                      </div>
+                    ) : null}
+                  </td>
+                ) : null}
                 <td className="whitespace-nowrap px-3 py-2.5 font-semibold text-emerald-700 dark:text-emerald-400">
                   {row.totalUzs}
                 </td>
@@ -270,9 +346,11 @@ export function WarehouseOverviewStockTable({
                 {formatNumber(totalQty)} {unit}
               </td>
               <td colSpan={middleColSpan} />
-              <td className="whitespace-nowrap px-3 py-3 text-sm font-extrabold text-violet-700 dark:text-violet-300">
-                {totalProfit}
-              </td>
+              {showProfit ? (
+                <td className="whitespace-nowrap px-3 py-3 text-sm font-extrabold text-violet-700 dark:text-violet-300">
+                  {totalProfit}
+                </td>
+              ) : null}
               <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-400">
                 {totalUzs}
               </td>

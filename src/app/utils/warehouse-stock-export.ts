@@ -1,10 +1,15 @@
 import type {
   FinishedProductCatalogItem,
+  RawMaterialProduct,
   SaleCurrency,
   SemiProductCatalogItem,
 } from '../store/erp-store';
 import { formatDate, formatNumber } from './format';
 import { formatWarehouseSalePriceDisplay } from './warehouse-product-pricing';
+import {
+  buildWarehouseProductProfitDisplay,
+  type WarehouseProfitLabels,
+} from './warehouse-product-profit';
 
 const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
 
@@ -30,6 +35,7 @@ export type WarehouseStockExportLabels = {
   noPrice: string;
   priceInUzs: string;
   fxValue: string;
+  colProfit?: string;
 };
 
 export type WarehouseStockExportRow = {
@@ -40,6 +46,8 @@ export type WarehouseStockExportRow = {
   totalUzs: number | null;
   totalUsd: number | null;
   typeLabel?: string;
+  profitHtml?: string;
+  profitTotalUzs: number | null;
 };
 
 export type WarehouseStockExportSection = {
@@ -64,6 +72,11 @@ export type WarehouseStockExportInput = {
   cbuEurRate?: number;
   /** Chop — ixcham jadval (bitta varaqka sig‘ishi uchun) */
   compact?: boolean;
+  showProfit?: boolean;
+  includeSemiProfit?: boolean;
+  rawMaterialById?: Map<string, RawMaterialProduct>;
+  semiProductById?: Map<string, SemiProductCatalogItem>;
+  profitLabels?: WarehouseProfitLabels;
 };
 
 function esc(value: string) {
@@ -141,6 +154,40 @@ function formatSalePriceHtml(
     .join('<br/>');
 }
 
+function formatProfitHtml(
+  product: SemiProductCatalogItem | FinishedProductCatalogItem,
+  rawMaterialById: Map<string, RawMaterialProduct> | undefined,
+  semiProductById: Map<string, SemiProductCatalogItem> | undefined,
+  profitLabels: WarehouseProfitLabels | undefined,
+  cbuUsdRate: number,
+  cbuEurRate: number,
+  includeSemiProfit: boolean,
+  compact: boolean,
+): { html: string; profitPerPiece: number | null } {
+  if (!rawMaterialById || !semiProductById || !profitLabels) {
+    return { html: '—', profitPerPiece: null };
+  }
+  const profit = buildWarehouseProductProfitDisplay(
+    product,
+    rawMaterialById,
+    semiProductById,
+    cbuUsdRate,
+    cbuEurRate,
+    profitLabels,
+    { includeSemiProfit },
+  );
+  const lines = [
+    ...profit.costLines.map((line) => esc(line)),
+    profit.saleUzsLine ? esc(profit.saleUzsLine) : '',
+    profit.profitLine ? `<b>${esc(profit.profitLine)}</b>` : '',
+    ...profit.semiProfitAddonLines.map((line) => esc(line)),
+    profit.totalProfitLine ? `<b>${esc(profit.totalProfitLine)}</b>` : '',
+  ].filter(Boolean);
+  if (lines.length === 0) return { html: '—', profitPerPiece: null };
+  const sep = compact ? ' · ' : '<br/>';
+  return { html: lines.join(sep), profitPerPiece: profit.profitPerPieceUzs };
+}
+
 function buildProductRow(
   product: SemiProductCatalogItem | FinishedProductCatalogItem,
   quantity: number,
@@ -150,6 +197,11 @@ function buildProductRow(
   cbuUsdRate = 0,
   cbuEurRate = 0,
   compact = false,
+  showProfit = false,
+  includeSemiProfit = false,
+  rawMaterialById?: Map<string, RawMaterialProduct>,
+  semiProductById?: Map<string, SemiProductCatalogItem>,
+  profitLabels?: WarehouseProfitLabels,
 ): WarehouseStockExportRow {
   const unitUzs = unitPriceUzs(
     product.salePrice,
@@ -161,6 +213,19 @@ function buildProductRow(
     product.priceCurrency,
     product.fxRateToUzs,
   );
+  const profitData = showProfit
+    ? formatProfitHtml(
+        product,
+        rawMaterialById,
+        semiProductById,
+        profitLabels,
+        cbuUsdRate,
+        cbuEurRate,
+        includeSemiProfit,
+        compact,
+      )
+    : { html: undefined, profitPerPiece: null };
+
   return {
     name: product.name,
     unit,
@@ -175,6 +240,11 @@ function buildProductRow(
     totalUzs: unitUzs != null ? unitUzs * quantity : null,
     totalUsd: unitUsd != null ? unitUsd * quantity : null,
     typeLabel,
+    profitHtml: profitData.html,
+    profitTotalUzs:
+      profitData.profitPerPiece != null
+        ? profitData.profitPerPiece * quantity
+        : null,
   };
 }
 
@@ -207,6 +277,11 @@ export function buildWarehouseStockExportSections(
     cbuUsdRate = 0,
     cbuEurRate = 0,
     compact = false,
+    showProfit = false,
+    includeSemiProfit = false,
+    rawMaterialById,
+    semiProductById,
+    profitLabels,
   } = input;
 
   const semiList =
@@ -218,6 +293,13 @@ export function buildWarehouseStockExportSections(
       ? filterByIds(finishedProducts, selectedFinalIds)
       : finishedProducts;
 
+  const rowOpts = {
+    showProfit,
+    includeSemiProfit,
+    rawMaterialById,
+    semiProductById,
+    profitLabels,
+  };
   const semiRows = sortByName(semiList).map((p) =>
     buildProductRow(
       p,
@@ -228,6 +310,11 @@ export function buildWarehouseStockExportSections(
       cbuUsdRate,
       cbuEurRate,
       compact,
+      rowOpts.showProfit,
+      rowOpts.includeSemiProfit,
+      rowOpts.rawMaterialById,
+      rowOpts.semiProductById,
+      rowOpts.profitLabels,
     ),
   );
   const finalRows = sortByName(finalList).map((p) =>
@@ -240,6 +327,11 @@ export function buildWarehouseStockExportSections(
       cbuUsdRate,
       cbuEurRate,
       compact,
+      rowOpts.showProfit,
+      rowOpts.includeSemiProfit,
+      rowOpts.rawMaterialById,
+      rowOpts.semiProductById,
+      rowOpts.profitLabels,
     ),
   );
 
@@ -276,9 +368,10 @@ function sectionTotals(rows: WarehouseStockExportRow[]) {
       acc.qty += row.quantity;
       if (row.totalUzs != null) acc.uzs += row.totalUzs;
       if (row.totalUsd != null) acc.usd += row.totalUsd;
+      if (row.profitTotalUzs != null) acc.profit += row.profitTotalUzs;
       return acc;
     },
-    { qty: 0, uzs: 0, usd: 0 },
+    { qty: 0, uzs: 0, usd: 0, profit: 0 },
   );
 }
 
@@ -288,9 +381,11 @@ function renderTableSection(
   showTypeColumn: boolean,
   compact = false,
   hideSectionTitle = false,
+  showProfit = false,
 ): string {
   const totals = sectionTotals(section.rows);
-  const colCount = (showTypeColumn ? 1 : 0) + (compact ? 6 : 7);
+  const profitCol = showProfit ? 1 : 0;
+  const colCount = (showTypeColumn ? 1 : 0) + (compact ? 6 : 7) + profitCol;
   const footerLabelSpan = (showTypeColumn ? 1 : 0) + (compact ? 3 : 4);
   const bodyRows = section.rows
     .map(
@@ -301,6 +396,7 @@ function renderTableSection(
           <td class="l name"><b>${esc(row.name)}</b></td>
           ${compact ? '' : `<td class="c unit">${esc(row.unit)}</td>`}
           <td class="l price">${row.salePriceHtml}</td>
+          ${showProfit ? `<td class="l profit">${row.profitHtml ?? '—'}</td>` : ''}
           <td class="r qty"><b>${formatNumber(row.quantity)}${compact ? ` ${esc(row.unit)}` : ''}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUzs, "so'm")}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUsd, '$')}</b></td>
@@ -324,6 +420,7 @@ function renderTableSection(
             <th class="col-name">${esc(labels.colName)}</th>
             ${compact ? '' : `<th>${esc(labels.colUnit)}</th>`}
             <th class="col-price">${esc(labels.colSalePrice)}</th>
+            ${showProfit ? `<th class="col-profit">${esc(labels.colProfit ?? '—')}</th>` : ''}
             <th class="col-qty">${esc(labels.colQty)}</th>
             <th class="col-uzs">${esc(labels.colTotalUzs)}</th>
             <th class="col-usd">${esc(labels.colTotalUsd)}</th>
@@ -335,6 +432,7 @@ function renderTableSection(
         <tfoot>
           <tr class="total-row">
             <td colspan="${footerLabelSpan}" class="total-label"><b>${esc(labels.grandTotal)}</b></td>
+            ${showProfit ? `<td class="r money profit-total"><b>${formatMoney(totals.profit || null, "so'm")}</b></td>` : ''}
             <td class="r qty"><b>${formatNumber(totals.qty)}${compact ? ` ${esc(labels.unitPiece)}` : ''}</b></td>
             <td class="r money"><b>${formatMoney(totals.uzs || null, "so'm")}</b></td>
             <td class="r money"><b>${formatMoney(totals.usd || null, '$')}</b></td>
@@ -349,13 +447,21 @@ export function buildWarehouseStockExportHtml(
   labels: WarehouseStockExportLabels,
   printedAtIso: string,
   forPrint = false,
+  showProfit = false,
 ): string {
   const compact = forPrint;
   const showTypeColumn = sections.some((s) => s.key === 'combined');
   const hideSectionTitles = compact && sections.length === 1;
   const sectionsHtml = sections
     .map((section) =>
-      renderTableSection(section, labels, showTypeColumn, compact, hideSectionTitles),
+      renderTableSection(
+        section,
+        labels,
+        showTypeColumn,
+        compact,
+        hideSectionTitles,
+        showProfit,
+      ),
     )
     .join('');
 
@@ -499,8 +605,9 @@ export function downloadWarehouseStockExcel(
   labels: WarehouseStockExportLabels,
   printedAtIso: string,
   fileName: string,
+  showProfit = false,
 ) {
-  const html = buildWarehouseStockExportHtml(sections, labels, printedAtIso, false);
+  const html = buildWarehouseStockExportHtml(sections, labels, printedAtIso, false, showProfit);
   const BOM = '\uFEFF';
   const blob = new Blob([BOM + html], {
     type: 'application/vnd.ms-excel;charset=utf-8',
@@ -517,8 +624,9 @@ export function printWarehouseStock(
   sections: WarehouseStockExportSection[],
   labels: WarehouseStockExportLabels,
   printedAtIso: string,
+  showProfit = false,
 ) {
-  const html = buildWarehouseStockExportHtml(sections, labels, printedAtIso, true);
+  const html = buildWarehouseStockExportHtml(sections, labels, printedAtIso, true, showProfit);
   const w = window.open('', '_blank', 'width=1200,height=900');
   if (!w) return;
   w.document.open();

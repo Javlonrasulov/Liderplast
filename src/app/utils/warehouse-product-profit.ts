@@ -12,13 +12,22 @@ export type WarehouseProfitLabels = {
   semiLine: string;
   saleLine: string;
   profitLine: string;
+  semiProfitAddon: string;
+  totalProfitLine: string;
   unavailable: string;
+};
+
+export type WarehouseProductProfitOptions = {
+  /** Tayyor mahsulot: yarim tayyor foydasini umumiy foydaga qo‘shish */
+  includeSemiProfit?: boolean;
 };
 
 export type WarehouseProductProfitDisplay = {
   costLines: string[];
   saleUzsLine: string | null;
   profitLine: string | null;
+  semiProfitAddonLines: string[];
+  totalProfitLine: string | null;
   profitPerPieceUzs: number | null;
   costPerPieceUzs: number | null;
   salePerPieceUzs: number | null;
@@ -102,11 +111,15 @@ export function buildWarehouseProductProfitDisplay(
   cbuUsdRate: number,
   cbuEurRate: number,
   labels: WarehouseProfitLabels,
+  options: WarehouseProductProfitOptions = {},
 ): WarehouseProductProfitDisplay {
+  const { includeSemiProfit = false } = options;
   const empty: WarehouseProductProfitDisplay = {
     costLines: [],
     saleUzsLine: null,
     profitLine: null,
+    semiProfitAddonLines: [],
+    totalProfitLine: null,
     profitPerPieceUzs: null,
     costPerPieceUzs: null,
     salePerPieceUzs: null,
@@ -174,11 +187,60 @@ export function buildWarehouseProductProfitDisplay(
       ? labels.profitLine.replace('{amount}', formatNumber(Math.round(profitPerPiece)))
       : null;
 
+  let semiProfitAddonLines: string[] = [];
+  let totalProfitLine: string | null = null;
+  let totalProfitPerPiece = profitPerPiece;
+
+  if (
+    product.itemType === 'FINISHED_PRODUCT' &&
+    includeSemiProfit &&
+    salePerPiece != null
+  ) {
+    let semiProfitSum = 0;
+    let hasSemiProfit = false;
+    for (const link of product.semiProducts) {
+      const semi = semiById.get(link.semiProductId);
+      if (!semi) continue;
+      const semiCost = semiUnitCostUzs(
+        semi,
+        rawById,
+        cbuUsdRate,
+        cbuEurRate,
+        labels,
+      );
+      const semiSale = salePricePerPieceUzs(semi, cbuUsdRate, cbuEurRate);
+      if (semiCost.total == null || semiSale == null) continue;
+      const semiProfit = semiSale - semiCost.total;
+      semiProfitSum += semiProfit;
+      hasSemiProfit = true;
+      semiProfitAddonLines.push(
+        labels.semiProfitAddon
+          .replace('{name}', link.name)
+          .replace('{amount}', formatNumber(Math.round(semiProfit))),
+      );
+    }
+    if (hasSemiProfit && profitPerPiece != null) {
+      totalProfitPerPiece = profitPerPiece + semiProfitSum;
+      totalProfitLine = labels.totalProfitLine.replace(
+        '{amount}',
+        formatNumber(Math.round(totalProfitPerPiece)),
+      );
+    } else if (hasSemiProfit && profitPerPiece == null) {
+      totalProfitPerPiece = semiProfitSum;
+      totalProfitLine = labels.totalProfitLine.replace(
+        '{amount}',
+        formatNumber(Math.round(totalProfitPerPiece)),
+      );
+    }
+  }
+
   return {
     costLines,
     saleUzsLine,
     profitLine,
-    profitPerPieceUzs: profitPerPiece,
+    semiProfitAddonLines,
+    totalProfitLine,
+    profitPerPieceUzs: includeSemiProfit ? totalProfitPerPiece : profitPerPiece,
     costPerPieceUzs: costPerPiece,
     salePerPieceUzs: salePerPiece,
   };

@@ -463,8 +463,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
   const currentExportTypeLabel = mode === 'semi' ? t.whExportTypeSemi : t.whExportTypeFinal;
 
-  const openStockExcelDialog = () => {
+  const openStockExportDialog = () => {
     setExportScope('current_only');
+    setExportShowProfit(showOverviewProfit);
+    setExportIncludeSemiProfit(mode === 'final' && includeSemiProfit);
     setExportDialogOpen(true);
   };
 
@@ -474,6 +476,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       scope: WarehouseExportScope;
       selectedSemiIds: string[];
       selectedFinalIds: string[];
+      showProfit: boolean;
+      includeSemiProfit: boolean;
     },
   ) => {
     if (options.selectedSemiIds.length === 0 && options.selectedFinalIds.length === 0) {
@@ -495,13 +499,21 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       finishedProducts,
       semiStockByName: semiStockByProductName,
       finalStockByName: finalStockByProductName,
-      labels,
+      labels: {
+        ...labels,
+        colProfit: t.whOverviewColProfit,
+      },
       printedAtIso,
       selectedSemiIds: options.selectedSemiIds,
       selectedFinalIds: options.selectedFinalIds,
       cbuUsdRate: cbuUsdFx,
       cbuEurRate: cbuEurFx,
       compact: action === 'print',
+      showProfit: options.showProfit,
+      includeSemiProfit: options.includeSemiProfit,
+      rawMaterialById,
+      semiProductById,
+      profitLabels,
     });
     if (action === 'excel') {
       downloadWarehouseStockExcel(
@@ -509,9 +521,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         labels,
         printedAtIso,
         warehouseStockExportFileName(mode, options.scope),
+        options.showProfit,
       );
     } else {
-      printWarehouseStock(sections, labels, printedAtIso);
+      printWarehouseStock(sections, labels, printedAtIso, options.showProfit);
     }
   };
 
@@ -524,16 +537,25 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       selectedFinalIds: finishedProducts
         .filter((p) => exportSelectedIds.has(p.id))
         .map((p) => p.id),
+      showProfit: exportShowProfit,
+      includeSemiProfit: mode === 'final' && exportIncludeSemiProfit,
     });
     setExportDialogOpen(false);
   };
 
-  const handleStockPrint = () => {
+  const runStockPrintExport = () => {
     executeStockExport('print', {
-      scope: 'current_only',
-      selectedSemiIds: mode === 'semi' ? semiProducts.map((p) => p.id) : [],
-      selectedFinalIds: mode === 'final' ? finishedProducts.map((p) => p.id) : [],
+      scope: exportScope,
+      selectedSemiIds: semiProducts
+        .filter((p) => exportSelectedIds.has(p.id))
+        .map((p) => p.id),
+      selectedFinalIds: finishedProducts
+        .filter((p) => exportSelectedIds.has(p.id))
+        .map((p) => p.id),
+      showProfit: exportShowProfit,
+      includeSemiProfit: mode === 'final' && exportIncludeSemiProfit,
     });
+    setExportDialogOpen(false);
   };
 
   const pricingFormLabels = useMemo(
@@ -595,6 +617,16 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     if (saved === 'cards' || saved === 'table') return saved;
     return 'table';
   });
+  const [showOverviewProfit, setShowOverviewProfit] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(`wh-overview-show-profit-${mode}`) === '1';
+  });
+  const [includeSemiProfit, setIncludeSemiProfit] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('wh-overview-include-semi-profit') === '1';
+  });
+  const [exportShowProfit, setExportShowProfit] = useState(false);
+  const [exportIncludeSemiProfit, setExportIncludeSemiProfit] = useState(false);
 
   /**
    * Mahsulotlarni boshqarish: Admin, Director — har doim;
@@ -935,9 +967,18 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       semiLine: t.whProfitSemiLine,
       saleLine: t.whProfitSaleLine,
       profitLine: t.whProfitValueLine,
+      semiProfitAddon: t.whProfitSemiAddonLine,
+      totalProfitLine: t.whProfitTotalLine,
       unavailable: t.whExportNoPrice,
     }),
     [t],
+  );
+
+  const profitBuildOptions = useMemo(
+    () => ({
+      includeSemiProfit: mode === 'final' && includeSemiProfit,
+    }),
+    [mode, includeSemiProfit],
   );
 
   const overviewStockRows = useMemo((): WarehouseOverviewStockRow[] => {
@@ -954,11 +995,17 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         cbuUsdFx,
         cbuEurFx,
         profitLabels,
+        profitBuildOptions,
       );
       return {
         profitCostLines: profit.costLines,
         profitSaleLine: profit.saleUzsLine ?? undefined,
         profitLine: profit.profitLine ?? undefined,
+        profitSemiAddonLines:
+          profit.semiProfitAddonLines.length > 0
+            ? profit.semiProfitAddonLines
+            : undefined,
+        profitTotalLine: profit.totalProfitLine ?? undefined,
         profitPerPieceUzs: profit.profitPerPieceUzs,
       };
     };
@@ -1050,6 +1097,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     rawMaterialById,
     semiProductById,
     profitLabels,
+    profitBuildOptions,
     cbuUsdFx,
     cbuEurFx,
     t,
@@ -1076,23 +1124,30 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         usd += totals.totalUsd;
         hasUsd = true;
       }
-      const profitDisplay = buildWarehouseProductProfitDisplay(
-        p,
-        rawMaterialById,
-        semiProductById,
-        cbuUsdFx,
-        cbuEurFx,
-        profitLabels,
-      );
-      if (profitDisplay.profitPerPieceUzs != null && qty > 0) {
-        profit += profitDisplay.profitPerPieceUzs * qty;
-        hasProfit = true;
+      if (showOverviewProfit) {
+        const profitDisplay = buildWarehouseProductProfitDisplay(
+          p,
+          rawMaterialById,
+          semiProductById,
+          cbuUsdFx,
+          cbuEurFx,
+          profitLabels,
+          profitBuildOptions,
+        );
+        if (profitDisplay.profitPerPieceUzs != null && qty > 0) {
+          profit += profitDisplay.profitPerPieceUzs * qty;
+          hasProfit = true;
+        }
       }
     });
     return {
       totalUzs: formatOverviewMoney(hasUzs ? uzs : null, "so'm", empty),
       totalUsd: formatOverviewMoney(hasUsd ? usd : null, '$', empty),
-      totalProfit: formatOverviewMoney(hasProfit ? profit : null, "so'm", empty),
+      totalProfit: formatOverviewMoney(
+        showOverviewProfit && hasProfit ? profit : null,
+        "so'm",
+        empty,
+      ),
     };
   }, [
     mode,
@@ -1102,6 +1157,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     rawMaterialById,
     semiProductById,
     profitLabels,
+    profitBuildOptions,
+    showOverviewProfit,
     cbuUsdFx,
     cbuEurFx,
     t,
@@ -1125,6 +1182,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       empty: t.whStockBreakdownEmpty,
       fullscreenEnter: t.whOverviewFullscreenEnter,
       fullscreenExit: t.whOverviewFullscreenExit,
+      showProfitLabel: t.whOverviewShowProfit,
+      includeSemiProfitLabel: t.whOverviewIncludeSemiProfit,
     }),
     [t, mode],
   );
@@ -1324,7 +1383,26 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   useEffect(() => {
     setCatalogSearch('');
     setOverviewSearch('');
+    if (typeof window !== 'undefined') {
+      setShowOverviewProfit(
+        window.localStorage.getItem(`wh-overview-show-profit-${mode}`) === '1',
+      );
+    }
   }, [mode]);
+
+  const setOverviewProfitVisible = (next: boolean) => {
+    setShowOverviewProfit(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(`wh-overview-show-profit-${mode}`, next ? '1' : '0');
+    }
+  };
+
+  const setOverviewIncludeSemiProfit = (next: boolean) => {
+    setIncludeSemiProfit(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('wh-overview-include-semi-profit', next ? '1' : '0');
+    }
+  };
 
   const setOverviewView = (next: 'cards' | 'table') => {
     setOverviewViewMode(next);
@@ -2160,28 +2238,30 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={openStockExcelDialog}
-          >
-            <FileDown size={16} />
-            {t.whExportExcel}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={handleStockPrint}
-          >
-            <Printer size={16} />
-            {t.whExportPrint}
-          </Button>
-        </div>
+        {whTab !== 'overview' ? (
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={openStockExportDialog}
+            >
+              <FileDown size={16} />
+              {t.whExportExcel}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={openStockExportDialog}
+            >
+              <Printer size={16} />
+              {t.whExportPrint}
+            </Button>
+          </div>
+        ) : null}
 
         <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
           <DialogContent className="max-h-[90dvh] max-w-lg overflow-y-auto">
@@ -2285,9 +2365,56 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               </div>
             </div>
 
+            <div className="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                {t.whExportProfitOptionsTitle}
+              </p>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="wh-export-show-profit"
+                  checked={exportShowProfit}
+                  onCheckedChange={(checked) => setExportShowProfit(checked === true)}
+                />
+                <Label htmlFor="wh-export-show-profit" className="cursor-pointer font-normal">
+                  {t.whExportShowProfit}
+                </Label>
+              </div>
+              {mode === 'final' ? (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="wh-export-include-semi-profit"
+                    checked={exportIncludeSemiProfit}
+                    disabled={!exportShowProfit}
+                    onCheckedChange={(checked) =>
+                      setExportIncludeSemiProfit(checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="wh-export-include-semi-profit"
+                    className={`cursor-pointer font-normal ${
+                      exportShowProfit
+                        ? ''
+                        : 'text-slate-400 dark:text-slate-500'
+                    }`}
+                  >
+                    {t.whExportIncludeSemiProfit}
+                  </Label>
+                </div>
+              ) : null}
+            </div>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setExportDialogOpen(false)}>
                 {t.btnCancel}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={runStockPrintExport}
+                disabled={exportSelectedIds.size === 0}
+              >
+                <Printer size={16} />
+                {t.whExportPrint}
               </Button>
               <Button
                 type="button"
@@ -2319,31 +2446,53 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 {t.whTabOverview}
               </h3>
-              <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
-                <button
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setOverviewView('cards')}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      overviewViewMode === 'cards'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <LayoutGrid size={14} />
+                    {t.whOverviewViewCards}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOverviewView('table')}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      overviewViewMode === 'table'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <Table2 size={14} />
+                    {t.whOverviewViewTable}
+                  </button>
+                </div>
+                <Button
                   type="button"
-                  onClick={() => setOverviewView('cards')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    overviewViewMode === 'cards'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
-                  }`}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={openStockExportDialog}
                 >
-                  <LayoutGrid size={14} />
-                  {t.whOverviewViewCards}
-                </button>
-                <button
+                  <FileDown size={16} />
+                  {t.whExportExcel}
+                </Button>
+                <Button
                   type="button"
-                  onClick={() => setOverviewView('table')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    overviewViewMode === 'table'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
-                  }`}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={openStockExportDialog}
                 >
-                  <Table2 size={14} />
-                  {t.whOverviewViewTable}
-                </button>
+                  <Printer size={16} />
+                  {t.whExportPrint}
+                </Button>
               </div>
             </div>
 
@@ -2453,6 +2602,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     totalProfit={overviewGrandTotals.totalProfit}
                     unit={t.unitPiece}
                     showSpecColumn={mode === 'semi'}
+                    showProfit={showOverviewProfit}
+                    includeSemiProfit={includeSemiProfit}
+                    showSemiProfitToggle={mode === 'final'}
+                    onShowProfitChange={setOverviewProfitVisible}
+                    onIncludeSemiProfitChange={setOverviewIncludeSemiProfit}
                   />
                 ) : (
                   <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">

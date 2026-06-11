@@ -479,6 +479,13 @@ export interface T {
   whProfitSemiLine: string;
   whProfitSaleLine: string;
   whProfitValueLine: string;
+  whProfitSemiAddonLine: string;
+  whProfitTotalLine: string;
+  whOverviewShowProfit: string;
+  whOverviewIncludeSemiProfit: string;
+  whExportProfitOptionsTitle: string;
+  whExportShowProfit: string;
+  whExportIncludeSemiProfit: string;
   whOverviewFullscreenEnter: string;
   whOverviewFullscreenExit: string;
   statusLow: string;
@@ -2095,6 +2102,13 @@ const uz_cyrillic: T = {
   whProfitSemiLine: '{name}: {cost} so‘m',
   whProfitSaleLine: 'Сотиш: {amount} so‘m',
   whProfitValueLine: 'Фойда: {amount} so‘m',
+  whProfitSemiAddonLine: '+ {name}: {amount} so‘m',
+  whProfitTotalLine: 'Умумий фойда: {amount} so‘m',
+  whOverviewShowProfit: 'Фойдани кўрсатиш',
+  whOverviewIncludeSemiProfit: '+ Ярим тайёр фойда',
+  whExportProfitOptionsTitle: 'Фойда',
+  whExportShowProfit: 'Фойда устунини кўрсатиш',
+  whExportIncludeSemiProfit: '+ Ярим тайёр фойдасини қўшиш',
   whOverviewFullscreenEnter: 'Тўлиқ экран',
   whOverviewFullscreenExit: 'Экрандан чиқиш',
   whProductsList: 'Маҳсулотлар рўйхати',
@@ -3404,6 +3418,13 @@ const uz_latin: T = {
   whProfitSemiLine: '{name}: {cost} so‘m',
   whProfitSaleLine: 'Sotish: {amount} so‘m',
   whProfitValueLine: 'Foyda: {amount} so‘m',
+  whProfitSemiAddonLine: '+ {name}: {amount} so‘m',
+  whProfitTotalLine: 'Umumiy foyda: {amount} so‘m',
+  whOverviewShowProfit: 'Foydani ko‘rsatish',
+  whOverviewIncludeSemiProfit: '+ Yarim tayyor foyda',
+  whExportProfitOptionsTitle: 'Foyda',
+  whExportShowProfit: 'Foyda ustunini ko‘rsatish',
+  whExportIncludeSemiProfit: '+ Yarim tayyor foydasini qo‘shish',
   whOverviewFullscreenEnter: 'To‘liq ekran',
   whOverviewFullscreenExit: 'Ekrandan chiqish',
   whProductsList: 'Mahsulotlar ro\'yxati',
@@ -4713,6 +4734,13 @@ const ru: T = {
   whProfitSemiLine: '{name}: {cost} сум',
   whProfitSaleLine: 'Продажа: {amount} сум',
   whProfitValueLine: 'Прибыль: {amount} сум',
+  whProfitSemiAddonLine: '+ {name}: {amount} сум',
+  whProfitTotalLine: 'Общая прибыль: {amount} сум',
+  whOverviewShowProfit: 'Показать прибыль',
+  whOverviewIncludeSemiProfit: '+ Прибыль полуфабриката',
+  whExportProfitOptionsTitle: 'Прибыль',
+  whExportShowProfit: 'Показать столбец прибыли',
+  whExportIncludeSemiProfit: '+ Добавить прибыль полуфабриката',
   whOverviewFullscreenEnter: 'Полный экран',
   whOverviewFullscreenExit: 'Выйти из экрана',
   whProductsList: 'Список продуктов',
