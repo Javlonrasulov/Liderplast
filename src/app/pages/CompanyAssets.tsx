@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DollarSign,
   Plus,
@@ -260,6 +261,8 @@ export function CompanyAssets() {
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [lastDocFileName, setLastDocFileName] = useState<string | null>(null);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
+  const [detailImageSaving, setDetailImageSaving] = useState(false);
+  const [detailImageFileName, setDetailImageFileName] = useState<string | null>(null);
 
   const usdRate = cbuUsdRate(usd);
   const eurRate = cbuEurRate(eur);
@@ -356,6 +359,20 @@ export function CompanyAssets() {
   useEffect(() => {
     void loadList();
   }, [loadList]);
+
+  useEffect(() => {
+    if (!fullscreenImageUrl) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullscreenImageUrl(null);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [fullscreenImageUrl]);
 
   useEffect(() => {
     void apiRequest<CompanyAssetStats>('/company-assets/stats').then(setStats).catch(() => {});
@@ -484,7 +501,7 @@ export function CompanyAssets() {
     const et = companyAssetsExportT;
     try {
       const all = await fetchAllForExport();
-      exportCompanyAssetsExcel(all, et, 'korxona-mulki.xlsx', usdRate, eurRate);
+      await exportCompanyAssetsExcel(all, et, 'korxona-mulki.xlsx', usdRate, eurRate);
       toast.success(t.caExportExcel);
     } catch {
       toast.error(et.caExportError);
@@ -515,6 +532,30 @@ export function CompanyAssets() {
       if (!opened) toast.error(et.caPrintBlocked);
     } catch {
       toast.error(et.caExportError);
+    }
+  };
+
+  const handleDetailImageUpload = async (file: File | null) => {
+    if (!detail || !file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t.caErrFileTooLarge);
+      return;
+    }
+    setDetailImageSaving(true);
+    setDetailImageFileName(file.name);
+    try {
+      const url = await compressImageFileToDataUrl(file);
+      const updated = await apiRequest<CompanyAssetDetail>(`/company-assets/${detail.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ imageUrl: url }),
+      });
+      setDetail(updated);
+      toast.success(t.caImageUploaded);
+      await loadList();
+    } catch {
+      toast.error(t.prEmployeeSaveError);
+    } finally {
+      setDetailImageSaving(false);
     }
   };
 
@@ -1302,7 +1343,10 @@ export function CompanyAssets() {
         open={detailOpen}
         onOpenChange={(o) => {
           setDetailOpen(o);
-          if (!o) setFullscreenImageUrl(null);
+          if (!o) {
+            setFullscreenImageUrl(null);
+            setDetailImageFileName(null);
+          }
         }}
       >
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
@@ -1312,24 +1356,39 @@ export function CompanyAssets() {
                 <DialogTitle>{detail.name}</DialogTitle>
                 <p className="text-sm text-slate-500">{detail.inventoryNumber}</p>
               </DialogHeader>
-              {detail.imageUrl && (
-                <button
-                  type="button"
-                  onClick={() => setFullscreenImageUrl(detail.imageUrl!)}
-                  className="group relative block w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-900/40"
-                  title={t.caViewImageFullscreen}
-                >
-                  <img
-                    src={detail.imageUrl}
-                    alt=""
-                    className="max-h-48 w-full cursor-zoom-in object-contain transition group-hover:opacity-90"
+              <div>
+                <span className="mb-1 block text-xs font-medium text-slate-500">{t.caFieldImage}</span>
+                {detail.imageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setFullscreenImageUrl(detail.imageUrl!)}
+                    className="group relative mb-2 block w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-900/40"
+                    title={t.caViewImageFullscreen}
+                  >
+                    <img
+                      src={detail.imageUrl}
+                      alt=""
+                      className="max-h-48 w-full cursor-zoom-in object-contain transition group-hover:opacity-90"
+                    />
+                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-lg bg-black/55 px-2 py-1 text-xs text-white">
+                      <ZoomIn size={14} />
+                      {t.caViewImageFullscreen}
+                    </span>
+                  </button>
+                ) : (
+                  <p className="mb-2 rounded-xl border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-400 dark:border-slate-600">
+                    {t.caNoImage}
+                  </p>
+                )}
+                {canManage && (
+                  <FilePickerField
+                    accept="image/*"
+                    fileName={detailImageSaving ? detailImageFileName : null}
+                    disabled={detailImageSaving}
+                    onFile={(file) => void handleDetailImageUpload(file)}
                   />
-                  <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-lg bg-black/55 px-2 py-1 text-xs text-white">
-                    <ZoomIn size={14} />
-                    {t.caViewImageFullscreen}
-                  </span>
-                </button>
-              )}
+                )}
+              </div>
               <div className="grid gap-2 text-sm sm:grid-cols-2">
                 <p><span className="text-slate-500">{t.caColCategory}:</span> {assetCategoryLabel(detail.category, t)}</p>
                 <p><span className="text-slate-500">{t.caColStatus}:</span> {assetStatusLabel(detail.status, t)}</p>
@@ -1457,24 +1516,34 @@ export function CompanyAssets() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!fullscreenImageUrl} onOpenChange={(o) => !o && setFullscreenImageUrl(null)}>
-        <DialogContent className="z-[140] max-h-[96vh] max-w-[96vw] gap-0 overflow-hidden border-0 bg-black/95 p-2 sm:p-4">
-          {fullscreenImageUrl && (
+      {fullscreenImageUrl &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-black"
+            onClick={() => setFullscreenImageUrl(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.caViewImageFullscreen}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFullscreenImageUrl(null);
+              }}
+              className="absolute right-4 top-4 z-10 rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur hover:bg-white/25"
+            >
+              {t.caCloseImage}
+            </button>
             <img
               src={fullscreenImageUrl}
               alt=""
-              className="mx-auto max-h-[88vh] w-full object-contain"
+              className="max-h-full max-w-full object-contain p-4"
+              onClick={(e) => e.stopPropagation()}
             />
-          )}
-          <button
-            type="button"
-            onClick={() => setFullscreenImageUrl(null)}
-            className="absolute right-3 top-3 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/20"
-          >
-            {t.caCloseImage}
-          </button>
-        </DialogContent>
-      </Dialog>
+          </div>,
+          document.body,
+        )}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>

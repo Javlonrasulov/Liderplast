@@ -22,13 +22,8 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import {
-  formatNumber,
-  formatDate,
-  formatKgAmount,
-  formatRawMaterialMovementQty,
-  todayYmd,
-} from '../utils/format';
+import { formatNumber, formatDate, todayYmd } from '../utils/format';
+import { RawMaterialMovementHistoryTable } from '../components/RawMaterialMovementHistoryTable';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
   Select,
@@ -155,18 +150,56 @@ export function RawMaterial() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const rawMaterialNameById = useMemo(() => {
-    const m = new Map<string, string>();
+  const rawMaterialMetaById = useMemo(() => {
+    const m = new Map<string, { name: string; kind?: RawMaterialKind }>();
     for (const p of state.warehouseProducts) {
-      if (p.itemType === 'RAW_MATERIAL') m.set(p.id, p.name);
+      if (p.itemType === 'RAW_MATERIAL') {
+        m.set(p.id, { name: p.name, kind: p.rawMaterialKind });
+      }
     }
     return m;
   }, [state.warehouseProducts]);
 
-  const resolveEntryMaterialName = (entry: (typeof filteredEntries)[number]) =>
-    entry.rawMaterialName?.trim() ||
-    (entry.rawMaterialId ? rawMaterialNameById.get(entry.rawMaterialId) : undefined) ||
-    '—';
+  const historyTableEntries = useMemo(
+    () =>
+      filteredEntries.map((entry) => {
+        const meta = entry.rawMaterialId
+          ? rawMaterialMetaById.get(entry.rawMaterialId)
+          : undefined;
+        return {
+          id: entry.id,
+          date: entry.date,
+          type: entry.type,
+          amount: entry.amount,
+          description: entry.description,
+          rawMaterialName:
+            entry.rawMaterialName?.trim() || meta?.name || '—',
+          materialKind: meta?.kind,
+        };
+      }),
+    [filteredEntries, rawMaterialMetaById],
+  );
+
+  const historyTableLabels = useMemo(
+    () => ({
+      colNum: t.whExportColNum,
+      colDate: t.colDate,
+      colType: t.colType,
+      colProduct: t.colProduct,
+      colAmount: t.colAmount,
+      colNote: t.colNote,
+      incoming: t.rmIncoming,
+      outgoing: t.rmOutgoing,
+      kindSiro: t.rmKindSiro,
+      kindPaint: t.rmKindPaint,
+      unitKg: t.unitKg,
+      balance: t.rmBalance,
+      metricsSiro: t.rmMetricsCaptionSiro,
+      metricsPaint: t.rmMetricsCaptionPaint,
+      empty: t.noData,
+    }),
+    [t],
+  );
 
   const incomingCatalogItems = useMemo(() => {
     return state.warehouseProducts
@@ -494,87 +527,17 @@ export function RawMaterial() {
               </div>
             </div>
           </CollapsibleTrigger>
-          <CollapsibleContent>
-            {filteredEntries.length === 0 ? (
-              <div className="flex items-center justify-center h-40 text-slate-400 text-sm">{t.noData}</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:bg-slate-700/40 dark:text-slate-400">
-                      <th className="px-4 py-3">{t.colDate}</th>
-                      <th className="px-4 py-3">{t.colType}</th>
-                      <th className="px-4 py-3">{t.colProduct}</th>
-                      <th className="px-4 py-3 text-right">{t.colAmount}</th>
-                      <th className="hidden px-4 py-3 sm:table-cell">{t.colNote}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEntries.map((entry) => {
-                      const qty = formatRawMaterialMovementQty(entry.amount);
-                      const unitLabel = qty.unit === 'g' ? 'g' : t.unitKg;
-                      const isIncoming = entry.type === 'incoming';
-                      const amountCls = isIncoming
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-orange-600 dark:text-orange-400';
-                      const note = entry.description.trim();
-
-                      return (
-                        <tr
-                          key={entry.id}
-                          className="border-b border-slate-100 align-top transition-colors hover:bg-slate-50/80 dark:border-slate-700/80 dark:hover:bg-slate-700/30"
-                        >
-                          <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
-                            {formatDate(entry.date)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                isIncoming
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                  : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                              }`}
-                            >
-                              {isIncoming ? t.rmIncoming : t.rmOutgoing}
-                            </span>
-                          </td>
-                          <td className="max-w-[12rem] px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-100">
-                            <span className="line-clamp-2">{resolveEntryMaterialName(entry)}</span>
-                          </td>
-                          <td className={`px-4 py-3 text-right tabular-nums text-sm font-semibold ${amountCls}`}>
-                            {isIncoming ? '+' : '−'}
-                            {qty.amount}{' '}
-                            <span className="text-xs font-normal opacity-80">{unitLabel}</span>
-                          </td>
-                          <td className="hidden max-w-xs px-4 py-3 text-xs text-slate-500 dark:text-slate-400 sm:table-cell">
-                            {note || '—'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-700/40">
-                      <td colSpan={3} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        {t.rmBalance}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span
-                          className={`text-sm font-bold tabular-nums ${lowStock ? 'text-amber-600' : 'text-emerald-600'}`}
-                        >
-                          {formatKgAmount(siroStockKg + paintStockKg)} {t.unitKg}
-                        </span>
-                        <span className="mt-0.5 block text-[10px] font-normal text-slate-500 dark:text-slate-400">
-                          {t.rmMetricsCaptionSiro}: {formatKgAmount(siroStockKg)} · {t.rmMetricsCaptionPaint}:{' '}
-                          {formatKgAmount(paintStockKg)}
-                        </span>
-                      </td>
-                      <td className="hidden sm:table-cell" />
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )}
+          <CollapsibleContent className="p-4 pt-0">
+            <RawMaterialMovementHistoryTable
+              entries={historyTableEntries}
+              labels={historyTableLabels}
+              footer={{
+                balanceKg: siroStockKg + paintStockKg,
+                siroKg: siroStockKg,
+                paintKg: paintStockKg,
+                lowStock,
+              }}
+            />
           </CollapsibleContent>
         </Collapsible>
 

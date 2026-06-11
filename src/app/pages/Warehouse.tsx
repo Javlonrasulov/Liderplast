@@ -48,6 +48,7 @@ import {
   type WarehouseExportScope,
 } from '../utils/warehouse-stock-export';
 import { inferVolumeLiterFromFinishedProductName } from '../utils/warehouse-catalog-buckets';
+import { Checkbox } from '../components/ui/checkbox';
 import { WarehouseProductPricingFieldsBlock } from '../components/WarehouseProductPricingFields';
 import {
   WarehouseOverviewStockTable,
@@ -57,12 +58,14 @@ import {
   EMPTY_WAREHOUSE_PRICING,
   getProductCatalogDetailRows,
   type ProductCatalogDetailRow,
+  formatWarehouseSalePriceDisplay,
   parseWarehousePricingPayload,
-  priceAmountInUzs,
   pricingFieldsFromProduct,
+  warehouseProductStockTotals,
   type WarehouseProductPricingFields,
 } from '../utils/warehouse-product-pricing';
-import type { SaleCurrency } from '../store/erp-store';
+import { useCbuRates } from '../hooks/use-cbu-rates';
+import { cbuEurRate, cbuUsdRate } from '../utils/sales-currency';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
@@ -102,50 +105,6 @@ import {
 
 function catalogNamesMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
-}
-
-function formatOverviewSalePrice(
-  product: {
-    salePrice?: number;
-    priceCurrency?: SaleCurrency;
-  },
-  noPrice: string,
-): string {
-  if (product.salePrice == null || product.salePrice <= 0) return noPrice;
-  const cur = product.priceCurrency ?? 'UZS';
-  const curLabel = cur === 'USD' ? 'USD (USDT)' : cur;
-  return `${formatNumber(product.salePrice)} ${curLabel}`;
-}
-
-function overviewProductTotals(
-  product: {
-    salePrice?: number;
-    priceCurrency?: SaleCurrency;
-    fxRateToUzs?: number;
-  },
-  quantity: number,
-): { totalUzs: number | null; totalUsd: number | null } {
-  const sp = product.salePrice;
-  if (sp == null || sp <= 0 || quantity <= 0) {
-    return { totalUzs: null, totalUsd: null };
-  }
-  const cur = product.priceCurrency ?? 'UZS';
-  const fx = product.fxRateToUzs ?? 0;
-  let unitUzs: number | null = null;
-  let unitUsd: number | null = null;
-  if (cur === 'UZS') {
-    unitUzs = sp;
-    if (fx > 0) unitUsd = sp / fx;
-  } else if (fx > 0) {
-    unitUzs = priceAmountInUzs(String(sp), String(fx));
-    unitUsd = cur === 'USD' ? sp : unitUzs != null ? unitUzs / fx : null;
-  } else if (cur === 'USD') {
-    unitUsd = sp;
-  }
-  return {
-    totalUzs: unitUzs != null ? unitUzs * quantity : null,
-    totalUsd: unitUsd != null ? unitUsd * quantity : null,
-  };
 }
 
 function formatOverviewMoney(amount: number | null, suffix: string, empty: string): string {
@@ -443,6 +402,9 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const { user, hasPermission } = useAuth();
   const { t, filterData } = useApp();
   const isMobile = useIsMobile();
+  const { usd: cbuUsd, eur: cbuEur } = useCbuRates();
+  const cbuUsdFx = cbuUsdRate(cbuUsd);
+  const cbuEurFx = cbuEurRate(cbuEur);
 
   const catalogDetailLabels = useMemo(
     () => ({
@@ -482,6 +444,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       grandTotal: t.whExportGrandTotal,
       unitPiece: t.unitPiece,
       noPrice: t.whExportNoPrice,
+      priceInUzs: t.whPriceInUzs,
       docTitle: mode === 'semi' ? t.whExportDocTitleSemi : t.whExportDocTitleFinal,
     }),
     [t, mode],
@@ -496,6 +459,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   };
 
   const runStockExport = () => {
+    if (exportSelectedIds.size === 0) {
+      setError(t.whExportNoneSelected);
+      return;
+    }
     const printedAtIso = new Date().toISOString().slice(0, 10);
     const labels = {
       ...stockExportLabelsBase,
@@ -504,6 +471,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           ? stockExportLabelsBase.docTitle
           : `${t.whExportSectionSemi} + ${t.whExportSectionFinal}`,
     };
+    const selectedSemiIds = semiProducts
+      .filter((p) => exportSelectedIds.has(p.id))
+      .map((p) => p.id);
+    const selectedFinalIds = finishedProducts
+      .filter((p) => exportSelectedIds.has(p.id))
+      .map((p) => p.id);
     const sections = buildWarehouseStockExportSections({
       scope: exportScope,
       mode,
@@ -513,6 +486,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       finalStockByName: finalStockByProductName,
       labels,
       printedAtIso,
+      selectedSemiIds,
+      selectedFinalIds,
     });
     if (exportAction === 'excel') {
       downloadWarehouseStockExcel(
@@ -578,11 +553,13 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportAction, setExportAction] = useState<'excel' | 'print'>('excel');
   const [exportScope, setExportScope] = useState<WarehouseExportScope>('current_only');
+  const [exportSelectedIds, setExportSelectedIds] = useState<Set<string>>(new Set());
   const [catalogSearch, setCatalogSearch] = useState('');
   const [overviewViewMode, setOverviewViewMode] = useState<'cards' | 'table'>(() => {
-    if (typeof window === 'undefined') return 'cards';
+    if (typeof window === 'undefined') return 'table';
     const saved = window.localStorage.getItem('wh-overview-view');
-    return saved === 'table' ? 'table' : 'cards';
+    if (saved === 'cards' || saved === 'table') return saved;
+    return 'table';
   });
 
   /**
@@ -703,6 +680,73 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       ),
     [state.warehouseProducts],
   );
+
+  const exportableProducts = useMemo(() => {
+    type Exportable = {
+      id: string;
+      name: string;
+      kind: 'semi' | 'final';
+      typeLabel: string;
+    };
+    const items: Exportable[] = [];
+    const includeSemi = exportScope !== 'current_only' || mode === 'semi';
+    const includeFinal = exportScope !== 'current_only' || mode === 'final';
+    if (includeSemi) {
+      semiProducts.forEach((p) => {
+        items.push({
+          id: p.id,
+          name: p.name,
+          kind: 'semi',
+          typeLabel: t.whExportTypeSemi,
+        });
+      });
+    }
+    if (includeFinal) {
+      finishedProducts.forEach((p) => {
+        items.push({
+          id: p.id,
+          name: p.name,
+          kind: 'final',
+          typeLabel: t.whExportTypeFinal,
+        });
+      });
+    }
+    return items.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
+  }, [
+    exportScope,
+    mode,
+    semiProducts,
+    finishedProducts,
+    t.whExportTypeSemi,
+    t.whExportTypeFinal,
+  ]);
+
+  useEffect(() => {
+    if (!exportDialogOpen) return;
+    setExportSelectedIds(new Set(exportableProducts.map((p) => p.id)));
+  }, [exportDialogOpen, exportScope, exportableProducts]);
+
+  const exportAllSelected =
+    exportableProducts.length > 0 &&
+    exportableProducts.every((p) => exportSelectedIds.has(p.id));
+  const exportSomeSelected = exportableProducts.some((p) => exportSelectedIds.has(p.id));
+
+  const toggleExportSelectAll = () => {
+    if (exportAllSelected) {
+      setExportSelectedIds(new Set());
+      return;
+    }
+    setExportSelectedIds(new Set(exportableProducts.map((p) => p.id)));
+  };
+
+  const toggleExportProduct = (id: string, checked: boolean) => {
+    setExportSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
   /** 1 pachkadagi dona: avval yarim tayyor o‘zidagi, keyin bog‘langan tayyor mahsulotdan */
   const semiPackPiecesPerBag = useMemo(() => {
@@ -832,7 +876,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         ppb,
         t,
       );
-      const totals = overviewProductTotals(p, qty);
+      const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
+      const salePriceDisplay = formatWarehouseSalePriceDisplay(p, empty, t.whPriceInUzs);
       rows.push({
         id: p.id,
         kind: 'SEMI_PRODUCT',
@@ -843,7 +888,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         packSummary: packLines.join(' · '),
         piecesPerBag: ppb > 0 ? formatNumber(ppb) : empty,
         spec: `${formatNumber(p.weightGram)} g`,
-        salePrice: formatOverviewSalePrice(p, empty),
+        salePrice: salePriceDisplay.main,
+        salePriceUzs: salePriceDisplay.sub,
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 100000),
@@ -859,7 +905,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         ppb,
         t,
       );
-      const totals = overviewProductTotals(p, qty);
+      const totals = warehouseProductStockTotals(p, qty, cbuUsdFx, cbuEurFx);
+      const salePriceDisplay = formatWarehouseSalePriceDisplay(p, empty, t.whPriceInUzs);
       rows.push({
         id: p.id,
         kind: 'FINISHED_PRODUCT',
@@ -869,8 +916,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         unit: t.unitPiece,
         packSummary: packLines.join(' · '),
         piecesPerBag: ppb > 0 ? formatNumber(ppb) : empty,
-        spec: `${formatNumber(p.volumeLiter)} L`,
-        salePrice: formatOverviewSalePrice(p, empty),
+        salePrice: salePriceDisplay.main,
+        salePriceUzs: salePriceDisplay.sub,
         totalUzs: formatOverviewMoney(totals.totalUzs, "so'm", empty),
         totalUsd: formatOverviewMoney(totals.totalUsd, '$', empty),
         fillPct: calcPercent(qty, 20000),
@@ -886,6 +933,8 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     semiPackPiecesPerBag,
     packagedBySemiName,
     packagedByFinalName,
+    cbuUsdFx,
+    cbuEurFx,
     t,
   ]);
 
@@ -897,7 +946,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       colStock: t.whExportColQty,
       colPack: t.whOverviewColPack,
       colPiecesPerBag: t.whCatalogPackLabel,
-      colSpec: mode === 'semi' ? t.whWeightGram : t.whVolumeLiter,
+      colSpec: t.whWeightGram,
       colSalePrice: t.whSalePrice,
       colTotalUzs: t.whExportColTotalUzs,
       colTotalUsd: t.whExportColTotalUsd,
@@ -1945,7 +1994,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         </div>
 
         <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-h-[90dvh] max-w-lg overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t.whExportScopeTitle}</DialogTitle>
               <DialogDescription>{t.whExportScopeDescription}</DialogDescription>
@@ -1974,11 +2023,87 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 </Label>
               </div>
             </RadioGroup>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  {t.whExportSelectProducts}
+                </p>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {t.whExportSelectedCount
+                    .replace('{n}', String(exportSelectedIds.size))
+                    .replace('{total}', String(exportableProducts.length))}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900/40">
+                <Checkbox
+                  id="wh-export-select-all"
+                  checked={
+                    exportAllSelected
+                      ? true
+                      : exportSomeSelected
+                        ? 'indeterminate'
+                        : false
+                  }
+                  onCheckedChange={toggleExportSelectAll}
+                />
+                <Label
+                  htmlFor="wh-export-select-all"
+                  className="cursor-pointer text-sm font-semibold leading-snug"
+                >
+                  {t.whExportSelectAll}
+                </Label>
+              </div>
+              <div className="max-h-52 space-y-1 overflow-y-auto rounded-xl border border-slate-200 p-2 dark:border-slate-700">
+                {exportableProducts.length === 0 ? (
+                  <p className="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-400">
+                    {t.whNoProducts}
+                  </p>
+                ) : (
+                  exportableProducts.map((product) => {
+                    const inputId = `wh-export-product-${product.id}`;
+                    return (
+                      <div
+                        key={product.id}
+                        className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                      >
+                        <Checkbox
+                          id={inputId}
+                          className="mt-0.5"
+                          checked={exportSelectedIds.has(product.id)}
+                          onCheckedChange={(checked) =>
+                            toggleExportProduct(product.id, checked === true)
+                          }
+                        />
+                        <Label
+                          htmlFor={inputId}
+                          className="flex min-w-0 flex-1 cursor-pointer flex-col gap-0.5 font-normal leading-snug"
+                        >
+                          <span className="text-sm text-slate-800 dark:text-slate-100">
+                            {product.name}
+                          </span>
+                          {exportScope !== 'current_only' ? (
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {product.typeLabel}
+                            </span>
+                          ) : null}
+                        </Label>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setExportDialogOpen(false)}>
                 {t.btnCancel}
               </Button>
-              <Button type="button" onClick={runStockExport}>
+              <Button
+                type="button"
+                onClick={runStockExport}
+                disabled={exportSelectedIds.size === 0}
+              >
                 {exportAction === 'excel' ? (
                   <>
                     <FileDown size={16} />
@@ -2139,6 +2264,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                     mode === 'semi' ? totalSemiInCatalogStock : totalFinalInCatalogStock
                   }
                   unit={t.unitPiece}
+                  showSpecColumn={mode === 'semi'}
                 />
               </div>
             )}

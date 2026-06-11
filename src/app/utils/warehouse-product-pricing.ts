@@ -1,5 +1,6 @@
 import type { SaleCurrency } from '../store/erp-store';
-import { formatSaleUnitPrice } from './sales-currency';
+import { formatNumber } from './format';
+import { formatSaleUnitPrice, unitPriceInUzs } from './sales-currency';
 
 export type WarehouseProductPricingFields = {
   purchasePrice: string;
@@ -140,6 +141,70 @@ export function priceAmountInUzs(
   return amount * fx;
 }
 
+function currencyDisplay(cur: SaleCurrency): string {
+  return cur === 'USD' ? 'USD (USDT)' : cur;
+}
+
+export type WarehouseSalePriceDisplay = {
+  main: string;
+  sub?: string;
+};
+
+/** Jadval/chop uchun sotuv narxi — USD kichik kasrlar va so'm ekvivalenti */
+export function warehouseProductStockTotals(
+  product: {
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
+  },
+  quantity: number,
+  usdRate: number,
+  eurRate: number,
+): { totalUzs: number | null; totalUsd: number | null } {
+  const sp = product.salePrice;
+  if (sp == null || sp <= 0 || quantity <= 0) {
+    return { totalUzs: null, totalUsd: null };
+  }
+  const cur = product.priceCurrency ?? 'UZS';
+  const unitUzs = unitPriceInUzs(sp, cur, usdRate, eurRate, product.fxRateToUzs);
+  let unitUsd: number | null = null;
+  if (cur === 'USD') {
+    unitUsd = sp;
+  } else if (cur === 'EUR' && unitUzs != null && usdRate > 0) {
+    unitUsd = unitUzs / usdRate;
+  } else if (cur === 'UZS' && usdRate > 0) {
+    unitUsd = sp / usdRate;
+  }
+  return {
+    totalUzs: unitUzs != null ? unitUzs * quantity : null,
+    totalUsd: unitUsd != null ? unitUsd * quantity : null,
+  };
+}
+
+export function formatWarehouseSalePriceDisplay(
+  product: {
+    salePrice?: number;
+    priceCurrency?: SaleCurrency;
+    fxRateToUzs?: number;
+  },
+  noPrice: string,
+  priceInUzsLabel: string,
+): WarehouseSalePriceDisplay {
+  const sp = product.salePrice;
+  if (sp == null || sp <= 0) return { main: noPrice };
+  const cur = product.priceCurrency ?? 'UZS';
+  const main = `${formatSaleUnitPrice(sp, cur)} ${currencyDisplay(cur)}`;
+  if (cur === 'UZS') return { main };
+  const fx = product.fxRateToUzs ?? 0;
+  if (fx <= 0) return { main };
+  const uzs = priceAmountInUzs(String(sp), String(fx));
+  if (uzs == null) return { main };
+  return {
+    main,
+    sub: priceInUzsLabel.replace('{amount}', formatNumber(uzs)),
+  };
+}
+
 export type ProductCatalogDetailRow = {
   id: string;
   label: string;
@@ -163,10 +228,6 @@ export type ProductCatalogDetailLabels = {
   fxLabel: string;
   fxValue: string;
 };
-
-function currencyDisplay(cur: SaleCurrency): string {
-  return cur === 'USD' ? 'USD (USDT)' : cur;
-}
 
 function pricingDetailRows(
   product: {

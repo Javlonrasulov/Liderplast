@@ -10,8 +10,9 @@ export type WarehouseOverviewStockRow = {
   unit: string;
   packSummary: string;
   piecesPerBag: string;
-  spec: string;
+  spec?: string;
   salePrice: string;
+  salePriceUzs?: string;
   totalUzs: string;
   totalUsd: string;
   fillPct: number;
@@ -38,6 +39,7 @@ type Props = {
   labels: Labels;
   totalQty: number;
   unit: string;
+  showSpecColumn?: boolean;
 };
 
 function fillBadgeClass(pct: number) {
@@ -52,7 +54,13 @@ function typeBadgeClass(kind: WarehouseOverviewStockRow['kind']) {
     : 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200';
 }
 
-export function WarehouseOverviewStockTable({ rows, labels, totalQty, unit }: Props) {
+export function WarehouseOverviewStockTable({
+  rows,
+  labels,
+  totalQty,
+  unit,
+  showSpecColumn = true,
+}: Props) {
   if (rows.length === 0) {
     return (
       <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
@@ -74,7 +82,7 @@ export function WarehouseOverviewStockTable({ rows, labels, totalQty, unit }: Pr
                 labels.colStock,
                 labels.colPack,
                 labels.colPiecesPerBag,
-                labels.colSpec,
+                ...(showSpecColumn ? [labels.colSpec] : []),
                 labels.colSalePrice,
                 labels.colTotalUzs,
                 labels.colTotalUsd,
@@ -122,11 +130,18 @@ export function WarehouseOverviewStockTable({ rows, labels, totalQty, unit }: Pr
                 <td className="whitespace-nowrap px-3 py-2.5 text-slate-700 dark:text-slate-200">
                   {row.piecesPerBag}
                 </td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-slate-700 dark:text-slate-200">
-                  {row.spec}
-                </td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-slate-700 dark:text-slate-200">
-                  {row.salePrice}
+                {showSpecColumn ? (
+                  <td className="whitespace-nowrap px-3 py-2.5 text-slate-700 dark:text-slate-200">
+                    {row.spec ?? '—'}
+                  </td>
+                ) : null}
+                <td className="min-w-[7rem] px-3 py-2.5 text-slate-700 dark:text-slate-200">
+                  <div className="font-semibold whitespace-nowrap">{row.salePrice}</div>
+                  {row.salePriceUzs ? (
+                    <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                      {row.salePriceUzs}
+                    </div>
+                  ) : null}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 font-semibold text-emerald-700 dark:text-emerald-400">
                   {row.totalUzs}
@@ -152,7 +167,7 @@ export function WarehouseOverviewStockTable({ rows, labels, totalQty, unit }: Pr
               <td className="whitespace-nowrap px-3 py-3 text-sm font-bold text-slate-900 dark:text-white">
                 {formatNumber(totalQty)} {unit}
               </td>
-              <td colSpan={7} />
+              <td colSpan={showSpecColumn ? 7 : 6} />
             </tr>
           </tfoot>
         </table>

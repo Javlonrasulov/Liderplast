@@ -4,6 +4,7 @@ import type {
   SemiProductCatalogItem,
 } from '../store/erp-store';
 import { formatDate, formatNumber } from './format';
+import { formatWarehouseSalePriceDisplay } from './warehouse-product-pricing';
 
 const PRINT_ORG_NAME = '"SAM-BC" MCHJ';
 
@@ -27,6 +28,7 @@ export type WarehouseStockExportLabels = {
   grandTotal: string;
   unitPiece: string;
   noPrice: string;
+  priceInUzs: string;
 };
 
 export type WarehouseStockExportRow = {
@@ -54,6 +56,9 @@ export type WarehouseStockExportInput = {
   finalStockByName: Record<string, number>;
   labels: WarehouseStockExportLabels;
   printedAtIso: string;
+  /** Bo'sh bo'lsa — barcha mahsulotlar */
+  selectedSemiIds?: string[];
+  selectedFinalIds?: string[];
 };
 
 function esc(value: string) {
@@ -104,18 +109,14 @@ function formatSalePriceDisplay(
     priceCurrency?: SaleCurrency;
     fxRateToUzs?: number;
   },
-  labels: Pick<WarehouseStockExportLabels, 'noPrice'>,
+  labels: Pick<WarehouseStockExportLabels, 'noPrice' | 'priceInUzs'>,
 ): string {
-  const sp = product.salePrice;
-  if (sp == null || sp <= 0) return labels.noPrice;
-  const cur = product.priceCurrency ?? 'UZS';
-  const main = `${formatNumber(sp)} ${currencyDisplay(cur)}`;
-  if (cur === 'UZS') return main;
-  const uzs = unitPriceUzs(sp, cur, product.fxRateToUzs);
-  if (uzs != null) {
-    return `${main}\n≈ ${formatNumber(uzs)} so'm`;
-  }
-  return main;
+  const { main, sub } = formatWarehouseSalePriceDisplay(
+    product,
+    labels.noPrice,
+    labels.priceInUzs,
+  );
+  return sub ? `${main}\n${sub}` : main;
 }
 
 function buildProductRow(
@@ -150,6 +151,15 @@ function sortByName<T extends { name: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.name.localeCompare(b.name, 'uz'));
 }
 
+function filterByIds<T extends { id: string }>(
+  items: T[],
+  selectedIds: string[] | undefined,
+): T[] {
+  if (!selectedIds || selectedIds.length === 0) return [];
+  const allowed = new Set(selectedIds);
+  return items.filter((item) => allowed.has(item.id));
+}
+
 export function buildWarehouseStockExportSections(
   input: WarehouseStockExportInput,
 ): WarehouseStockExportSection[] {
@@ -161,9 +171,20 @@ export function buildWarehouseStockExportSections(
     semiStockByName,
     finalStockByName,
     labels,
+    selectedSemiIds,
+    selectedFinalIds,
   } = input;
 
-  const semiRows = sortByName(semiProducts).map((p) =>
+  const semiList =
+    selectedSemiIds != null
+      ? filterByIds(semiProducts, selectedSemiIds)
+      : semiProducts;
+  const finalList =
+    selectedFinalIds != null
+      ? filterByIds(finishedProducts, selectedFinalIds)
+      : finishedProducts;
+
+  const semiRows = sortByName(semiList).map((p) =>
     buildProductRow(
       p,
       semiStockByName[p.name] ?? 0,
@@ -172,7 +193,7 @@ export function buildWarehouseStockExportSections(
       labels.typeSemi,
     ),
   );
-  const finalRows = sortByName(finishedProducts).map((p) =>
+  const finalRows = sortByName(finalList).map((p) =>
     buildProductRow(
       p,
       finalStockByName[p.name] ?? 0,
@@ -230,22 +251,22 @@ function renderTableSection(
   const bodyRows = section.rows
     .map(
       (row, i) => `
-        <tr class="${i % 2 === 0 ? 'even' : 'odd'}">
+        <tr>
           <td class="c num">${i + 1}</td>
           ${showTypeColumn ? `<td class="c type">${esc(row.typeLabel ?? '—')}</td>` : ''}
-          <td class="l name">${esc(row.name)}</td>
+          <td class="l name"><b>${esc(row.name)}</b></td>
           <td class="c">${esc(row.unit)}</td>
           <td class="l price">${esc(row.salePriceDisplay).replace(/\n/g, '<br/>')}</td>
-          <td class="r qty">${formatNumber(row.quantity)}</td>
-          <td class="r money uzs">${formatMoney(row.totalUzs, "so'm")}</td>
-          <td class="r money usd">${formatMoney(row.totalUsd, '$')}</td>
+          <td class="r qty"><b>${formatNumber(row.quantity)}</b></td>
+          <td class="r money"><b>${formatMoney(row.totalUzs, "so'm")}</b></td>
+          <td class="r money"><b>${formatMoney(row.totalUsd, '$')}</b></td>
         </tr>`,
     )
     .join('');
 
   return `
     <div class="section">
-      <h2 class="section-title">${esc(section.title)}</h2>
+      <h2 class="section-title"><b>${esc(section.title)}</b></h2>
       <table class="data">
         <thead>
           <tr>
@@ -263,11 +284,11 @@ function renderTableSection(
           ${bodyRows || `<tr><td colspan="${showTypeColumn ? 8 : 7}" class="c empty">—</td></tr>`}
         </tbody>
         <tfoot>
-          <tr>
-            <td colspan="${showTypeColumn ? 5 : 4}" class="total-label">${esc(labels.grandTotal)}</td>
-            <td class="r qty">${formatNumber(totals.qty)}</td>
-            <td class="r money uzs">${formatMoney(totals.uzs || null, "so'm")}</td>
-            <td class="r money usd">${formatMoney(totals.usd || null, '$')}</td>
+          <tr class="total-row">
+            <td colspan="${showTypeColumn ? 5 : 4}" class="total-label"><b>${esc(labels.grandTotal)}</b></td>
+            <td class="r qty"><b>${formatNumber(totals.qty)}</b></td>
+            <td class="r money"><b>${formatMoney(totals.uzs || null, "so'm")}</b></td>
+            <td class="r money"><b>${formatMoney(totals.usd || null, '$')}</b></td>
           </tr>
         </tfoot>
       </table>
@@ -290,12 +311,12 @@ export function buildWarehouseStockExportHtml(
   const grandHtml =
     sections.length > 1
       ? `
-    <table class="grand">
-      <tr>
-        <td class="grand-label">${esc(labels.grandTotal)} (${esc(labels.docTitle)})</td>
-        <td class="r qty">${formatNumber(grand.qty)} ${esc(labels.unitPiece)}</td>
-        <td class="r money uzs">${formatMoney(grand.uzs || null, "so'm")}</td>
-        <td class="r money usd">${formatMoney(grand.usd || null, '$')}</td>
+    <table class="data grand">
+      <tr class="total-row">
+        <td class="grand-label"><b>${esc(labels.grandTotal)} (${esc(labels.docTitle)})</b></td>
+        <td class="r qty"><b>${formatNumber(grand.qty)} ${esc(labels.unitPiece)}</b></td>
+        <td class="r money"><b>${formatMoney(grand.uzs || null, "so'm")}</b></td>
+        <td class="r money"><b>${formatMoney(grand.usd || null, '$')}</b></td>
       </tr>
     </table>`
       : '';
@@ -310,80 +331,77 @@ export function buildWarehouseStockExportHtml(
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        padding: 10mm;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 10pt;
-        color: #0f172a;
+        padding: 8mm;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11pt;
+        color: #000;
         background: #fff;
       }
       .header {
         margin-bottom: 6mm;
-        padding: 4mm 5mm;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        color: #fff;
+        padding: 0;
+        border: none;
+        background: none;
+        color: #000;
       }
-      .org { font-size: 14pt; font-weight: 800; margin: 0 0 2mm; }
-      .doc-title { font-size: 12pt; font-weight: 700; margin: 0 0 2mm; }
-      .meta { font-size: 9pt; opacity: 0.95; margin: 0; }
-      .section { margin-bottom: 8mm; page-break-inside: avoid; }
+      .org { font-size: 12pt; font-weight: bold; margin: 0 0 2mm; }
+      .doc-title { font-size: 11pt; font-weight: bold; margin: 0 0 2mm; }
+      .meta { font-size: 10pt; margin: 0; }
+      .section { margin-bottom: 6mm; page-break-inside: avoid; }
       .section + .section { page-break-before: ${forPrint ? 'always' : 'auto'}; }
       .section-title {
-        margin: 0 0 3mm;
-        padding: 2.5mm 4mm;
-        border-radius: 6px;
-        background: linear-gradient(90deg, #e0e7ff, #fae8ff);
-        color: #312e81;
+        margin: 0 0 2mm;
+        padding: 0;
         font-size: 11pt;
-        font-weight: 800;
-        border-left: 4px solid #6366f1;
+        font-weight: bold;
+        color: #000;
+        background: none;
+        border: none;
       }
-      table.data, table.grand {
+      table.data {
         width: 100%;
         border-collapse: collapse;
-        font-size: 9pt;
+        font-size: 10pt;
+        table-layout: auto;
       }
-      table.data th, table.data td, table.grand td {
-        border: 1px solid #cbd5e1;
-        padding: 2mm 2.5mm;
+      table.data th,
+      table.data td {
+        border: 1px solid #000;
+        padding: 3px 5px;
         vertical-align: middle;
+        color: #000;
+        background: #fff;
       }
       table.data thead th {
-        background: linear-gradient(180deg, #4338ca, #6366f1);
-        color: #fff;
-        font-weight: 800;
+        background: #d9d9d9;
+        color: #000;
+        font-weight: bold;
         text-align: center;
-        font-size: 8.5pt;
-        line-height: 1.3;
+        font-size: 10pt;
+        line-height: 1.25;
+        white-space: nowrap;
       }
-      table.data tbody tr.even { background: #f8fafc; }
-      table.data tbody tr.odd { background: #ffffff; }
-      table.data tbody tr:hover { background: #eef2ff; }
-      table.data tfoot td, table.grand td {
-        background: linear-gradient(180deg, #d1fae5, #a7f3d0);
-        font-weight: 800;
-        border-top: 2px solid #059669;
+      table.data tfoot td,
+      table.data tr.total-row td {
+        background: #f2f2f2;
+        font-weight: bold;
+        border: 1px solid #000;
       }
       table.grand {
         margin-top: 4mm;
       }
       table.grand .grand-label {
-        font-weight: 800;
-        color: #065f46;
-        padding-left: 4mm;
+        text-align: left;
+        padding-left: 5px;
       }
       .c { text-align: center; }
       .r { text-align: right; white-space: nowrap; }
       .l { text-align: left; }
-      .name { font-weight: 700; color: #1e293b; min-width: 140px; }
-      .price { font-size: 8.5pt; line-height: 1.35; color: #334155; }
-      .qty { font-weight: 700; color: #0f766e; }
-      .money.uzs { font-weight: 700; color: #047857; }
-      .money.usd { font-weight: 700; color: #1d4ed8; }
-      .type { font-size: 8pt; font-weight: 700; color: #6d28d9; }
-      .total-label { text-align: right; font-weight: 800; color: #065f46; }
-      .empty { color: #94a3b8; font-style: italic; }
-      @page { size: A4 landscape; margin: 8mm; }
+      .name { min-width: 140px; }
+      .price { font-size: 10pt; line-height: 1.3; }
+      .total-label { text-align: right; }
+      .empty { color: #666; font-style: italic; }
+      @page { size: A4 landscape; margin: 10mm; }
       @media print {
         body { padding: 0; }
         thead { display: table-header-group; }
@@ -394,9 +412,9 @@ export function buildWarehouseStockExportHtml(
   </head>
   <body>
     <div class="header">
-      <p class="org">${esc(PRINT_ORG_NAME)}</p>
-      <p class="doc-title">${esc(labels.docTitle)}</p>
-      <p class="meta">${esc(labels.printedAt)}: ${esc(formatDate(printedAtIso))}</p>
+      <p class="org"><b>${esc(PRINT_ORG_NAME)}</b></p>
+      <p class="doc-title"><b>${esc(labels.docTitle)}</b></p>
+      <p class="meta">${esc(labels.printedAt)}: <b>${esc(formatDate(printedAtIso))}</b></p>
     </div>
     ${sectionsHtml}
     ${grandHtml}
