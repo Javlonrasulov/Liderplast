@@ -192,13 +192,21 @@ export function formatWarehouseSalePriceDisplay(
   noPrice: string,
   priceInUzsLabel: string,
   fxValueLabel?: string,
+  options?: { fallbackUsdRate?: number; fallbackEurRate?: number },
 ): WarehouseSalePriceDisplay {
   const sp = product.salePrice;
   if (sp == null || sp <= 0) return { main: noPrice };
   const cur = product.priceCurrency ?? 'UZS';
   const main = `${formatSaleUnitPrice(sp, cur)} ${currencyDisplay(cur)}`;
   if (cur === 'UZS') return { main };
-  const fx = product.fxRateToUzs ?? 0;
+  let fx = product.fxRateToUzs ?? 0;
+  if (fx <= 0 && options) {
+    if (cur === 'USD' && (options.fallbackUsdRate ?? 0) > 0) {
+      fx = options.fallbackUsdRate!;
+    } else if (cur === 'EUR' && (options.fallbackEurRate ?? 0) > 0) {
+      fx = options.fallbackEurRate!;
+    }
+  }
   if (fx <= 0) return { main };
   const uzs = priceAmountInUzs(String(sp), String(fx));
   if (uzs == null) return { main };

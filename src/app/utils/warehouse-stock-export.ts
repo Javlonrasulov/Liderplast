@@ -29,12 +29,13 @@ export type WarehouseStockExportLabels = {
   unitPiece: string;
   noPrice: string;
   priceInUzs: string;
+  fxValue: string;
 };
 
 export type WarehouseStockExportRow = {
   name: string;
   unit: string;
-  salePriceDisplay: string;
+  salePriceHtml: string;
   quantity: number;
   totalUzs: number | null;
   totalUsd: number | null;
@@ -59,6 +60,8 @@ export type WarehouseStockExportInput = {
   /** Bo'sh bo'lsa — barcha mahsulotlar */
   selectedSemiIds?: string[];
   selectedFinalIds?: string[];
+  cbuUsdRate?: number;
+  cbuEurRate?: number;
 };
 
 function esc(value: string) {
@@ -103,20 +106,30 @@ function formatMoney(value: number | null, suffix: string): string {
   return `${formatNumber(Math.round(value * 100) / 100)} ${suffix}`;
 }
 
-function formatSalePriceDisplay(
+function formatSalePriceHtml(
   product: {
     salePrice?: number;
     priceCurrency?: SaleCurrency;
     fxRateToUzs?: number;
   },
-  labels: Pick<WarehouseStockExportLabels, 'noPrice' | 'priceInUzs'>,
+  labels: Pick<WarehouseStockExportLabels, 'noPrice' | 'priceInUzs' | 'fxValue'>,
+  cbuUsdRate = 0,
+  cbuEurRate = 0,
 ): string {
-  const { main, sub } = formatWarehouseSalePriceDisplay(
+  const { main, sub, fxRate } = formatWarehouseSalePriceDisplay(
     product,
     labels.noPrice,
     labels.priceInUzs,
+    labels.fxValue,
+    { fallbackUsdRate: cbuUsdRate, fallbackEurRate: cbuEurRate },
   );
-  return sub ? `${main}\n${sub}` : main;
+  return [
+    main ? `<b>${esc(main)}</b>` : '',
+    sub ? `<span class="price-uzs">${esc(sub)}</span>` : '',
+    fxRate ? `<span class="price-fx">${esc(fxRate)}</span>` : '',
+  ]
+    .filter(Boolean)
+    .join('<br/>');
 }
 
 function buildProductRow(
@@ -125,6 +138,8 @@ function buildProductRow(
   unit: string,
   labels: WarehouseStockExportLabels,
   typeLabel?: string,
+  cbuUsdRate = 0,
+  cbuEurRate = 0,
 ): WarehouseStockExportRow {
   const unitUzs = unitPriceUzs(
     product.salePrice,
@@ -139,7 +154,7 @@ function buildProductRow(
   return {
     name: product.name,
     unit,
-    salePriceDisplay: formatSalePriceDisplay(product, labels),
+    salePriceHtml: formatSalePriceHtml(product, labels, cbuUsdRate, cbuEurRate),
     quantity,
     totalUzs: unitUzs != null ? unitUzs * quantity : null,
     totalUsd: unitUsd != null ? unitUsd * quantity : null,
@@ -173,6 +188,8 @@ export function buildWarehouseStockExportSections(
     labels,
     selectedSemiIds,
     selectedFinalIds,
+    cbuUsdRate = 0,
+    cbuEurRate = 0,
   } = input;
 
   const semiList =
@@ -191,6 +208,8 @@ export function buildWarehouseStockExportSections(
       labels.unitPiece,
       labels,
       labels.typeSemi,
+      cbuUsdRate,
+      cbuEurRate,
     ),
   );
   const finalRows = sortByName(finalList).map((p) =>
@@ -200,6 +219,8 @@ export function buildWarehouseStockExportSections(
       labels.unitPiece,
       labels,
       labels.typeFinal,
+      cbuUsdRate,
+      cbuEurRate,
     ),
   );
 
@@ -256,7 +277,7 @@ function renderTableSection(
           ${showTypeColumn ? `<td class="c type">${esc(row.typeLabel ?? '—')}</td>` : ''}
           <td class="l name"><b>${esc(row.name)}</b></td>
           <td class="c">${esc(row.unit)}</td>
-          <td class="l price">${esc(row.salePriceDisplay).replace(/\n/g, '<br/>')}</td>
+          <td class="l price">${row.salePriceHtml}</td>
           <td class="r qty"><b>${formatNumber(row.quantity)}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUzs, "so'm")}</b></td>
           <td class="r money"><b>${formatMoney(row.totalUsd, '$')}</b></td>
@@ -398,7 +419,9 @@ export function buildWarehouseStockExportHtml(
       .r { text-align: right; white-space: nowrap; }
       .l { text-align: left; }
       .name { min-width: 140px; }
-      .price { font-size: 10pt; line-height: 1.3; }
+      .price { font-size: 10pt; line-height: 1.35; min-width: 120px; }
+      .price-uzs { font-size: 9pt; color: #166534; }
+      .price-fx { font-size: 8.5pt; color: #475569; }
       .total-label { text-align: right; }
       .empty { color: #666; font-style: italic; }
       @page { size: A4 landscape; margin: 10mm; }

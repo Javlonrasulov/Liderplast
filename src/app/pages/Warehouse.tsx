@@ -445,6 +445,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       unitPiece: t.unitPiece,
       noPrice: t.whExportNoPrice,
       priceInUzs: t.whPriceInUzs,
+      fxValue: t.whCatalogFxValue,
       docTitle: mode === 'semi' ? t.whExportDocTitleSemi : t.whExportDocTitleFinal,
     }),
     [t, mode],
@@ -452,14 +453,20 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
 
   const currentExportTypeLabel = mode === 'semi' ? t.whExportTypeSemi : t.whExportTypeFinal;
 
-  const openStockExportDialog = (action: 'excel' | 'print') => {
-    setExportAction(action);
+  const openStockExcelDialog = () => {
     setExportScope('current_only');
     setExportDialogOpen(true);
   };
 
-  const runStockExport = () => {
-    if (exportSelectedIds.size === 0) {
+  const executeStockExport = (
+    action: 'excel' | 'print',
+    options: {
+      scope: WarehouseExportScope;
+      selectedSemiIds: string[];
+      selectedFinalIds: string[];
+    },
+  ) => {
+    if (options.selectedSemiIds.length === 0 && options.selectedFinalIds.length === 0) {
       setError(t.whExportNoneSelected);
       return;
     }
@@ -467,18 +474,12 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     const labels = {
       ...stockExportLabelsBase,
       docTitle:
-        exportScope === 'current_only'
+        options.scope === 'current_only'
           ? stockExportLabelsBase.docTitle
           : `${t.whExportSectionSemi} + ${t.whExportSectionFinal}`,
     };
-    const selectedSemiIds = semiProducts
-      .filter((p) => exportSelectedIds.has(p.id))
-      .map((p) => p.id);
-    const selectedFinalIds = finishedProducts
-      .filter((p) => exportSelectedIds.has(p.id))
-      .map((p) => p.id);
     const sections = buildWarehouseStockExportSections({
-      scope: exportScope,
+      scope: options.scope,
       mode,
       semiProducts,
       finishedProducts,
@@ -486,20 +487,42 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       finalStockByName: finalStockByProductName,
       labels,
       printedAtIso,
-      selectedSemiIds,
-      selectedFinalIds,
+      selectedSemiIds: options.selectedSemiIds,
+      selectedFinalIds: options.selectedFinalIds,
+      cbuUsdRate: cbuUsdFx,
+      cbuEurRate: cbuEurFx,
     });
-    if (exportAction === 'excel') {
+    if (action === 'excel') {
       downloadWarehouseStockExcel(
         sections,
         labels,
         printedAtIso,
-        warehouseStockExportFileName(mode, exportScope),
+        warehouseStockExportFileName(mode, options.scope),
       );
     } else {
       printWarehouseStock(sections, labels, printedAtIso);
     }
+  };
+
+  const runStockExcelExport = () => {
+    executeStockExport('excel', {
+      scope: exportScope,
+      selectedSemiIds: semiProducts
+        .filter((p) => exportSelectedIds.has(p.id))
+        .map((p) => p.id),
+      selectedFinalIds: finishedProducts
+        .filter((p) => exportSelectedIds.has(p.id))
+        .map((p) => p.id),
+    });
     setExportDialogOpen(false);
+  };
+
+  const handleStockPrint = () => {
+    executeStockExport('print', {
+      scope: 'current_only',
+      selectedSemiIds: mode === 'semi' ? semiProducts.map((p) => p.id) : [],
+      selectedFinalIds: mode === 'final' ? finishedProducts.map((p) => p.id) : [],
+    });
   };
 
   const pricingFormLabels = useMemo(
@@ -551,7 +574,6 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
     'overview',
   );
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [exportAction, setExportAction] = useState<'excel' | 'print'>('excel');
   const [exportScope, setExportScope] = useState<WarehouseExportScope>('current_only');
   const [exportSelectedIds, setExportSelectedIds] = useState<Set<string>>(new Set());
   const [catalogSearch, setCatalogSearch] = useState('');
@@ -882,6 +904,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         empty,
         t.whPriceInUzs,
         t.whCatalogFxValue,
+        { fallbackUsdRate: cbuUsdFx, fallbackEurRate: cbuEurFx },
       );
       rows.push({
         id: p.id,
@@ -917,6 +940,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
         empty,
         t.whPriceInUzs,
         t.whCatalogFxValue,
+        { fallbackUsdRate: cbuUsdFx, fallbackEurRate: cbuEurFx },
       );
       rows.push({
         id: p.id,
@@ -1988,7 +2012,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             variant="outline"
             size="sm"
             className="gap-1.5"
-            onClick={() => openStockExportDialog('excel')}
+            onClick={openStockExcelDialog}
           >
             <FileDown size={16} />
             {t.whExportExcel}
@@ -1998,7 +2022,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
             variant="outline"
             size="sm"
             className="gap-1.5"
-            onClick={() => openStockExportDialog('print')}
+            onClick={handleStockPrint}
           >
             <Printer size={16} />
             {t.whExportPrint}
@@ -2113,20 +2137,11 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
               </Button>
               <Button
                 type="button"
-                onClick={runStockExport}
+                onClick={runStockExcelExport}
                 disabled={exportSelectedIds.size === 0}
               >
-                {exportAction === 'excel' ? (
-                  <>
-                    <FileDown size={16} />
-                    {t.whExportExcel}
-                  </>
-                ) : (
-                  <>
-                    <Printer size={16} />
-                    {t.whExportPrint}
-                  </>
-                )}
+                <FileDown size={16} />
+                {t.whExportExcel}
               </Button>
             </DialogFooter>
           </DialogContent>
