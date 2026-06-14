@@ -86,7 +86,7 @@ export function Sales() {
     finalStockByProductName,
     isLoading,
   } = useERP();
-  const { t, dateFilter, filterLabel } = useApp();
+  const { t, filterData, isFiltered, filterLabel } = useApp();
 
   const [activeTab, setActiveTab] = useState<'sale' | 'clients' | 'history'>('sale');
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
@@ -354,16 +354,14 @@ export function Sales() {
     setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
   };
 
-  // ---- History (barcha sotuvlar — global sana filtri qarz/tarixda aralashmasin) ----
+  // ---- History (navbar sana filtri bo‘yicha) ----
   const historySales = useMemo(
     () =>
-      [...state.sales].sort(
+      filterData([...state.sales]).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
-    [state.sales],
+    [state.sales, filterData],
   );
-  const historyFilteredByHeader =
-    dateFilter.preset !== 'all' && (dateFilter.from || dateFilter.to);
   const historySaleIds = useMemo(() => historySales.map((s) => s.id), [historySales]);
   const allHistorySelected =
     historySales.length > 0 && selectedSaleIds.size === historySales.length;
@@ -1069,9 +1067,9 @@ export function Sales() {
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.slTabHistory}</h3>
             <span className="text-xs text-slate-400">{historySales.length} {t.slOperations}</span>
           </div>
-          {historyFilteredByHeader && (
-            <p className="px-5 py-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/40">
-              {t.slHistoryIgnoresDateFilter} ({filterLabel})
+          {isFiltered && (
+            <p className="px-5 py-2 text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/40">
+              {t.dfShowing} {filterLabel}
             </p>
           )}
           {historySales.length > 0 && (

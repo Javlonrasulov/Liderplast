@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { startServerTodaySync, subscribeServerToday } from '../api/server-date';
 import { Language, T, translations } from './translations';
 import { parseYmdLocal, todayYmd, toLocalDateString, formatChartDateRangeLabel } from '../utils/format';
@@ -58,6 +58,14 @@ export function filterByDateRange<T extends { date: string }>(
   });
 }
 
+export function isDateInFilter(dateStr: string, filter: DateFilter): boolean {
+  if (!dateStr) return filter.preset === 'all' || (!filter.from && !filter.to);
+  if (filter.preset === 'all' || (!filter.from && !filter.to)) return true;
+  if (filter.from && dateStr < filter.from) return false;
+  if (filter.to && dateStr > filter.to) return false;
+  return true;
+}
+
 // ======================== FONT SIZE ========================
 
 export type FontSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -112,6 +120,7 @@ interface AppContextValue {
   setPreset: (preset: DatePreset) => void;
   setCustomRange: (from: string, to: string) => void;
   filterData: <I extends { date: string }>(items: I[]) => I[];
+  isFiltered: boolean;
   filterLabel: string;
   /** Grafiklar uchun: tanlangan kunlar yoki «so‘nggi 7 kun» */
   chartRangeLabel: string;
@@ -204,9 +213,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDateFilter({ preset: 'custom', from: f, to: t });
   };
 
-  const filterData = <I extends { date: string }>(items: I[]): I[] => {
-    return filterByDateRange(items, dateFilter);
-  };
+  const filterData = useCallback(
+    <I extends { date: string }>(items: I[]): I[] => filterByDateRange(items, dateFilter),
+    [dateFilter],
+  );
+
+  const isFiltered =
+    dateFilter.preset !== 'all' && Boolean(dateFilter.from || dateFilter.to);
 
   const filterLabel = useMemo(() => {
     if (dateFilter.preset === 'all' || (!dateFilter.from && !dateFilter.to)) return t.dfAllTime;
@@ -231,7 +244,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, filterLabel, chartRangeLabel, fontSize, setFontSize }}>
+    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, isFiltered, filterLabel, chartRangeLabel, fontSize, setFontSize }}>
       {children}
     </AppContext.Provider>
   );

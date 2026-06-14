@@ -351,7 +351,7 @@ function ExpenseHistoryTableView({
 
 export function Expenses() {
   const { state, dispatch } = useERP();
-  const { t, filterData } = useApp();
+  const { t, filterData, isFiltered, filterLabel } = useApp();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [activeFundingSourceId, setActiveFundingSourceId] = useState('');
   const [form, setForm] = useState({
@@ -451,10 +451,15 @@ export function Expenses() {
     [state.expenses, filterData],
   );
 
-  /** Diagramma va yuqori kartalar — sana filtrisiz (barcha vaqt), tarix jadvali alohida filtrlangan */
+  /** Diagramma va kartalar — sana tanlangan bo‘lsa filtrlangan, aks holda barcha vaqt */
   const statsSortedExpenses = useMemo(
-    () => [...state.expenses].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [state.expenses],
+    () =>
+      isFiltered
+        ? filteredExpenses
+        : [...state.expenses].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
+    [state.expenses, filteredExpenses, isFiltered],
   );
 
   const totalTableFiltered = filteredExpenses.reduce((s, e) => s + e.amount, 0);
@@ -1452,6 +1457,11 @@ export function Expenses() {
           <div className="flex items-center justify-between gap-2 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
             <h3 className="text-slate-800 dark:text-white font-semibold text-sm min-w-0">{t.exHistory}</h3>
             <div className="flex shrink-0 items-center gap-2">
+              {isFiltered && (
+                <span className="hidden text-xs text-indigo-600 dark:text-indigo-400 sm:inline">
+                  {t.dfShowing} {filterLabel}
+                </span>
+              )}
               <span className="text-xs text-slate-400 hidden sm:inline">
                 {filteredExpenses.length} {t.totalRecords}
               </span>

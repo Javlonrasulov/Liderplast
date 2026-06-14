@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Download, Pencil, Printer, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useERP, type SupplierPurchaseOrder } from '../store/erp-store';
-import { useApp } from '../i18n/app-context';
+import { useApp, isDateInFilter } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { formatCurrency, formatNumber } from '../utils/format';
 import {
@@ -25,7 +25,7 @@ function qtyUnitLabel(u: QtyUnit, t: ReturnType<typeof useApp>['t']) {
 
 export function SupplierPurchaseHistorySection() {
   const { state, dispatch } = useERP();
-  const { t } = useApp();
+  const { t, dateFilter, isFiltered, filterLabel } = useApp();
   const { hasPermission } = useAuth();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -40,10 +40,12 @@ export function SupplierPurchaseHistorySection() {
 
   const historySorted = useMemo(
     () =>
-      [...state.supplierPurchaseOrders].sort(
-        (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
-      ),
-    [state.supplierPurchaseOrders],
+      [...state.supplierPurchaseOrders]
+        .filter((o) => isDateInFilter(o.orderedAt.slice(0, 10), dateFilter))
+        .sort(
+          (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
+        ),
+    [state.supplierPurchaseOrders, dateFilter],
   );
 
   const pdfLabels = useMemo<SupplierPurchasePdfLabels>(
@@ -197,7 +199,14 @@ export function SupplierPurchaseHistorySection() {
         />
       )}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.supTabHistory}</h3>
+          {isFiltered && (
+            <span className="text-[11px] text-indigo-600 dark:text-indigo-400">
+              {t.dfShowing} {filterLabel}
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           {selectedIds.size > 0 && (
             <span className="text-[11px] text-slate-500">{selectedCountLabel}</span>
