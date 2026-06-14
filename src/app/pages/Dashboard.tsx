@@ -241,7 +241,7 @@ export function Dashboard() {
     semiStockByProductName,
     finalStockByProductName,
   } = useERP();
-  const { t, filterLabel, dateFilter } = useApp();
+  const { t, filterLabel, dateFilter, chartRangeLabel } = useApp();
 
   const machineTypeById = useMemo(
     () => new Map(state.machines.map(m => [m.id, m.type] as const)),
@@ -277,9 +277,6 @@ export function Dashboard() {
     const range = getInclusiveDateRange(from, to);
     return range.length > 0 ? range : getLast7Days();
   }, [dateFilter]);
-
-  const chartRangeLabel =
-    dateFilter.preset === 'all' && !dateFilter.from && !dateFilter.to ? t.dashChartLast7 : filterLabel;
 
   const productionChartData = useMemo(() => chartDayKeys.map(date => {
     const semiB = state.semiProductBatches.filter(b => b.date === date).reduce((s, b) => s + b.quantity, 0);

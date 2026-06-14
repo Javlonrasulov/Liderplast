@@ -291,9 +291,20 @@ interface LineChartProps {
   height?: number;
   formatValue?: (v: number) => string;
   formatYTick?: (v: number) => string;
+  /** Silliq tolqin chiziq (Catmull-Rom Bezier) */
+  smooth?: boolean;
 }
 
-export function SimpleLineChart({ data, dataKey, name, color = '#10b981', height = 220, formatValue, formatYTick }: LineChartProps) {
+export function SimpleLineChart({
+  data,
+  dataKey,
+  name,
+  color = '#10b981',
+  height = 220,
+  formatValue,
+  formatYTick,
+  smooth = false,
+}: LineChartProps) {
   const ref = useRef<HTMLDivElement>(null);
   const w = useWidth(ref);
   const [tipIdx, setTipIdx] = useState<number | null>(null);
@@ -307,10 +318,20 @@ export function SimpleLineChart({ data, dataKey, name, color = '#10b981', height
   const scaleY = (v: number) => iH * (1 - Math.min(v / maxVal, 1));
   const scaleX = (i: number) => (i / n) * iW;
 
-  const pathD = data.length < 2 ? '' :
-    vals.map((v, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(i).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
-  const areaD = data.length < 2 ? '' :
-    `${pathD} L ${scaleX(n).toFixed(1)},${iH} L 0,${iH} Z`;
+  const points = vals.map((v, i) => ({ x: scaleX(i), y: scaleY(v) }));
+
+  const pathD =
+    data.length < 2
+      ? ''
+      : smooth
+        ? buildSmoothLinePath(points)
+        : points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaD =
+    data.length < 2
+      ? ''
+      : smooth
+        ? buildSmoothAreaPath(points, iH)
+        : `${pathD} L ${scaleX(n).toFixed(1)},${iH} L 0,${iH} Z`;
 
   return (
     <div ref={ref} className="w-full">

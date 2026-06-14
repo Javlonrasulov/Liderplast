@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { startServerTodaySync, subscribeServerToday } from '../api/server-date';
 import { Language, T, translations } from './translations';
-import { parseYmdLocal, todayYmd, toLocalDateString } from '../utils/format';
+import { parseYmdLocal, todayYmd, toLocalDateString, formatChartDateRangeLabel } from '../utils/format';
 
 // ======================== DATE FILTER ========================
 
@@ -113,6 +113,8 @@ interface AppContextValue {
   setCustomRange: (from: string, to: string) => void;
   filterData: <I extends { date: string }>(items: I[]) => I[];
   filterLabel: string;
+  /** Grafiklar uchun: tanlangan kunlar yoki «so‘nggi 7 kun» */
+  chartRangeLabel: string;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
 }
@@ -216,8 +218,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return t.dfAllTime;
   }, [dateFilter, t]);
 
+  const chartRangeLabel = useMemo(
+    () =>
+      formatChartDateRangeLabel(
+        dateFilter.preset,
+        dateFilter.from,
+        dateFilter.to,
+        t.dashChartLast7,
+        filterLabel,
+      ),
+    [dateFilter, t.dashChartLast7, filterLabel],
+  );
+
   return (
-    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, filterLabel, fontSize, setFontSize }}>
+    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, filterLabel, chartRangeLabel, fontSize, setFontSize }}>
       {children}
     </AppContext.Provider>
   );

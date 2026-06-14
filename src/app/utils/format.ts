@@ -231,6 +231,42 @@ export function getInclusiveDateRange(from: string, to: string, maxDays = 400): 
   return out;
 }
 
+/** Kalendardagi kabi qisqa sana: `DD.MM` */
+export function fmtShortDateYmd(ymd: string): string {
+  if (!ymd) return '';
+  const [, m, d] = ymd.split('-');
+  return `${d}.${m}`;
+}
+
+/**
+ * Grafik va hisobot sarlavhalaridagi sana oralig‘i.
+ * Filtr yo‘q → `last7Label`; from/to bor → `DD.MM — DD.MM.YYYY`.
+ */
+export function formatChartDateRangeLabel(
+  preset: string,
+  from: string,
+  to: string,
+  last7Label: string,
+  fallbackLabel?: string,
+): string {
+  if (preset === 'all' && !from && !to) return last7Label;
+  if (from && to) {
+    const year = to.split('-')[0];
+    if (from === to) return `${fmtShortDateYmd(from)}.${year}`;
+    return `${fmtShortDateYmd(from)} — ${fmtShortDateYmd(to)}.${year}`;
+  }
+  return fallbackLabel ?? last7Label;
+}
+
+/** Tarjimadagi `(…, birlik)` qismini saqlab, sana qismini almashtiradi. */
+export function buildReportChartTitle(titleWithMeta: string, rangeLabel: string): string {
+  const base = titleWithMeta.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  const suffixMatch = titleWithMeta.match(/\([^,)]+,\s*([^)]+)\)\s*$/);
+  const suffix = suffixMatch?.[1]?.trim();
+  const inner = suffix ? `${rangeLabel}, ${suffix}` : rangeLabel;
+  return `${base} (${inner})`;
+}
+
 export function shortDate(dateStr: string): string {
   const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
