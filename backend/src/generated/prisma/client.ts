@@ -172,6 +172,11 @@ export type Payment = Prisma.PaymentModel
  */
 export type ExpenseCategory = Prisma.ExpenseCategoryModel
 /**
+ * Model ExpenseFundingSource
+ * Xarajat uchun pul manbai (kassa, bank, shaxs va h.k.)
+ */
+export type ExpenseFundingSource = Prisma.ExpenseFundingSourceModel
+/**
  * Model Expense
  * 
  */

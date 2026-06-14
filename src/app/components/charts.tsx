@@ -164,11 +164,14 @@ export function SimpleAreaChart({ data, series, height = 220, formatValue }: Are
   const scaleY = (v: number) => iH * (1 - Math.min(v / maxVal, 1));
   const scaleX = (i: number) => (i / n) * iW;
 
-  const buildPath = (dataKey: string) =>
-    data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(i).toFixed(1)},${scaleY(Number(d[dataKey]) || 0).toFixed(1)}`).join(' ');
+  const seriesPoints = (dataKey: string) =>
+    data.map((d, i) => ({
+      x: scaleX(i),
+      y: scaleY(Number(d[dataKey]) || 0),
+    }));
 
-  const buildArea = (dataKey: string) =>
-    `${buildPath(dataKey)} L ${scaleX(data.length - 1).toFixed(1)},${iH} L ${scaleX(0).toFixed(1)},${iH} Z`;
+  const buildPath = (dataKey: string) => buildSmoothLinePath(seriesPoints(dataKey));
+  const buildArea = (dataKey: string) => buildSmoothAreaPath(seriesPoints(dataKey), iH);
 
   return (
     <div ref={ref} className="w-full">
@@ -176,8 +179,9 @@ export function SimpleAreaChart({ data, series, height = 220, formatValue }: Are
         <defs>
           {series.map(s => (
             <linearGradient key={s.gradId} id={s.gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={s.color} stopOpacity={0.22} />
-              <stop offset="95%" stopColor={s.color} stopOpacity={0} />
+              <stop offset="0%" stopColor={s.color} stopOpacity={0.35} />
+              <stop offset="55%" stopColor={s.color} stopOpacity={0.12} />
+              <stop offset="100%" stopColor={s.color} stopOpacity={0} />
             </linearGradient>
           ))}
         </defs>
@@ -201,7 +205,7 @@ export function SimpleAreaChart({ data, series, height = 220, formatValue }: Are
           ))}
           {series.map(s => (
             <path key={`line-${s.gradId}`} d={buildPath(s.dataKey)} fill="none"
-              stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+              stroke={s.color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
           ))}
 
           {/* X labels & hover zones */}
@@ -245,6 +249,37 @@ export function SimpleAreaChart({ data, series, height = 220, formatValue }: Are
 function slotHalfWidth(i: number, n: number, iW: number) {
   const slotW = iW / Math.max(n, 1);
   return slotW / 2;
+}
+
+/** Nuqtalar orasida silliq tolqin (cubic Bezier) chiziq */
+function buildSmoothLinePath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  if (points.length === 1) return `M ${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  if (points.length === 2) {
+    return `M ${points[0].x.toFixed(1)},${points[0].y.toFixed(1)} L ${points[1].x.toFixed(1)},${points[1].y.toFixed(1)}`;
+  }
+
+  let d = `M ${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+function buildSmoothAreaPath(points: { x: number; y: number }[], bottomY: number): string {
+  if (points.length === 0) return '';
+  const line = buildSmoothLinePath(points);
+  const last = points[points.length - 1];
+  const first = points[0];
+  return `${line} L ${last.x.toFixed(1)},${bottomY.toFixed(1)} L ${first.x.toFixed(1)},${bottomY.toFixed(1)} Z`;
 }
 
 // ── SimpleLineChart ───────────────────────────────────────────────────────────
@@ -386,6 +421,67 @@ export function CategoryExpenseHorizontalBars({
                 className="h-full rounded-full transition-[width] duration-300"
                 style={{ width: `${Math.min(100, pct)}%`, backgroundColor: row.color }}
               />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Xarajatlar: reytingli kategoriya ustunlari (chiziqli naqsh) */
+export function CategoryExpenseRankedBars({
+  items,
+  formatValue,
+  total,
+  maxItems = 5,
+}: {
+  items: CategoryExpenseBarRow[];
+  formatValue: (n: number) => string;
+  total: number;
+  maxItems?: number;
+}) {
+  if (items.length === 0) return null;
+  const shown = items.slice(0, maxItems);
+  return (
+    <div className="space-y-3">
+      {shown.map((row, idx) => {
+        const pct = total > 0 ? (row.value / total) * 100 : 0;
+        return (
+          <div
+            key={`${row.name}-${idx}`}
+            className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3 dark:border-slate-600/60 dark:bg-slate-900/30"
+          >
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+              style={{ backgroundColor: `${row.color}22`, color: row.color }}
+            >
+              {idx + 1}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100" title={row.name}>
+                  {row.name}
+                </p>
+                <p className="shrink-0 text-xs font-bold tabular-nums text-red-600 dark:text-red-400">
+                  {formatValue(row.value)}
+                </p>
+              </div>
+              <div className="relative h-3 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700">
+                <div
+                  className="relative h-full rounded-full transition-[width] duration-500"
+                  style={{ width: `${Math.min(100, pct)}%`, backgroundColor: row.color }}
+                >
+                  <div
+                    className="absolute inset-0 opacity-35"
+                    style={{
+                      backgroundImage:
+                        'repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(255,255,255,0.55) 3px, rgba(255,255,255,0.55) 6px)',
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="mt-1 text-right text-[10px] tabular-nums text-slate-400">{pct.toFixed(1)}%</p>
             </div>
           </div>
         );

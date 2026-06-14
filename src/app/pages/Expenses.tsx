@@ -12,6 +12,8 @@ import {
   BarChart2,
   Maximize2,
   X,
+  TrendingUp,
+  Wallet,
 } from 'lucide-react';
 import { useERP, type Expense, type ExpenseCategory } from '../store/erp-store';
 import type { T } from '../i18n/translations';
@@ -42,7 +44,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
-import { SimpleDonutChart, CategoryExpenseHorizontalBars } from '../components/charts';
+import { SimpleDonutChart, CategoryExpenseHorizontalBars, CategoryExpenseRankedBars, SimpleAreaChart } from '../components/charts';
+import { SingleDatePicker } from '../components/SingleDatePicker';
 import { cn } from '../components/ui/utils';
 import {
   Dialog,
@@ -89,6 +92,44 @@ const EXPENSE_CATEGORY_CHART_HEX = [
 ] as const;
 
 type ExStatsChartView = 'table' | 'donut' | 'hbar';
+type ExTrendPeriod = 'week' | 'month' | 'year';
+
+const MONTH_SHORT = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+
+function getWeekMondayKey(dateStr: string): string {
+  const head = dateStr.trim().slice(0, 10);
+  const d = new Date(`${head}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return head;
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatMonthLabel(ym: string): string {
+  const m = /^(\d{4})-(\d{2})$/.exec(ym);
+  if (!m) return ym;
+  return `${MONTH_SHORT[parseInt(m[2], 10) - 1]} '${m[1].slice(2)}`;
+}
+
+function formatWeekLabel(weekKey: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(weekKey);
+  if (!m) return weekKey;
+  return `${m[3]}.${m[2]}`;
+}
+
+function expensePeriodKey(dateStr: string, period: ExTrendPeriod): string {
+  const head = dateStr.trim().slice(0, 10);
+  if (period === 'year') return head.slice(0, 4);
+  if (period === 'month') return head.slice(0, 7);
+  return getWeekMondayKey(head);
+}
+
+function formatPeriodLabel(key: string, period: ExTrendPeriod): string {
+  if (period === 'year') return key;
+  if (period === 'month') return formatMonthLabel(key);
+  return formatWeekLabel(key);
+}
 
 function readStoredStatsChartView(): ExStatsChartView {
   try {
@@ -125,6 +166,20 @@ function chartBarClassForCategory(categoryId: string, index: number) {
 function chartHexForCategory(categoryId: string, index: number) {
   if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF) return CHART_HEX_BAG_WRITEOFF;
   return EXPENSE_CATEGORY_CHART_HEX[index % EXPENSE_CATEGORY_CHART_HEX.length];
+}
+
+const FUNDING_SOURCE_CHART_HEX = [
+  '#6366f1',
+  '#0ea5e9',
+  '#14b8a6',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#64748b',
+] as const;
+
+function fundingSourceHex(index: number) {
+  return FUNDING_SOURCE_CHART_HEX[index % FUNDING_SOURCE_CHART_HEX.length];
 }
 
 function isElectricityCategory(c: ExpenseCategory) {
@@ -172,11 +227,11 @@ function ExpenseHistoryTableView({
       <table className="w-full">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-700/50">
-            {[t.colDate, t.colType, t.exColAmount, t.exHistoryColUser, t.colNote, t.exHistoryColActions].map((h, i) => (
+            {[t.colDate, t.colType, t.exHistoryColFundingSource, t.exColAmount, t.exHistoryColUser, t.colNote, t.exHistoryColActions].map((h, i) => (
               <th
                 key={h}
                 className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 ${
-                  i === 4 ? noteCol : i === 5 ? 'text-right w-24' : i === 3 ? 'hidden sm:table-cell' : ''
+                  i === 5 ? noteCol : i === 6 ? 'text-right w-24' : i === 4 ? 'hidden sm:table-cell' : i === 2 ? 'hidden lg:table-cell' : ''
                 }`}
               >
                 {h}
@@ -213,6 +268,16 @@ function ExpenseHistoryTableView({
                   >
                     {categoryLabel}
                   </span>
+                </td>
+                <td className="hidden px-4 py-3 text-xs text-slate-600 dark:text-slate-300 lg:table-cell">
+                  {expense.fundingSourceName ? (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2 py-1 font-medium text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
+                      <Wallet size={12} className="shrink-0 opacity-70" />
+                      {expense.fundingSourceName}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
                   {formatCurrency(expense.amount)}
@@ -270,7 +335,7 @@ function ExpenseHistoryTableView({
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
-            <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <td colSpan={3} className="px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
               {t.exTotalLabel}
             </td>
             <td className="px-4 py-3 text-right text-sm font-bold text-red-600">{formatCurrency(totalFiltered)}</td>
@@ -288,6 +353,7 @@ export function Expenses() {
   const { state, dispatch } = useERP();
   const { t, filterData } = useApp();
   const [activeCategoryId, setActiveCategoryId] = useState('');
+  const [activeFundingSourceId, setActiveFundingSourceId] = useState('');
   const [form, setForm] = useState({
     amount: '',
     description: '',
@@ -299,11 +365,17 @@ export function Expenses() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
+  const [newFundingSourceName, setNewFundingSourceName] = useState('');
+  const [fundingEditingId, setFundingEditingId] = useState<string | null>(null);
+  const [fundingEditName, setFundingEditName] = useState('');
+  const [fundingDeleteId, setFundingDeleteId] = useState<string | null>(null);
   const [statsChartView, setStatsChartView] = useState<ExStatsChartView>(readStoredStatsChartView);
+  const [trendPeriod, setTrendPeriod] = useState<ExTrendPeriod>('month');
   const [historyFullscreen, setHistoryFullscreen] = useState(false);
   const [expenseEdit, setExpenseEdit] = useState<Expense | null>(null);
   const [expenseEditForm, setExpenseEditForm] = useState({
     categoryId: '',
+    fundingSourceId: '',
     amount: '',
     description: '',
     date: todayYmd(),
@@ -312,6 +384,7 @@ export function Expenses() {
   const [expenseDeleteId, setExpenseDeleteId] = useState<string | null>(null);
 
   const categories = state.expenseCategories;
+  const fundingSources = state.expenseFundingSources;
 
   /** Qo‘lda kiritish: tashqi buyurtma kategoriyasi faqat buyurtma yaratilganda xarajatga tushadi */
   const manualExpenseCategories = useMemo(
@@ -357,6 +430,15 @@ export function Expenses() {
       setActiveCategoryId(elec?.id ?? manualExpenseCategories[0].id);
     }
   }, [manualExpenseCategories, activeCategoryId]);
+
+  useEffect(() => {
+    if (fundingSources.length === 0) return;
+    const stillValid =
+      activeFundingSourceId && fundingSources.some((s) => s.id === activeFundingSourceId);
+    if (!stillValid) {
+      setActiveFundingSourceId(fundingSources[0].id);
+    }
+  }, [fundingSources, activeFundingSourceId]);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const isElectricity = activeCategory ? isElectricityCategory(activeCategory) : false;
@@ -406,11 +488,79 @@ export function Expenses() {
     [categoryStats],
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const expenseTrend = useMemo(() => {
+    const topCats = categoryStats.slice(0, 5);
+    if (topCats.length === 0) return { data: [] as Record<string, string | number>[], series: [] as { dataKey: string; name: string; color: string; gradId: string }[] };
+
+    const periodKeys = new Set<string>();
+    for (const e of statsSortedExpenses) {
+      if (e.date) periodKeys.add(expensePeriodKey(e.date, trendPeriod));
+    }
+    const limit = trendPeriod === 'year' ? 4 : trendPeriod === 'month' ? 8 : 10;
+    const keys = [...periodKeys].sort().slice(-limit);
+
+    const data = keys.map((key) => {
+      const row: Record<string, string | number> = { date: formatPeriodLabel(key, trendPeriod) };
+      for (const cat of topCats) {
+        const sum = statsSortedExpenses
+          .filter(
+            (e) =>
+              e.date &&
+              expensePeriodKey(e.date, trendPeriod) === key &&
+              (e.categoryId || `legacy-${e.id}`) === cat.id,
+          )
+          .reduce((s, e) => s + e.amount, 0);
+        row[`cat_${cat.id}`] = sum;
+      }
+      return row;
+    });
+
+    const series = topCats.map((cat, i) => ({
+      dataKey: `cat_${cat.id}`,
+      name: cat.name,
+      color: chartHexForCategory(cat.id, i),
+      gradId: `ex-trend-${cat.id.replace(/[^a-zA-Z0-9]/g, '')}`,
+    }));
+
+    return { data, series };
+  }, [statsSortedExpenses, categoryStats, trendPeriod]);
+
+  const fundingSourceStats = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; amount: number; count: number }>();
+    for (const e of statsSortedExpenses) {
+      if (!e.fundingSourceId) continue;
+      const sid = e.fundingSourceId;
+      const name = e.fundingSourceName?.trim() || sid;
+      const row = map.get(sid) ?? { id: sid, name, amount: 0, count: 0 };
+      row.name = name;
+      row.amount += e.amount;
+      row.count += 1;
+      map.set(sid, row);
+    }
+    return [...map.values()].sort((a, b) => b.amount - a.amount);
+  }, [statsSortedExpenses]);
+
+  const fundingChartRows = useMemo(
+    () =>
+      fundingSourceStats.map((row, i) => ({
+        name: row.name,
+        value: row.amount,
+        color: fundingSourceHex(i),
+      })),
+    [fundingSourceStats],
+  );
+
+  const totalFundingTracked = fundingSourceStats.reduce((s, r) => s + r.amount, 0);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!activeCategoryId) {
       setError(t.exNoCategories);
+      return;
+    }
+    if (!activeFundingSourceId) {
+      setError(t.exFundingSourceRequired);
       return;
     }
     if (
@@ -428,22 +578,27 @@ export function Expenses() {
       setError(t.labelAmount + '!');
       return;
     }
-    void dispatch({
-      type: 'ADD_EXPENSE',
-      payload: {
-        categoryId: activeCategoryId,
-        amount: num,
-        description: form.description,
-        date: form.date,
-      },
-    });
-    setForm({
-      amount: '',
-      description: '',
-      date: todayYmd(),
-    });
-    setSuccess(`${t.successAdded}: ${formatCurrency(num)}`);
-    setTimeout(() => setSuccess(''), 4000);
+    try {
+      await dispatch({
+        type: 'ADD_EXPENSE',
+        payload: {
+          categoryId: activeCategoryId,
+          fundingSourceId: activeFundingSourceId,
+          amount: num,
+          description: form.description,
+          date: form.date,
+        },
+      });
+      setForm({
+        amount: '',
+        description: '',
+        date: todayYmd(),
+      });
+      setSuccess(`${t.successAdded}: ${formatCurrency(num)}`);
+      setTimeout(() => setSuccess(''), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error');
+    }
   };
 
   const handleAddCategory = (e: React.FormEvent) => {
@@ -477,11 +632,43 @@ export function Expenses() {
     setCategoryDeleteId(null);
   };
 
+  const handleAddFundingSource = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newFundingSourceName.trim();
+    if (!name) return;
+    void dispatch({ type: 'ADD_EXPENSE_FUNDING_SOURCE', payload: { name } });
+    setNewFundingSourceName('');
+  };
+
+  const startFundingEdit = (id: string, name: string) => {
+    setFundingEditingId(id);
+    setFundingEditName(name);
+  };
+
+  const saveFundingEdit = () => {
+    if (!fundingEditingId) return;
+    const name = fundingEditName.trim();
+    if (!name) return;
+    void dispatch({ type: 'UPDATE_EXPENSE_FUNDING_SOURCE', payload: { id: fundingEditingId, name } });
+    setFundingEditingId(null);
+  };
+
+  const requestDeleteFundingSource = (id: string) => {
+    setFundingDeleteId(id);
+  };
+
+  const confirmDeleteFundingSource = () => {
+    if (!fundingDeleteId) return;
+    void dispatch({ type: 'DELETE_EXPENSE_FUNDING_SOURCE', payload: fundingDeleteId });
+    setFundingDeleteId(null);
+  };
+
   const openExpenseEdit = (expense: Expense) => {
     setExpenseEdit(expense);
     setExpenseEditError('');
     setExpenseEditForm({
       categoryId: expense.categoryId,
+      fundingSourceId: expense.fundingSourceId ?? fundingSources[0]?.id ?? '',
       amount: String(Math.round(expense.amount)),
       description: expense.description ?? '',
       date: expense.date,
@@ -502,12 +689,17 @@ export function Expenses() {
       setExpenseEditError(t.exNoCategories);
       return;
     }
+    if (!expenseEditForm.fundingSourceId) {
+      setExpenseEditError(t.exFundingSourceRequired);
+      return;
+    }
     try {
       await dispatch({
         type: 'UPDATE_EXPENSE',
         payload: {
           id: expenseEdit.id,
           categoryId: expenseEditForm.categoryId,
+          fundingSourceId: expenseEditForm.fundingSourceId,
           amount: num,
           description: expenseEditForm.description,
           date: expenseEditForm.date,
@@ -534,72 +726,206 @@ export function Expenses() {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      {/* Summary cards — top categories */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {categoryStats.length === 0 ? (
-          <div className="col-span-2 lg:col-span-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm text-sm text-slate-500 dark:text-slate-400">
-            {t.noData}
-          </div>
-        ) : (
-          categoryStats.slice(0, 8).map((row) => {
-            return (
-              <div
-                key={row.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm"
-              >
-                <div
-                  className={`inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg font-medium mb-3 ${expenseCategoryBadgeClass(row.id)}`}
-                >
-                  {row.name}
+      {/* Умумий харажатлар — yangi dashboard */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800">
+        {/* Hero header */}
+        <div className="border-b border-red-100/80 bg-gradient-to-br from-red-50 via-white to-orange-50/60 px-5 py-6 dark:border-red-900/30 dark:from-red-950/25 dark:via-slate-800 dark:to-slate-800 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400">
+                  <BarChart3 size={18} />
                 </div>
-                <p className="text-slate-900 dark:text-white font-bold text-lg">{formatCurrency(row.amount)}</p>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                  {t.exTotalLabel.replace(':', '')}
+                </h2>
               </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Total bar + legend + statistics table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4">
-        <div className="flex flex-col gap-1 mb-1">
-          <div className="flex items-center gap-2">
-            <BarChart3 size={16} className="text-slate-500" />
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
-              {t.exTotalLabel} {formatCurrency(totalForStats)}
-            </h3>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 pl-6">{t.exPageStatsNote}</p>
-        </div>
-        <div className="flex h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-          {totalForStats > 0 &&
-            categoryStats.map((row, i) => {
-              const pct = (row.amount / totalForStats) * 100;
-              return pct > 0 ? (
+              <p className="text-3xl font-bold tabular-nums tracking-tight text-red-700 dark:text-red-300 sm:text-4xl">
+                {formatCurrency(totalForStats)}
+              </p>
+              <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                {t.exPageStatsNote}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {categoryStats.slice(0, 3).map((row) => (
                 <div
                   key={row.id}
-                  className={chartBarClassForCategory(row.id, i)}
-                  style={{ width: `${pct}%` }}
-                  title={`${row.name}: ${formatCurrency(row.amount)}`}
-                />
-              ) : null;
-            })}
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {categoryStats.map((row, i) => {
-            const pct = totalForStats > 0 ? ((row.amount / totalForStats) * 100).toFixed(0) : '0';
-            return (
-              <div key={row.id} className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${chartBarClassForCategory(row.id, i)}`} />
-                <span className="text-xs text-slate-600 dark:text-slate-300">
-                  {row.name}: {pct}% ({formatCurrency(row.amount)})
-                </span>
+                  className="rounded-xl border border-white/80 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-slate-600/60 dark:bg-slate-900/40"
+                >
+                  <p className="max-w-[9rem] truncate text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                    {row.name}
+                  </p>
+                  <p className="text-sm font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                    {totalForStats > 0 ? ((row.amount / totalForStats) * 100).toFixed(0) : 0}%
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stacked progress bar */}
+          {totalForStats > 0 && categoryStats.length > 0 && (
+            <div className="mt-5">
+              <div className="flex h-3 overflow-hidden rounded-full bg-slate-200/70 shadow-inner dark:bg-slate-700">
+                {categoryStats.map((row, i) => {
+                  const pct = (row.amount / totalForStats) * 100;
+                  return pct > 0 ? (
+                    <div
+                      key={row.id}
+                      className={`h-full transition-all duration-500 first:rounded-l-full last:rounded-r-full ${chartBarClassForCategory(row.id, i)}`}
+                      style={{ width: `${pct}%` }}
+                      title={`${row.name}: ${formatCurrency(row.amount)}`}
+                    />
+                  ) : null;
+                })}
               </div>
-            );
-          })}
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+                {categoryStats.map((row, i) => {
+                  const pct = totalForStats > 0 ? ((row.amount / totalForStats) * 100).toFixed(0) : '0';
+                  return (
+                    <div key={row.id} className="flex items-center gap-1.5">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${chartBarClassForCategory(row.id, i)}`} />
+                      <span className="text-[11px] text-slate-600 dark:text-slate-300">
+                        {row.name}: <span className="font-semibold">{pct}%</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="border-t border-slate-200 dark:border-slate-600 pt-4">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Donut + top categories */}
+        <div className="grid grid-cols-1 gap-5 border-b border-slate-200/80 p-5 dark:border-slate-700/80 lg:grid-cols-2 lg:p-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-600/60 dark:bg-slate-900/20">
+            <h3 className="mb-4 text-sm font-semibold text-slate-800 dark:text-white">{t.exStatsByCategory}</h3>
+            {categoryStats.length === 0 ? (
+              <p className="py-10 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <div className="flex flex-col items-center gap-5 min-[420px]:flex-row min-[420px]:items-start">
+                <div className="relative shrink-0">
+                  <SimpleDonutChart
+                    data={categoryChartRows.map((r) => ({ name: r.name, value: r.value }))}
+                    colors={categoryChartRows.map((r) => r.color)}
+                    size={168}
+                  />
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                      {t.exColAmount}
+                    </span>
+                    <span className="max-w-[5.5rem] text-center text-xs font-bold tabular-nums leading-tight text-slate-800 dark:text-slate-100">
+                      {formatCurrency(totalForStats)}
+                    </span>
+                  </div>
+                </div>
+                <div className="w-full min-w-0 flex-1 space-y-2">
+                  {categoryChartRows.map((row, i) => {
+                    const pct = totalForStats > 0 ? ((row.value / totalForStats) * 100).toFixed(1) : '0';
+                    return (
+                      <div
+                        key={`${row.name}-${i}`}
+                        className="flex items-center justify-between gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-800/60"
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: row.color }} />
+                          <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{row.name}</span>
+                        </div>
+                        <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                          {pct}% · {formatCurrency(row.value)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-600/60 dark:bg-slate-900/20">
+            <h3 className="mb-4 text-sm font-semibold text-slate-800 dark:text-white">{t.exTopCategories}</h3>
+            {categoryStats.length === 0 ? (
+              <p className="py-10 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <CategoryExpenseRankedBars
+                items={categoryChartRows}
+                formatValue={formatCurrency}
+                total={totalForStats}
+                maxItems={5}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Trend chart */}
+        <div className="border-b border-slate-200/80 p-5 dark:border-slate-700/80 lg:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-indigo-500" />
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{t.exTrendTitle}</h3>
+            </div>
+            <div
+              className="inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-600 dark:bg-slate-900/50"
+              role="tablist"
+              aria-label={t.exTrendTitle}
+            >
+              {(
+                [
+                  { key: 'week' as const, label: t.exTrendWeek },
+                  { key: 'month' as const, label: t.exTrendMonth },
+                  { key: 'year' as const, label: t.exTrendYear },
+                ] as const
+              ).map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={trendPeriod === key}
+                  onClick={() => setTrendPeriod(key)}
+                  className={cn(
+                    'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                    trendPeriod === key
+                      ? 'bg-white text-indigo-700 shadow-sm dark:bg-slate-700 dark:text-indigo-300'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {expenseTrend.series.length === 0 || expenseTrend.data.length === 0 ? (
+            <p className="py-10 text-center text-sm text-slate-500">{t.noData}</p>
+          ) : (
+            <>
+              <div className="mb-4 flex flex-wrap gap-2">
+                {expenseTrend.series.map((s) => (
+                  <span
+                    key={s.dataKey}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <span className="h-2 w-4 rounded-sm" style={{ background: s.color }} />
+                    {s.name}
+                  </span>
+                ))}
+              </div>
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-3 dark:border-slate-600/60 dark:bg-slate-900/20 sm:p-4">
+                <SimpleAreaChart
+                  data={expenseTrend.data}
+                  series={expenseTrend.series}
+                  height={260}
+                  formatValue={formatCurrency}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Detailed stats with view switcher */}
+        <div className="p-5 lg:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h4 className="text-sm font-semibold text-slate-800 dark:text-white">{t.exStatsByCategory}</h4>
             <div
               className="inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-600 dark:bg-slate-900/50"
@@ -732,6 +1058,107 @@ export function Expenses() {
         </div>
       </div>
 
+      {/* Pul manbai bo'yicha hisobot */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800">
+        <div className="border-b border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-white to-sky-50/60 px-5 py-5 dark:border-indigo-900/30 dark:from-indigo-950/25 dark:via-slate-800 dark:to-slate-800 sm:px-6">
+          <div className="flex items-center gap-2">
+            <Wallet size={18} className="text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+              {t.exFundingReportTitle}
+            </h2>
+          </div>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t.exPageStatsNote}</p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 p-5 lg:grid-cols-2 lg:p-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-600/60 dark:bg-slate-900/20">
+            {fundingSourceStats.length === 0 ? (
+              <p className="py-10 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <CategoryExpenseRankedBars
+                items={fundingChartRows}
+                formatValue={formatCurrency}
+                total={totalFundingTracked}
+                maxItems={8}
+              />
+            )}
+          </div>
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-600/60 dark:bg-slate-900/20">
+            {fundingSourceStats.length === 0 ? (
+              <p className="py-10 text-center text-sm text-slate-500">{t.noData}</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-700/50">
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-500">{t.exFundingSourceName}</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold text-slate-500">{t.exColAmount}</th>
+                      <th className="hidden px-3 py-2 text-right text-xs font-semibold text-slate-500 sm:table-cell">#</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fundingSourceStats.map((row) => (
+                      <tr key={row.id} className="border-t border-slate-100 dark:border-slate-700">
+                        <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{row.name}</td>
+                        <td className="px-3 py-2 text-right font-semibold text-indigo-700 dark:text-indigo-300">
+                          {formatCurrency(row.amount)}
+                        </td>
+                        <td className="hidden px-3 py-2 text-right text-slate-500 sm:table-cell">{row.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+        {fundingSourceStats.length > 0 && (
+          <div className="border-t border-slate-200/80 px-5 pb-5 dark:border-slate-700/80 lg:px-6 lg:pb-6">
+            <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-white">{t.exHistory}</h4>
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-700/50">
+                    {[t.colDate, t.exFundingSourceName, t.colType, t.exColAmount].map((h) => (
+                      <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-slate-500">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {statsSortedExpenses
+                    .filter((e) => e.fundingSourceId)
+                    .slice(0, 20)
+                    .map((expense) => {
+                      const dbName = resolveExpenseCategoryNameFromState(
+                        expense.categoryId,
+                        expense.categoryName,
+                        categories,
+                      );
+                      const categoryLabel =
+                        expense.type === 'electricity' || expense.electricityCalc
+                          ? t.exElectricity
+                          : labelExpenseCategory(expense.categoryId, dbName, t);
+                      return (
+                        <tr key={expense.id} className="border-t border-slate-100 dark:border-slate-700">
+                          <td className="px-3 py-2 text-xs text-slate-500">{formatDate(expense.date)}</td>
+                          <td className="px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                            {expense.fundingSourceName ?? '—'}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200">{categoryLabel}</td>
+                          <td className="px-3 py-2 text-right font-semibold text-red-600 dark:text-red-400">
+                            {formatCurrency(expense.amount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
@@ -767,6 +1194,34 @@ export function Expenses() {
               </div>
             )}
 
+            <div className="mb-4">
+              <label className="mb-2 block text-sm text-slate-600 dark:text-slate-400">{t.exFundingSourceLabel}</label>
+              {fundingSources.length === 0 ? (
+                <p className="text-sm text-amber-600 dark:text-amber-400">{t.exNoFundingSources}</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                  {fundingSources.map((s) => {
+                    const active = activeFundingSourceId === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setActiveFundingSourceId(s.id)}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-left text-xs font-medium transition-all ${
+                          active
+                            ? 'border-indigo-500 bg-indigo-600 text-white dark:border-indigo-400 dark:bg-indigo-600'
+                            : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        <Wallet size={13} className="shrink-0 opacity-80" />
+                        <span className="truncate">{s.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {success && (
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl flex items-start gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
@@ -777,11 +1232,9 @@ export function Expenses() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDate}</label>
-                <input
-                  type="date"
+                <SingleDatePicker
                   value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  onChange={(date) => setForm({ ...form, date })}
                 />
               </div>
               <div>
@@ -819,7 +1272,7 @@ export function Expenses() {
               )}
               <button
                 type="submit"
-                disabled={categories.length === 0}
+                disabled={categories.length === 0 || fundingSources.length === 0}
                 className="w-full py-2.5 bg-slate-800 dark:bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
               >
                 <Plus size={16} /> {t.exBtn}
@@ -911,6 +1364,86 @@ export function Expenses() {
                   </li>
                 );
               })}
+            </ul>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
+                <Wallet size={16} className="text-white" />
+              </div>
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.exFundingSourcesTitle}</h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{t.exFundingSourceDeleteHint}</p>
+            <form onSubmit={handleAddFundingSource} className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={newFundingSourceName}
+                onChange={(e) => setNewFundingSourceName(e.target.value)}
+                placeholder={t.exFundingSourceName}
+                className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm"
+              />
+              <button
+                type="submit"
+                className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl"
+              >
+                {t.exFundingSourceAdd}
+              </button>
+            </form>
+            <ul className="space-y-2">
+              {fundingSources.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600"
+                >
+                  {fundingEditingId === s.id ? (
+                    <>
+                      <input
+                        value={fundingEditName}
+                        onChange={(e) => setFundingEditName(e.target.value)}
+                        className="flex-1 px-2 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={saveFundingEdit}
+                        className="text-xs px-2 py-1 rounded-lg bg-emerald-600 text-white"
+                      >
+                        {t.btnSave}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFundingEditingId(null)}
+                        className="text-xs px-2 py-1 rounded-lg bg-slate-500 text-white"
+                      >
+                        {t.btnCancel}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex flex-1 items-center gap-1.5 text-xs px-2 py-1 rounded-lg font-medium bg-indigo-50 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                        <Wallet size={13} />
+                        {s.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => startFundingEdit(s.id, s.name)}
+                        className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600"
+                        aria-label={t.btnSave}
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => requestDeleteFundingSource(s.id)}
+                        className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
+                        aria-label={t.exFundingSourceDelete}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -1012,6 +1545,33 @@ export function Expenses() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={Boolean(fundingDeleteId)}
+        onOpenChange={(open) => {
+          if (!open) setFundingDeleteId(null);
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">{t.exFundingSourceDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+              {t.exFundingSourceDeleteHint}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
+              {t.btnCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteFundingSource}
+              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500/30"
+            >
+              {t.exFundingSourceDelete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={Boolean(expenseEdit)} onOpenChange={(open) => !open && setExpenseEdit(null)}>
         <DialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
           <DialogHeader>
@@ -1035,12 +1595,25 @@ export function Expenses() {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.labelDate}</label>
-              <input
-                type="date"
-                value={expenseEditForm.date}
-                onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, date: e.target.value }))}
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.exFundingSourceLabel}</label>
+              <select
+                value={expenseEditForm.fundingSourceId}
+                onChange={(e) => setExpenseEditForm((prev) => ({ ...prev, fundingSourceId: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              >
+                {fundingSources.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.labelDate}</label>
+              <SingleDatePicker
+                value={expenseEditForm.date}
+                onChange={(date) => setExpenseEditForm((prev) => ({ ...prev, date }))}
+                menuZClassName="z-[90]"
               />
             </div>
             <div>

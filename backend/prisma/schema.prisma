@@ -691,6 +691,15 @@ model ExpenseCategory {
   expenses          Expense[]
 }
 
+/// Xarajat uchun pul manbai (kassa, bank, shaxs va h.k.)
+model ExpenseFundingSource {
+  id        String    @id @default(cuid())
+  name      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  expenses  Expense[]
+}
+
 model Expense {
   id          String           @id @default(cuid())
   title       String
@@ -707,6 +716,8 @@ model Expense {
   updatedBy   User?            @relation("ExpenseUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
   categoryId  String?
   category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  fundingSourceId String?
+  fundingSource   ExpenseFundingSource? @relation(fields: [fundingSourceId], references: [id], onDelete: SetNull)
   sourceShiftId String?        @unique
   sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
   rawMaterialPurchaseOrder RawMaterialPurchaseOrder?

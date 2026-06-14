@@ -27,4 +27,8 @@ export class CreateExpenseDto {
   @IsOptional()
   @IsDateString()
   incurredAt?: string;
+
+  @IsString()
+  @MinLength(1)
+  fundingSourceId!: string;
 }

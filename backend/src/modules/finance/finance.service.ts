@@ -27,6 +27,7 @@ import {
   SalaryType,
 } from '../../generated/prisma/enums.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
+import { CreateExpenseFundingSourceDto } from './dto/create-expense-funding-source.dto.js';
 import { CreateRawMaterialPurchaseOrderDto } from './dto/create-raw-material-purchase-order.dto.js';
 import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
@@ -35,6 +36,7 @@ import { SupplierPurchaseBatchItemDto } from './dto/supplier-purchase-batch-item
 import { UpdateSupplierPurchaseOrderDto } from './dto/update-supplier-purchase-order.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
+import { UpdateExpenseFundingSourceDto } from './dto/update-expense-funding-source.dto.js';
 import { UpdateExpenseDto } from './dto/update-expense.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
@@ -400,6 +402,13 @@ export class FinanceService {
       );
     }
 
+    const fundingSource = await this.prisma.expenseFundingSource.findUnique({
+      where: { id: dto.fundingSourceId },
+    });
+    if (!fundingSource || fundingSource.deletedAt) {
+      throw new BadRequestException('Pul manbai topilmadi yoki faol emas');
+    }
+
     const incurredAt = dto.incurredAt ? new Date(dto.incurredAt) : new Date();
 
     return this.prisma.expense.create({
@@ -407,6 +416,7 @@ export class FinanceService {
         title: dto.title,
         type: category.legacyExpenseType,
         categoryId: category.id,
+        fundingSourceId: fundingSource.id,
         amount: dto.amount,
         description: dto.description,
         incurredAt,
@@ -414,6 +424,7 @@ export class FinanceService {
       },
       include: {
         category: true,
+        fundingSource: true,
         createdBy: {
           omit: { passwordHash: true },
         },
@@ -428,6 +439,7 @@ export class FinanceService {
     return this.prisma.expense.findMany({
       include: {
         category: true,
+        fundingSource: true,
         createdBy: {
           omit: { passwordHash: true },
         },
@@ -497,6 +509,17 @@ export class FinanceService {
       nextType = category.legacyExpenseType;
     }
 
+    let nextFundingSourceId = existing.fundingSourceId;
+    if (dto.fundingSourceId !== undefined) {
+      const fundingSource = await this.prisma.expenseFundingSource.findUnique({
+        where: { id: dto.fundingSourceId },
+      });
+      if (!fundingSource || fundingSource.deletedAt) {
+        throw new BadRequestException('Pul manbai topilmadi yoki faol emas');
+      }
+      nextFundingSourceId = fundingSource.id;
+    }
+
     const nextDescription =
       dto.description !== undefined ? dto.description : existing.description;
     const title =
@@ -517,10 +540,14 @@ export class FinanceService {
         ...(dto.categoryId !== undefined
           ? { categoryId: nextCategoryId, type: nextType }
           : {}),
+        ...(dto.fundingSourceId !== undefined
+          ? { fundingSourceId: nextFundingSourceId }
+          : {}),
         ...(updatedById ? { updatedById } : {}),
       },
       include: {
         category: true,
+        fundingSource: true,
         createdBy: {
           omit: { passwordHash: true },
         },
@@ -1611,6 +1638,53 @@ export class FinanceService {
       );
     }
     return this.prisma.expenseCategory.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  getExpenseFundingSources() {
+    return this.prisma.expenseFundingSource.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ name: 'asc' }],
+    });
+  }
+
+  createExpenseFundingSource(dto: CreateExpenseFundingSourceDto) {
+    return this.prisma.expenseFundingSource.create({
+      data: {
+        name: dto.name.trim(),
+      },
+    });
+  }
+
+  async updateExpenseFundingSource(id: string, dto: UpdateExpenseFundingSourceDto) {
+    const existing = await this.prisma.expenseFundingSource.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense funding source not found');
+    }
+    if (dto.name === undefined) {
+      return existing;
+    }
+    return this.prisma.expenseFundingSource.update({
+      where: { id },
+      data: { name: dto.name.trim() },
+    });
+  }
+
+  async deleteExpenseFundingSource(id: string) {
+    const existing = await this.prisma.expenseFundingSource.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      throw new NotFoundException('Expense funding source not found');
+    }
+    if (existing.deletedAt) {
+      return existing;
+    }
+    return this.prisma.expenseFundingSource.update({
       where: { id },
       data: { deletedAt: new Date() },
     });

@@ -77,6 +77,7 @@ export const ModelName = {
   OrderItem: 'OrderItem',
   Payment: 'Payment',
   ExpenseCategory: 'ExpenseCategory',
+  ExpenseFundingSource: 'ExpenseFundingSource',
   Expense: 'Expense',
   RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
   Supplier: 'Supplier',
@@ -524,6 +525,16 @@ export const ExpenseCategoryScalarFieldEnum = {
 export type ExpenseCategoryScalarFieldEnum = (typeof ExpenseCategoryScalarFieldEnum)[keyof typeof ExpenseCategoryScalarFieldEnum]
 
 
+export const ExpenseFundingSourceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ExpenseFundingSourceScalarFieldEnum = (typeof ExpenseFundingSourceScalarFieldEnum)[keyof typeof ExpenseFundingSourceScalarFieldEnum]
+
+
 export const ExpenseScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -537,6 +548,7 @@ export const ExpenseScalarFieldEnum = {
   createdById: 'createdById',
   updatedById: 'updatedById',
   categoryId: 'categoryId',
+  fundingSourceId: 'fundingSourceId',
   sourceShiftId: 'sourceShiftId'
 } as const
 

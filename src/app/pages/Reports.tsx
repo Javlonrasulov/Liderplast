@@ -1,10 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import { SimpleBarChart, SimpleLineChart, SimpleDonutChart, type BarSeries } from '../components/charts';
-import { BarChart3, TrendingUp, FileText, Cpu } from 'lucide-react';
+import {
+  BarChart3,
+  TrendingUp,
+  FileText,
+  Droplets,
+  DollarSign,
+  Wallet,
+  PiggyBank,
+  Search,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Gauge,
+} from 'lucide-react';
 import {
   useERP,
   type FinishedProductCatalogItem,
   type SemiProductCatalogItem,
+  type RawMaterialEntry,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import type { T } from '../i18n/translations';
@@ -17,6 +30,111 @@ function semiRowKey(name: string) {
 }
 function finalRowKey(name: string) {
   return `final_${name}`;
+}
+
+// ── UI building blocks ────────────────────────────────────────────────────────
+
+function ReportKpiCard({
+  label,
+  value,
+  icon: Icon,
+  accentBar,
+  iconWrap,
+  iconColor,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  accentBar: string;
+  iconWrap: string;
+  iconColor: string;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700/80 dark:bg-slate-800">
+      <div className={`absolute inset-x-0 bottom-0 h-1 ${accentBar}`} />
+      <div className="flex items-start justify-between gap-3">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconWrap}`}>
+          <Icon size={20} className={iconColor} />
+        </div>
+      </div>
+      <p className="mt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">{value}</p>
+    </div>
+  );
+}
+
+function ReportPanel({
+  title,
+  subtitle,
+  children,
+  className = '',
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700/80 dark:bg-slate-800 sm:p-6 ${className}`}
+    >
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
+        {subtitle ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyBlock({ message }: { message: string }) {
+  return (
+    <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center dark:border-slate-600 dark:bg-slate-900/30">
+      <p className="text-sm text-slate-500 dark:text-slate-400">{message}</p>
+    </div>
+  );
+}
+
+function LegendPills({ items }: { items: { name: string; color: string }[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span
+          key={item.name}
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700/40 dark:text-slate-300"
+        >
+          <span className="h-2 w-2 rounded-full" style={{ background: item.color }} />
+          {item.name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function GaugeRing({ percent, size = 52 }: { percent: number; size?: number }) {
+  const p = Math.min(100, Math.max(0, percent));
+  const stroke = p >= 80 ? '#10b981' : p >= 50 ? '#f59e0b' : '#ef4444';
+  const r = (size - 8) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (p / 100) * c;
+  return (
+    <svg width={size} height={size} className="shrink-0 -rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={5} className="text-slate-200 dark:text-slate-600" />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={stroke}
+        strokeWidth={5}
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+        className="transition-all duration-700"
+      />
+    </svg>
+  );
 }
 
 function EffBar({
@@ -46,55 +164,118 @@ function EffBar({
     : 'text-slate-800 dark:text-slate-100';
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <span className="text-slate-800 dark:text-slate-100 text-sm font-semibold leading-snug">{label}</span>
-        <span
-          className={`text-lg font-bold tabular-nums shrink-0 ${pct >= 80 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 50 ? 'text-amber-500' : 'text-red-500'}`}
-        >
-          {pct.toFixed(1)}%
-        </span>
-      </div>
-      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 mb-3">
-        <div className="rounded-lg border border-slate-200/90 bg-white/70 px-3 py-2.5 dark:border-slate-600/70 dark:bg-slate-800/50">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t.repEffPlannedHourly}</p>
-          <p className="mt-1 text-base font-semibold tabular-nums text-slate-800 dark:text-white">
-            {hasPlan ? (
-              <>
-                {formatNumber(plannedPerHour)} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{t.repEffUnitPcsPerHour}</span>
-              </>
-            ) : (
-              '—'
-            )}
+    <article className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/80 p-4 shadow-sm dark:border-slate-600/60 dark:from-slate-800 dark:to-slate-800/60 sm:p-5">
+      <div className="flex items-start gap-4">
+        <div className="relative flex h-[52px] w-[52px] items-center justify-center">
+          <GaugeRing percent={pct} />
+          <span className="absolute text-[10px] font-bold tabular-nums text-slate-700 dark:text-slate-200">{pct.toFixed(0)}%</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{label}</h4>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums ${
+                pct >= 80
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                  : pct >= 50
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+              }`}
+            >
+              {pct.toFixed(1)}%
+            </span>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
+            <div className="rounded-xl bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.repEffPlannedHourly}</p>
+              <p className="mt-0.5 text-sm font-bold tabular-nums text-slate-800 dark:text-white">
+                {hasPlan ? (
+                  <>
+                    {formatNumber(plannedPerHour)}{' '}
+                    <span className="text-xs font-normal text-slate-400">{t.repEffUnitPcsPerHour}</span>
+                  </>
+                ) : (
+                  '—'
+                )}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.repEffActualHourly}</p>
+              <p className={`mt-0.5 text-sm font-bold tabular-nums ${actualRateCls}`}>
+                {formatNumber(actualAvgPerHour)}{' '}
+                <span className="text-xs font-normal text-slate-400">{t.repEffUnitPcsPerHour}</span>
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+            <span>
+              {t.repEffTotalShort} <strong className="text-slate-700 dark:text-slate-200">{formatNumber(actual)}</strong>
+            </span>
+            <span>
+              {t.repEffLimitShort} <strong className="text-slate-700 dark:text-slate-200">{formatNumber(max)}</strong>
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
+            {(t.repEffAssumedHours ?? '').replace('{{h}}', String(hoursAssumed))}
           </p>
         </div>
-        <div className="rounded-lg border border-slate-200/90 bg-white/70 px-3 py-2.5 dark:border-slate-600/70 dark:bg-slate-800/50">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t.repEffActualHourly}</p>
-          <p className={`mt-1 text-base font-semibold tabular-nums ${actualRateCls}`}>
-            {formatNumber(actualAvgPerHour)} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{t.repEffUnitPcsPerHour}</span>
-          </p>
-        </div>
       </div>
-      <div className="h-3 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+    </article>
+  );
+}
+
+function MaterialFeedRow({ entry, t }: { entry: RawMaterialEntry; t: T }) {
+  const incoming = entry.type === 'incoming';
+  return (
+    <div
+      className={`flex flex-col gap-3 rounded-xl border p-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
+        incoming
+          ? 'border-blue-100/80 bg-blue-50/30 dark:border-blue-900/40 dark:bg-blue-950/20'
+          : 'border-orange-100/80 bg-orange-50/30 dark:border-orange-900/40 dark:bg-orange-950/20'
+      }`}
+    >
+      <div className="flex min-w-0 items-start gap-3">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-          style={{ width: `${pct}%` }}
-        />
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+            incoming ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400' : 'bg-orange-500/15 text-orange-600 dark:text-orange-400'
+          }`}
+        >
+          {incoming ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{entry.date}</span>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                incoming
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                  : 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300'
+              }`}
+            >
+              {incoming ? t.rmIncoming.replace('↓ ', '') : t.rmOutgoing.replace('↑ ', '')}
+            </span>
+          </div>
+          <p className="mt-1 line-clamp-2 text-sm text-slate-700 dark:text-slate-200">{entry.description || '—'}</p>
+        </div>
       </div>
-      <div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-        <span>
-          <span className="text-slate-600 dark:text-slate-300">{t.repEffTotalShort}</span> {formatNumber(actual)}
-        </span>
-        <span>
-          <span className="text-slate-600 dark:text-slate-300">{t.repEffLimitShort}</span> {formatNumber(max)}
-        </span>
+      <div className="shrink-0 text-right sm:pl-4">
+        <p className={`text-lg font-bold tabular-nums ${incoming ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+          {incoming ? '+' : '−'}
+          {formatNumber(entry.amount)}
+        </p>
+        <p className="text-xs text-slate-400">kg</p>
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-        {(t.repEffAssumedHours ?? '').replace('{{h}}', String(hoursAssumed))}
-      </p>
     </div>
   );
 }
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export function Reports() {
   const {
@@ -105,6 +286,7 @@ export function Reports() {
   } = useERP();
   const { t, filterData } = useApp();
   const [activeTab, setActiveTab] = useState('production');
+  const [materialSearch, setMaterialSearch] = useState('');
 
   const last7Days = getLast7Days();
 
@@ -141,11 +323,10 @@ export function Reports() {
   );
 
   const machineTypeById = useMemo(
-    () => new Map(state.machines.map(m => [m.id, m.type] as const)),
+    () => new Map(state.machines.map((m) => [m.id, m.type] as const)),
     [state.machines],
   );
 
-  /** Barcha ko‘rinadigan mahsulot turlari: katalog + partiyalar + smenalar */
   const productionSemiKeys = useMemo(() => {
     const s = new Set<string>();
     for (const p of semiCatalog) s.add(p.name);
@@ -188,11 +369,7 @@ export function Reports() {
     const out: BarSeries[] = [];
     let i = 0;
     for (const name of productionSemiKeys) {
-      out.push({
-        dataKey: semiRowKey(name),
-        name,
-        color: PIE_COLORS[i % PIE_COLORS.length],
-      });
+      out.push({ dataKey: semiRowKey(name), name, color: PIE_COLORS[i % PIE_COLORS.length] });
       i++;
     }
     for (const name of productionFinalKeys) {
@@ -230,17 +407,13 @@ export function Reports() {
         const pt = r.productType?.trim() || '';
         if (mt === 'semi') {
           let target = pt;
-          if (!target) {
-            target = semiCatalog[0]?.name ?? productionSemiKeys[0] ?? '18g';
-          }
+          if (!target) target = semiCatalog[0]?.name ?? productionSemiKeys[0] ?? '18g';
           const key = semiRowKey(target);
           if (row[key] === undefined) row[key] = 0;
           row[key] = Number(row[key]) + r.producedQty;
         } else if (mt === 'final') {
           let target = pt;
-          if (!target) {
-            target = finalCatalog[0]?.name ?? productionFinalKeys[0] ?? '0.5L';
-          }
+          if (!target) target = finalCatalog[0]?.name ?? productionFinalKeys[0] ?? '0.5L';
           const key = finalRowKey(target);
           if (row[key] === undefined) row[key] = 0;
           row[key] = Number(row[key]) + r.producedQty;
@@ -260,16 +433,58 @@ export function Reports() {
     finalCatalog,
   ]);
 
-  const salesData = useMemo(() => last7Days.map(date => ({
-    date: shortDate(date),
-    value: state.sales.filter(s => s.date === date).reduce((s, sale) => s + sale.total, 0) / 1000,
-  })), [state, last7Days]);
+  const production7Total = useMemo(
+    () =>
+      productionData.reduce(
+        (sum, row) =>
+          sum +
+          productionSeries.reduce((s, ser) => s + (Number(row[ser.dataKey]) || 0), 0),
+        0,
+      ),
+    [productionData, productionSeries],
+  );
 
-  const materialData = useMemo(() => last7Days.map(date => ({
-    date: shortDate(date),
-    incoming: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'incoming').reduce((s, e) => s + e.amount, 0),
-    outgoing: state.rawMaterialEntries.filter(e => e.date === date && e.type === 'outgoing').reduce((s, e) => s + e.amount, 0),
-  })), [state, last7Days]);
+  const salesData = useMemo(
+    () =>
+      last7Days.map((date) => ({
+        date: shortDate(date),
+        value: state.sales.filter((s) => s.date === date).reduce((s, sale) => s + sale.total, 0) / 1000,
+      })),
+    [state, last7Days],
+  );
+
+  const sales7Total = useMemo(
+    () =>
+      last7Days.reduce(
+        (sum, date) =>
+          sum + state.sales.filter((s) => s.date === date).reduce((s, sale) => s + sale.total, 0),
+        0,
+      ),
+    [state.sales, last7Days],
+  );
+
+  const materialData = useMemo(
+    () =>
+      last7Days.map((date) => ({
+        date: shortDate(date),
+        incoming: state.rawMaterialEntries
+          .filter((e) => e.date === date && e.type === 'incoming')
+          .reduce((s, e) => s + e.amount, 0),
+        outgoing: state.rawMaterialEntries
+          .filter((e) => e.date === date && e.type === 'outgoing')
+          .reduce((s, e) => s + e.amount, 0),
+      })),
+    [state, last7Days],
+  );
+
+  const material7In = useMemo(
+    () => materialData.reduce((s, d) => s + d.incoming, 0),
+    [materialData],
+  );
+  const material7Out = useMemo(
+    () => materialData.reduce((s, d) => s + d.outgoing, 0),
+    [materialData],
+  );
 
   const machineEfficiency = useMemo(() => {
     return state.machines.map((machine) => {
@@ -297,125 +512,219 @@ export function Reports() {
     });
   }, [state.machines, state.semiProductBatches, state.shiftRecords]);
 
+  const avgMachineEff = useMemo(() => {
+    if (machineEfficiency.length === 0) return 0;
+    const sum = machineEfficiency.reduce((s, m) => s + calcPercent(m.actual, m.max), 0);
+    return sum / machineEfficiency.length;
+  }, [machineEfficiency]);
+
   const totalRevenue = state.sales.reduce((s, sale) => s + sale.total, 0);
   const totalExpenses = state.expenses.reduce((s, e) => s + e.amount, 0);
-  const totalRawIn = state.rawMaterialEntries.filter(e => e.type === 'incoming').reduce((s, e) => s + e.amount, 0);
-  const totalRawOut = state.rawMaterialEntries.filter(e => e.type === 'outgoing').reduce((s, e) => s + e.amount, 0);
+  const totalRawIn = state.rawMaterialEntries.filter((e) => e.type === 'incoming').reduce((s, e) => s + e.amount, 0);
+  const totalRawOut = state.rawMaterialEntries.filter((e) => e.type === 'outgoing').reduce((s, e) => s + e.amount, 0);
 
-  const filteredRawEntries = filterData([...state.rawMaterialEntries]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const filteredRawEntries = useMemo(() => {
+    const sorted = filterData([...state.rawMaterialEntries]).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+    const q = materialSearch.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter(
+      (e) =>
+        e.description.toLowerCase().includes(q) ||
+        e.date.includes(q) ||
+        e.type.includes(q),
+    );
+  }, [state.rawMaterialEntries, filterData, materialSearch]);
+
+  const clientSalesRank = useMemo(
+    () =>
+      [...state.clients]
+        .map((client) => ({
+          client,
+          total: state.sales.filter((s) => s.clientId === client.id).reduce((s, sale) => s + sale.total, 0),
+        }))
+        .filter((row) => row.total > 0)
+        .sort((a, b) => b.total - a.total),
+    [state.clients, state.sales],
+  );
 
   const TABS = [
     { key: 'production', label: t.repTabProduction, icon: BarChart3 },
     { key: 'efficiency', label: t.repTabEfficiency, icon: TrendingUp },
     { key: 'sales', label: t.repTabSales, icon: FileText },
-    { key: 'material', label: t.repTabMaterial, icon: Cpu },
-  ];
+    { key: 'material', label: t.repTabMaterial, icon: Droplets },
+  ] as const;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden p-3 min-[400px]:p-4 lg:p-6">
-      {/* KPI */}
-      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[
-          { label: t.repRevenue, value: formatCurrency(totalRevenue), cls: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
-          { label: t.repExpenses, value: formatCurrency(totalExpenses), cls: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' },
-          { label: t.repProfit, value: formatCurrency(totalRevenue - totalExpenses), cls: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800' },
-          { label: t.repRawEff, value: totalRawIn > 0 ? ((totalRawOut / totalRawIn) * 100).toFixed(1) + '%' : '0%', cls: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
-        ].map(item => (
-          <div key={item.label} className={`rounded-2xl border p-5 shadow-sm ${item.bg}`}>
-            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">{item.label}</p>
-            <p className={`font-bold text-lg ${item.cls}`}>{item.value}</p>
-          </div>
-        ))}
+      {/* Header */}
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">{t.repTitle}</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t.repProdTitle.replace(/\(.*\)/, '').trim()} · KPI</p>
+        </div>
+      </header>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-4">
+        <ReportKpiCard
+          label={t.repRevenue}
+          value={formatCurrency(totalRevenue)}
+          icon={DollarSign}
+          accentBar="bg-emerald-500"
+          iconWrap="bg-emerald-500/15"
+          iconColor="text-emerald-600 dark:text-emerald-400"
+        />
+        <ReportKpiCard
+          label={t.repExpenses}
+          value={formatCurrency(totalExpenses)}
+          icon={Wallet}
+          accentBar="bg-rose-500"
+          iconWrap="bg-rose-500/15"
+          iconColor="text-rose-600 dark:text-rose-400"
+        />
+        <ReportKpiCard
+          label={t.repProfit}
+          value={formatCurrency(totalRevenue - totalExpenses)}
+          icon={PiggyBank}
+          accentBar="bg-violet-500"
+          iconWrap="bg-violet-500/15"
+          iconColor="text-violet-600 dark:text-violet-400"
+        />
+        <ReportKpiCard
+          label={t.repRawEff}
+          value={totalRawIn > 0 ? `${((totalRawOut / totalRawIn) * 100).toFixed(1)}%` : '0%'}
+          icon={Gauge}
+          accentBar="bg-sky-500"
+          iconWrap="bg-sky-500/15"
+          iconColor="text-sky-600 dark:text-sky-400"
+        />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setActiveTab(key)}
-            className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === key ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
-            <Icon size={15} /> {label}
-          </button>
-        ))}
+      {/* Pill tabs */}
+      <div className="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1.5 dark:border-slate-700/80 dark:bg-slate-800/60">
+        <div className="flex gap-1 overflow-x-auto">
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
+                activeTab === key
+                  ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              <Icon size={16} />
+              <span className="whitespace-nowrap">{label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* ── Production ── */}
       {activeTab === 'production' && (
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-2">{t.repProdTitle}</h3>
-            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-              {productionSeries.length === 0 ? (
-                <span className="text-xs text-slate-500 dark:text-slate-400">{t.noData}</span>
-              ) : (
-                productionSeries.map((s) => (
-                  <div key={s.dataKey} className="flex items-center gap-1.5">
-                    <span className="inline-block h-2 w-2 rounded-full" style={{ background: s.color }} />
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{s.name}</span>
-                  </div>
-                ))
-              )}
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repProdTitle.split('(')[0]?.trim()}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+                {formatNumber(production7Total)} <span className="text-sm font-normal text-slate-400">{t.unitPiece}</span>
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repSemiDist}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+                {formatNumber(semiDistData.reduce((s, x) => s + x.value, 0))}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repFinalDist}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-cyan-600 dark:text-cyan-400">
+                {formatNumber(finalDistData.reduce((s, x) => s + x.value, 0))}
+              </p>
+            </div>
+          </div>
+
+          <ReportPanel title={t.repProdTitle} subtitle={productionSeries.map((s) => s.name).join(' · ') || undefined}>
+            <div className="mb-4">
+              <LegendPills items={productionSeries.map((s) => ({ name: s.name, color: s.color }))} />
             </div>
             {productionSeries.length === 0 ? (
-              <div className="flex h-44 items-center justify-center rounded-lg border border-dashed border-slate-200 text-sm text-slate-500 dark:border-slate-600 dark:text-slate-400">
-                {t.noData}
-              </div>
+              <EmptyBlock message={t.noData} />
             ) : (
               <SimpleBarChart
                 data={productionData}
-                height={280}
+                height={300}
                 formatValue={(v) => formatNumber(v) + ' ' + t.unitPiece}
                 series={productionSeries}
               />
             )}
-          </div>
+          </ReportPanel>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[
-              { title: t.repSemiDist, data: semiDistData },
-              { title: t.repFinalDist, data: finalDistData },
-            ].map((chart) => (
-              <div key={chart.title} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-                <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{chart.title}</h3>
-                <div className="flex flex-col items-stretch gap-4 min-[420px]:flex-row min-[420px]:items-center sm:gap-6">
-                  <div className="flex shrink-0 justify-center min-[420px]:justify-start">
-                    <SimpleDonutChart data={chart.data} colors={PIE_COLORS} size={140} />
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {[ { title: t.repSemiDist, data: semiDistData }, { title: t.repFinalDist, data: finalDistData } ].map((chart) => (
+              <ReportPanel key={chart.title} title={chart.title}>
+                {chart.data.length === 0 || chart.data.every((d) => d.value === 0) ? (
+                  <EmptyBlock message={t.noData} />
+                ) : (
+                  <div className="flex flex-col items-center gap-6 min-[420px]:flex-row min-[420px]:items-start">
+                    <SimpleDonutChart data={chart.data} colors={PIE_COLORS} size={148} />
+                    <div className="w-full min-w-0 flex-1 space-y-2">
+                      {chart.data.map((item, i) => {
+                        const total = chart.data.reduce((s, x) => s + x.value, 0) || 1;
+                        const pct = (item.value / total) * 100;
+                        return (
+                          <div key={item.name} className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-900/40">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                                <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{item.name}</span>
+                              </div>
+                              <span className="shrink-0 text-sm font-bold tabular-nums text-slate-900 dark:text-white">{formatNumber(item.value)}</span>
+                            </div>
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                            </div>
+                            <p className="mt-1 text-right text-[10px] text-slate-400">{pct.toFixed(0)}%</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1 space-y-2">
-                    {chart.data.map((item, i) => (
-                      <div key={item.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                          />
-                          <span className="text-sm text-slate-600 dark:text-slate-400">{item.name}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-slate-800 dark:text-white">
-                          {formatNumber(item.value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                )}
+              </ReportPanel>
             ))}
           </div>
         </div>
       )}
 
+      {/* ── Efficiency ── */}
       {activeTab === 'efficiency' && (
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2"><TrendingUp size={16} className="text-indigo-500" /><h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.repEffTitle}</h3></div>
-              <span className="text-xs text-slate-400">{t.repEffFormula}</span>
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repEffTitle}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">{avgMachineEff.toFixed(1)}%</p>
+              <p className="text-xs text-slate-400">{state.machines.length} apparat</p>
             </div>
-            <div className="space-y-4">
-              {machineEfficiency.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/40 dark:text-slate-400">
-                  {t.repEffNoMachines}
-                </div>
-              ) : (
-                machineEfficiency.map(({ machine, actual, max, hoursAssumed, capacityPerHour }) => (
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repRawIn}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-blue-600 dark:text-blue-400">{formatNumber(totalRawIn)} kg</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.repRawOut}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-orange-600 dark:text-orange-400">{formatNumber(totalRawOut)} kg</p>
+            </div>
+          </div>
+
+          <ReportPanel title={t.repEffTitle} subtitle={t.repEffFormula}>
+            {machineEfficiency.length === 0 ? (
+              <EmptyBlock message={t.repEffNoMachines} />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {machineEfficiency.map(({ machine, actual, max, hoursAssumed, capacityPerHour }) => (
                   <EffBar
                     key={machine.id}
                     label={machine.name}
@@ -426,126 +735,174 @@ export function Reports() {
                     hoursAssumed={hoursAssumed}
                     t={t}
                   />
-                ))
-              )}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{t.repRawTitle}</h3>
-            <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-3 sm:gap-4">
+                ))}
+              </div>
+            )}
+          </ReportPanel>
+
+          <ReportPanel title={t.repRawTitle}>
+            <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-3">
               {[
-                { label: t.repRawIn, val: `${formatNumber(totalRawIn)} kg`, cls: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
-                { label: t.repRawOut, val: `${formatNumber(totalRawOut)} kg`, cls: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },
-                { label: t.repRawEffLabel, val: `${totalRawIn > 0 ? ((totalRawOut / totalRawIn) * 100).toFixed(1) : 0}%`, cls: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
-              ].map(item => (
-                <div key={item.label} className={`text-center p-4 rounded-xl border ${item.bg}`}>
-                  <p className={`text-xs mb-1 ${item.cls}`}>{item.label}</p>
-                  <p className="text-slate-900 dark:text-white text-xl font-bold">{item.val}</p>
+                { label: t.repRawIn, val: formatNumber(totalRawIn), unit: 'kg', cls: 'text-blue-600 dark:text-blue-400', ring: 'stroke-blue-500' },
+                { label: t.repRawOut, val: formatNumber(totalRawOut), unit: 'kg', cls: 'text-orange-600 dark:text-orange-400', ring: 'stroke-orange-500' },
+                {
+                  label: t.repRawEffLabel,
+                  val: totalRawIn > 0 ? ((totalRawOut / totalRawIn) * 100).toFixed(1) : '0',
+                  unit: '%',
+                  cls: 'text-emerald-600 dark:text-emerald-400',
+                  ring: 'stroke-emerald-500',
+                },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 text-center dark:border-slate-600 dark:bg-slate-900/30">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
+                  <p className={`mt-2 text-2xl font-bold tabular-nums ${item.cls}`}>
+                    {item.val}
+                    <span className="ml-1 text-sm font-normal text-slate-400">{item.unit}</span>
+                  </p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-blue-500" style={{ width: `${totalRawIn > 0 ? (totalRawOut / totalRawIn) * 100 : 0}%` }} />
+            <div className="mt-5">
+              <div className="mb-2 flex justify-between text-xs text-slate-500">
+                <span>{t.repRawEffLabel}</span>
+                <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+                  {totalRawIn > 0 ? ((totalRawOut / totalRawIn) * 100).toFixed(1) : 0}%
+                </span>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-700"
+                  style={{ width: `${totalRawIn > 0 ? Math.min(100, (totalRawOut / totalRawIn) * 100) : 0}%` }}
+                />
+              </div>
             </div>
-          </div>
+          </ReportPanel>
         </div>
       )}
 
+      {/* ── Sales ── */}
       {activeTab === 'sales' && (
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-5">{t.repSalesTitle}</h3>
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white p-5 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:to-slate-800">
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700/80 dark:text-emerald-400">{t.repSalesTitle.split('(')[0]?.trim()}</p>
+              <p className="mt-2 text-3xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{formatCurrency(sales7Total)}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.repClientsTitle}</p>
+              <p className="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">{clientSalesRank.length}</p>
+              <p className="text-xs text-slate-400">{t.repRevenue}: {formatCurrency(totalRevenue)}</p>
+            </div>
+          </div>
+
+          <ReportPanel title={t.repSalesTitle}>
             <SimpleLineChart
               data={salesData}
               dataKey="value"
               name={t.navSales}
               color="#10b981"
-              height={240}
-              formatValue={v => formatCurrency(v * 1000)}
-              formatYTick={v => v.toFixed(0) + 'k'}
+              height={280}
+              formatValue={(v) => formatCurrency(v * 1000)}
+              formatYTick={(v) => v.toFixed(0) + 'k'}
             />
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-4">{t.repClientsTitle}</h3>
-            <div className="space-y-3">
-              {state.clients.map(client => {
-                const clientSales = state.sales.filter(s => s.clientId === client.id).reduce((s, sale) => s + sale.total, 0);
-                const pct = totalRevenue > 0 ? (clientSales / totalRevenue) * 100 : 0;
-                return (
-                  <div key={client.id}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm text-slate-700 dark:text-slate-300">{client.name}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-slate-400">{pct.toFixed(1)}%</span>
-                        <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(clientSales)}</span>
+          </ReportPanel>
+
+          <ReportPanel title={t.repClientsTitle}>
+            {clientSalesRank.length === 0 ? (
+              <EmptyBlock message={t.noData} />
+            ) : (
+              <div className="space-y-3">
+                {clientSalesRank.map(({ client, total }, idx) => {
+                  const pct = totalRevenue > 0 ? (total / totalRevenue) * 100 : 0;
+                  return (
+                    <div
+                      key={client.id}
+                      className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-600/60 dark:bg-slate-900/30"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                        {idx + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate font-semibold text-slate-800 dark:text-slate-100">{client.name}</p>
+                          <p className="shrink-0 font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(total)}</p>
+                        </div>
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                        <p className="mt-1 text-right text-[10px] text-slate-400">{pct.toFixed(1)}%</p>
                       </div>
                     </div>
-                    <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                  );
+                })}
+              </div>
+            )}
+          </ReportPanel>
         </div>
       )}
 
+      {/* ── Material ── */}
       {activeTab === 'material' && (
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm mb-2">{t.repMatTitle}</h3>
-            <div className="flex items-center gap-4 mb-3">
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.rmIncoming.replace('↓ ', '')}</span></div>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block" /><span className="text-xs text-slate-500 dark:text-slate-400">{t.rmOutgoing.replace('↑ ', '')}</span></div>
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-4 dark:border-blue-900/40 dark:bg-blue-950/20">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{t.repRawIn} (7 kun)</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-300">{formatNumber(material7In)} kg</p>
             </div>
-            <SimpleBarChart
-              data={materialData}
-              height={260}
-              formatValue={v => formatNumber(v) + ' kg'}
-              series={[
-                { dataKey: 'incoming', name: t.rmIncoming.replace('↓ ', ''), color: '#3b82f6' },
-                { dataKey: 'outgoing', name: t.rmOutgoing.replace('↑ ', ''), color: '#f97316' },
-              ]}
-            />
+            <div className="rounded-2xl border border-orange-200/80 bg-orange-50/40 p-4 dark:border-orange-900/40 dark:bg-orange-950/20">
+              <p className="text-xs font-semibold uppercase tracking-wide text-orange-600 dark:text-orange-400">{t.repRawOut} (7 kun)</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-orange-700 dark:text-orange-300">{formatNumber(material7Out)} kg</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.layoutSiroRemaining}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{formatNumber(rawMaterialStock)} kg</p>
+            </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.repMatTable}</h3>
+          <ReportPanel title={t.repMatTitle}>
+            <LegendPills
+              items={[
+                { name: t.rmIncoming.replace('↓ ', ''), color: '#3b82f6' },
+                { name: t.rmOutgoing.replace('↑ ', ''), color: '#f97316' },
+              ]}
+            />
+            <div className="mt-4">
+              <SimpleBarChart
+                data={materialData}
+                height={280}
+                formatValue={(v) => formatNumber(v) + ' kg'}
+                series={[
+                  { dataKey: 'incoming', name: t.rmIncoming.replace('↓ ', ''), color: '#3b82f6' },
+                  { dataKey: 'outgoing', name: t.rmOutgoing.replace('↑ ', ''), color: '#f97316' },
+                ]}
+              />
+            </div>
+          </ReportPanel>
+
+          <ReportPanel
+            title={t.repMatTable}
+            subtitle={`${filteredRawEntries.length} ${t.repMatTable.toLowerCase()}`}
+          >
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-600 dark:bg-slate-900/40">
+              <Search size={16} className="shrink-0 text-slate-400" />
+              <input
+                type="search"
+                value={materialSearch}
+                onChange={(e) => setMaterialSearch(e.target.value)}
+                placeholder={t.colNote}
+                className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100"
+              />
             </div>
             {filteredRawEntries.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-slate-400 text-sm">{t.noData}</div>
+              <EmptyBlock message={t.noData} />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-700/50">
-                      {[t.colDate, t.colType, t.colAmount, t.colNote].map((h, i) => (
-                        <th key={h} className={`text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 ${i === 3 ? 'hidden md:table-cell' : ''}`}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRawEntries.map((entry, idx) => (
-                      <tr key={entry.id} className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${idx % 2 !== 0 ? 'bg-slate-50/40 dark:bg-slate-800/40' : ''}`}>
-                        <td className="px-4 py-3 text-xs text-slate-500">{entry.date}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-lg font-medium ${entry.type === 'incoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
-                            {entry.type === 'incoming' ? t.rmIncoming : t.rmOutgoing}
-                          </span>
-                        </td>
-                        <td className={`px-4 py-3 text-right text-sm font-semibold ${entry.type === 'incoming' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                          {entry.type === 'incoming' ? '+' : '-'}{formatNumber(entry.amount)}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell max-w-xs truncate">{entry.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="max-h-[28rem] space-y-2 overflow-y-auto pr-1">
+                {filteredRawEntries.map((entry) => (
+                  <MaterialFeedRow key={entry.id} entry={entry} t={t} />
+                ))}
               </div>
             )}
-          </div>
+          </ReportPanel>
         </div>
       )}
     </div>

@@ -16,8 +16,10 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto.js';
+import { CreateExpenseFundingSourceDto } from './dto/create-expense-funding-source.dto.js';
 import { CreateExpenseDto } from './dto/create-expense.dto.js';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto.js';
+import { UpdateExpenseFundingSourceDto } from './dto/update-expense-funding-source.dto.js';
 import { UpdateExpenseDto } from './dto/update-expense.dto.js';
 import { GenerateSalaryDto } from './dto/generate-salary.dto.js';
 import { SetMonthPaidDto } from './dto/set-month-paid.dto.js';
@@ -70,6 +72,33 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   deleteExpenseCategory(@Param('id') id: string) {
     return this.financeService.deleteExpenseCategory(id);
+  }
+
+  @Get('expenses/funding-sources')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getExpenseFundingSources() {
+    return this.financeService.getExpenseFundingSources();
+  }
+
+  @Post('expenses/funding-sources')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createExpenseFundingSource(@Body() dto: CreateExpenseFundingSourceDto) {
+    return this.financeService.createExpenseFundingSource(dto);
+  }
+
+  @Patch('expenses/funding-sources/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateExpenseFundingSource(
+    @Param('id') id: string,
+    @Body() dto: UpdateExpenseFundingSourceDto,
+  ) {
+    return this.financeService.updateExpenseFundingSource(id, dto);
+  }
+
+  @Delete('expenses/funding-sources/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteExpenseFundingSource(@Param('id') id: string) {
+    return this.financeService.deleteExpenseFundingSource(id);
   }
 
   @Get('expenses')

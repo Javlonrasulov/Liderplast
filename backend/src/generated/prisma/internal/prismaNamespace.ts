@@ -410,6 +410,7 @@ export const ModelName = {
   OrderItem: 'OrderItem',
   Payment: 'Payment',
   ExpenseCategory: 'ExpenseCategory',
+  ExpenseFundingSource: 'ExpenseFundingSource',
   Expense: 'Expense',
   RawMaterialPurchaseOrder: 'RawMaterialPurchaseOrder',
   Supplier: 'Supplier',
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expenseFundingSource" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2368,6 +2369,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ExpenseFundingSource: {
+      payload: Prisma.$ExpenseFundingSourcePayload<ExtArgs>
+      fields: Prisma.ExpenseFundingSourceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ExpenseFundingSourceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ExpenseFundingSourceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        findFirst: {
+          args: Prisma.ExpenseFundingSourceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ExpenseFundingSourceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        findMany: {
+          args: Prisma.ExpenseFundingSourceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>[]
+        }
+        create: {
+          args: Prisma.ExpenseFundingSourceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        createMany: {
+          args: Prisma.ExpenseFundingSourceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ExpenseFundingSourceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>[]
+        }
+        delete: {
+          args: Prisma.ExpenseFundingSourceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        update: {
+          args: Prisma.ExpenseFundingSourceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        deleteMany: {
+          args: Prisma.ExpenseFundingSourceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ExpenseFundingSourceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ExpenseFundingSourceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>[]
+        }
+        upsert: {
+          args: Prisma.ExpenseFundingSourceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpenseFundingSourcePayload>
+        }
+        aggregate: {
+          args: Prisma.ExpenseFundingSourceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateExpenseFundingSource>
+        }
+        groupBy: {
+          args: Prisma.ExpenseFundingSourceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpenseFundingSourceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ExpenseFundingSourceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpenseFundingSourceCountAggregateOutputType> | number
+        }
+      }
+    }
     Expense: {
       payload: Prisma.$ExpensePayload<ExtArgs>
       fields: Prisma.ExpenseFieldRefs
@@ -3931,6 +4006,16 @@ export const ExpenseCategoryScalarFieldEnum = {
 export type ExpenseCategoryScalarFieldEnum = (typeof ExpenseCategoryScalarFieldEnum)[keyof typeof ExpenseCategoryScalarFieldEnum]
 
 
+export const ExpenseFundingSourceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ExpenseFundingSourceScalarFieldEnum = (typeof ExpenseFundingSourceScalarFieldEnum)[keyof typeof ExpenseFundingSourceScalarFieldEnum]
+
+
 export const ExpenseScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -3944,6 +4029,7 @@ export const ExpenseScalarFieldEnum = {
   createdById: 'createdById',
   updatedById: 'updatedById',
   categoryId: 'categoryId',
+  fundingSourceId: 'fundingSourceId',
   sourceShiftId: 'sourceShiftId'
 } as const
 
@@ -4864,6 +4950,7 @@ export type GlobalOmitConfig = {
   orderItem?: Prisma.OrderItemOmit
   payment?: Prisma.PaymentOmit
   expenseCategory?: Prisma.ExpenseCategoryOmit
+  expenseFundingSource?: Prisma.ExpenseFundingSourceOmit
   expense?: Prisma.ExpenseOmit
   rawMaterialPurchaseOrder?: Prisma.RawMaterialPurchaseOrderOmit
   supplier?: Prisma.SupplierOmit

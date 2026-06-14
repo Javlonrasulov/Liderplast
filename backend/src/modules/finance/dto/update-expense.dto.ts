@@ -25,4 +25,9 @@ export class UpdateExpenseDto {
   @IsOptional()
   @IsDateString()
   incurredAt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  fundingSourceId?: string;
 }

@@ -239,12 +239,20 @@ export interface ExpenseCategory {
   createdAt: string;
 }
 
+export interface ExpenseFundingSource {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface Expense {
   id: string;
   date: string;
   type: 'electricity' | 'caps' | 'packaging' | 'other';
   categoryId: string;
   categoryName: string;
+  fundingSourceId?: string;
+  fundingSourceName?: string;
   electricityCalc?: boolean;
   amount: number;
   description: string;
@@ -542,6 +550,7 @@ export interface ERPState {
   sales: Sale[];
   expenses: Expense[];
   expenseCategories: ExpenseCategory[];
+  expenseFundingSources: ExpenseFundingSource[];
   suppliers: Supplier[];
   supplierPurchaseOrders: SupplierPurchaseOrder[];
   machines: Machine[];
@@ -680,6 +689,7 @@ type ERPAction =
       type: 'ADD_EXPENSE';
       payload: {
         categoryId: string;
+        fundingSourceId: string;
         amount: number;
         description: string;
         machineId?: string;
@@ -691,11 +701,15 @@ type ERPAction =
   | { type: 'ADD_EXPENSE_CATEGORY'; payload: { name: string } }
   | { type: 'UPDATE_EXPENSE_CATEGORY'; payload: { id: string; name: string } }
   | { type: 'DELETE_EXPENSE_CATEGORY'; payload: string }
+  | { type: 'ADD_EXPENSE_FUNDING_SOURCE'; payload: { name: string } }
+  | { type: 'UPDATE_EXPENSE_FUNDING_SOURCE'; payload: { id: string; name: string } }
+  | { type: 'DELETE_EXPENSE_FUNDING_SOURCE'; payload: string }
   | {
       type: 'UPDATE_EXPENSE';
       payload: {
         id: string;
         categoryId?: string;
+        fundingSourceId?: string;
         amount?: number;
         description?: string;
         date?: string;
@@ -888,6 +902,7 @@ const emptyState: ERPState = {
   sales: [],
   expenses: [],
   expenseCategories: [],
+  expenseFundingSources: [],
   suppliers: [],
   supplierPurchaseOrders: [],
   machines: [],
@@ -1327,6 +1342,13 @@ type BackendExpenseCategory = {
   createdAt: string;
 };
 
+type BackendExpenseFundingSource = {
+  id: string;
+  name: string;
+  deletedAt: string | null;
+  createdAt: string;
+};
+
 type BackendExpense = {
   id: string;
   type: 'ELECTRICITY' | 'CAPS' | 'PACKAGING' | 'OTHER';
@@ -1338,6 +1360,8 @@ type BackendExpense = {
   updatedAt?: string;
   categoryId?: string | null;
   category?: BackendExpenseCategory | null;
+  fundingSourceId?: string | null;
+  fundingSource?: BackendExpenseFundingSource | null;
   sourceShiftId?: string | null;
   createdBy?: { fullName: string } | null;
   updatedBy?: { fullName: string } | null;
@@ -1933,6 +1957,14 @@ async function fetchExpenseCategoriesSafe(): Promise<BackendExpenseCategory[]> {
   }
 }
 
+async function fetchExpenseFundingSourcesSafe(): Promise<BackendExpenseFundingSource[]> {
+  try {
+    return await apiRequest<BackendExpenseFundingSource[]>('/finance/expenses/funding-sources');
+  } catch {
+    return [];
+  }
+}
+
 async function fetchSuppliersSafe(): Promise<BackendSupplier[]> {
   try {
     return await apiRequest<BackendSupplier[]>('/finance/suppliers');
@@ -2071,6 +2103,18 @@ async function mutateExpenseCategoryApi(
   throw lastError;
 }
 
+async function mutateExpenseFundingSourceApi(
+  method: 'POST' | 'PATCH' | 'DELETE',
+  id: string | undefined,
+  body?: { name?: string },
+): Promise<void> {
+  const suffix = id ? `/${id}` : '';
+  await apiRequest(`/finance/expenses/funding-sources${suffix}`, {
+    method,
+    ...(method === 'DELETE' ? {} : { body: JSON.stringify(body ?? {}) }),
+  });
+}
+
 /**
  * Foydalanuvchining ruxsatlari yetmaydigan endpointlarga umuman so‘rov yubormaymiz —
  * shu tariqa konsoldagi 403 (Forbidden) shovqini ham yo‘qoladi va sahifa tezroq yuklanadi.
@@ -2087,6 +2131,9 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
   const expenseCategoriesPromise = allow('expenses')
     ? fetchExpenseCategoriesSafe()
     : skipped<BackendExpenseCategory[]>([]);
+  const expenseFundingSourcesPromise = allow('expenses')
+    ? fetchExpenseFundingSourcesSafe()
+    : skipped<BackendExpenseFundingSource[]>([]);
   const suppliersPromise = allow('suppliers')
     ? fetchSuppliersSafe()
     : skipped<BackendSupplier[]>([]);
@@ -2196,6 +2243,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
   ]);
 
   const expenseCategories = await expenseCategoriesPromise;
+  const expenseFundingSources = await expenseFundingSourcesPromise;
 
   const nameToRawMaterialId = new Map(catalog.rawMaterials.map((r) => [r.name, r.id]));
 
@@ -2368,12 +2416,20 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     createdAt: c.createdAt,
   }));
 
+  const mappedExpenseFundingSources: ExpenseFundingSource[] = expenseFundingSources.map((s) => ({
+    id: s.id,
+    name: s.name,
+    createdAt: s.createdAt,
+  }));
+
   const mappedExpenses: Expense[] = expenses.map((expense) => ({
     id: expense.id,
     date: toLocalDateString(expense.incurredAt),
     type: expense.type.toLowerCase() as Expense['type'],
     categoryId: expense.categoryId ?? '',
     categoryName: expense.category?.name ?? legacyExpenseLabel[expense.type],
+    fundingSourceId: expense.fundingSourceId ?? undefined,
+    fundingSourceName: expense.fundingSource?.name ?? undefined,
     electricityCalc: expense.category?.electricityCalc ?? expense.type === 'ELECTRICITY',
     amount: expense.amount,
     description: expense.description ?? expense.title,
@@ -2525,6 +2581,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     sales,
     expenses: mappedExpenses,
     expenseCategories: mappedExpenseCategories,
+    expenseFundingSources: mappedExpenseFundingSources,
     suppliers: suppliersState,
     supplierPurchaseOrders: supplierPurchaseOrdersState,
     machines: mappedMachines,
@@ -2785,6 +2842,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({
               title,
               categoryId: action.payload.categoryId,
+              fundingSourceId: action.payload.fundingSourceId,
               amount: action.payload.amount,
               description: action.payload.description,
               incurredAt: action.payload.date,
@@ -2796,6 +2854,9 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           const body: Record<string, unknown> = {};
           if (action.payload.categoryId !== undefined) {
             body.categoryId = action.payload.categoryId;
+          }
+          if (action.payload.fundingSourceId !== undefined) {
+            body.fundingSourceId = action.payload.fundingSourceId;
           }
           if (action.payload.amount !== undefined) {
             body.amount = action.payload.amount;
@@ -2904,6 +2965,19 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           break;
         case 'DELETE_EXPENSE_CATEGORY':
           await mutateExpenseCategoryApi('DELETE', action.payload);
+          break;
+        case 'ADD_EXPENSE_FUNDING_SOURCE':
+          await mutateExpenseFundingSourceApi('POST', undefined, {
+            name: action.payload.name,
+          });
+          break;
+        case 'UPDATE_EXPENSE_FUNDING_SOURCE':
+          await mutateExpenseFundingSourceApi('PATCH', action.payload.id, {
+            name: action.payload.name,
+          });
+          break;
+        case 'DELETE_EXPENSE_FUNDING_SOURCE':
+          await mutateExpenseFundingSourceApi('DELETE', action.payload);
           break;
         case 'ADD_PAYMENT':
           await apiRequest('/payments', {

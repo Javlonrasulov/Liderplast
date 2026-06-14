@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp, DatePreset } from '../i18n/app-context';
 import { Language } from '../i18n/translations';
+import { useERP } from '../store/erp-store';
 import { getAppCalendarParts, todayYmd } from '../utils/format';
 
 // ─── Localized data ──────────────────────────────────────────────────────────
@@ -64,9 +65,71 @@ function fmtShort(dateStr: string) {
   return `${d}.${m}`;
 }
 
+interface DayActivity {
+  production: boolean;
+  sales: boolean;
+  purchase: boolean;
+}
+
+function buildActivityByDate(
+  semiProductBatches: { date: string }[],
+  finalProductBatches: { date: string }[],
+  shiftRecords: { date: string; producedQty: number }[],
+  productionHistory: { date: string }[],
+  sales: { date: string }[],
+  supplierPurchaseOrders: { orderedAt: string }[],
+): Map<string, DayActivity> {
+  const map = new Map<string, DayActivity>();
+
+  const mark = (date: string, key: keyof DayActivity) => {
+    if (!date) return;
+    const entry = map.get(date) ?? { production: false, sales: false, purchase: false };
+    entry[key] = true;
+    map.set(date, entry);
+  };
+
+  for (const b of semiProductBatches) mark(b.date, 'production');
+  for (const b of finalProductBatches) mark(b.date, 'production');
+  for (const r of shiftRecords) {
+    if (r.producedQty > 0) mark(r.date, 'production');
+  }
+  for (const p of productionHistory) mark(p.date, 'production');
+  for (const s of sales) mark(s.date, 'sales');
+  for (const o of supplierPurchaseOrders) mark(o.orderedAt.slice(0, 10), 'purchase');
+
+  return map;
+}
+
+const ACTIVITY_DOTS: { key: keyof DayActivity; className: string }[] = [
+  { key: 'production', className: 'bg-emerald-500' },
+  { key: 'sales', className: 'bg-amber-500' },
+  { key: 'purchase', className: 'bg-violet-500' },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export function DateFilterPicker() {
   const { t, lang, dateFilter, setPreset, setCustomRange, filterLabel } = useApp();
+  const { state } = useERP();
+
+  const activityByDate = useMemo(
+    () =>
+      buildActivityByDate(
+        state.semiProductBatches,
+        state.finalProductBatches,
+        state.shiftRecords,
+        state.productionHistory,
+        state.sales,
+        state.supplierPurchaseOrders,
+      ),
+    [
+      state.semiProductBatches,
+      state.finalProductBatches,
+      state.shiftRecords,
+      state.productionHistory,
+      state.sales,
+      state.supplierPurchaseOrders,
+    ],
+  );
 
   const [open, setOpen] = useState(false);
   const [viewYear, setViewYear] = useState(() => {
@@ -275,7 +338,10 @@ export function DateFilterPicker() {
                 const isStartEdge   = isStart && !isSingle;
                 const isEndEdge     = isEnd && !isSingle;
 
-                let cellClass = `relative h-8 w-full flex items-center justify-center text-xs transition-colors select-none ${
+                const activity = activityByDate.get(cell.dateStr);
+                const hasDots = activity && (activity.production || activity.sales || activity.purchase);
+
+                let cellClass = `relative h-10 w-full flex flex-col items-center justify-center text-xs transition-colors select-none ${
                   isFuture ? 'cursor-not-allowed' : 'cursor-pointer'
                 } `;
                 let innerClass = 'relative z-10 w-7 h-7 flex items-center justify-center rounded-full transition-all ';
@@ -316,6 +382,16 @@ export function DateFilterPicker() {
                     onMouseLeave={() => pickPhase === 'end' && setHoverDate('')}
                   >
                     <div className={innerClass}>{cell.day}</div>
+                    {hasDots && (
+                      <div className="mt-0.5 flex items-center justify-center gap-0.5">
+                        {ACTIVITY_DOTS.filter(d => activity![d.key]).map(d => (
+                          <span
+                            key={d.key}
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ring-1 ring-white/80 dark:ring-slate-900/80 ${d.className}`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -327,6 +403,23 @@ export function DateFilterPicker() {
                 {t.dfTo}... →
               </p>
             )}
+
+            {/* Activity dot legend */}
+            <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              {([
+                { key: 'production', className: 'bg-emerald-500', label: t.dfDotProduction },
+                { key: 'sales', className: 'bg-amber-500', label: t.dfDotSales },
+                { key: 'purchase', className: 'bg-violet-500', label: t.dfDotPurchase },
+              ] as const).map(item => (
+                <span
+                  key={item.key}
+                  className="inline-flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500"
+                >
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${item.className}`} />
+                  {item.label}
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Footer */}

@@ -361,6 +361,9 @@ export interface T {
   dfApply: string;
   dfShowing: string;
   dfAllTime: string;
+  dfDotProduction: string;
+  dfDotSales: string;
+  dfDotPurchase: string;
 
   /** Смена сақлаш — backend `ERR::` кодлари (омбор / ретсепт) */
   apiShiftProductTypeRequired: string;
@@ -955,6 +958,22 @@ export interface T {
   exExternalOrderManualBlocked: string;
   /** Diagramma va yuqori statistika barcha vaqt; tarix jadvali sana filtri bo‘yicha */
   exPageStatsNote: string;
+  exTrendTitle: string;
+  exTrendWeek: string;
+  exTrendMonth: string;
+  exTrendYear: string;
+  exTopCategories: string;
+  exFundingSourceLabel: string;
+  exFundingSourcesTitle: string;
+  exFundingSourceAdd: string;
+  exFundingSourceName: string;
+  exFundingSourceDelete: string;
+  exFundingSourceDeleteTitle: string;
+  exFundingSourceDeleteHint: string;
+  exNoFundingSources: string;
+  exFundingSourceRequired: string;
+  exFundingReportTitle: string;
+  exHistoryColFundingSource: string;
   exNoMachinesElectric: string;
   exGlobalElectricityPriceTitle: string;
   exShiftElectricityExplain: string;
@@ -1697,13 +1716,16 @@ const uz_cyrillic: T = {
   dfTitle: 'Сана оралиғи',
   dfToday: 'Бугун',
   dfWeek: 'Бу ҳафта',
-  dfMonth: 'Б ой',
+  dfMonth: 'Бу ой',
   dfAll: 'Барчаси',
   dfFrom: 'Дан',
   dfTo: 'Гача',
   dfApply: 'Қўллаш',
   dfShowing: 'Кўрсатилмоқда:',
   dfAllTime: 'Барча вақт',
+  dfDotProduction: 'Ишлаб чиқариш',
+  dfDotSales: 'Сотув',
+  dfDotPurchase: 'Сотиб олиш',
 
   apiShiftProductTypeRequired: 'Маҳсулот тури киритилиши керак',
   apiShiftMachineRequired: 'Аппарат танланиши керак',
@@ -2282,6 +2304,22 @@ const uz_cyrillic: T = {
     '«Хом ашё ташқи буюртма» фақат ташқи буюртма берилганда харажатга қўшилади — бу ерда қўлда киритилмайди.',
   exPageStatsNote:
     'Диаграмма ва юқори статистика — барча вақт. «Тарих» жадвали — танланган сана фильтри бўйича.',
+  exTrendTitle: 'Харажатлар динамикаси',
+  exTrendWeek: 'Ҳафталик',
+  exTrendMonth: 'Ойлик',
+  exTrendYear: 'Йиллик',
+  exTopCategories: 'Топ категориялар',
+  exFundingSourceLabel: 'Пул қаердан олинади',
+  exFundingSourcesTitle: 'Пул манбалари',
+  exFundingSourceAdd: 'Янги манба',
+  exFundingSourceName: 'Манба номи',
+  exFundingSourceDelete: 'Ўчириш',
+  exFundingSourceDeleteTitle: 'Манбани рўйхатдан оламизми?',
+  exFundingSourceDeleteHint: 'Манба рўйхатдан олинади; тарихдаги ёзувлар сақланади.',
+  exNoFundingSources: 'Пул манбаси йўқ. Аввал манба яратинг.',
+  exFundingSourceRequired: 'Пул манбаини танланг',
+  exFundingReportTitle: 'Пул манбаси бўйича ҳисобот',
+  exHistoryColFundingSource: 'Пул манбаси',
   exNoMachinesElectric:
     'Электр харажати учун ишлаб чиқариш машиналари рўйхати бўш. Админ `/production/machines` орқали машина қўшсин.',
   exGlobalElectricityPriceTitle: 'kVt·soat narxi (барча электр учун)',
@@ -3020,6 +3058,9 @@ const uz_latin: T = {
   dfApply: "Qo'llash",
   dfShowing: "Ko'rsatilmoqda:",
   dfAllTime: 'Barcha vaqt',
+  dfDotProduction: 'Ishlab chiqarish',
+  dfDotSales: 'Sotuv',
+  dfDotPurchase: 'Sotib olish',
 
   apiShiftProductTypeRequired: 'Mahsulot turi kiritilishi kerak',
   apiShiftMachineRequired: 'Apparat tanlanishi kerak',
@@ -3599,6 +3640,22 @@ const uz_latin: T = {
     "«Xom ashyo tashqi buyurtma» faqat tashqi buyurtma berilganda xarajatga qo'shiladi — bu yerda qo'lda kiritilmaydi.",
   exPageStatsNote:
     "Diagramma va yuqori statistika — barcha vaqt. «Tarix» jadvali — tanlangan sana filtri bo'yicha.",
+  exTrendTitle: 'Xarajatlar dinamikasi',
+  exTrendWeek: 'Haftalik',
+  exTrendMonth: 'Oylik',
+  exTrendYear: 'Yillik',
+  exTopCategories: 'Top kategoriyalar',
+  exFundingSourceLabel: 'Pul qayerdan olinadi',
+  exFundingSourcesTitle: 'Pul manbalari',
+  exFundingSourceAdd: 'Yangi manba',
+  exFundingSourceName: 'Manba nomi',
+  exFundingSourceDelete: "O'chirish",
+  exFundingSourceDeleteTitle: "Manbani ro'yxatdan olamizmi?",
+  exFundingSourceDeleteHint: "Manba ro'yxatdan olinadi; tarixdagi yozuvlar saqlanadi.",
+  exNoFundingSources: "Pul manbai yo'q. Avval manba yarating.",
+  exFundingSourceRequired: 'Pul manbaini tanlang',
+  exFundingReportTitle: "Pul manbai bo'yicha hisobot",
+  exHistoryColFundingSource: 'Pul manbai',
   exNoMachinesElectric:
     "Elektr xarajati uchun ishlab chiqarish mashinalari ro'yxati bo'sh. Admin `/production/machines` orqali mashina qo'shsin.",
   exGlobalElectricityPriceTitle: "kVt·soat narxi (barcha elektr uchun)",
@@ -4337,6 +4394,9 @@ const ru: T = {
   dfApply: 'Применить',
   dfShowing: 'Отображается:',
   dfAllTime: 'Всё время',
+  dfDotProduction: 'Производство',
+  dfDotSales: 'Продажи',
+  dfDotPurchase: 'Закупка',
 
   apiShiftProductTypeRequired: 'Нужно указать тип продукции',
   apiShiftMachineRequired: 'Нужно выбрать аппарат',
@@ -4915,6 +4975,22 @@ const ru: T = {
     '«Сырьё: внешний заказ» добавляется в расходы только при создании внешнего заказа — вручную здесь не вводится.',
   exPageStatsNote:
     'Диаграмма и сводка сверху — за всё время. Таблица «История» — по выбранному фильтру дат.',
+  exTrendTitle: 'Динамика расходов',
+  exTrendWeek: 'Понедельно',
+  exTrendMonth: 'Помесячно',
+  exTrendYear: 'По годам',
+  exTopCategories: 'Топ категорий',
+  exFundingSourceLabel: 'Откуда берутся деньги',
+  exFundingSourcesTitle: 'Источники средств',
+  exFundingSourceAdd: 'Новый источник',
+  exFundingSourceName: 'Название источника',
+  exFundingSourceDelete: 'Удалить',
+  exFundingSourceDeleteTitle: 'Удалить источник из списка?',
+  exFundingSourceDeleteHint: 'Источник исчезнет из списка; записи в истории сохранятся.',
+  exNoFundingSources: 'Нет источников средств. Сначала создайте источник.',
+  exFundingSourceRequired: 'Выберите источник средств',
+  exFundingReportTitle: 'Отчёт по источникам средств',
+  exHistoryColFundingSource: 'Источник средств',
   exNoMachinesElectric:
     'Для расхода на электроэнергию список станков пуст. Пусть администратор добавит станки в `/production/machines`.',
   exGlobalElectricityPriceTitle: 'Цена за кВт·ч (вся электроэнергия)',
