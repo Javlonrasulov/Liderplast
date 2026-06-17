@@ -101,6 +101,15 @@ export const BankTransactionType = {
 export type BankTransactionType = (typeof BankTransactionType)[keyof typeof BankTransactionType]
 
 
+export const KassaEntryType = {
+  CLIENT_INFLOW: 'CLIENT_INFLOW',
+  SALE_DEDUCTION: 'SALE_DEDUCTION',
+  OUTFLOW: 'OUTFLOW'
+} as const
+
+export type KassaEntryType = (typeof KassaEntryType)[keyof typeof KassaEntryType]
+
+
 export const ProductionStage = {
   SEMI: 'SEMI',
   FINISHED: 'FINISHED'

@@ -3,7 +3,7 @@ import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Pencil, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
-  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar,
+  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar, Wallet,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useERP } from '../store/erp-store';
@@ -20,7 +20,7 @@ import {
   EMPTY_PLACEHOLDER,
   INLINE_SEP,
 } from '../utils/format';
-import type { Employee, EmployeeProductRate, ShiftRecord } from '../store/erp-store';
+import type { Employee, EmployeeProductRate, KassaEntry, ShiftRecord } from '../store/erp-store';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -2187,17 +2187,423 @@ function SettingsTab() {
   );
 }
 
+// ======================== KASSA TAB ========================
+
+function KassaTab() {
+  const { state, dispatch } = useERP();
+  const { t } = useApp();
+  const [inflowClientId, setInflowClientId] = useState(state.clients[0]?.id ?? '');
+  const [inflowAmount, setInflowAmount] = useState('');
+  const [inflowComment, setInflowComment] = useState('');
+  const [inflowDate, setInflowDate] = useState(todayYmd());
+  const [outflowAmount, setOutflowAmount] = useState('');
+  const [outflowComment, setOutflowComment] = useState('');
+  const [outflowDate, setOutflowDate] = useState(todayYmd());
+  const [saving, setSaving] = useState(false);
+  const [editEntry, setEditEntry] = useState<KassaEntry | null>(null);
+  const [deleteEntry, setDeleteEntry] = useState<KassaEntry | null>(null);
+  const [editClientId, setEditClientId] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editComment, setEditComment] = useState('');
+  const [editDate, setEditDate] = useState(todayYmd());
+
+  const inflows = useMemo(
+    () => state.kassaEntries.filter((e) => e.type === 'client_inflow'),
+    [state.kassaEntries],
+  );
+  const outflows = useMemo(
+    () => state.kassaEntries.filter((e) => e.type === 'outflow'),
+    [state.kassaEntries],
+  );
+
+  const clientOptions = useMemo(
+    () =>
+      [...state.clients]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((c) => ({ value: c.id, label: `${c.name} (${formatCurrency(c.cashBalance)})` })),
+    [state.clients],
+  );
+
+  const handleAddInflow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseDigitsFromAmountInput(inflowAmount);
+    if (!inflowClientId || amount <= 0) {
+      toast.error(t.prKassaAmount);
+      return;
+    }
+    setSaving(true);
+    try {
+      await dispatch({
+        type: 'ADD_KASSA_INFLOW',
+        payload: {
+          clientId: inflowClientId,
+          amount,
+          comment: inflowComment.trim() || undefined,
+          date: inflowDate,
+        },
+      });
+      setInflowAmount('');
+      setInflowComment('');
+      toast.success(t.prKassaAddInflow);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddOutflow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseDigitsFromAmountInput(outflowAmount);
+    if (amount <= 0) {
+      toast.error(t.prKassaAmount);
+      return;
+    }
+    setSaving(true);
+    try {
+      await dispatch({
+        type: 'ADD_KASSA_OUTFLOW',
+        payload: {
+          amount,
+          comment: outflowComment.trim() || undefined,
+          date: outflowDate,
+        },
+      });
+      setOutflowAmount('');
+      setOutflowComment('');
+      toast.success(t.prKassaAddOutflow);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openEdit = (entry: KassaEntry) => {
+    setEditEntry(entry);
+    setEditClientId(entry.clientId ?? '');
+    setEditAmount(displayGroupedIntInput(String(entry.amount)));
+    setEditComment(entry.comment ?? '');
+    setEditDate(entry.date);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editEntry) return;
+    const amount = parseDigitsFromAmountInput(editAmount);
+    if (amount <= 0) {
+      toast.error(t.prKassaAmount);
+      return;
+    }
+    setSaving(true);
+    try {
+      if (editEntry.type === 'client_inflow') {
+        await dispatch({
+          type: 'UPDATE_KASSA_INFLOW',
+          payload: {
+            id: editEntry.id,
+            clientId: editClientId,
+            amount,
+            comment: editComment.trim() || undefined,
+            date: editDate,
+          },
+        });
+      } else {
+        await dispatch({
+          type: 'UPDATE_KASSA_OUTFLOW',
+          payload: {
+            id: editEntry.id,
+            amount,
+            comment: editComment.trim() || undefined,
+            date: editDate,
+          },
+        });
+      }
+      setEditEntry(null);
+      toast.success(t.btnSave);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteEntry) return;
+    setSaving(true);
+    try {
+      await dispatch({
+        type: deleteEntry.type === 'client_inflow' ? 'DELETE_KASSA_INFLOW' : 'DELETE_KASSA_OUTFLOW',
+        payload: deleteEntry.id,
+      });
+      setDeleteEntry(null);
+      toast.success(t.whDeleteAction);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderAudit = (entry: KassaEntry) => {
+    const name = entry.updatedByName ?? entry.createdByName;
+    return name ? (
+      <span className="text-xs text-slate-500 dark:text-slate-400">{name}</span>
+    ) : (
+      <span className="text-xs text-slate-400">{EMPTY_PLACEHOLDER}</span>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label={t.prKassaBalance}
+          value={formatCurrency(state.kassaSummary.balance)}
+          color="bg-indigo-50 border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-900"
+        />
+        <StatCard
+          label={t.prKassaTotalInflow}
+          value={formatCurrency(state.kassaSummary.totalInflow)}
+          color="bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900"
+        />
+        <StatCard
+          label={t.prKassaTotalOutflow}
+          value={formatCurrency(state.kassaSummary.totalOutflow)}
+          color="bg-rose-50 border-rose-100 dark:bg-rose-950/40 dark:border-rose-900"
+        />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="mb-4 flex items-center gap-2">
+            <ArrowDownLeft size={16} className="text-emerald-600" />
+            <h3 className="font-semibold text-slate-800 dark:text-white">{t.prKassaInflowSection}</h3>
+          </div>
+          <form onSubmit={handleAddInflow} className="mb-4 grid gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label>{t.prKassaClient}</Label>
+              <StyledSelect
+                value={inflowClientId}
+                onValueChange={setInflowClientId}
+                options={clientOptions}
+                placeholder={t.prKassaClient}
+              />
+            </div>
+            <div>
+              <Label>{t.prKassaAmount}</Label>
+              <Input
+                value={inflowAmount}
+                onChange={(e) => setInflowAmount(displayGroupedIntInput(e.target.value))}
+                inputMode="numeric"
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label>{t.prKassaDate}</Label>
+              <Input type="date" value={inflowDate} onChange={(e) => setInflowDate(e.target.value)} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>{t.prKassaComment}</Label>
+              <Input value={inflowComment} onChange={(e) => setInflowComment(e.target.value)} />
+            </div>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                disabled={saving || clientOptions.length === 0}
+                className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                <Plus size={14} />
+                {t.prKassaAddInflow}
+              </button>
+            </div>
+          </form>
+          <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                <tr>
+                  <th className="px-3 py-2 text-left">{t.prKassaDate}</th>
+                  <th className="px-3 py-2 text-left">{t.prKassaClient}</th>
+                  <th className="px-3 py-2 text-right">{t.prKassaAmount}</th>
+                  <th className="px-3 py-2 text-left">{t.prKassaComment}</th>
+                  <th className="px-3 py-2 text-left">{t.prKassaCreatedBy}</th>
+                  <th className="px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {inflows.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-3 py-8 text-center text-slate-400">{t.prKassaNoInflows}</td>
+                  </tr>
+                ) : (
+                  inflows.map((entry) => (
+                    <tr key={entry.id} className="border-t border-slate-100 dark:border-slate-700">
+                      <td className="px-3 py-2 whitespace-nowrap">{formatDate(entry.date)}</td>
+                      <td className="px-3 py-2">{entry.clientName ?? EMPTY_PLACEHOLDER}</td>
+                      <td className="px-3 py-2 text-right font-medium text-emerald-600">{formatCurrency(entry.amount)}</td>
+                      <td className="px-3 py-2 max-w-[160px] truncate">{entry.comment ?? EMPTY_PLACEHOLDER}</td>
+                      <td className="px-3 py-2">{renderAudit(entry)}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex justify-end gap-1">
+                          <button type="button" onClick={() => openEdit(entry)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <Pencil size={14} />
+                          </button>
+                          <button type="button" onClick={() => setDeleteEntry(entry)} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="mb-4 flex items-center gap-2">
+            <ArrowUpRight size={16} className="text-rose-600" />
+            <h3 className="font-semibold text-slate-800 dark:text-white">{t.prKassaOutflowSection}</h3>
+          </div>
+          <form onSubmit={handleAddOutflow} className="mb-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>{t.prKassaAmount}</Label>
+              <Input
+                value={outflowAmount}
+                onChange={(e) => setOutflowAmount(displayGroupedIntInput(e.target.value))}
+                inputMode="numeric"
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label>{t.prKassaDate}</Label>
+              <Input type="date" value={outflowDate} onChange={(e) => setOutflowDate(e.target.value)} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>{t.prKassaComment}</Label>
+              <Input value={outflowComment} onChange={(e) => setOutflowComment(e.target.value)} />
+            </div>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex h-9 items-center gap-2 rounded-xl bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+              >
+                <Plus size={14} />
+                {t.prKassaAddOutflow}
+              </button>
+            </div>
+          </form>
+          <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                <tr>
+                  <th className="px-3 py-2 text-left">{t.prKassaDate}</th>
+                  <th className="px-3 py-2 text-right">{t.prKassaAmount}</th>
+                  <th className="px-3 py-2 text-left">{t.prKassaComment}</th>
+                  <th className="px-3 py-2 text-left">{t.prKassaCreatedBy}</th>
+                  <th className="px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {outflows.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-3 py-8 text-center text-slate-400">{t.prKassaNoOutflows}</td>
+                  </tr>
+                ) : (
+                  outflows.map((entry) => (
+                    <tr key={entry.id} className="border-t border-slate-100 dark:border-slate-700">
+                      <td className="px-3 py-2 whitespace-nowrap">{formatDate(entry.date)}</td>
+                      <td className="px-3 py-2 text-right font-medium text-rose-600">{formatCurrency(entry.amount)}</td>
+                      <td className="px-3 py-2 max-w-[200px] truncate">{entry.comment ?? EMPTY_PLACEHOLDER}</td>
+                      <td className="px-3 py-2">{renderAudit(entry)}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex justify-end gap-1">
+                          <button type="button" onClick={() => openEdit(entry)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <Pencil size={14} />
+                          </button>
+                          <button type="button" onClick={() => setDeleteEntry(entry)} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <Dialog open={!!editEntry} onOpenChange={(open) => !open && setEditEntry(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editEntry?.type === 'client_inflow' ? t.prKassaEditInflow : t.prKassaEditOutflow}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            {editEntry?.type === 'client_inflow' && (
+              <div>
+                <Label>{t.prKassaClient}</Label>
+                <StyledSelect value={editClientId} onValueChange={setEditClientId} options={clientOptions} />
+              </div>
+            )}
+            <div>
+              <Label>{t.prKassaAmount}</Label>
+              <Input value={editAmount} onChange={(e) => setEditAmount(displayGroupedIntInput(e.target.value))} />
+            </div>
+            <div>
+              <Label>{t.prKassaDate}</Label>
+              <Input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>{t.prKassaComment}</Label>
+              <Input value={editComment} onChange={(e) => setEditComment(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <button type="button" onClick={() => setEditEntry(null)} className="rounded-xl px-4 py-2 text-sm text-slate-600">{t.btnCancel}</button>
+            <button type="button" onClick={() => void handleSaveEdit()} disabled={saving} className="rounded-xl bg-indigo-600 px-4 py-2 text-sm text-white">{t.btnSave}</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteEntry} onOpenChange={(open) => !open && setDeleteEntry(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {deleteEntry?.type === 'client_inflow' ? t.prKassaDeleteInflowTitle : t.prKassaDeleteOutflowTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteEntry?.type === 'client_inflow' ? t.prKassaDeleteInflowConfirm : t.prKassaDeleteOutflowConfirm}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); void handleConfirmDelete(); }} disabled={saving} className="bg-red-600 hover:bg-red-700">
+              {t.whDeleteAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
 // ======================== MAIN PAYROLL PAGE ========================
 
 export function Payroll() {
   const { t } = useApp();
   const [activeTab, setActiveTab] = useState<
-    'vedomost' | 'bank' | 'employees' | 'settings'
+    'vedomost' | 'bank' | 'kassa' | 'employees' | 'settings'
   >('vedomost');
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
     { key: 'bank', label: t.prTabBank, icon: Landmark },
+    { key: 'kassa', label: t.prTabKassa, icon: Wallet },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
   ] as const;
@@ -2231,6 +2637,7 @@ export function Payroll() {
       {/* Tab content */}
       {activeTab === 'vedomost' && <VedomostTab />}
       {activeTab === 'bank' && <BankTab />}
+      {activeTab === 'kassa' && <KassaTab />}
       {activeTab === 'employees' && <EmployeesTab />}
       {activeTab === 'settings' && <SettingsTab />}
     </div>

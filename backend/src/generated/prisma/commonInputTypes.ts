@@ -596,6 +596,23 @@ export type EnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel = never> 
   _max?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
 }
 
+export type EnumKassaEntryTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.KassaEntryType | Prisma.EnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel> | $Enums.KassaEntryType
+}
+
+export type EnumKassaEntryTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KassaEntryType | Prisma.EnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKassaEntryTypeWithAggregatesFilter<$PrismaModel> | $Enums.KassaEntryType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel>
+}
+
 export type EnumExpenseTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.ExpenseType | Prisma.EnumExpenseTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ExpenseType[] | Prisma.ListEnumExpenseTypeFieldRefInput<$PrismaModel>
@@ -1412,6 +1429,23 @@ export type NestedEnumPurchaseOrderCurrencyWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPurchaseOrderCurrencyFilter<$PrismaModel>
+}
+
+export type NestedEnumKassaEntryTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.KassaEntryType | Prisma.EnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel> | $Enums.KassaEntryType
+}
+
+export type NestedEnumKassaEntryTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KassaEntryType | Prisma.EnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KassaEntryType[] | Prisma.ListEnumKassaEntryTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKassaEntryTypeWithAggregatesFilter<$PrismaModel> | $Enums.KassaEntryType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKassaEntryTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumExpenseTypeFilter<$PrismaModel = never> = {

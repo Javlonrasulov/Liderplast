@@ -26,7 +26,7 @@ import {
   saleLineFromSale,
 } from '../components/SaleHistoryPriceDetail';
 import { useApp } from '../i18n/app-context';
-import { formatNumber, formatCurrency, formatDate, todayYmd } from '../utils/format';
+import { formatNumber, formatCurrency, formatDate, todayYmd, INLINE_SEP } from '../utils/format';
 import {
   printSaleDeliveryNote,
   downloadSaleDeliveryNotePdf,
@@ -277,7 +277,13 @@ export function Sales() {
 
   const orderTotal = useMemo(() => cartItems.reduce((s, i) => s + i.total, 0), [cartItems]);
   const paidNum = parseFloat(paid) || 0;
-  const debt = orderTotal - paidNum;
+  const selectedClient = useMemo(
+    () => state.clients.find((c) => c.id === clientId),
+    [state.clients, clientId],
+  );
+  const clientCashBalance = selectedClient?.cashBalance ?? 0;
+  const balanceToApply = Math.min(clientCashBalance, Math.max(0, orderTotal - paidNum));
+  const debt = Math.max(0, orderTotal - paidNum - balanceToApply);
 
   const cartStockRows = useMemo(() => {
     const acc: Record<string, { cat: 'semi' | 'final'; type: string; requested: number }> = {};
@@ -825,6 +831,14 @@ export function Sales() {
                   <p className={`font-bold ${debt > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(Math.max(0, debt))}</p>
                 </div>
               </div>
+              {clientCashBalance > 0 && orderTotal > 0 && (
+                <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs text-indigo-800 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                  <span>{t.slClientCashBalance}: <strong>{formatCurrency(clientCashBalance)}</strong></span>
+                  {balanceToApply > 0 && (
+                    <span>{INLINE_SEP} {t.slBalanceWillApply}: <strong>{formatCurrency(balanceToApply)}</strong></span>
+                  )}
+                </div>
+              )}
               {!allStockOk && cartItems.length > 0 && (
                 <div className="mb-3 flex items-center gap-2 p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
                   <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />

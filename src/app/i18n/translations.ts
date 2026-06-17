@@ -1102,6 +1102,29 @@ export interface T {
   prTabEmployees: string;
   prTabRawOrders: string;
   prTabSettings: string;
+  prTabKassa: string;
+  prKassaBalance: string;
+  prKassaTotalInflow: string;
+  prKassaTotalOutflow: string;
+  prKassaInflowSection: string;
+  prKassaOutflowSection: string;
+  prKassaAddInflow: string;
+  prKassaAddOutflow: string;
+  prKassaClient: string;
+  prKassaAmount: string;
+  prKassaComment: string;
+  prKassaDate: string;
+  prKassaCreatedBy: string;
+  prKassaNoInflows: string;
+  prKassaNoOutflows: string;
+  prKassaDeleteInflowTitle: string;
+  prKassaDeleteInflowConfirm: string;
+  prKassaDeleteOutflowTitle: string;
+  prKassaDeleteOutflowConfirm: string;
+  prKassaEditInflow: string;
+  prKassaEditOutflow: string;
+  slClientCashBalance: string;
+  slBalanceWillApply: string;
   prGenerate: string;
   /** Vedomostni butunlay o‘chirish / yopish */
   prCloseVedomost: string;
@@ -2444,6 +2467,29 @@ const uz_cyrillic: T = {
   prTabEmployees: 'Ишчилар',
   prTabRawOrders: 'Хомашё буюртма',
   prTabSettings: 'Солиқ созламалари',
+  prTabKassa: 'Касса',
+  prKassaBalance: 'Умумий касса ҳисоби',
+  prKassaTotalInflow: 'Жами кирим',
+  prKassaTotalOutflow: 'Жами чиқим',
+  prKassaInflowSection: 'Кирим',
+  prKassaOutflowSection: 'Чиқим',
+  prKassaAddInflow: 'Кирим қўшиш',
+  prKassaAddOutflow: 'Чиқим қўшиш',
+  prKassaClient: 'Мижоз',
+  prKassaAmount: 'Сумма',
+  prKassaComment: 'Изоҳ',
+  prKassaDate: 'Сана',
+  prKassaCreatedBy: 'Киритган',
+  prKassaNoInflows: 'Киримлар йўқ',
+  prKassaNoOutflows: 'Чиқимлар йўқ',
+  prKassaDeleteInflowTitle: 'Киримни ўчириш',
+  prKassaDeleteInflowConfirm: 'Ушбу кирим ўчирилади. Мижоз ҳисобидан ҳам айирилади.',
+  prKassaDeleteOutflowTitle: 'Чиқимни ўчириш',
+  prKassaDeleteOutflowConfirm: 'Ушбу чиқим ўчирилади.',
+  prKassaEditInflow: 'Киримни таҳрирлаш',
+  prKassaEditOutflow: 'Чиқимни таҳрирлаш',
+  slClientCashBalance: 'Мижоз ҳисоби',
+  slBalanceWillApply: 'Сотувда ҳисобдан ечилади',
   prGenerate: 'Ведомост яратиш',
   prCloseVedomost: 'Ведомостни ёпиш',
   prCloseVedomostTitle: 'Ведомостни ёпиш',
@@ -3780,6 +3826,29 @@ const uz_latin: T = {
   prTabEmployees: 'Ishchilar',
   prTabRawOrders: 'Xomashyo buyurtma',
   prTabSettings: 'Soliq sozlamalari',
+  prTabKassa: 'Kassa',
+  prKassaBalance: 'Umumiy kassa hisobi',
+  prKassaTotalInflow: 'Jami kirim',
+  prKassaTotalOutflow: 'Jami chiqim',
+  prKassaInflowSection: 'Kirim',
+  prKassaOutflowSection: 'Chiqim',
+  prKassaAddInflow: 'Kirim qo‘shish',
+  prKassaAddOutflow: 'Chiqim qo‘shish',
+  prKassaClient: 'Mijoz',
+  prKassaAmount: 'Summa',
+  prKassaComment: 'Izoh',
+  prKassaDate: 'Sana',
+  prKassaCreatedBy: 'Kiritgan',
+  prKassaNoInflows: 'Kirimlar yo‘q',
+  prKassaNoOutflows: 'Chiqimlar yo‘q',
+  prKassaDeleteInflowTitle: 'Kirimni o‘chirish',
+  prKassaDeleteInflowConfirm: 'Ushbu kirim o‘chiriladi. Mijoz hisobidan ham ayiriladi.',
+  prKassaDeleteOutflowTitle: 'Chiqimni o‘chirish',
+  prKassaDeleteOutflowConfirm: 'Ushbu chiqim o‘chiriladi.',
+  prKassaEditInflow: 'Kirimni tahrirlash',
+  prKassaEditOutflow: 'Chiqimni tahrirlash',
+  slClientCashBalance: 'Mijoz hisobi',
+  slBalanceWillApply: 'Sotuvda hisobdan yechiladi',
   prGenerate: 'Vedomost yaratish',
   prCloseVedomost: 'Vedomostni yopish',
   prCloseVedomostTitle: 'Vedomostni yopish',
@@ -5115,6 +5184,29 @@ const ru: T = {
   prTabEmployees: 'Сотрудники',
   prTabRawOrders: 'Заказ сырья',
   prTabSettings: 'Налоговые ставки',
+  prTabKassa: 'Касса',
+  prKassaBalance: 'Общий счёт кассы',
+  prKassaTotalInflow: 'Всего приход',
+  prKassaTotalOutflow: 'Всего расход',
+  prKassaInflowSection: 'Приход',
+  prKassaOutflowSection: 'Расход',
+  prKassaAddInflow: 'Добавить приход',
+  prKassaAddOutflow: 'Добавить расход',
+  prKassaClient: 'Клиент',
+  prKassaAmount: 'Сумма',
+  prKassaComment: 'Комментарий',
+  prKassaDate: 'Дата',
+  prKassaCreatedBy: 'Внёс',
+  prKassaNoInflows: 'Нет приходов',
+  prKassaNoOutflows: 'Нет расходов',
+  prKassaDeleteInflowTitle: 'Удалить приход',
+  prKassaDeleteInflowConfirm: 'Эта запись будет удалена. С баланса клиента тоже спишется.',
+  prKassaDeleteOutflowTitle: 'Удалить расход',
+  prKassaDeleteOutflowConfirm: 'Эта запись будет удалена.',
+  prKassaEditInflow: 'Редактировать приход',
+  prKassaEditOutflow: 'Редактировать расход',
+  slClientCashBalance: 'Баланс клиента',
+  slBalanceWillApply: 'При продаже спишется с баланса',
   prGenerate: 'Сформировать ведомость',
   prCloseVedomost: 'Закрыть ведомость',
   prCloseVedomostTitle: 'Закрыть ведомость',

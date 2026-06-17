@@ -20,8 +20,18 @@ export type ClientModel = runtime.Types.Result.DefaultSelection<Prisma.$ClientPa
 
 export type AggregateClient = {
   _count: ClientCountAggregateOutputType | null
+  _avg: ClientAvgAggregateOutputType | null
+  _sum: ClientSumAggregateOutputType | null
   _min: ClientMinAggregateOutputType | null
   _max: ClientMaxAggregateOutputType | null
+}
+
+export type ClientAvgAggregateOutputType = {
+  cashBalance: number | null
+}
+
+export type ClientSumAggregateOutputType = {
+  cashBalance: number | null
 }
 
 export type ClientMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type ClientMinAggregateOutputType = {
   address: string | null
   bankAccount: string | null
   bankName: string | null
+  cashBalance: number | null
   deliveryVehiclePlate: string | null
   deliveryDriverName: string | null
   status: $Enums.EntityStatus | null
@@ -45,6 +56,7 @@ export type ClientMaxAggregateOutputType = {
   address: string | null
   bankAccount: string | null
   bankName: string | null
+  cashBalance: number | null
   deliveryVehiclePlate: string | null
   deliveryDriverName: string | null
   status: $Enums.EntityStatus | null
@@ -59,6 +71,7 @@ export type ClientCountAggregateOutputType = {
   address: number
   bankAccount: number
   bankName: number
+  cashBalance: number
   deliveryVehiclePlate: number
   deliveryDriverName: number
   status: number
@@ -68,6 +81,14 @@ export type ClientCountAggregateOutputType = {
 }
 
 
+export type ClientAvgAggregateInputType = {
+  cashBalance?: true
+}
+
+export type ClientSumAggregateInputType = {
+  cashBalance?: true
+}
+
 export type ClientMinAggregateInputType = {
   id?: true
   name?: true
@@ -75,6 +96,7 @@ export type ClientMinAggregateInputType = {
   address?: true
   bankAccount?: true
   bankName?: true
+  cashBalance?: true
   deliveryVehiclePlate?: true
   deliveryDriverName?: true
   status?: true
@@ -89,6 +111,7 @@ export type ClientMaxAggregateInputType = {
   address?: true
   bankAccount?: true
   bankName?: true
+  cashBalance?: true
   deliveryVehiclePlate?: true
   deliveryDriverName?: true
   status?: true
@@ -103,6 +126,7 @@ export type ClientCountAggregateInputType = {
   address?: true
   bankAccount?: true
   bankName?: true
+  cashBalance?: true
   deliveryVehiclePlate?: true
   deliveryDriverName?: true
   status?: true
@@ -149,6 +173,18 @@ export type ClientAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ClientAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ClientSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ClientMinAggregateInputType
@@ -179,6 +215,8 @@ export type ClientGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: ClientCountAggregateInputType | true
+  _avg?: ClientAvgAggregateInputType
+  _sum?: ClientSumAggregateInputType
   _min?: ClientMinAggregateInputType
   _max?: ClientMaxAggregateInputType
 }
@@ -190,12 +228,15 @@ export type ClientGroupByOutputType = {
   address: string | null
   bankAccount: string | null
   bankName: string | null
+  cashBalance: number
   deliveryVehiclePlate: string | null
   deliveryDriverName: string | null
   status: $Enums.EntityStatus
   createdAt: Date
   updatedAt: Date
   _count: ClientCountAggregateOutputType | null
+  _avg: ClientAvgAggregateOutputType | null
+  _sum: ClientSumAggregateOutputType | null
   _min: ClientMinAggregateOutputType | null
   _max: ClientMaxAggregateOutputType | null
 }
@@ -225,6 +266,7 @@ export type ClientWhereInput = {
   address?: Prisma.StringNullableFilter<"Client"> | string | null
   bankAccount?: Prisma.StringNullableFilter<"Client"> | string | null
   bankName?: Prisma.StringNullableFilter<"Client"> | string | null
+  cashBalance?: Prisma.FloatFilter<"Client"> | number
   deliveryVehiclePlate?: Prisma.StringNullableFilter<"Client"> | string | null
   deliveryDriverName?: Prisma.StringNullableFilter<"Client"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Client"> | $Enums.EntityStatus
@@ -233,6 +275,7 @@ export type ClientWhereInput = {
   orders?: Prisma.OrderListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
   bankTransactions?: Prisma.BankTransactionListRelationFilter
+  kassaEntries?: Prisma.KassaEntryListRelationFilter
 }
 
 export type ClientOrderByWithRelationInput = {
@@ -242,6 +285,7 @@ export type ClientOrderByWithRelationInput = {
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccount?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  cashBalance?: Prisma.SortOrder
   deliveryVehiclePlate?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryDriverName?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -250,6 +294,7 @@ export type ClientOrderByWithRelationInput = {
   orders?: Prisma.OrderOrderByRelationAggregateInput
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   bankTransactions?: Prisma.BankTransactionOrderByRelationAggregateInput
+  kassaEntries?: Prisma.KassaEntryOrderByRelationAggregateInput
 }
 
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
@@ -262,6 +307,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   address?: Prisma.StringNullableFilter<"Client"> | string | null
   bankAccount?: Prisma.StringNullableFilter<"Client"> | string | null
   bankName?: Prisma.StringNullableFilter<"Client"> | string | null
+  cashBalance?: Prisma.FloatFilter<"Client"> | number
   deliveryVehiclePlate?: Prisma.StringNullableFilter<"Client"> | string | null
   deliveryDriverName?: Prisma.StringNullableFilter<"Client"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Client"> | $Enums.EntityStatus
@@ -270,6 +316,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   orders?: Prisma.OrderListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
   bankTransactions?: Prisma.BankTransactionListRelationFilter
+  kassaEntries?: Prisma.KassaEntryListRelationFilter
 }, "id" | "phone">
 
 export type ClientOrderByWithAggregationInput = {
@@ -279,14 +326,17 @@ export type ClientOrderByWithAggregationInput = {
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccount?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  cashBalance?: Prisma.SortOrder
   deliveryVehiclePlate?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryDriverName?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ClientCountOrderByAggregateInput
+  _avg?: Prisma.ClientAvgOrderByAggregateInput
   _max?: Prisma.ClientMaxOrderByAggregateInput
   _min?: Prisma.ClientMinOrderByAggregateInput
+  _sum?: Prisma.ClientSumOrderByAggregateInput
 }
 
 export type ClientScalarWhereWithAggregatesInput = {
@@ -299,6 +349,7 @@ export type ClientScalarWhereWithAggregatesInput = {
   address?: Prisma.StringNullableWithAggregatesFilter<"Client"> | string | null
   bankAccount?: Prisma.StringNullableWithAggregatesFilter<"Client"> | string | null
   bankName?: Prisma.StringNullableWithAggregatesFilter<"Client"> | string | null
+  cashBalance?: Prisma.FloatWithAggregatesFilter<"Client"> | number
   deliveryVehiclePlate?: Prisma.StringNullableWithAggregatesFilter<"Client"> | string | null
   deliveryDriverName?: Prisma.StringNullableWithAggregatesFilter<"Client"> | string | null
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"Client"> | $Enums.EntityStatus
@@ -313,6 +364,7 @@ export type ClientCreateInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -321,6 +373,7 @@ export type ClientCreateInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutClientInput
   payments?: Prisma.PaymentCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateInput = {
@@ -330,6 +383,7 @@ export type ClientUncheckedCreateInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -338,6 +392,7 @@ export type ClientUncheckedCreateInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutClientInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientUpdateInput = {
@@ -347,6 +402,7 @@ export type ClientUpdateInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -355,6 +411,7 @@ export type ClientUpdateInput = {
   orders?: Prisma.OrderUpdateManyWithoutClientNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateInput = {
@@ -364,6 +421,7 @@ export type ClientUncheckedUpdateInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -372,6 +430,7 @@ export type ClientUncheckedUpdateInput = {
   orders?: Prisma.OrderUncheckedUpdateManyWithoutClientNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateManyInput = {
@@ -381,6 +440,7 @@ export type ClientCreateManyInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -395,6 +455,7 @@ export type ClientUpdateManyMutationInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -409,6 +470,7 @@ export type ClientUncheckedUpdateManyInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -423,11 +485,16 @@ export type ClientCountOrderByAggregateInput = {
   address?: Prisma.SortOrder
   bankAccount?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  cashBalance?: Prisma.SortOrder
   deliveryVehiclePlate?: Prisma.SortOrder
   deliveryDriverName?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ClientAvgOrderByAggregateInput = {
+  cashBalance?: Prisma.SortOrder
 }
 
 export type ClientMaxOrderByAggregateInput = {
@@ -437,6 +504,7 @@ export type ClientMaxOrderByAggregateInput = {
   address?: Prisma.SortOrder
   bankAccount?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  cashBalance?: Prisma.SortOrder
   deliveryVehiclePlate?: Prisma.SortOrder
   deliveryDriverName?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -451,11 +519,16 @@ export type ClientMinOrderByAggregateInput = {
   address?: Prisma.SortOrder
   bankAccount?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  cashBalance?: Prisma.SortOrder
   deliveryVehiclePlate?: Prisma.SortOrder
   deliveryDriverName?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ClientSumOrderByAggregateInput = {
+  cashBalance?: Prisma.SortOrder
 }
 
 export type ClientScalarRelationFilter = {
@@ -496,6 +569,22 @@ export type ClientUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutPaymentsInput, Prisma.ClientUpdateWithoutPaymentsInput>, Prisma.ClientUncheckedUpdateWithoutPaymentsInput>
 }
 
+export type ClientCreateNestedOneWithoutKassaEntriesInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutKassaEntriesInput, Prisma.ClientUncheckedCreateWithoutKassaEntriesInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutKassaEntriesInput
+  connect?: Prisma.ClientWhereUniqueInput
+}
+
+export type ClientUpdateOneWithoutKassaEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutKassaEntriesInput, Prisma.ClientUncheckedCreateWithoutKassaEntriesInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutKassaEntriesInput
+  upsert?: Prisma.ClientUpsertWithoutKassaEntriesInput
+  disconnect?: Prisma.ClientWhereInput | boolean
+  delete?: Prisma.ClientWhereInput | boolean
+  connect?: Prisma.ClientWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutKassaEntriesInput, Prisma.ClientUpdateWithoutKassaEntriesInput>, Prisma.ClientUncheckedUpdateWithoutKassaEntriesInput>
+}
+
 export type ClientCreateNestedOneWithoutBankTransactionsInput = {
   create?: Prisma.XOR<Prisma.ClientCreateWithoutBankTransactionsInput, Prisma.ClientUncheckedCreateWithoutBankTransactionsInput>
   connectOrCreate?: Prisma.ClientCreateOrConnectWithoutBankTransactionsInput
@@ -519,6 +608,7 @@ export type ClientCreateWithoutOrdersInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -526,6 +616,7 @@ export type ClientCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   payments?: Prisma.PaymentCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutOrdersInput = {
@@ -535,6 +626,7 @@ export type ClientUncheckedCreateWithoutOrdersInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -542,6 +634,7 @@ export type ClientUncheckedCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutOrdersInput = {
@@ -567,6 +660,7 @@ export type ClientUpdateWithoutOrdersInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -574,6 +668,7 @@ export type ClientUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutOrdersInput = {
@@ -583,6 +678,7 @@ export type ClientUncheckedUpdateWithoutOrdersInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -590,6 +686,7 @@ export type ClientUncheckedUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutPaymentsInput = {
@@ -599,6 +696,7 @@ export type ClientCreateWithoutPaymentsInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -606,6 +704,7 @@ export type ClientCreateWithoutPaymentsInput = {
   updatedAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutPaymentsInput = {
@@ -615,6 +714,7 @@ export type ClientUncheckedCreateWithoutPaymentsInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -622,6 +722,7 @@ export type ClientUncheckedCreateWithoutPaymentsInput = {
   updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutClientInput
   bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutPaymentsInput = {
@@ -647,6 +748,7 @@ export type ClientUpdateWithoutPaymentsInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -654,6 +756,7 @@ export type ClientUpdateWithoutPaymentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutPaymentsInput = {
@@ -663,12 +766,102 @@ export type ClientUncheckedUpdateWithoutPaymentsInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutClientNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUncheckedUpdateManyWithoutClientNestedInput
+}
+
+export type ClientCreateWithoutKassaEntriesInput = {
+  id?: string
+  name: string
+  phone: string
+  address?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  cashBalance?: number
+  deliveryVehiclePlate?: string | null
+  deliveryDriverName?: string | null
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orders?: Prisma.OrderCreateNestedManyWithoutClientInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutClientInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutClientInput
+}
+
+export type ClientUncheckedCreateWithoutKassaEntriesInput = {
+  id?: string
+  name: string
+  phone: string
+  address?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  cashBalance?: number
+  deliveryVehiclePlate?: string | null
+  deliveryDriverName?: string | null
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutClientInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutClientInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutClientInput
+}
+
+export type ClientCreateOrConnectWithoutKassaEntriesInput = {
+  where: Prisma.ClientWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClientCreateWithoutKassaEntriesInput, Prisma.ClientUncheckedCreateWithoutKassaEntriesInput>
+}
+
+export type ClientUpsertWithoutKassaEntriesInput = {
+  update: Prisma.XOR<Prisma.ClientUpdateWithoutKassaEntriesInput, Prisma.ClientUncheckedUpdateWithoutKassaEntriesInput>
+  create: Prisma.XOR<Prisma.ClientCreateWithoutKassaEntriesInput, Prisma.ClientUncheckedCreateWithoutKassaEntriesInput>
+  where?: Prisma.ClientWhereInput
+}
+
+export type ClientUpdateToOneWithWhereWithoutKassaEntriesInput = {
+  where?: Prisma.ClientWhereInput
+  data: Prisma.XOR<Prisma.ClientUpdateWithoutKassaEntriesInput, Prisma.ClientUncheckedUpdateWithoutKassaEntriesInput>
+}
+
+export type ClientUpdateWithoutKassaEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUpdateManyWithoutClientNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutClientNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutClientNestedInput
+}
+
+export type ClientUncheckedUpdateWithoutKassaEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutClientNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutClientNestedInput
   bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutClientNestedInput
 }
 
@@ -679,6 +872,7 @@ export type ClientCreateWithoutBankTransactionsInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -686,6 +880,7 @@ export type ClientCreateWithoutBankTransactionsInput = {
   updatedAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutClientInput
   payments?: Prisma.PaymentCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutBankTransactionsInput = {
@@ -695,6 +890,7 @@ export type ClientUncheckedCreateWithoutBankTransactionsInput = {
   address?: string | null
   bankAccount?: string | null
   bankName?: string | null
+  cashBalance?: number
   deliveryVehiclePlate?: string | null
   deliveryDriverName?: string | null
   status?: $Enums.EntityStatus
@@ -702,6 +898,7 @@ export type ClientUncheckedCreateWithoutBankTransactionsInput = {
   updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutClientInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutClientInput
+  kassaEntries?: Prisma.KassaEntryUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutBankTransactionsInput = {
@@ -727,6 +924,7 @@ export type ClientUpdateWithoutBankTransactionsInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -734,6 +932,7 @@ export type ClientUpdateWithoutBankTransactionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutClientNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutBankTransactionsInput = {
@@ -743,6 +942,7 @@ export type ClientUncheckedUpdateWithoutBankTransactionsInput = {
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cashBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   deliveryVehiclePlate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryDriverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -750,6 +950,7 @@ export type ClientUncheckedUpdateWithoutBankTransactionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutClientNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutClientNestedInput
+  kassaEntries?: Prisma.KassaEntryUncheckedUpdateManyWithoutClientNestedInput
 }
 
 
@@ -761,12 +962,14 @@ export type ClientCountOutputType = {
   orders: number
   payments: number
   bankTransactions: number
+  kassaEntries: number
 }
 
 export type ClientCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | ClientCountOutputTypeCountOrdersArgs
   payments?: boolean | ClientCountOutputTypeCountPaymentsArgs
   bankTransactions?: boolean | ClientCountOutputTypeCountBankTransactionsArgs
+  kassaEntries?: boolean | ClientCountOutputTypeCountKassaEntriesArgs
 }
 
 /**
@@ -800,6 +1003,13 @@ export type ClientCountOutputTypeCountBankTransactionsArgs<ExtArgs extends runti
   where?: Prisma.BankTransactionWhereInput
 }
 
+/**
+ * ClientCountOutputType without action
+ */
+export type ClientCountOutputTypeCountKassaEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KassaEntryWhereInput
+}
+
 
 export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -808,6 +1018,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   address?: boolean
   bankAccount?: boolean
   bankName?: boolean
+  cashBalance?: boolean
   deliveryVehiclePlate?: boolean
   deliveryDriverName?: boolean
   status?: boolean
@@ -816,6 +1027,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   orders?: boolean | Prisma.Client$ordersArgs<ExtArgs>
   payments?: boolean | Prisma.Client$paymentsArgs<ExtArgs>
   bankTransactions?: boolean | Prisma.Client$bankTransactionsArgs<ExtArgs>
+  kassaEntries?: boolean | Prisma.Client$kassaEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -826,6 +1038,7 @@ export type ClientSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   address?: boolean
   bankAccount?: boolean
   bankName?: boolean
+  cashBalance?: boolean
   deliveryVehiclePlate?: boolean
   deliveryDriverName?: boolean
   status?: boolean
@@ -840,6 +1053,7 @@ export type ClientSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   address?: boolean
   bankAccount?: boolean
   bankName?: boolean
+  cashBalance?: boolean
   deliveryVehiclePlate?: boolean
   deliveryDriverName?: boolean
   status?: boolean
@@ -854,6 +1068,7 @@ export type ClientSelectScalar = {
   address?: boolean
   bankAccount?: boolean
   bankName?: boolean
+  cashBalance?: boolean
   deliveryVehiclePlate?: boolean
   deliveryDriverName?: boolean
   status?: boolean
@@ -861,11 +1076,12 @@ export type ClientSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "address" | "bankAccount" | "bankName" | "deliveryVehiclePlate" | "deliveryDriverName" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["client"]>
+export type ClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "address" | "bankAccount" | "bankName" | "cashBalance" | "deliveryVehiclePlate" | "deliveryDriverName" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["client"]>
 export type ClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.Client$ordersArgs<ExtArgs>
   payments?: boolean | Prisma.Client$paymentsArgs<ExtArgs>
   bankTransactions?: boolean | Prisma.Client$bankTransactionsArgs<ExtArgs>
+  kassaEntries?: boolean | Prisma.Client$kassaEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClientIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -877,6 +1093,7 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     orders: Prisma.$OrderPayload<ExtArgs>[]
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     bankTransactions: Prisma.$BankTransactionPayload<ExtArgs>[]
+    kassaEntries: Prisma.$KassaEntryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -885,6 +1102,10 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     address: string | null
     bankAccount: string | null
     bankName: string | null
+    /**
+     * Mijoz oldindan to‘lagan mablag‘ (kassa kirim)
+     */
+    cashBalance: number
     /**
      * Chop etish uchun — mijoz bo‘yicha default
      */
@@ -1290,6 +1511,7 @@ export interface Prisma__ClientClient<T, Null = never, ExtArgs extends runtime.T
   orders<T extends Prisma.Client$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payments<T extends Prisma.Client$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bankTransactions<T extends Prisma.Client$bankTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$bankTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  kassaEntries<T extends Prisma.Client$kassaEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$kassaEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KassaEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1325,6 +1547,7 @@ export interface ClientFieldRefs {
   readonly address: Prisma.FieldRef<"Client", 'String'>
   readonly bankAccount: Prisma.FieldRef<"Client", 'String'>
   readonly bankName: Prisma.FieldRef<"Client", 'String'>
+  readonly cashBalance: Prisma.FieldRef<"Client", 'Float'>
   readonly deliveryVehiclePlate: Prisma.FieldRef<"Client", 'String'>
   readonly deliveryDriverName: Prisma.FieldRef<"Client", 'String'>
   readonly status: Prisma.FieldRef<"Client", 'EntityStatus'>
@@ -1792,6 +2015,30 @@ export type Client$bankTransactionsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.BankTransactionScalarFieldEnum | Prisma.BankTransactionScalarFieldEnum[]
+}
+
+/**
+ * Client.kassaEntries
+ */
+export type Client$kassaEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KassaEntry
+   */
+  select?: Prisma.KassaEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KassaEntry
+   */
+  omit?: Prisma.KassaEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KassaEntryInclude<ExtArgs> | null
+  where?: Prisma.KassaEntryWhereInput
+  orderBy?: Prisma.KassaEntryOrderByWithRelationInput | Prisma.KassaEntryOrderByWithRelationInput[]
+  cursor?: Prisma.KassaEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KassaEntryScalarFieldEnum | Prisma.KassaEntryScalarFieldEnum[]
 }
 
 /**

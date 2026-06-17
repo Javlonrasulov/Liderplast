@@ -69,6 +69,12 @@ enum BankTransactionType {
   EXPENSE
 }
 
+enum KassaEntryType {
+  CLIENT_INFLOW
+  SALE_DEDUCTION
+  OUTFLOW
+}
+
 enum ProductionStage {
   SEMI
   FINISHED
@@ -238,6 +244,8 @@ model User {
   companyAssetsDeleted             CompanyAsset[]             @relation("CompanyAssetDeleter")
   companyAssetActivityLogs         CompanyAssetActivityLog[]  @relation("CompanyAssetActivityActor")
   inventoryDocumentsCreated        InventoryDocument[]        @relation("InventoryDocumentCreator")
+  kassaEntriesCreated              KassaEntry[]               @relation("KassaEntryCreator")
+  kassaEntriesUpdated              KassaEntry[]               @relation("KassaEntryUpdater")
 
   @@index([stir])
 }
@@ -620,6 +628,8 @@ model Client {
   address   String?
   bankAccount String?
   bankName  String?
+  /// Mijoz oldindan to‘lagan mablag‘ (kassa kirim)
+  cashBalance Float      @default(0)
   /// Chop etish uchun — mijoz bo‘yicha default
   deliveryVehiclePlate String?
   deliveryDriverName   String?
@@ -629,6 +639,7 @@ model Client {
   orders    Order[]
   payments  Payment[]
   bankTransactions BankTransaction[]
+  kassaEntries KassaEntry[]
 }
 
 model Order {
@@ -647,6 +658,7 @@ model Order {
   updatedAt  DateTime     @updatedAt
   items      OrderItem[]
   payments   Payment[]
+  kassaEntries KassaEntry[]
 
   @@index([orderedAt])
 }
@@ -679,6 +691,29 @@ model Payment {
   paidAt      DateTime     @default(now())
   status      EntityStatus @default(COMPLETED)
   createdAt   DateTime     @default(now())
+}
+
+/// Buxgalteriya → Kassa: mijoz kirimi, sotuvdan yechish, chiqim
+model KassaEntry {
+  id          String         @id @default(cuid())
+  type        KassaEntryType
+  clientId    String?
+  client      Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  orderId     String?
+  order       Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  amount      Float
+  comment     String?
+  entryDate   DateTime       @default(now())
+  createdById String?
+  createdBy   User?          @relation("KassaEntryCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?          @relation("KassaEntryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([type, entryDate])
+  @@index([clientId])
+  @@index([orderId])
 }
 
 model ExpenseCategory {

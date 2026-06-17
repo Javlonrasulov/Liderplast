@@ -571,11 +571,12 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
               <TrendingUp size={14} className="text-emerald-500" />
               Moliyaviy ko'rsatkichlar
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[
                 { label: 'Jami operatsiyalar', value: `${clientSales.length} ta`, color: 'text-indigo-600 dark:text-indigo-400' },
                 { label: t.cdTotalPurchases, value: formatCurrency(totalPurchases), color: 'text-slate-800 dark:text-white' },
                 { label: t.colPaid, value: formatCurrency(totalPaid), color: 'text-emerald-600 dark:text-emerald-400' },
+                { label: t.slClientCashBalance, value: formatCurrency(client.cashBalance ?? 0), color: 'text-indigo-600 dark:text-indigo-400' },
                 { label: t.cdDebt, value: formatCurrency(client.debt), color: client.debt > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' },
               ].map(item => (
                 <div key={item.label} className="text-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">

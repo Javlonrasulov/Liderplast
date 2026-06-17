@@ -409,6 +409,7 @@ export const ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
+  KassaEntry: 'KassaEntry',
   ExpenseCategory: 'ExpenseCategory',
   ExpenseFundingSource: 'ExpenseFundingSource',
   Expense: 'Expense',
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "expenseCategory" | "expenseFundingSource" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "kassaEntry" | "expenseCategory" | "expenseFundingSource" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2295,6 +2296,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KassaEntry: {
+      payload: Prisma.$KassaEntryPayload<ExtArgs>
+      fields: Prisma.KassaEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KassaEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KassaEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.KassaEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KassaEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        findMany: {
+          args: Prisma.KassaEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>[]
+        }
+        create: {
+          args: Prisma.KassaEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        createMany: {
+          args: Prisma.KassaEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KassaEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.KassaEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        update: {
+          args: Prisma.KassaEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.KassaEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KassaEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KassaEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.KassaEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KassaEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.KassaEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKassaEntry>
+        }
+        groupBy: {
+          args: Prisma.KassaEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KassaEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KassaEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KassaEntryCountAggregateOutputType> | number
+        }
+      }
+    }
     ExpenseCategory: {
       payload: Prisma.$ExpenseCategoryPayload<ExtArgs>
       fields: Prisma.ExpenseCategoryFieldRefs
@@ -3938,6 +4013,7 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  cashBalance: 'cashBalance',
   deliveryVehiclePlate: 'deliveryVehiclePlate',
   deliveryDriverName: 'deliveryDriverName',
   status: 'status',
@@ -3992,6 +4068,23 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const KassaEntryScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  clientId: 'clientId',
+  orderId: 'orderId',
+  amount: 'amount',
+  comment: 'comment',
+  entryDate: 'entryDate',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KassaEntryScalarFieldEnum = (typeof KassaEntryScalarFieldEnum)[keyof typeof KassaEntryScalarFieldEnum]
 
 
 export const ExpenseCategoryScalarFieldEnum = {
@@ -4649,6 +4742,20 @@ export type ListEnumOrderProductTypeFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'KassaEntryType'
+ */
+export type EnumKassaEntryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KassaEntryType'>
+    
+
+
+/**
+ * Reference to a field of type 'KassaEntryType[]'
+ */
+export type ListEnumKassaEntryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KassaEntryType[]'>
+    
+
+
+/**
  * Reference to a field of type 'ExpenseType'
  */
 export type EnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseType'>
@@ -4949,6 +5056,7 @@ export type GlobalOmitConfig = {
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit
   payment?: Prisma.PaymentOmit
+  kassaEntry?: Prisma.KassaEntryOmit
   expenseCategory?: Prisma.ExpenseCategoryOmit
   expenseFundingSource?: Prisma.ExpenseFundingSourceOmit
   expense?: Prisma.ExpenseOmit

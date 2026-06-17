@@ -22,6 +22,7 @@ import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateOrderDto } from './dto/update-order.dto.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
 import { UpdateClientDto } from './dto/update-client.dto.js';
+import { KassaService } from '../finance/kassa.service.js';
 
 /** Bazada `deletedAt` bo‘lmasa ham ishlaydi — o‘chirilgan mijoz telefoni `__del__` qatorini o‘z ichiga oladi */
 function isClientRemoved(client: { phone: string }): boolean {
@@ -33,6 +34,7 @@ export class CrmService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly kassaService: KassaService,
   ) {}
 
   /** +998XXXXXXXXX yoki null (bo‘sh / to‘liq emas) */
@@ -397,7 +399,6 @@ export class CrmService {
         0,
       );
       const paidAmount = dto.paidAmount ?? 0;
-      const debtAmount = totalAmount - paidAmount;
 
       const savedOrder = await tx.order.create({
         data: {
@@ -406,8 +407,8 @@ export class CrmService {
           status: dto.status ?? OrderStatus.PENDING,
           orderedAt: this.parseOrderDate(dto.orderedAt) ?? new Date(),
           totalAmount,
-          paidAmount,
-          debtAmount,
+          paidAmount: 0,
+          debtAmount: totalAmount,
           items: {
             create: dto.items.map((item) => {
               const total = this.orderItemTotalUzs(item);
@@ -433,6 +434,25 @@ export class CrmService {
 
       await this.consumeOrderItemsFromStock(tx, dto.items, savedOrder.id, createdById);
 
+      const { effectivePaid, debtAmount } =
+        await this.kassaService.applySaleBalanceDeduction(tx, {
+          clientId: dto.clientId,
+          orderId: savedOrder.id,
+          totalAmount,
+          paidAmount,
+          createdById,
+        });
+
+      const finalOrder = await tx.order.update({
+        where: { id: savedOrder.id },
+        data: {
+          paidAmount: effectivePaid,
+          debtAmount,
+          status: debtAmount <= 0 ? OrderStatus.COMPLETED : (dto.status ?? OrderStatus.PENDING),
+        },
+        include: { items: true, client: true },
+      });
+
       if (paidAmount > 0) {
         await tx.payment.create({
           data: {
@@ -444,7 +464,7 @@ export class CrmService {
         });
       }
 
-      return savedOrder;
+      return finalOrder;
     });
 
     this.realtimeGateway.emitOrderUpdated(order);
@@ -485,6 +505,8 @@ export class CrmService {
 
       await this.assertOrderItemsStock(tx, dto.items);
 
+      await this.kassaService.reverseSaleBalanceDeduction(tx, id);
+
       const totalAmount = dto.items.reduce(
         (sum, item) => sum + this.orderItemTotalUzs(item),
         0,
@@ -493,7 +515,6 @@ export class CrmService {
       if (paidAmount > totalAmount) {
         throw new BadRequestException('Paid amount cannot exceed order total');
       }
-      const debtAmount = totalAmount - paidAmount;
 
       await tx.orderItem.deleteMany({ where: { orderId: id } });
 
@@ -503,14 +524,11 @@ export class CrmService {
         where: { id },
         data: {
           clientId: dto.clientId,
-          status:
-            debtAmount <= 0
-              ? OrderStatus.COMPLETED
-              : (dto.status ?? OrderStatus.PENDING),
+          status: dto.status ?? OrderStatus.PENDING,
           ...(orderedAt ? { orderedAt } : {}),
           totalAmount,
-          paidAmount,
-          debtAmount,
+          paidAmount: 0,
+          debtAmount: totalAmount,
           items: {
             create: dto.items.map((item) => {
               const total = this.orderItemTotalUzs(item);
@@ -535,6 +553,25 @@ export class CrmService {
       });
 
       await this.consumeOrderItemsFromStock(tx, dto.items, id, updatedById);
+
+      const { effectivePaid, debtAmount } =
+        await this.kassaService.applySaleBalanceDeduction(tx, {
+          clientId: dto.clientId,
+          orderId: id,
+          totalAmount,
+          paidAmount,
+          createdById: updatedById,
+        });
+
+      const orderWithTotals = await tx.order.update({
+        where: { id },
+        data: {
+          paidAmount: effectivePaid,
+          debtAmount,
+          status: debtAmount <= 0 ? OrderStatus.COMPLETED : (dto.status ?? OrderStatus.PENDING),
+        },
+        include: { items: true, client: true, payments: true },
+      });
 
       const payments = await tx.payment.findMany({ where: { orderId: id } });
       const paymentsTotal = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -570,7 +607,7 @@ export class CrmService {
         });
       }
 
-      return updatedOrder;
+      return orderWithTotals;
     });
 
     this.realtimeGateway.emitOrderUpdated(order);

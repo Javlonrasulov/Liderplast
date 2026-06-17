@@ -196,6 +196,8 @@ export interface Client {
   name: string;
   phone: string;
   debt: number;
+  /** Kassa kirim — mijoz oldindan to‘langan mablag‘ */
+  cashBalance: number;
   createdAt: string;
   bankAccount?: string;
   bankName?: string;
@@ -412,6 +414,30 @@ export interface Payment {
   createdAt: string;
 }
 
+export type KassaEntryType = 'client_inflow' | 'sale_deduction' | 'outflow';
+
+export interface KassaEntry {
+  id: string;
+  type: KassaEntryType;
+  clientId?: string;
+  clientName?: string;
+  orderId?: string;
+  amount: number;
+  comment?: string;
+  date: string;
+  createdAt: string;
+  updatedAt?: string;
+  createdByName?: string;
+  updatedByName?: string;
+}
+
+export interface KassaSummary {
+  balance: number;
+  totalInflow: number;
+  totalOutflow: number;
+  totalSaleDeductions: number;
+}
+
 export interface Employee {
   id: string;
   fullName: string;
@@ -570,6 +596,8 @@ export interface ERPState {
   selectedBankVedomost: BankVedomost | null;
   payrollSettings: PayrollSettings;
   payments: Payment[];
+  kassaSummary: KassaSummary;
+  kassaEntries: KassaEntry[];
 }
 
 type ERPAction =
@@ -716,6 +744,30 @@ type ERPAction =
       };
     }
   | { type: 'DELETE_EXPENSE'; payload: string }
+  | {
+      type: 'ADD_KASSA_INFLOW';
+      payload: { clientId: string; amount: number; comment?: string; date: string };
+    }
+  | {
+      type: 'UPDATE_KASSA_INFLOW';
+      payload: {
+        id: string;
+        clientId?: string;
+        amount?: number;
+        comment?: string;
+        date?: string;
+      };
+    }
+  | { type: 'DELETE_KASSA_INFLOW'; payload: string }
+  | {
+      type: 'ADD_KASSA_OUTFLOW';
+      payload: { amount: number; comment?: string; date: string };
+    }
+  | {
+      type: 'UPDATE_KASSA_OUTFLOW';
+      payload: { id: string; amount?: number; comment?: string; date?: string };
+    }
+  | { type: 'DELETE_KASSA_OUTFLOW'; payload: string }
   | { type: 'ADD_CLIENT'; payload: { name: string; phone?: string; bankAccount?: string; bankName?: string } }
   | {
       type: 'UPDATE_CLIENT';
@@ -925,6 +977,13 @@ const emptyState: ERPState = {
     electricityPricePerKwh: 800,
   },
   payments: [],
+  kassaSummary: {
+    balance: 0,
+    totalInflow: 0,
+    totalOutflow: 0,
+    totalSaleDeductions: 0,
+  },
+  kassaEntries: [],
 };
 
 const ERPContext = createContext<ERPContextValue | null>(null);
@@ -1295,6 +1354,7 @@ type BackendClient = {
   id: string;
   name: string;
   phone: string;
+  cashBalance?: number;
   createdAt: string;
   bankAccount?: string | null;
   bankName?: string | null;
@@ -1331,6 +1391,28 @@ type BackendPayment = {
   paidAt: string;
   createdAt: string;
   client: { name: string };
+};
+
+type BackendKassaEntry = {
+  id: string;
+  type: 'CLIENT_INFLOW' | 'SALE_DEDUCTION' | 'OUTFLOW';
+  clientId?: string | null;
+  orderId?: string | null;
+  amount: number;
+  comment?: string | null;
+  entryDate: string;
+  createdAt: string;
+  updatedAt?: string;
+  client?: { id: string; name: string } | null;
+  createdBy?: { fullName: string } | null;
+  updatedBy?: { fullName: string } | null;
+};
+
+type BackendKassaSummary = {
+  balance: number;
+  totalInflow: number;
+  totalOutflow: number;
+  totalSaleDeductions: number;
 };
 
 type BackendExpenseCategory = {
@@ -1591,6 +1673,28 @@ function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
     unresolvedEmployees: item.unresolvedEmployees,
     unresolvedClients: item.unresolvedClients,
     warnings: item.warnings,
+  };
+}
+
+function mapKassaEntry(item: BackendKassaEntry): KassaEntry {
+  const typeMap: Record<BackendKassaEntry['type'], KassaEntryType> = {
+    CLIENT_INFLOW: 'client_inflow',
+    SALE_DEDUCTION: 'sale_deduction',
+    OUTFLOW: 'outflow',
+  };
+  return {
+    id: item.id,
+    type: typeMap[item.type],
+    clientId: item.clientId ?? undefined,
+    clientName: item.client?.name ?? undefined,
+    orderId: item.orderId ?? undefined,
+    amount: item.amount,
+    comment: item.comment?.trim() || undefined,
+    date: item.entryDate.slice(0, 10),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    createdByName: item.createdBy?.fullName?.trim() || undefined,
+    updatedByName: item.updatedBy?.fullName?.trim() || undefined,
   };
 }
 
@@ -2163,6 +2267,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     salaryPaymentSummaries,
     suppliersRows,
     supplierOrders,
+    kassaSummary,
+    kassaEntries,
   ] = await Promise.all([
     allow('warehouseCatalog')
       ? safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
@@ -2238,6 +2344,20 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
           [] as BackendSalaryPaymentSummary[],
         )
       : skipped<BackendSalaryPaymentSummary[]>([]),
+    allow('salaryRows')
+      ? safeLoad(
+          apiRequest<BackendKassaSummary>('/finance/kassa/summary'),
+          { balance: 0, totalInflow: 0, totalOutflow: 0, totalSaleDeductions: 0 },
+        )
+      : skipped<BackendKassaSummary>({
+          balance: 0,
+          totalInflow: 0,
+          totalOutflow: 0,
+          totalSaleDeductions: 0,
+        }),
+    allow('salaryRows')
+      ? safeLoad(apiRequest<BackendKassaEntry[]>('/finance/kassa/entries'), [] as BackendKassaEntry[])
+      : skipped<BackendKassaEntry[]>([]),
     suppliersPromise,
     supplierOrdersPromise,
   ]);
@@ -2376,6 +2496,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     name: client.name,
     phone: client.phone,
     debt: computeDebt(client),
+    cashBalance: client.cashBalance ?? 0,
     createdAt: client.createdAt,
     bankAccount: client.bankAccount ?? undefined,
     bankName: client.bankName ?? undefined,
@@ -2606,6 +2727,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
         }
       : emptyState.payrollSettings,
     payments: mappedPayments,
+    kassaSummary: kassaSummary ?? emptyState.kassaSummary,
+    kassaEntries: (kassaEntries ?? []).map(mapKassaEntry),
   };
 
   return { state, lookups };
@@ -2876,6 +2999,56 @@ export function ERPProvider({ children }: { children: ReactNode }) {
         }
         case 'DELETE_EXPENSE':
           await apiRequest(`/finance/expenses/${action.payload}`, { method: 'DELETE' });
+          break;
+        case 'ADD_KASSA_INFLOW':
+          await apiRequest('/finance/kassa/inflows', {
+            method: 'POST',
+            body: JSON.stringify({
+              clientId: action.payload.clientId,
+              amount: action.payload.amount,
+              comment: action.payload.comment,
+              entryDate: action.payload.date,
+            }),
+          });
+          break;
+        case 'UPDATE_KASSA_INFLOW': {
+          const body: Record<string, unknown> = {};
+          if (action.payload.clientId !== undefined) body.clientId = action.payload.clientId;
+          if (action.payload.amount !== undefined) body.amount = action.payload.amount;
+          if (action.payload.comment !== undefined) body.comment = action.payload.comment;
+          if (action.payload.date !== undefined) body.entryDate = action.payload.date;
+          await apiRequest(`/finance/kassa/inflows/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(body),
+          });
+          break;
+        }
+        case 'DELETE_KASSA_INFLOW':
+          await apiRequest(`/finance/kassa/inflows/${action.payload}`, { method: 'DELETE' });
+          break;
+        case 'ADD_KASSA_OUTFLOW':
+          await apiRequest('/finance/kassa/outflows', {
+            method: 'POST',
+            body: JSON.stringify({
+              amount: action.payload.amount,
+              comment: action.payload.comment,
+              entryDate: action.payload.date,
+            }),
+          });
+          break;
+        case 'UPDATE_KASSA_OUTFLOW': {
+          const body: Record<string, unknown> = {};
+          if (action.payload.amount !== undefined) body.amount = action.payload.amount;
+          if (action.payload.comment !== undefined) body.comment = action.payload.comment;
+          if (action.payload.date !== undefined) body.entryDate = action.payload.date;
+          await apiRequest(`/finance/kassa/outflows/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(body),
+          });
+          break;
+        }
+        case 'DELETE_KASSA_OUTFLOW':
+          await apiRequest(`/finance/kassa/outflows/${action.payload}`, { method: 'DELETE' });
           break;
         case 'CREATE_SUPPLIER':
           await apiRequest('/finance/suppliers', {

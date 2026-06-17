@@ -32,11 +32,19 @@ import { CreateSupplierDto } from './dto/create-supplier.dto.js';
 import { CreateSupplierPurchaseOrderDto } from './dto/create-supplier-purchase-order.dto.js';
 import { CreateSupplierPurchaseBatchDto } from './dto/create-supplier-purchase-batch.dto.js';
 import { UpdateSupplierPurchaseOrderDto } from './dto/update-supplier-purchase-order.dto.js';
+import { CreateKassaInflowDto } from './dto/create-kassa-inflow.dto.js';
+import { CreateKassaOutflowDto } from './dto/create-kassa-outflow.dto.js';
+import { UpdateKassaInflowDto } from './dto/update-kassa-inflow.dto.js';
+import { UpdateKassaOutflowDto } from './dto/update-kassa-outflow.dto.js';
 import { FinanceService } from './finance.service.js';
+import { KassaService } from './kassa.service.js';
 
 @Controller('finance')
 export class FinanceController {
-  constructor(private readonly financeService: FinanceService) {}
+  constructor(
+    private readonly financeService: FinanceService,
+    private readonly kassaService: KassaService,
+  ) {}
 
   @Post('expenses')
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
@@ -369,5 +377,67 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   reconcileBankVedomost(@Param('id') id: string) {
     return this.financeService.reconcileBankVedomost(id);
+  }
+
+  @Get('kassa/summary')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getKassaSummary() {
+    return this.kassaService.getSummary();
+  }
+
+  @Get('kassa/entries')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getKassaEntries() {
+    return this.kassaService.getEntries();
+  }
+
+  @Post('kassa/inflows')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createKassaInflow(
+    @Body() dto: CreateKassaInflowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.kassaService.createInflow(dto, userId);
+  }
+
+  @Patch('kassa/inflows/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateKassaInflow(
+    @Param('id') id: string,
+    @Body() dto: UpdateKassaInflowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.kassaService.updateInflow(id, dto, userId);
+  }
+
+  @Delete('kassa/inflows/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteKassaInflow(@Param('id') id: string) {
+    return this.kassaService.deleteInflow(id);
+  }
+
+  @Post('kassa/outflows')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  createKassaOutflow(
+    @Body() dto: CreateKassaOutflowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.kassaService.createOutflow(dto, userId);
+  }
+
+  @Patch('kassa/outflows/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateKassaOutflow(
+    @Param('id') id: string,
+    @Body() dto: UpdateKassaOutflowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.kassaService.updateOutflow(id, dto, userId);
+  }
+
+  @Delete('kassa/outflows/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteKassaOutflow(@Param('id') id: string) {
+    return this.kassaService.deleteOutflow(id);
   }
 }

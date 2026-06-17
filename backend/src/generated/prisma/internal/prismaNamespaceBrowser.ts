@@ -76,6 +76,7 @@ export const ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
+  KassaEntry: 'KassaEntry',
   ExpenseCategory: 'ExpenseCategory',
   ExpenseFundingSource: 'ExpenseFundingSource',
   Expense: 'Expense',
@@ -457,6 +458,7 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  cashBalance: 'cashBalance',
   deliveryVehiclePlate: 'deliveryVehiclePlate',
   deliveryDriverName: 'deliveryDriverName',
   status: 'status',
@@ -511,6 +513,23 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const KassaEntryScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  clientId: 'clientId',
+  orderId: 'orderId',
+  amount: 'amount',
+  comment: 'comment',
+  entryDate: 'entryDate',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KassaEntryScalarFieldEnum = (typeof KassaEntryScalarFieldEnum)[keyof typeof KassaEntryScalarFieldEnum]
 
 
 export const ExpenseCategoryScalarFieldEnum = {

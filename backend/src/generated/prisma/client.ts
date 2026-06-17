@@ -167,6 +167,11 @@ export type OrderItem = Prisma.OrderItemModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model KassaEntry
+ * Buxgalteriya → Kassa: mijoz kirimi, sotuvdan yechish, chiqim
+ */
+export type KassaEntry = Prisma.KassaEntryModel
+/**
  * Model ExpenseCategory
  * 
  */

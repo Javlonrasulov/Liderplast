@@ -354,7 +354,7 @@ export function RawMaterial() {
       payload: { rawMaterialId, amount: amountKg, description, date },
     });
     setForm({ amount: '', unit: 'kg', description: '', date: todayYmd() });
-    setSuccess(`${formatNumber(amountKg)} ${t.unitKg} ${t.successAdded}`);
+    setSuccess(`${formatKgAmount(amountKg)} ${t.unitKg} ${t.successAdded}`);
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -366,7 +366,7 @@ export function RawMaterial() {
       return;
     }
     const rawMaterialId = resolvedIncomingRawMaterialId;
-    const rawVal = parseFloat(String(form.amount).replace(',', '.'));
+    const rawVal = parseAmountInput(form.amount);
     const amountKg = form.unit === 'ton' ? rawVal * 1000 : rawVal;
     if (!rawMaterialId) {
       setError(t.rmSelectRawMaterialRequired);
@@ -394,7 +394,13 @@ export function RawMaterial() {
     runIncomingSubmit(rawMaterialId, amountKg, description, form.date);
   };
 
-  const amountKg = form.unit === 'ton' ? parseFloat(form.amount || '0') * 1000 : parseFloat(form.amount || '0');
+  const parseAmountInput = (raw: string) =>
+    parseFloat(String(raw).replace(',', '.').trim());
+
+  const amountKg =
+    form.unit === 'ton'
+      ? parseAmountInput(form.amount || '0') * 1000
+      : parseAmountInput(form.amount || '0');
   const previewStockKg = incomingKind === 'PAINT' ? paintStockKg : siroStockKg;
   const incomingAutoBagCount =
     incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
@@ -503,7 +509,7 @@ export function RawMaterial() {
                 <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
               </div>
               <p className="text-slate-900 dark:text-white text-2xl font-bold">
-                {formatNumber(flowByKind.siroIn)}{' '}
+                {formatKgAmount(flowByKind.siroIn)}{' '}
                 <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
               </p>
             </div>
@@ -515,7 +521,7 @@ export function RawMaterial() {
                 <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
               </div>
               <p className="text-slate-900 dark:text-white text-2xl font-bold">
-                {formatNumber(flowByKind.siroOut)}{' '}
+                {formatKgAmount(flowByKind.siroOut)}{' '}
                 <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
               </p>
             </div>
@@ -547,7 +553,7 @@ export function RawMaterial() {
                   criticalStock ? 'text-red-600' : lowStock ? 'text-amber-600' : 'text-slate-900 dark:text-white'
                 }`}
               >
-                {formatNumber(siroStockKg)}{' '}
+                {formatKgAmount(siroStockKg)}{' '}
                 <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
               </p>
               {lowStock && (
@@ -569,7 +575,7 @@ export function RawMaterial() {
                 <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
               </div>
               <p className="text-slate-900 dark:text-white text-2xl font-bold">
-                {formatNumber(flowByKind.paintIn)}{' '}
+                {formatKgAmount(flowByKind.paintIn)}{' '}
                 <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
               </p>
             </div>
@@ -581,7 +587,7 @@ export function RawMaterial() {
                 <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
               </div>
               <p className="text-slate-900 dark:text-white text-2xl font-bold">
-                {formatNumber(flowByKind.paintOut)}{' '}
+                {formatKgAmount(flowByKind.paintOut)}{' '}
                 <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
               </p>
             </div>
@@ -593,7 +599,7 @@ export function RawMaterial() {
                 <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmRemainingPaint}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                {formatNumber(paintStockKg)}{' '}
+                {formatKgAmount(paintStockKg)}{' '}
                 <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
               </p>
             </div>
@@ -709,7 +715,7 @@ export function RawMaterial() {
                               {item.name}
                             </p>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                              {formatNumber(item.quantityKg)} {t.unitKg}
+                              {formatKgAmount(item.quantityKg)} {t.unitKg}
                             </p>
                           </div>
                           <span
@@ -761,7 +767,7 @@ export function RawMaterial() {
                               {item.name}
                             </p>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                              {formatNumber(item.quantityKg)} {t.unitKg}
+                              {formatKgAmount(item.quantityKg)} {t.unitKg}
                             </p>
                           </div>
                           <span
@@ -902,7 +908,7 @@ export function RawMaterial() {
                         <span className="text-slate-700 dark:text-slate-200">
                           {t.prRmDaysWaitingTpl
                             .replace('{name}', o.productName)
-                            .replace('{kg}', formatNumber(o.quantityKg ?? o.quantity))
+                            .replace('{kg}', formatKgAmount(o.quantityKg ?? o.quantity))
                             .replace('{days}', String(days))}
                         </span>
                         <button
@@ -993,7 +999,7 @@ export function RawMaterial() {
                   incomingRawMaterial.defaultBagWeightKg && (
                     <p className="text-xs text-indigo-500 mt-1">
                       {t.rmIncomingBagWeightHint
-                        .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg))
+                        .replace('{weight}', formatKgAmount(incomingRawMaterial.defaultBagWeightKg))
                         .replace('{unit}', t.unitKg)}
                     </p>
                   )}
@@ -1008,8 +1014,16 @@ export function RawMaterial() {
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelAmount}</label>
                 <div className="flex gap-2">
-                  <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="0" min="0"
-                    className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  <input
+                    type="number"
+                    value={form.amount}
+                    onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                    placeholder="0"
+                    min="0"
+                    step="any"
+                    inputMode="decimal"
+                    className="flex-1 px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
                   <div className="w-full min-w-[6.5rem] max-w-[42%] sm:w-[140px] sm:max-w-none">
                     <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
                       <SelectTrigger className={SELECT_TRIGGER_CLS}>
@@ -1027,7 +1041,7 @@ export function RawMaterial() {
                   </div>
                 </div>
                 {form.amount && form.unit === 'ton' && (
-                  <p className="text-xs text-indigo-500 mt-1">= {formatNumber(amountKg)} {t.unitKg}</p>
+                  <p className="text-xs text-indigo-500 mt-1">= {formatKgAmount(amountKg)} {t.unitKg}</p>
                 )}
               </div>
               <div>
@@ -1043,9 +1057,9 @@ export function RawMaterial() {
               {form.amount && amountKg > 0 && (
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
                   <p className="text-blue-700 dark:text-blue-400 text-xs font-medium">{t.rmPreviewAdd}</p>
-                  <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatNumber(amountKg)} {t.unitKg}</p>
+                  <p className="text-blue-800 dark:text-blue-300 text-sm font-bold mt-0.5">{formatKgAmount(amountKg)} {t.unitKg}</p>
                   <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
-                    {t.rmPreviewBalance} {formatNumber(previewStockKg + amountKg)} {t.unitKg}
+                    {t.rmPreviewBalance} {formatKgAmount(previewStockKg + amountKg)} {t.unitKg}
                   </p>
                   {incomingKind === 'SIRO' &&
                   incomingAutoBagCount > 0 &&
@@ -1053,8 +1067,8 @@ export function RawMaterial() {
                     <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
                       {t.rmAutoBagPreview
                         .replace('{count}', String(incomingAutoBagCount))
-                        .replace('{weight}', formatNumber(incomingRawMaterial.defaultBagWeightKg ?? 0))
-                        .replace('{lastWeight}', formatNumber(incomingLastBagKg || 0))}
+                        .replace('{weight}', formatKgAmount(incomingRawMaterial.defaultBagWeightKg ?? 0))
+                        .replace('{lastWeight}', formatKgAmount(incomingLastBagKg || 0))}
                     </p>
                   ) : null}
                 </div>
@@ -1098,8 +1112,8 @@ export function RawMaterial() {
             <AlertDialogDescription>
               {incomingQtyMismatchPayload
                 ? t.rmIncomingQtyMismatchBody
-                    .replace('{orderedKg}', formatNumber(incomingQtyMismatchPayload.orderedKg))
-                    .replace('{enteredKg}', formatNumber(incomingQtyMismatchPayload.amountKg))
+                    .replace('{orderedKg}', formatKgAmount(incomingQtyMismatchPayload.orderedKg))
+                    .replace('{enteredKg}', formatKgAmount(incomingQtyMismatchPayload.amountKg))
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
