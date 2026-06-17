@@ -52,7 +52,7 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     machines: hasRole(user, 'DIRECTOR', 'MANAGER', 'WORKER') && has('view_shift'),
     shifts:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_shift'),
-    clients: hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_sales'),
+    clients: hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && (has('view_sales') || has('view_vedemost')),
     orders:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_sales'),
     payments: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_sales'),

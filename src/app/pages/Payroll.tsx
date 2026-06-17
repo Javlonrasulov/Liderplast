@@ -6,6 +6,7 @@ import {
   UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar, Wallet,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiRequest } from '../api/http';
 import { useERP } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import {
@@ -85,6 +86,15 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
+function SelectField(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      className={`w-full h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition ${props.className ?? ''}`}
+    />
+  );
+}
+
 function StyledSelect({
   value,
   onValueChange,
@@ -97,13 +107,20 @@ function StyledSelect({
   placeholder?: string;
 }) {
   return (
-    <RadixSelect value={value} onValueChange={onValueChange}>
+    <RadixSelect value={value || undefined} onValueChange={onValueChange}>
       <SelectTrigger className="h-9 w-full rounded-xl border-slate-200 bg-white text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent
+        position="popper"
+        className="z-[200] max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+      >
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            className="cursor-pointer rounded-lg py-2 pl-3 pr-8 text-sm data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-800"
+          >
             {option.label}
           </SelectItem>
         ))}
@@ -2189,10 +2206,14 @@ function SettingsTab() {
 
 // ======================== KASSA TAB ========================
 
+type KassaClientOption = { id: string; name: string; cashBalance: number };
+
 function KassaTab() {
   const { state, dispatch } = useERP();
   const { t } = useApp();
-  const [inflowClientId, setInflowClientId] = useState(state.clients[0]?.id ?? '');
+  const [kassaClients, setKassaClients] = useState<KassaClientOption[]>([]);
+  const [clientsLoading, setClientsLoading] = useState(true);
+  const [inflowClientId, setInflowClientId] = useState('');
   const [inflowAmount, setInflowAmount] = useState('');
   const [inflowComment, setInflowComment] = useState('');
   const [inflowDate, setInflowDate] = useState(todayYmd());
@@ -2207,6 +2228,45 @@ function KassaTab() {
   const [editComment, setEditComment] = useState('');
   const [editDate, setEditDate] = useState(todayYmd());
 
+  const sortedClients = useMemo(
+    () => [...kassaClients].sort((a, b) => a.name.localeCompare(b.name)),
+    [kassaClients],
+  );
+
+  const loadKassaClients = React.useCallback(async () => {
+    setClientsLoading(true);
+    try {
+      const rows = await apiRequest<Array<{ id: string; name: string; cashBalance?: number }>>('/clients');
+      setKassaClients(
+        rows
+          .map((row) => ({
+            id: row.id,
+            name: row.name,
+            cashBalance: row.cashBalance ?? 0,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    } catch (err) {
+      if (state.clients.length > 0) {
+        setKassaClients(
+          state.clients.map((client) => ({
+            id: client.id,
+            name: client.name,
+            cashBalance: client.cashBalance,
+          })),
+        );
+      } else {
+        toast.error(err instanceof Error ? err.message : t.whRequestError);
+      }
+    } finally {
+      setClientsLoading(false);
+    }
+  }, [state.clients, t.whRequestError]);
+
+  useEffect(() => {
+    void loadKassaClients();
+  }, [loadKassaClients]);
+
   const inflows = useMemo(
     () => state.kassaEntries.filter((e) => e.type === 'client_inflow'),
     [state.kassaEntries],
@@ -2216,18 +2276,14 @@ function KassaTab() {
     [state.kassaEntries],
   );
 
-  const clientOptions = useMemo(
-    () =>
-      [...state.clients]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((c) => ({ value: c.id, label: `${c.name} (${formatCurrency(c.cashBalance)})` })),
-    [state.clients],
-  );
-
   const handleAddInflow = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!inflowClientId) {
+      toast.error(t.prKassaSelectClient);
+      return;
+    }
     const amount = parseDigitsFromAmountInput(inflowAmount);
-    if (!inflowClientId || amount <= 0) {
+    if (amount <= 0) {
       toast.error(t.prKassaAmount);
       return;
     }
@@ -2244,6 +2300,8 @@ function KassaTab() {
       });
       setInflowAmount('');
       setInflowComment('');
+      setInflowClientId('');
+      await loadKassaClients();
       toast.success(t.prKassaAddInflow);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.whRequestError);
@@ -2319,6 +2377,7 @@ function KassaTab() {
         });
       }
       setEditEntry(null);
+      await loadKassaClients();
       toast.success(t.btnSave);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.whRequestError);
@@ -2336,6 +2395,7 @@ function KassaTab() {
         payload: deleteEntry.id,
       });
       setDeleteEntry(null);
+      await loadKassaClients();
       toast.success(t.whDeleteAction);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.whRequestError);
@@ -2382,12 +2442,27 @@ function KassaTab() {
           <form onSubmit={handleAddInflow} className="mb-4 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Label>{t.prKassaClient}</Label>
-              <StyledSelect
-                value={inflowClientId}
-                onValueChange={setInflowClientId}
-                options={clientOptions}
-                placeholder={t.prKassaClient}
-              />
+              {clientsLoading ? (
+                <div className="flex min-h-9 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
+                  {t.authLoading}
+                </div>
+              ) : sortedClients.length === 0 ? (
+                <div className="flex min-h-9 items-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
+                  {t.prKassaNoClients}
+                </div>
+              ) : (
+                <SelectField
+                  value={inflowClientId}
+                  onChange={(e) => setInflowClientId(e.target.value)}
+                >
+                  <option value="">{t.prKassaSelectClient}</option>
+                  {sortedClients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name} ({formatCurrency(client.cashBalance)})
+                    </option>
+                  ))}
+                </SelectField>
+              )}
             </div>
             <div>
               <Label>{t.prKassaAmount}</Label>
@@ -2409,7 +2484,7 @@ function KassaTab() {
             <div className="sm:col-span-2">
               <button
                 type="submit"
-                disabled={saving || clientOptions.length === 0}
+                disabled={saving || sortedClients.length === 0}
                 className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               >
                 <Plus size={14} />
@@ -2547,7 +2622,14 @@ function KassaTab() {
             {editEntry?.type === 'client_inflow' && (
               <div>
                 <Label>{t.prKassaClient}</Label>
-                <StyledSelect value={editClientId} onValueChange={setEditClientId} options={clientOptions} />
+                <SelectField value={editClientId} onChange={(e) => setEditClientId(e.target.value)}>
+                  <option value="">{t.prKassaSelectClient}</option>
+                  {sortedClients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name} ({formatCurrency(client.cashBalance)})
+                    </option>
+                  ))}
+                </SelectField>
               </div>
             )}
             <div>

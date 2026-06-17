@@ -1124,7 +1124,8 @@ export interface T {
   prKassaEditInflow: string;
   prKassaEditOutflow: string;
   slClientCashBalance: string;
-  slBalanceWillApply: string;
+  prKassaSelectClient: string;
+  prKassaNoClients: string;
   prGenerate: string;
   /** Vedomostni butunlay o‘chirish / yopish */
   prCloseVedomost: string;
@@ -2490,6 +2491,8 @@ const uz_cyrillic: T = {
   prKassaEditOutflow: 'Чиқимни таҳрирлаш',
   slClientCashBalance: 'Мижоз ҳисоби',
   slBalanceWillApply: 'Сотувда ҳисобдан ечилади',
+  prKassaSelectClient: 'Мижозни танланг',
+  prKassaNoClients: 'Мижозлар йўқ — аввал «Сотув» бўлимида мижоз қўшинг',
   prGenerate: 'Ведомост яратиш',
   prCloseVedomost: 'Ведомостни ёпиш',
   prCloseVedomostTitle: 'Ведомостни ёпиш',
@@ -3849,6 +3852,8 @@ const uz_latin: T = {
   prKassaEditOutflow: 'Chiqimni tahrirlash',
   slClientCashBalance: 'Mijoz hisobi',
   slBalanceWillApply: 'Sotuvda hisobdan yechiladi',
+  prKassaSelectClient: 'Mijozni tanlang',
+  prKassaNoClients: 'Mijozlar yo‘q — avval «Sotuv» bo‘limida mijoz qo‘shing',
   prGenerate: 'Vedomost yaratish',
   prCloseVedomost: 'Vedomostni yopish',
   prCloseVedomostTitle: 'Vedomostni yopish',
@@ -5207,6 +5212,8 @@ const ru: T = {
   prKassaEditOutflow: 'Редактировать расход',
   slClientCashBalance: 'Баланс клиента',
   slBalanceWillApply: 'При продаже спишется с баланса',
+  prKassaSelectClient: 'Выберите клиента',
+  prKassaNoClients: 'Нет клиентов — сначала добавьте клиента в разделе «Продажи»',
   prGenerate: 'Сформировать ведомость',
   prCloseVedomost: 'Закрыть ведомость',
   prCloseVedomostTitle: 'Закрыть ведомость',
