@@ -2344,6 +2344,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
           [] as BackendSalaryPaymentSummary[],
         )
       : skipped<BackendSalaryPaymentSummary[]>([]),
+    suppliersPromise,
+    supplierOrdersPromise,
     allow('salaryRows')
       ? safeLoad(
           apiRequest<BackendKassaSummary>('/finance/kassa/summary'),
@@ -2358,8 +2360,6 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     allow('salaryRows')
       ? safeLoad(apiRequest<BackendKassaEntry[]>('/finance/kassa/entries'), [] as BackendKassaEntry[])
       : skipped<BackendKassaEntry[]>([]),
-    suppliersPromise,
-    supplierOrdersPromise,
   ]);
 
   const expenseCategories = await expenseCategoriesPromise;
