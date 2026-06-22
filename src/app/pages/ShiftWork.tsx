@@ -124,6 +124,7 @@ const TR = {
     autoKwh: '⚡ Автоматик ток ҳисоби:',
     btn: 'Смена ёзувини сақлаш',
     btnSaveAll: 'Барчасини сақлаш',
+    btnSaveAllSaved: 'Сақланди!',
     draftProductionTitle: 'Ишлаб чиқариш (сақланмаган)',
     draftPackagingTitle: 'Қадоқлаш (сақланмаган)',
     formAddRow: '+ қатор',
@@ -286,6 +287,7 @@ const TR = {
     autoKwh: "⚡ Avtomatik tok hisobi:",
     btn: 'Smena yozuvini saqlash',
     btnSaveAll: 'Barchasini saqlash',
+    btnSaveAllSaved: 'Saqlandi!',
     draftProductionTitle: 'Ishlab chiqarish (saqlanmagan)',
     draftPackagingTitle: 'Qadoqlash (saqlanmagan)',
     formAddRow: '+ qator',
@@ -448,6 +450,7 @@ const TR = {
     autoKwh: '⚡ Автоматический расчёт тока:',
     btn: 'Сохранить запись смены',
     btnSaveAll: 'Сохранить всё',
+    btnSaveAllSaved: 'Сохранено!',
     draftProductionTitle: 'Производство (не сохранено)',
     draftPackagingTitle: 'Упаковка (не сохранено)',
     formAddRow: '+ строка',
@@ -872,6 +875,7 @@ export function ShiftWork() {
     'form' | 'history' | 'materialHistory' | 'workers' | 'machines' | 'shiftDefs'
   >('form');
   const [success, setSuccess] = useState('');
+  const [saveAllStatus, setSaveAllStatus] = useState<'idle' | 'saving' | 'success'>('idle');
   const [error, setError] = useState('');
   const [newWorker, setNewWorker] = useState('');
   const [newWorkerShift, setNewWorkerShift] = useState(1);
@@ -1459,6 +1463,7 @@ export function ShiftWork() {
     }
 
     try {
+      setSaveAllStatus('saving');
       if (!state.workers.some((w) => w === form.workerName.trim())) {
         await dispatch({
           type: 'ADD_WORKER',
@@ -1547,11 +1552,16 @@ export function ShiftWork() {
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Error';
       setError(translateShiftInventoryApiError(raw, appT));
+      setSaveAllStatus('idle');
       return;
     }
 
+    setSaveAllStatus('success');
     setSuccess(`${form.workerName} — ${getShiftLabel(shiftDefinitions, form.shift, t)} ✓`);
-    setTimeout(() => setSuccess(''), 4000);
+    setTimeout(() => {
+      setSuccess('');
+      setSaveAllStatus('idle');
+    }, 4000);
     setForm((prev) => ({ ...prev, workerName: '' }));
     setLines([createEmptyLine()]);
     setPackagingLines([createEmptyPackagingLineCb()]);
@@ -2501,14 +2511,26 @@ export function ShiftWork() {
 
               <button
                 type="submit"
-                disabled={shiftPickerDefs.length === 0}
-                className={`w-full py-3 disabled:cursor-not-allowed disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md ${
-                  formEntryMode === 'packaging'
-                    ? 'bg-teal-600 hover:bg-teal-700 disabled:hover:bg-teal-600 shadow-teal-200 dark:shadow-teal-900/30'
-                    : 'bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 shadow-indigo-200 dark:shadow-indigo-900/30'
+                disabled={shiftPickerDefs.length === 0 || saveAllStatus === 'saving'}
+                className={`w-full py-3 disabled:cursor-not-allowed disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-md ${
+                  saveAllStatus === 'success'
+                    ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-200 dark:shadow-emerald-900/40 ring-2 ring-emerald-400/60'
+                    : formEntryMode === 'packaging'
+                      ? 'bg-teal-600 hover:bg-teal-700 disabled:hover:bg-teal-600 shadow-teal-200 dark:shadow-teal-900/30'
+                      : 'bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 shadow-indigo-200 dark:shadow-indigo-900/30'
                 }`}
               >
-                <CheckCircle2 size={16} /> {t.btnSaveAll}
+                {saveAllStatus === 'success' ? (
+                  <>
+                    <CheckCircle2 size={20} strokeWidth={2.5} className="shrink-0" />
+                    {t.btnSaveAllSaved}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={16} className="shrink-0" />
+                    {t.btnSaveAll}
+                  </>
+                )}
               </button>
             </form>
           </div>

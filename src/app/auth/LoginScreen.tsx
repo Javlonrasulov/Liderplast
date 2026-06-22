@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Factory, Lock, LogIn, Recycle, User } from 'lucide-react';
+import { ClipboardList, Eye, EyeOff, Factory, Lock, LogIn, Recycle, User } from 'lucide-react';
 import { useAuth } from './auth-context';
 import { useApp } from '../i18n/app-context';
 
 const MASHINALAR_CRM_URL = 'https://mashina.liderplast.uz';
 const SARALASH_CRM_URL = 'https://saralash.liderplast.uz/';
+const VAZIFA_CRM_URL = 'https://vazifa.liderplast.uz/';
 
 const outlineNavClass =
   'w-full h-11 rounded-xl border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 font-medium flex items-center justify-center gap-2 transition-colors';
@@ -107,6 +108,10 @@ export function LoginScreen() {
           <a href={SARALASH_CRM_URL} className={outlineNavClass}>
             <Recycle size={18} className="shrink-0" aria-hidden />
             {t.authSaralash}
+          </a>
+          <a href={VAZIFA_CRM_URL} className={outlineNavClass}>
+            <ClipboardList size={18} className="shrink-0" aria-hidden />
+            {t.authVazifa}
           </a>
         </div>
       </div>
