@@ -44,12 +44,23 @@ export type BankTransactionMinAggregateOutputType = {
   operationDate: Date | null
   receiverName: string | null
   receiverAccount: string | null
+  receiverBankCode: string | null
   receiverBankName: string | null
   receiverStir: string | null
   paymentPurpose: string | null
+  companyAccount: string | null
+  companyBankName: string | null
+  companyStir: string | null
   isSalary: boolean | null
   employeeId: string | null
   clientId: string | null
+  supplierId: string | null
+  reviewStatus: $Enums.BankRowReviewStatus | null
+  counterpartyKind: $Enums.BankCounterpartyKind | null
+  expenseId: string | null
+  kassaEntryId: string | null
+  createdById: string | null
+  updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,12 +75,23 @@ export type BankTransactionMaxAggregateOutputType = {
   operationDate: Date | null
   receiverName: string | null
   receiverAccount: string | null
+  receiverBankCode: string | null
   receiverBankName: string | null
   receiverStir: string | null
   paymentPurpose: string | null
+  companyAccount: string | null
+  companyBankName: string | null
+  companyStir: string | null
   isSalary: boolean | null
   employeeId: string | null
   clientId: string | null
+  supplierId: string | null
+  reviewStatus: $Enums.BankRowReviewStatus | null
+  counterpartyKind: $Enums.BankCounterpartyKind | null
+  expenseId: string | null
+  kassaEntryId: string | null
+  createdById: string | null
+  updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -84,12 +106,23 @@ export type BankTransactionCountAggregateOutputType = {
   operationDate: number
   receiverName: number
   receiverAccount: number
+  receiverBankCode: number
   receiverBankName: number
   receiverStir: number
   paymentPurpose: number
+  companyAccount: number
+  companyBankName: number
+  companyStir: number
   isSalary: number
   employeeId: number
   clientId: number
+  supplierId: number
+  reviewStatus: number
+  counterpartyKind: number
+  expenseId: number
+  kassaEntryId: number
+  createdById: number
+  updatedById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -114,12 +147,23 @@ export type BankTransactionMinAggregateInputType = {
   operationDate?: true
   receiverName?: true
   receiverAccount?: true
+  receiverBankCode?: true
   receiverBankName?: true
   receiverStir?: true
   paymentPurpose?: true
+  companyAccount?: true
+  companyBankName?: true
+  companyStir?: true
   isSalary?: true
   employeeId?: true
   clientId?: true
+  supplierId?: true
+  reviewStatus?: true
+  counterpartyKind?: true
+  expenseId?: true
+  kassaEntryId?: true
+  createdById?: true
+  updatedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -134,12 +178,23 @@ export type BankTransactionMaxAggregateInputType = {
   operationDate?: true
   receiverName?: true
   receiverAccount?: true
+  receiverBankCode?: true
   receiverBankName?: true
   receiverStir?: true
   paymentPurpose?: true
+  companyAccount?: true
+  companyBankName?: true
+  companyStir?: true
   isSalary?: true
   employeeId?: true
   clientId?: true
+  supplierId?: true
+  reviewStatus?: true
+  counterpartyKind?: true
+  expenseId?: true
+  kassaEntryId?: true
+  createdById?: true
+  updatedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -154,12 +209,23 @@ export type BankTransactionCountAggregateInputType = {
   operationDate?: true
   receiverName?: true
   receiverAccount?: true
+  receiverBankCode?: true
   receiverBankName?: true
   receiverStir?: true
   paymentPurpose?: true
+  companyAccount?: true
+  companyBankName?: true
+  companyStir?: true
   isSalary?: true
   employeeId?: true
   clientId?: true
+  supplierId?: true
+  reviewStatus?: true
+  counterpartyKind?: true
+  expenseId?: true
+  kassaEntryId?: true
+  createdById?: true
+  updatedById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -261,12 +327,23 @@ export type BankTransactionGroupByOutputType = {
   operationDate: Date
   receiverName: string | null
   receiverAccount: string | null
+  receiverBankCode: string | null
   receiverBankName: string | null
   receiverStir: string | null
   paymentPurpose: string | null
+  companyAccount: string | null
+  companyBankName: string | null
+  companyStir: string | null
   isSalary: boolean
   employeeId: string | null
   clientId: string | null
+  supplierId: string | null
+  reviewStatus: $Enums.BankRowReviewStatus
+  counterpartyKind: $Enums.BankCounterpartyKind
+  expenseId: string | null
+  kassaEntryId: string | null
+  createdById: string | null
+  updatedById: string | null
   createdAt: Date
   updatedAt: Date
   _count: BankTransactionCountAggregateOutputType | null
@@ -304,17 +381,33 @@ export type BankTransactionWhereInput = {
   operationDate?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   receiverName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  receiverBankCode?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentPurpose?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   isSalary?: Prisma.BoolFilter<"BankTransaction"> | boolean
   employeeId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   clientId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  supplierId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFilter<"BankTransaction"> | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFilter<"BankTransaction"> | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  kassaEntryId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  createdById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   bankVedomost?: Prisma.XOR<Prisma.BankVedomostScalarRelationFilter, Prisma.BankVedomostWhereInput>
   employee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null
+  supplier?: Prisma.XOR<Prisma.SupplierNullableScalarRelationFilter, Prisma.SupplierWhereInput> | null
+  expense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
+  kassaEntry?: Prisma.XOR<Prisma.KassaEntryNullableScalarRelationFilter, Prisma.KassaEntryWhereInput> | null
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type BankTransactionOrderByWithRelationInput = {
@@ -327,21 +420,39 @@ export type BankTransactionOrderByWithRelationInput = {
   operationDate?: Prisma.SortOrder
   receiverName?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiverBankCode?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverBankName?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverStir?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentPurpose?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyBankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyStir?: Prisma.SortOrderInput | Prisma.SortOrder
   isSalary?: Prisma.SortOrder
   employeeId?: Prisma.SortOrderInput | Prisma.SortOrder
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  counterpartyKind?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  kassaEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   bankVedomost?: Prisma.BankVedomostOrderByWithRelationInput
   employee?: Prisma.UserOrderByWithRelationInput
   client?: Prisma.ClientOrderByWithRelationInput
+  supplier?: Prisma.SupplierOrderByWithRelationInput
+  expense?: Prisma.ExpenseOrderByWithRelationInput
+  kassaEntry?: Prisma.KassaEntryOrderByWithRelationInput
+  createdBy?: Prisma.UserOrderByWithRelationInput
+  updatedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type BankTransactionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  expenseId?: string
+  kassaEntryId?: string
   AND?: Prisma.BankTransactionWhereInput | Prisma.BankTransactionWhereInput[]
   OR?: Prisma.BankTransactionWhereInput[]
   NOT?: Prisma.BankTransactionWhereInput | Prisma.BankTransactionWhereInput[]
@@ -353,18 +464,32 @@ export type BankTransactionWhereUniqueInput = Prisma.AtLeast<{
   operationDate?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   receiverName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  receiverBankCode?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentPurpose?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   isSalary?: Prisma.BoolFilter<"BankTransaction"> | boolean
   employeeId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   clientId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  supplierId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFilter<"BankTransaction"> | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFilter<"BankTransaction"> | $Enums.BankCounterpartyKind
+  createdById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   bankVedomost?: Prisma.XOR<Prisma.BankVedomostScalarRelationFilter, Prisma.BankVedomostWhereInput>
   employee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null
-}, "id">
+  supplier?: Prisma.XOR<Prisma.SupplierNullableScalarRelationFilter, Prisma.SupplierWhereInput> | null
+  expense?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
+  kassaEntry?: Prisma.XOR<Prisma.KassaEntryNullableScalarRelationFilter, Prisma.KassaEntryWhereInput> | null
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+}, "id" | "expenseId" | "kassaEntryId">
 
 export type BankTransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -376,12 +501,23 @@ export type BankTransactionOrderByWithAggregationInput = {
   operationDate?: Prisma.SortOrder
   receiverName?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiverBankCode?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverBankName?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverStir?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentPurpose?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyBankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyStir?: Prisma.SortOrderInput | Prisma.SortOrder
   isSalary?: Prisma.SortOrder
   employeeId?: Prisma.SortOrderInput | Prisma.SortOrder
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  counterpartyKind?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  kassaEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BankTransactionCountOrderByAggregateInput
@@ -404,12 +540,23 @@ export type BankTransactionScalarWhereWithAggregatesInput = {
   operationDate?: Prisma.DateTimeWithAggregatesFilter<"BankTransaction"> | Date | string
   receiverName?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   receiverAccount?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  receiverBankCode?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   receiverBankName?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   receiverStir?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   paymentPurpose?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  companyAccount?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  companyBankName?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  companyStir?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   isSalary?: Prisma.BoolWithAggregatesFilter<"BankTransaction"> | boolean
   employeeId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   clientId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  supplierId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusWithAggregatesFilter<"BankTransaction"> | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindWithAggregatesFilter<"BankTransaction"> | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  kassaEntryId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  updatedById?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BankTransaction"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BankTransaction"> | Date | string
 }
@@ -423,15 +570,26 @@ export type BankTransactionCreateInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
   createdAt?: Date | string
   updatedAt?: Date | string
   bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
   employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
   client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
 }
 
 export type BankTransactionUncheckedCreateInput = {
@@ -444,12 +602,23 @@ export type BankTransactionUncheckedCreateInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -463,15 +632,26 @@ export type BankTransactionUpdateInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
   employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
   client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
 }
 
 export type BankTransactionUncheckedUpdateInput = {
@@ -484,12 +664,23 @@ export type BankTransactionUncheckedUpdateInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -504,12 +695,23 @@ export type BankTransactionCreateManyInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -523,10 +725,16 @@ export type BankTransactionUpdateManyMutationInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -541,12 +749,23 @@ export type BankTransactionUncheckedUpdateManyInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -561,6 +780,11 @@ export type BankTransactionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type BankTransactionNullableScalarRelationFilter = {
+  is?: Prisma.BankTransactionWhereInput | null
+  isNot?: Prisma.BankTransactionWhereInput | null
+}
+
 export type BankTransactionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   bankVedomostId?: Prisma.SortOrder
@@ -571,12 +795,23 @@ export type BankTransactionCountOrderByAggregateInput = {
   operationDate?: Prisma.SortOrder
   receiverName?: Prisma.SortOrder
   receiverAccount?: Prisma.SortOrder
+  receiverBankCode?: Prisma.SortOrder
   receiverBankName?: Prisma.SortOrder
   receiverStir?: Prisma.SortOrder
   paymentPurpose?: Prisma.SortOrder
+  companyAccount?: Prisma.SortOrder
+  companyBankName?: Prisma.SortOrder
+  companyStir?: Prisma.SortOrder
   isSalary?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
+  supplierId?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  counterpartyKind?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  kassaEntryId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -595,12 +830,23 @@ export type BankTransactionMaxOrderByAggregateInput = {
   operationDate?: Prisma.SortOrder
   receiverName?: Prisma.SortOrder
   receiverAccount?: Prisma.SortOrder
+  receiverBankCode?: Prisma.SortOrder
   receiverBankName?: Prisma.SortOrder
   receiverStir?: Prisma.SortOrder
   paymentPurpose?: Prisma.SortOrder
+  companyAccount?: Prisma.SortOrder
+  companyBankName?: Prisma.SortOrder
+  companyStir?: Prisma.SortOrder
   isSalary?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
+  supplierId?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  counterpartyKind?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  kassaEntryId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -615,12 +861,23 @@ export type BankTransactionMinOrderByAggregateInput = {
   operationDate?: Prisma.SortOrder
   receiverName?: Prisma.SortOrder
   receiverAccount?: Prisma.SortOrder
+  receiverBankCode?: Prisma.SortOrder
   receiverBankName?: Prisma.SortOrder
   receiverStir?: Prisma.SortOrder
   paymentPurpose?: Prisma.SortOrder
+  companyAccount?: Prisma.SortOrder
+  companyBankName?: Prisma.SortOrder
+  companyStir?: Prisma.SortOrder
   isSalary?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
+  supplierId?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  counterpartyKind?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  kassaEntryId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -636,10 +893,38 @@ export type BankTransactionCreateNestedManyWithoutEmployeeInput = {
   connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
 }
 
+export type BankTransactionCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput> | Prisma.BankTransactionCreateWithoutCreatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput | Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyCreatedByInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
+export type BankTransactionCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput> | Prisma.BankTransactionCreateWithoutUpdatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput | Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyUpdatedByInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
 export type BankTransactionUncheckedCreateNestedManyWithoutEmployeeInput = {
   create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutEmployeeInput, Prisma.BankTransactionUncheckedCreateWithoutEmployeeInput> | Prisma.BankTransactionCreateWithoutEmployeeInput[] | Prisma.BankTransactionUncheckedCreateWithoutEmployeeInput[]
   connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutEmployeeInput | Prisma.BankTransactionCreateOrConnectWithoutEmployeeInput[]
   createMany?: Prisma.BankTransactionCreateManyEmployeeInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
+export type BankTransactionUncheckedCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput> | Prisma.BankTransactionCreateWithoutCreatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput | Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyCreatedByInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
+export type BankTransactionUncheckedCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput> | Prisma.BankTransactionCreateWithoutUpdatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput | Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyUpdatedByInputEnvelope
   connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
 }
 
@@ -657,6 +942,34 @@ export type BankTransactionUpdateManyWithoutEmployeeNestedInput = {
   deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
 }
 
+export type BankTransactionUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput> | Prisma.BankTransactionCreateWithoutCreatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput | Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyCreatedByInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutCreatedByInput | Prisma.BankTransactionUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
+export type BankTransactionUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput> | Prisma.BankTransactionCreateWithoutUpdatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput | Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyUpdatedByInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutUpdatedByInput | Prisma.BankTransactionUpdateManyWithWhereWithoutUpdatedByInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
 export type BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput = {
   create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutEmployeeInput, Prisma.BankTransactionUncheckedCreateWithoutEmployeeInput> | Prisma.BankTransactionCreateWithoutEmployeeInput[] | Prisma.BankTransactionUncheckedCreateWithoutEmployeeInput[]
   connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutEmployeeInput | Prisma.BankTransactionCreateOrConnectWithoutEmployeeInput[]
@@ -668,6 +981,34 @@ export type BankTransactionUncheckedUpdateManyWithoutEmployeeNestedInput = {
   connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
   update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutEmployeeInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutEmployeeInput[]
   updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutEmployeeInput | Prisma.BankTransactionUpdateManyWithWhereWithoutEmployeeInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput> | Prisma.BankTransactionCreateWithoutCreatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput | Prisma.BankTransactionCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyCreatedByInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutCreatedByInput | Prisma.BankTransactionUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput> | Prisma.BankTransactionCreateWithoutUpdatedByInput[] | Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput | Prisma.BankTransactionCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.BankTransactionCreateManyUpdatedByInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutUpdatedByInput | Prisma.BankTransactionUpdateManyWithWhereWithoutUpdatedByInput[]
   deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
 }
 
@@ -710,6 +1051,112 @@ export type BankTransactionUncheckedUpdateManyWithoutClientNestedInput = {
   connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
   update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutClientInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutClientInput[]
   updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutClientInput | Prisma.BankTransactionUpdateManyWithWhereWithoutClientInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
+export type BankTransactionCreateNestedOneWithoutKassaEntryInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutKassaEntryInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+}
+
+export type BankTransactionUncheckedCreateNestedOneWithoutKassaEntryInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutKassaEntryInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+}
+
+export type BankTransactionUpdateOneWithoutKassaEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutKassaEntryInput
+  upsert?: Prisma.BankTransactionUpsertWithoutKassaEntryInput
+  disconnect?: Prisma.BankTransactionWhereInput | boolean
+  delete?: Prisma.BankTransactionWhereInput | boolean
+  connect?: Prisma.BankTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BankTransactionUpdateToOneWithWhereWithoutKassaEntryInput, Prisma.BankTransactionUpdateWithoutKassaEntryInput>, Prisma.BankTransactionUncheckedUpdateWithoutKassaEntryInput>
+}
+
+export type BankTransactionUncheckedUpdateOneWithoutKassaEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutKassaEntryInput
+  upsert?: Prisma.BankTransactionUpsertWithoutKassaEntryInput
+  disconnect?: Prisma.BankTransactionWhereInput | boolean
+  delete?: Prisma.BankTransactionWhereInput | boolean
+  connect?: Prisma.BankTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BankTransactionUpdateToOneWithWhereWithoutKassaEntryInput, Prisma.BankTransactionUpdateWithoutKassaEntryInput>, Prisma.BankTransactionUncheckedUpdateWithoutKassaEntryInput>
+}
+
+export type BankTransactionCreateNestedOneWithoutExpenseInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutExpenseInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+}
+
+export type BankTransactionUncheckedCreateNestedOneWithoutExpenseInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutExpenseInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+}
+
+export type BankTransactionUpdateOneWithoutExpenseNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutExpenseInput
+  upsert?: Prisma.BankTransactionUpsertWithoutExpenseInput
+  disconnect?: Prisma.BankTransactionWhereInput | boolean
+  delete?: Prisma.BankTransactionWhereInput | boolean
+  connect?: Prisma.BankTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BankTransactionUpdateToOneWithWhereWithoutExpenseInput, Prisma.BankTransactionUpdateWithoutExpenseInput>, Prisma.BankTransactionUncheckedUpdateWithoutExpenseInput>
+}
+
+export type BankTransactionUncheckedUpdateOneWithoutExpenseNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutExpenseInput
+  upsert?: Prisma.BankTransactionUpsertWithoutExpenseInput
+  disconnect?: Prisma.BankTransactionWhereInput | boolean
+  delete?: Prisma.BankTransactionWhereInput | boolean
+  connect?: Prisma.BankTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BankTransactionUpdateToOneWithWhereWithoutExpenseInput, Prisma.BankTransactionUpdateWithoutExpenseInput>, Prisma.BankTransactionUncheckedUpdateWithoutExpenseInput>
+}
+
+export type BankTransactionCreateNestedManyWithoutSupplierInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput> | Prisma.BankTransactionCreateWithoutSupplierInput[] | Prisma.BankTransactionUncheckedCreateWithoutSupplierInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutSupplierInput | Prisma.BankTransactionCreateOrConnectWithoutSupplierInput[]
+  createMany?: Prisma.BankTransactionCreateManySupplierInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
+export type BankTransactionUncheckedCreateNestedManyWithoutSupplierInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput> | Prisma.BankTransactionCreateWithoutSupplierInput[] | Prisma.BankTransactionUncheckedCreateWithoutSupplierInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutSupplierInput | Prisma.BankTransactionCreateOrConnectWithoutSupplierInput[]
+  createMany?: Prisma.BankTransactionCreateManySupplierInputEnvelope
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+}
+
+export type BankTransactionUpdateManyWithoutSupplierNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput> | Prisma.BankTransactionCreateWithoutSupplierInput[] | Prisma.BankTransactionUncheckedCreateWithoutSupplierInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutSupplierInput | Prisma.BankTransactionCreateOrConnectWithoutSupplierInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutSupplierInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutSupplierInput[]
+  createMany?: Prisma.BankTransactionCreateManySupplierInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutSupplierInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutSupplierInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutSupplierInput | Prisma.BankTransactionUpdateManyWithWhereWithoutSupplierInput[]
+  deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutSupplierNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput> | Prisma.BankTransactionCreateWithoutSupplierInput[] | Prisma.BankTransactionUncheckedCreateWithoutSupplierInput[]
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutSupplierInput | Prisma.BankTransactionCreateOrConnectWithoutSupplierInput[]
+  upsert?: Prisma.BankTransactionUpsertWithWhereUniqueWithoutSupplierInput | Prisma.BankTransactionUpsertWithWhereUniqueWithoutSupplierInput[]
+  createMany?: Prisma.BankTransactionCreateManySupplierInputEnvelope
+  set?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  disconnect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  delete?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  connect?: Prisma.BankTransactionWhereUniqueInput | Prisma.BankTransactionWhereUniqueInput[]
+  update?: Prisma.BankTransactionUpdateWithWhereUniqueWithoutSupplierInput | Prisma.BankTransactionUpdateWithWhereUniqueWithoutSupplierInput[]
+  updateMany?: Prisma.BankTransactionUpdateManyWithWhereWithoutSupplierInput | Prisma.BankTransactionUpdateManyWithWhereWithoutSupplierInput[]
   deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
 }
 
@@ -759,6 +1206,14 @@ export type EnumBankTransactionTypeFieldUpdateOperationsInput = {
   set?: $Enums.BankTransactionType
 }
 
+export type EnumBankRowReviewStatusFieldUpdateOperationsInput = {
+  set?: $Enums.BankRowReviewStatus
+}
+
+export type EnumBankCounterpartyKindFieldUpdateOperationsInput = {
+  set?: $Enums.BankCounterpartyKind
+}
+
 export type BankTransactionCreateWithoutEmployeeInput = {
   id?: string
   type: $Enums.BankTransactionType
@@ -768,14 +1223,25 @@ export type BankTransactionCreateWithoutEmployeeInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
   createdAt?: Date | string
   updatedAt?: Date | string
   bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
   client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
 }
 
 export type BankTransactionUncheckedCreateWithoutEmployeeInput = {
@@ -788,11 +1254,22 @@ export type BankTransactionUncheckedCreateWithoutEmployeeInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -804,6 +1281,146 @@ export type BankTransactionCreateOrConnectWithoutEmployeeInput = {
 
 export type BankTransactionCreateManyEmployeeInputEnvelope = {
   data: Prisma.BankTransactionCreateManyEmployeeInput | Prisma.BankTransactionCreateManyEmployeeInput[]
+  skipDuplicates?: boolean
+}
+
+export type BankTransactionCreateWithoutCreatedByInput = {
+  id?: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
+  employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
+}
+
+export type BankTransactionUncheckedCreateWithoutCreatedByInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateOrConnectWithoutCreatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput>
+}
+
+export type BankTransactionCreateManyCreatedByInputEnvelope = {
+  data: Prisma.BankTransactionCreateManyCreatedByInput | Prisma.BankTransactionCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type BankTransactionCreateWithoutUpdatedByInput = {
+  id?: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
+  employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+}
+
+export type BankTransactionUncheckedCreateWithoutUpdatedByInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateOrConnectWithoutUpdatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type BankTransactionCreateManyUpdatedByInputEnvelope = {
+  data: Prisma.BankTransactionCreateManyUpdatedByInput | Prisma.BankTransactionCreateManyUpdatedByInput[]
   skipDuplicates?: boolean
 }
 
@@ -836,14 +1453,57 @@ export type BankTransactionScalarWhereInput = {
   operationDate?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   receiverName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  receiverBankCode?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   receiverStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentPurpose?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyAccount?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyBankName?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  companyStir?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   isSalary?: Prisma.BoolFilter<"BankTransaction"> | boolean
   employeeId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   clientId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  supplierId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFilter<"BankTransaction"> | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFilter<"BankTransaction"> | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  kassaEntryId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  createdById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  updatedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
+}
+
+export type BankTransactionUpsertWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutCreatedByInput, Prisma.BankTransactionUncheckedUpdateWithoutCreatedByInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutCreatedByInput, Prisma.BankTransactionUncheckedCreateWithoutCreatedByInput>
+}
+
+export type BankTransactionUpdateWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutCreatedByInput, Prisma.BankTransactionUncheckedUpdateWithoutCreatedByInput>
+}
+
+export type BankTransactionUpdateManyWithWhereWithoutCreatedByInput = {
+  where: Prisma.BankTransactionScalarWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateManyMutationInput, Prisma.BankTransactionUncheckedUpdateManyWithoutCreatedByInput>
+}
+
+export type BankTransactionUpsertWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedUpdateWithoutUpdatedByInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type BankTransactionUpdateWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutUpdatedByInput, Prisma.BankTransactionUncheckedUpdateWithoutUpdatedByInput>
+}
+
+export type BankTransactionUpdateManyWithWhereWithoutUpdatedByInput = {
+  where: Prisma.BankTransactionScalarWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateManyMutationInput, Prisma.BankTransactionUncheckedUpdateManyWithoutUpdatedByInput>
 }
 
 export type BankTransactionCreateWithoutClientInput = {
@@ -855,14 +1515,25 @@ export type BankTransactionCreateWithoutClientInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
   createdAt?: Date | string
   updatedAt?: Date | string
   bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
   employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
 }
 
 export type BankTransactionUncheckedCreateWithoutClientInput = {
@@ -875,11 +1546,22 @@ export type BankTransactionUncheckedCreateWithoutClientInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -910,6 +1592,364 @@ export type BankTransactionUpdateManyWithWhereWithoutClientInput = {
   data: Prisma.XOR<Prisma.BankTransactionUpdateManyMutationInput, Prisma.BankTransactionUncheckedUpdateManyWithoutClientInput>
 }
 
+export type BankTransactionCreateWithoutKassaEntryInput = {
+  id?: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
+  employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
+}
+
+export type BankTransactionUncheckedCreateWithoutKassaEntryInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateOrConnectWithoutKassaEntryInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+}
+
+export type BankTransactionUpsertWithoutKassaEntryInput = {
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedUpdateWithoutKassaEntryInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedCreateWithoutKassaEntryInput>
+  where?: Prisma.BankTransactionWhereInput
+}
+
+export type BankTransactionUpdateToOneWithWhereWithoutKassaEntryInput = {
+  where?: Prisma.BankTransactionWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutKassaEntryInput, Prisma.BankTransactionUncheckedUpdateWithoutKassaEntryInput>
+}
+
+export type BankTransactionUpdateWithoutKassaEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
+  employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutKassaEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionCreateWithoutExpenseInput = {
+  id?: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
+  employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
+}
+
+export type BankTransactionUncheckedCreateWithoutExpenseInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateOrConnectWithoutExpenseInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+}
+
+export type BankTransactionUpsertWithoutExpenseInput = {
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutExpenseInput, Prisma.BankTransactionUncheckedUpdateWithoutExpenseInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutExpenseInput, Prisma.BankTransactionUncheckedCreateWithoutExpenseInput>
+  where?: Prisma.BankTransactionWhereInput
+}
+
+export type BankTransactionUpdateToOneWithWhereWithoutExpenseInput = {
+  where?: Prisma.BankTransactionWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutExpenseInput, Prisma.BankTransactionUncheckedUpdateWithoutExpenseInput>
+}
+
+export type BankTransactionUpdateWithoutExpenseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
+  employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutExpenseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionCreateWithoutSupplierInput = {
+  id?: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bankVedomost: Prisma.BankVedomostCreateNestedOneWithoutTransactionsInput
+  employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
+  client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
+}
+
+export type BankTransactionUncheckedCreateWithoutSupplierInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateOrConnectWithoutSupplierInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput>
+}
+
+export type BankTransactionCreateManySupplierInputEnvelope = {
+  data: Prisma.BankTransactionCreateManySupplierInput | Prisma.BankTransactionCreateManySupplierInput[]
+  skipDuplicates?: boolean
+}
+
+export type BankTransactionUpsertWithWhereUniqueWithoutSupplierInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutSupplierInput, Prisma.BankTransactionUncheckedUpdateWithoutSupplierInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutSupplierInput, Prisma.BankTransactionUncheckedCreateWithoutSupplierInput>
+}
+
+export type BankTransactionUpdateWithWhereUniqueWithoutSupplierInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutSupplierInput, Prisma.BankTransactionUncheckedUpdateWithoutSupplierInput>
+}
+
+export type BankTransactionUpdateManyWithWhereWithoutSupplierInput = {
+  where: Prisma.BankTransactionScalarWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateManyMutationInput, Prisma.BankTransactionUncheckedUpdateManyWithoutSupplierInput>
+}
+
 export type BankTransactionCreateWithoutBankVedomostInput = {
   id?: string
   type: $Enums.BankTransactionType
@@ -919,14 +1959,25 @@ export type BankTransactionCreateWithoutBankVedomostInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
   createdAt?: Date | string
   updatedAt?: Date | string
   employee?: Prisma.UserCreateNestedOneWithoutBankTransactionsInput
   client?: Prisma.ClientCreateNestedOneWithoutBankTransactionsInput
+  supplier?: Prisma.SupplierCreateNestedOneWithoutBankTransactionsInput
+  expense?: Prisma.ExpenseCreateNestedOneWithoutBankTransactionInput
+  kassaEntry?: Prisma.KassaEntryCreateNestedOneWithoutBankTransactionInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedBankTransactionsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutUpdatedBankTransactionsInput
 }
 
 export type BankTransactionUncheckedCreateWithoutBankVedomostInput = {
@@ -938,12 +1989,23 @@ export type BankTransactionUncheckedCreateWithoutBankVedomostInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -984,11 +2046,82 @@ export type BankTransactionCreateManyEmployeeInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateManyCreatedByInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionCreateManyUpdatedByInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1002,14 +2135,25 @@ export type BankTransactionUpdateWithoutEmployeeInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
   client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
 }
 
 export type BankTransactionUncheckedUpdateWithoutEmployeeInput = {
@@ -1022,11 +2166,22 @@ export type BankTransactionUncheckedUpdateWithoutEmployeeInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1041,11 +2196,202 @@ export type BankTransactionUncheckedUpdateManyWithoutEmployeeInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
+  employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
+  employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1060,11 +2406,22 @@ export type BankTransactionCreateManyClientInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1078,14 +2435,25 @@ export type BankTransactionUpdateWithoutClientInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
   employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
 }
 
 export type BankTransactionUncheckedUpdateWithoutClientInput = {
@@ -1098,11 +2466,22 @@ export type BankTransactionUncheckedUpdateWithoutClientInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1117,11 +2496,142 @@ export type BankTransactionUncheckedUpdateManyWithoutClientInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionCreateManySupplierInput = {
+  id?: string
+  bankVedomostId: string
+  type: $Enums.BankTransactionType
+  amount: number
+  documentDate?: Date | string | null
+  documentNumber?: string | null
+  operationDate: Date | string
+  receiverName?: string | null
+  receiverAccount?: string | null
+  receiverBankCode?: string | null
+  receiverBankName?: string | null
+  receiverStir?: string | null
+  paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
+  isSalary?: boolean
+  employeeId?: string | null
+  clientId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type BankTransactionUpdateWithoutSupplierInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankVedomost?: Prisma.BankVedomostUpdateOneRequiredWithoutTransactionsNestedInput
+  employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
+  client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutSupplierInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BankTransactionUncheckedUpdateManyWithoutSupplierInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankVedomostId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumBankTransactionTypeFieldUpdateOperationsInput | $Enums.BankTransactionType
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1135,12 +2645,23 @@ export type BankTransactionCreateManyBankVedomostInput = {
   operationDate: Date | string
   receiverName?: string | null
   receiverAccount?: string | null
+  receiverBankCode?: string | null
   receiverBankName?: string | null
   receiverStir?: string | null
   paymentPurpose?: string | null
+  companyAccount?: string | null
+  companyBankName?: string | null
+  companyStir?: string | null
   isSalary?: boolean
   employeeId?: string | null
   clientId?: string | null
+  supplierId?: string | null
+  reviewStatus?: $Enums.BankRowReviewStatus
+  counterpartyKind?: $Enums.BankCounterpartyKind
+  expenseId?: string | null
+  kassaEntryId?: string | null
+  createdById?: string | null
+  updatedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1154,14 +2675,25 @@ export type BankTransactionUpdateWithoutBankVedomostInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.UserUpdateOneWithoutBankTransactionsNestedInput
   client?: Prisma.ClientUpdateOneWithoutBankTransactionsNestedInput
+  supplier?: Prisma.SupplierUpdateOneWithoutBankTransactionsNestedInput
+  expense?: Prisma.ExpenseUpdateOneWithoutBankTransactionNestedInput
+  kassaEntry?: Prisma.KassaEntryUpdateOneWithoutBankTransactionNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedBankTransactionsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutUpdatedBankTransactionsNestedInput
 }
 
 export type BankTransactionUncheckedUpdateWithoutBankVedomostInput = {
@@ -1173,12 +2705,23 @@ export type BankTransactionUncheckedUpdateWithoutBankVedomostInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1192,12 +2735,23 @@ export type BankTransactionUncheckedUpdateManyWithoutBankVedomostInput = {
   operationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receiverName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverBankCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentPurpose?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyStir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSalary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatus?: Prisma.EnumBankRowReviewStatusFieldUpdateOperationsInput | $Enums.BankRowReviewStatus
+  counterpartyKind?: Prisma.EnumBankCounterpartyKindFieldUpdateOperationsInput | $Enums.BankCounterpartyKind
+  expenseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kassaEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1214,17 +2768,33 @@ export type BankTransactionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   operationDate?: boolean
   receiverName?: boolean
   receiverAccount?: boolean
+  receiverBankCode?: boolean
   receiverBankName?: boolean
   receiverStir?: boolean
   paymentPurpose?: boolean
+  companyAccount?: boolean
+  companyBankName?: boolean
+  companyStir?: boolean
   isSalary?: boolean
   employeeId?: boolean
   clientId?: boolean
+  supplierId?: boolean
+  reviewStatus?: boolean
+  counterpartyKind?: boolean
+  expenseId?: boolean
+  kassaEntryId?: boolean
+  createdById?: boolean
+  updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["bankTransaction"]>
 
 export type BankTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1237,17 +2807,33 @@ export type BankTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   operationDate?: boolean
   receiverName?: boolean
   receiverAccount?: boolean
+  receiverBankCode?: boolean
   receiverBankName?: boolean
   receiverStir?: boolean
   paymentPurpose?: boolean
+  companyAccount?: boolean
+  companyBankName?: boolean
+  companyStir?: boolean
   isSalary?: boolean
   employeeId?: boolean
   clientId?: boolean
+  supplierId?: boolean
+  reviewStatus?: boolean
+  counterpartyKind?: boolean
+  expenseId?: boolean
+  kassaEntryId?: boolean
+  createdById?: boolean
+  updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["bankTransaction"]>
 
 export type BankTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1260,17 +2846,33 @@ export type BankTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   operationDate?: boolean
   receiverName?: boolean
   receiverAccount?: boolean
+  receiverBankCode?: boolean
   receiverBankName?: boolean
   receiverStir?: boolean
   paymentPurpose?: boolean
+  companyAccount?: boolean
+  companyBankName?: boolean
+  companyStir?: boolean
   isSalary?: boolean
   employeeId?: boolean
   clientId?: boolean
+  supplierId?: boolean
+  reviewStatus?: boolean
+  counterpartyKind?: boolean
+  expenseId?: boolean
+  kassaEntryId?: boolean
+  createdById?: boolean
+  updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["bankTransaction"]>
 
 export type BankTransactionSelectScalar = {
@@ -1283,31 +2885,57 @@ export type BankTransactionSelectScalar = {
   operationDate?: boolean
   receiverName?: boolean
   receiverAccount?: boolean
+  receiverBankCode?: boolean
   receiverBankName?: boolean
   receiverStir?: boolean
   paymentPurpose?: boolean
+  companyAccount?: boolean
+  companyBankName?: boolean
+  companyStir?: boolean
   isSalary?: boolean
   employeeId?: boolean
   clientId?: boolean
+  supplierId?: boolean
+  reviewStatus?: boolean
+  counterpartyKind?: boolean
+  expenseId?: boolean
+  kassaEntryId?: boolean
+  createdById?: boolean
+  updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankVedomostId" | "type" | "amount" | "documentDate" | "documentNumber" | "operationDate" | "receiverName" | "receiverAccount" | "receiverBankName" | "receiverStir" | "paymentPurpose" | "isSalary" | "employeeId" | "clientId" | "createdAt" | "updatedAt", ExtArgs["result"]["bankTransaction"]>
+export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankVedomostId" | "type" | "amount" | "documentDate" | "documentNumber" | "operationDate" | "receiverName" | "receiverAccount" | "receiverBankCode" | "receiverBankName" | "receiverStir" | "paymentPurpose" | "companyAccount" | "companyBankName" | "companyStir" | "isSalary" | "employeeId" | "clientId" | "supplierId" | "reviewStatus" | "counterpartyKind" | "expenseId" | "kassaEntryId" | "createdById" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["bankTransaction"]>
 export type BankTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }
 export type BankTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }
 export type BankTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bankVedomost?: boolean | Prisma.BankVedomostDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.BankTransaction$employeeArgs<ExtArgs>
   client?: boolean | Prisma.BankTransaction$clientArgs<ExtArgs>
+  supplier?: boolean | Prisma.BankTransaction$supplierArgs<ExtArgs>
+  expense?: boolean | Prisma.BankTransaction$expenseArgs<ExtArgs>
+  kassaEntry?: boolean | Prisma.BankTransaction$kassaEntryArgs<ExtArgs>
+  createdBy?: boolean | Prisma.BankTransaction$createdByArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.BankTransaction$updatedByArgs<ExtArgs>
 }
 
 export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1316,6 +2944,11 @@ export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.Int
     bankVedomost: Prisma.$BankVedomostPayload<ExtArgs>
     employee: Prisma.$UserPayload<ExtArgs> | null
     client: Prisma.$ClientPayload<ExtArgs> | null
+    supplier: Prisma.$SupplierPayload<ExtArgs> | null
+    expense: Prisma.$ExpensePayload<ExtArgs> | null
+    kassaEntry: Prisma.$KassaEntryPayload<ExtArgs> | null
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
+    updatedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1327,12 +2960,23 @@ export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.Int
     operationDate: Date
     receiverName: string | null
     receiverAccount: string | null
+    receiverBankCode: string | null
     receiverBankName: string | null
     receiverStir: string | null
     paymentPurpose: string | null
+    companyAccount: string | null
+    companyBankName: string | null
+    companyStir: string | null
     isSalary: boolean
     employeeId: string | null
     clientId: string | null
+    supplierId: string | null
+    reviewStatus: $Enums.BankRowReviewStatus
+    counterpartyKind: $Enums.BankCounterpartyKind
+    expenseId: string | null
+    kassaEntryId: string | null
+    createdById: string | null
+    updatedById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["bankTransaction"]>
@@ -1732,6 +3376,11 @@ export interface Prisma__BankTransactionClient<T, Null = never, ExtArgs extends 
   bankVedomost<T extends Prisma.BankVedomostDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankVedomostDefaultArgs<ExtArgs>>): Prisma.Prisma__BankVedomostClient<runtime.Types.Result.GetResult<Prisma.$BankVedomostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   employee<T extends Prisma.BankTransaction$employeeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$employeeArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   client<T extends Prisma.BankTransaction$clientArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$clientArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  supplier<T extends Prisma.BankTransaction$supplierArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$supplierArgs<ExtArgs>>): Prisma.Prisma__SupplierClient<runtime.Types.Result.GetResult<Prisma.$SupplierPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  expense<T extends Prisma.BankTransaction$expenseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$expenseArgs<ExtArgs>>): Prisma.Prisma__ExpenseClient<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  kassaEntry<T extends Prisma.BankTransaction$kassaEntryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$kassaEntryArgs<ExtArgs>>): Prisma.Prisma__KassaEntryClient<runtime.Types.Result.GetResult<Prisma.$KassaEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  createdBy<T extends Prisma.BankTransaction$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  updatedBy<T extends Prisma.BankTransaction$updatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$updatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1770,12 +3419,23 @@ export interface BankTransactionFieldRefs {
   readonly operationDate: Prisma.FieldRef<"BankTransaction", 'DateTime'>
   readonly receiverName: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly receiverAccount: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly receiverBankCode: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly receiverBankName: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly receiverStir: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly paymentPurpose: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly companyAccount: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly companyBankName: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly companyStir: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly isSalary: Prisma.FieldRef<"BankTransaction", 'Boolean'>
   readonly employeeId: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly clientId: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly supplierId: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly reviewStatus: Prisma.FieldRef<"BankTransaction", 'BankRowReviewStatus'>
+  readonly counterpartyKind: Prisma.FieldRef<"BankTransaction", 'BankCounterpartyKind'>
+  readonly expenseId: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly kassaEntryId: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly createdById: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly updatedById: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly createdAt: Prisma.FieldRef<"BankTransaction", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BankTransaction", 'DateTime'>
 }
@@ -2214,6 +3874,101 @@ export type BankTransaction$clientArgs<ExtArgs extends runtime.Types.Extensions.
    */
   include?: Prisma.ClientInclude<ExtArgs> | null
   where?: Prisma.ClientWhereInput
+}
+
+/**
+ * BankTransaction.supplier
+ */
+export type BankTransaction$supplierArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Supplier
+   */
+  select?: Prisma.SupplierSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Supplier
+   */
+  omit?: Prisma.SupplierOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupplierInclude<ExtArgs> | null
+  where?: Prisma.SupplierWhereInput
+}
+
+/**
+ * BankTransaction.expense
+ */
+export type BankTransaction$expenseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseInclude<ExtArgs> | null
+  where?: Prisma.ExpenseWhereInput
+}
+
+/**
+ * BankTransaction.kassaEntry
+ */
+export type BankTransaction$kassaEntryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KassaEntry
+   */
+  select?: Prisma.KassaEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KassaEntry
+   */
+  omit?: Prisma.KassaEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KassaEntryInclude<ExtArgs> | null
+  where?: Prisma.KassaEntryWhereInput
+}
+
+/**
+ * BankTransaction.createdBy
+ */
+export type BankTransaction$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * BankTransaction.updatedBy
+ */
+export type BankTransaction$updatedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

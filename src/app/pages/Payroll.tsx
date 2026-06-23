@@ -1,9 +1,10 @@
 ﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
   Users, FileText, Settings, Factory, Download, Printer, Plus,
   Trash2, CheckCircle, XCircle, Edit3, Pencil, Save, X, ChevronDown,
   TrendingUp, DollarSign, Receipt, CreditCard, BadgeCheck, Clock,
-  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar, Wallet,
+  UploadCloud, Info, Minus, Landmark, ArrowDownLeft, ArrowUpRight, AlertTriangle, UserPlus, Building2, Calendar, Wallet, Truck, Search, ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiRequest } from '../api/http';
@@ -21,7 +22,7 @@ import {
   EMPTY_PLACEHOLDER,
   INLINE_SEP,
 } from '../utils/format';
-import type { Employee, EmployeeProductRate, KassaEntry, ShiftRecord } from '../store/erp-store';
+import type { Employee, EmployeeProductRate, KassaEntry, Sale, ShiftRecord, Supplier, SupplierPurchaseOrder } from '../store/erp-store';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import { StatementImportWizard } from '../components/StatementImportWizard';
 
 // ======================== HELPERS ========================
 
@@ -69,6 +71,89 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{label}</p>
       <p className="text-lg font-bold text-slate-800 dark:text-white leading-tight">{value}</p>
       {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+function BankAccountBalanceCard({ color }: { color: string }) {
+  const { state, refresh } = useERP();
+  const { t } = useApp();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+
+  const activeAccountId =
+    state.bankBalance.accountId ??
+    state.companyBankAccounts.find((a) => a.isActive)?.id ??
+    '';
+
+  const accountOptions = state.companyBankAccounts.map((account) => ({
+    value: account.id,
+    label: account.label
+      ? `${account.label} · ${account.accountNumber}`
+      : account.accountNumber,
+  }));
+
+  const handleAccountChange = async (id: string) => {
+    if (!id || id === activeAccountId || busy) return;
+    setBusy(true);
+    try {
+      await apiRequest(`/finance/company-bank-accounts/${id}/activate`, {
+        method: 'PATCH',
+      });
+      await refresh();
+      toast.success(t.siAccountActivated);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const balanceSub = `${t.siBankIncomeTotal}: ${formatCurrency(state.bankBalance.totalIncome)} · ${t.siBankExpenseTotal}: ${formatCurrency(state.bankBalance.totalExpense)}`;
+  const auditLine =
+    state.bankBalance.updatedByName && !state.bankBalance.allAccounts
+      ? `${t.siAccountChangedBy}: ${state.bankBalance.updatedByName}${
+          state.bankBalance.updatedAt
+            ? ` · ${formatDateTime(state.bankBalance.updatedAt)}`
+            : ''
+        }`
+      : null;
+
+  return (
+    <div className={`rounded-2xl border p-4 shadow-sm ${color}`}>
+      {state.companyBankAccounts.length > 0 ? (
+        <div className="mb-3">
+          <Label>{t.siActiveBankAccount}</Label>
+          <StyledSelect
+            value={activeAccountId}
+            onValueChange={handleAccountChange}
+            options={accountOptions}
+            placeholder={t.siSelectBankAccount}
+          />
+        </div>
+      ) : (
+        <div className="mb-2">
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            {t.siNoCompanyAccountsBalanceHint}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/payroll?tab=settings')}
+            className="mt-1 text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+          >
+            {t.siOpenCompanyAccountsSettings}
+          </button>
+        </div>
+      )}
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t.siBankBalance}</p>
+      <p className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
+        {formatCurrency(state.bankBalance.balance)}
+      </p>
+      <p className="text-xs text-slate-400 mt-0.5">{balanceSub}</p>
+      {state.bankBalance.allAccounts && state.companyBankAccounts.length > 0 && (
+        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t.siAllAccountsBalance}</p>
+      )}
+      {auditLine && <p className="text-xs text-slate-400 mt-1">{auditLine}</p>}
     </div>
   );
 }
@@ -748,6 +833,22 @@ function BankTab() {
 
   return (
     <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <BankAccountBalanceCard color="bg-sky-50 border-sky-100 dark:bg-sky-950/40 dark:border-sky-900 sm:col-span-3" />
+        <StatCard
+          label={t.siBankIncomeTotal}
+          value={formatCurrency(state.bankBalance.totalIncome)}
+          color="bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900"
+        />
+        <StatCard
+          label={t.siBankExpenseTotal}
+          value={formatCurrency(state.bankBalance.totalExpense)}
+          color="bg-rose-50 border-rose-100 dark:bg-rose-950/40 dark:border-rose-900"
+        />
+      </div>
+
+      <StatementImportWizard source="bank" />
+
       <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -2126,21 +2227,75 @@ function EmployeesTab() {
 // ======================== SETTINGS TAB ========================
 
 function SettingsTab() {
-  const { state, dispatch } = useERP();
+  const { state, dispatch, refresh } = useERP();
   const { t } = useApp();
   const [form, setForm] = useState({
     incomeTaxPercent: state.payrollSettings.incomeTaxPercent,
     socialTaxPercent: state.payrollSettings.socialTaxPercent,
     npsPercent: state.payrollSettings.npsPercent,
   });
+  const [newAccount, setNewAccount] = useState('');
+  const [newAccountLabel, setNewAccountLabel] = useState('');
+  const [accountBusy, setAccountBusy] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch({ type: 'UPDATE_PAYROLL_SETTINGS', payload: form });
   };
 
+  const handleAddAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAccount.trim()) return;
+    setAccountBusy(true);
+    try {
+      await apiRequest('/finance/company-bank-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          accountNumber: newAccount.trim(),
+          label: newAccountLabel.trim() || undefined,
+        }),
+      });
+      setNewAccount('');
+      setNewAccountLabel('');
+      await refresh();
+      toast.success(t.siAccountAdded);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setAccountBusy(false);
+    }
+  };
+
+  const handleActivateAccount = async (id: string) => {
+    setAccountBusy(true);
+    try {
+      await apiRequest(`/finance/company-bank-accounts/${id}/activate`, {
+        method: 'PATCH',
+      });
+      await refresh();
+      toast.success(t.siAccountActivated);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setAccountBusy(false);
+    }
+  };
+
+  const handleDeleteAccount = async (id: string) => {
+    setAccountBusy(true);
+    try {
+      await apiRequest(`/finance/company-bank-accounts/${id}`, { method: 'DELETE' });
+      await refresh();
+      toast.success(t.siAccountDeleted);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.whRequestError);
+    } finally {
+      setAccountBusy(false);
+    }
+  };
+
   return (
-    <div className="max-w-md">
+    <div className="grid gap-5 lg:grid-cols-2">
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-5">
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
@@ -2199,6 +2354,97 @@ function SettingsTab() {
             <Save size={14} /> {t.prSaveSettings}
           </button>
         </form>
+      </div>
+
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+            <Landmark size={16} className="text-slate-500 dark:text-slate-400" />
+          </div>
+          <h3 className="text-slate-800 dark:text-white font-semibold text-sm">{t.siCompanyAccountsTitle}</h3>
+        </div>
+        <p className="text-xs text-slate-400 mb-4">{t.siCompanyAccountsHint}</p>
+
+        <form onSubmit={handleAddAccount} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end mb-4">
+          <div>
+            <Label>{t.siAccountNumber}</Label>
+            <Input value={newAccount} onChange={(e) => setNewAccount(e.target.value)} placeholder="2020 8000 ..." />
+          </div>
+          <div>
+            <Label>{t.siAccountLabel}</Label>
+            <Input value={newAccountLabel} onChange={(e) => setNewAccountLabel(e.target.value)} placeholder="SAM-BC" />
+          </div>
+          <button
+            type="submit"
+            disabled={accountBusy || !newAccount.trim()}
+            className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium px-4 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <Plus size={14} /> {t.siAddAccount}
+          </button>
+        </form>
+
+        {state.companyBankAccounts.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-slate-200 px-3 py-6 text-center text-xs text-slate-400 dark:border-slate-700">
+            {t.siNoCompanyAccounts}
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {state.companyBankAccounts.map((account) => (
+              <div
+                key={account.id}
+                className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
+                  account.isActive
+                    ? 'border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/30'
+                    : 'border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40'
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-mono text-sm text-slate-700 dark:text-slate-200">
+                      {account.accountNumber}
+                    </p>
+                    {account.isActive && (
+                      <span className="rounded-md bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                        {t.siAccountActiveBadge}
+                      </span>
+                    )}
+                  </div>
+                  {account.label && (
+                    <p className="truncate text-xs text-slate-400">{account.label}</p>
+                  )}
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {formatCurrency(account.balance)}
+                    {account.updatedByName
+                      ? ` · ${t.siAccountChangedBy}: ${account.updatedByName}`
+                      : account.createdByName
+                        ? ` · ${account.createdByName}`
+                        : ''}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  {!account.isActive && (
+                    <button
+                      type="button"
+                      onClick={() => handleActivateAccount(account.id)}
+                      disabled={accountBusy}
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-100 disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                    >
+                      {t.siSelectBankAccount}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteAccount(account.id)}
+                    disabled={accountBusy}
+                    className="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-900/20"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2268,7 +2514,7 @@ function KassaTab() {
   }, [loadKassaClients]);
 
   const inflows = useMemo(
-    () => state.kassaEntries.filter((e) => e.type === 'client_inflow'),
+    () => state.kassaEntries.filter((e) => e.type === 'client_inflow' || e.type === 'bank_inflow'),
     [state.kassaEntries],
   );
   const outflows = useMemo(
@@ -2338,6 +2584,7 @@ function KassaTab() {
   };
 
   const openEdit = (entry: KassaEntry) => {
+    if (entry.type === 'bank_inflow') return;
     setEditEntry(entry);
     setEditClientId(entry.clientId ?? '');
     setEditAmount(displayGroupedIntInput(String(entry.amount)));
@@ -2391,7 +2638,8 @@ function KassaTab() {
     setSaving(true);
     try {
       await dispatch({
-        type: deleteEntry.type === 'client_inflow' ? 'DELETE_KASSA_INFLOW' : 'DELETE_KASSA_OUTFLOW',
+        type:
+          deleteEntry.type === 'outflow' ? 'DELETE_KASSA_OUTFLOW' : 'DELETE_KASSA_INFLOW',
         payload: deleteEntry.id,
       });
       setDeleteEntry(null);
@@ -2415,7 +2663,8 @@ function KassaTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <BankAccountBalanceCard color="bg-sky-50 border-sky-100 dark:bg-sky-950/40 dark:border-sky-900 sm:col-span-2 xl:col-span-1" />
         <StatCard
           label={t.prKassaBalance}
           value={formatCurrency(state.kassaSummary.balance)}
@@ -2432,6 +2681,8 @@ function KassaTab() {
           color="bg-rose-50 border-rose-100 dark:bg-rose-950/40 dark:border-rose-900"
         />
       </div>
+
+      <StatementImportWizard source="kassa" />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -2513,15 +2764,21 @@ function KassaTab() {
                   inflows.map((entry) => (
                     <tr key={entry.id} className="border-t border-slate-100 dark:border-slate-700">
                       <td className="px-3 py-2 whitespace-nowrap">{formatDate(entry.date)}</td>
-                      <td className="px-3 py-2">{entry.clientName ?? EMPTY_PLACEHOLDER}</td>
+                      <td className="px-3 py-2">
+                        {entry.type === 'bank_inflow'
+                          ? t.prKassaBankInflow
+                          : (entry.clientName ?? EMPTY_PLACEHOLDER)}
+                      </td>
                       <td className="px-3 py-2 text-right font-medium text-emerald-600">{formatCurrency(entry.amount)}</td>
                       <td className="px-3 py-2 max-w-[160px] truncate">{entry.comment ?? EMPTY_PLACEHOLDER}</td>
                       <td className="px-3 py-2">{renderAudit(entry)}</td>
                       <td className="px-3 py-2">
                         <div className="flex justify-end gap-1">
-                          <button type="button" onClick={() => openEdit(entry)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
-                            <Pencil size={14} />
-                          </button>
+                          {entry.type !== 'bank_inflow' && (
+                            <button type="button" onClick={() => openEdit(entry)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                              <Pencil size={14} />
+                            </button>
+                          )}
                           <button type="button" onClick={() => setDeleteEntry(entry)} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
                             <Trash2 size={14} />
                           </button>
@@ -2656,10 +2913,10 @@ function KassaTab() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteEntry?.type === 'client_inflow' ? t.prKassaDeleteInflowTitle : t.prKassaDeleteOutflowTitle}
+              {deleteEntry?.type === 'outflow' ? t.prKassaDeleteOutflowTitle : t.prKassaDeleteInflowTitle}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteEntry?.type === 'client_inflow' ? t.prKassaDeleteInflowConfirm : t.prKassaDeleteOutflowConfirm}
+              {deleteEntry?.type === 'outflow' ? t.prKassaDeleteOutflowConfirm : t.prKassaDeleteInflowConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -2674,18 +2931,472 @@ function KassaTab() {
   );
 }
 
+// ======================== CLIENTS TAB ========================
+
+function ClientsTab() {
+  const { state } = useERP();
+  const { t } = useApp();
+  const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedSaleId, setExpandedSaleId] = useState<string | null>(null);
+
+  const sortedClients = useMemo(
+    () => [...state.clients].sort((a, b) => a.name.localeCompare(b.name)),
+    [state.clients],
+  );
+
+  const filteredClients = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return sortedClients;
+    return sortedClients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(q) ||
+        client.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')),
+    );
+  }, [sortedClients, search]);
+
+  const selectedClient = selectedId
+    ? state.clients.find((client) => client.id === selectedId) ?? null
+    : null;
+
+  const clientSales = useMemo(() => {
+    if (!selectedId) return [] as Sale[];
+    return state.sales
+      .filter((sale) => sale.clientId === selectedId)
+      .sort(
+        (a, b) =>
+          b.date.localeCompare(a.date) ||
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+  }, [state.sales, selectedId]);
+
+  const clientTotals = useMemo(() => {
+    const totalPurchases = clientSales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalPaid = clientSales.reduce((sum, sale) => sum + sale.paid, 0);
+    return { totalPurchases, totalPaid, count: clientSales.length };
+  }, [clientSales]);
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t.prClientsSearch}
+              className="pl-9"
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">{filteredClients.length} {t.slClientList.toLowerCase()}</p>
+        </div>
+        <div className="max-h-[70vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+          {filteredClients.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-slate-400">{t.prKassaNoClients}</p>
+          ) : (
+            filteredClients.map((client) => {
+              const active = selectedId === client.id;
+              return (
+                <button
+                  key={client.id}
+                  type="button"
+                  onClick={() => setSelectedId(client.id)}
+                  className={`flex w-full items-start gap-2 px-4 py-3 text-left transition-colors ${
+                    active
+                      ? 'bg-indigo-50 dark:bg-indigo-950/40'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/40'
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-800 dark:text-white">{client.name}</p>
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                      {client.debt > 0 ? (
+                        <span className="font-medium text-red-600">{t.cdDebt}: {formatCurrency(client.debt)}</span>
+                      ) : (
+                        <span className="text-emerald-600">✓ {t.slDebtPaid}</span>
+                      )}
+                      {client.cashBalance > 0 && (
+                        <span className="font-medium text-indigo-600">
+                          {t.prColPrepaid}: {formatCurrency(client.cashBalance)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight size={14} className={`mt-1 shrink-0 ${active ? 'text-indigo-500' : 'text-slate-300'}`} />
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        {!selectedClient ? (
+          <div className="flex h-full min-h-[320px] items-center justify-center px-6 text-center text-sm text-slate-400">
+            {t.prKassaSelectClient}
+          </div>
+        ) : (
+          <>
+            <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+              <h3 className="text-base font-semibold text-slate-800 dark:text-white">{selectedClient.name}</h3>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  label={t.cdDebt}
+                  value={formatCurrency(selectedClient.debt)}
+                  color={
+                    selectedClient.debt > 0
+                      ? 'bg-red-50 border-red-100 dark:bg-red-950/40 dark:border-red-900'
+                      : 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900'
+                  }
+                />
+                <StatCard
+                  label={t.prColPrepaid}
+                  value={formatCurrency(selectedClient.cashBalance)}
+                  color="bg-indigo-50 border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-900"
+                />
+                <StatCard
+                  label={t.cdTotalPurchases}
+                  value={formatCurrency(clientTotals.totalPurchases)}
+                  color="bg-slate-50 border-slate-100 dark:bg-slate-900/40 dark:border-slate-700"
+                />
+                <StatCard
+                  label={t.slTabHistory}
+                  value={`${clientTotals.count}`}
+                  color="bg-violet-50 border-violet-100 dark:bg-violet-950/40 dark:border-violet-900"
+                />
+              </div>
+            </div>
+            <div className="px-5 py-4">
+              <h4 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{t.prClientPurchaseHistory}</h4>
+              {clientSales.length === 0 ? (
+                <p className="py-10 text-center text-sm text-slate-400">{t.prClientNoSales}</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                      <tr>
+                        <th className="px-3 py-2 text-left">{t.colDate}</th>
+                        <th className="px-3 py-2 text-left">{t.colProduct}</th>
+                        <th className="px-3 py-2 text-right">{t.colQty}</th>
+                        <th className="px-3 py-2 text-right">{t.colTotal}</th>
+                        <th className="px-3 py-2 text-right">{t.colPaid}</th>
+                        <th className="px-3 py-2 text-right">{t.colDebt}</th>
+                        <th className="px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientSales.map((sale) => {
+                        const isMulti = (sale.items?.length ?? 0) > 1;
+                        const debt = Math.max(0, sale.total - sale.paid);
+                        const expanded = expandedSaleId === sale.id;
+                        return (
+                          <React.Fragment key={sale.id}>
+                            <tr className="border-t border-slate-100 dark:border-slate-700">
+                              <td className="px-3 py-2 whitespace-nowrap">{formatDate(sale.date)}</td>
+                              <td className="px-3 py-2">
+                                {isMulti ? (
+                                  <span className="text-xs font-medium text-indigo-600">
+                                    {t.slMixedProducts} ({sale.items!.length})
+                                  </span>
+                                ) : (
+                                  <span className="text-xs">{sale.productType}</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-2 text-right">{formatNumber(sale.quantity)}</td>
+                              <td className="px-3 py-2 text-right font-medium">{formatCurrency(sale.total)}</td>
+                              <td className="px-3 py-2 text-right text-emerald-600">{formatCurrency(sale.paid)}</td>
+                              <td className="px-3 py-2 text-right">
+                                {debt > 0 ? (
+                                  <span className="font-medium text-red-600">{formatCurrency(debt)}</span>
+                                ) : (
+                                  <span className="text-emerald-600">✓</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-2">
+                                {isMulti && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedSaleId(expanded ? null : sale.id)}
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                  >
+                                    <ChevronDown size={14} className={expanded ? 'rotate-180' : ''} />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                            {isMulti && expanded && sale.items?.map((item, idx) => (
+                              <tr key={`${sale.id}-${idx}`} className="bg-slate-50/70 text-xs dark:bg-slate-900/30">
+                                <td />
+                                <td className="px-3 py-1.5">{item.productType}</td>
+                                <td className="px-3 py-1.5 text-right">{formatNumber(item.quantity)}</td>
+                                <td className="px-3 py-1.5 text-right">{formatCurrency(item.total)}</td>
+                                <td colSpan={3} />
+                              </tr>
+                            ))}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ======================== SUPPLIERS TAB ========================
+
+function supplierOrdersFor(supplier: Supplier, orders: SupplierPurchaseOrder[]) {
+  return orders.filter(
+    (order) =>
+      order.supplierId === supplier.id ||
+      (order.supplierId == null && order.supplierName?.trim() === supplier.name.trim()),
+  );
+}
+
+function SuppliersTab() {
+  const { state } = useERP();
+  const { t } = useApp();
+  const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const sortedSuppliers = useMemo(
+    () => [...state.suppliers].sort((a, b) => a.name.localeCompare(b.name)),
+    [state.suppliers],
+  );
+
+  const supplierStatsMap = useMemo(() => {
+    const map = new Map<string, { debt: number; paid: number; total: number; count: number }>();
+    for (const supplier of sortedSuppliers) {
+      const related = supplierOrdersFor(supplier, state.supplierPurchaseOrders);
+      map.set(supplier.id, {
+        debt: related.reduce((sum, order) => sum + order.debtAmountUzs, 0),
+        paid: related.reduce((sum, order) => sum + order.paidAmountUzs, 0),
+        total: related.reduce((sum, order) => sum + order.amountUzs, 0),
+        count: related.length,
+      });
+    }
+    return map;
+  }, [sortedSuppliers, state.supplierPurchaseOrders]);
+
+  const filteredSuppliers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return sortedSuppliers;
+    return sortedSuppliers.filter(
+      (supplier) =>
+        supplier.name.toLowerCase().includes(q) ||
+        (supplier.phone ?? '').replace(/\D/g, '').includes(q.replace(/\D/g, '')),
+    );
+  }, [sortedSuppliers, search]);
+
+  const selectedSupplier = selectedId
+    ? state.suppliers.find((supplier) => supplier.id === selectedId) ?? null
+    : null;
+
+  const supplierOrders = useMemo(() => {
+    if (!selectedSupplier) return [] as SupplierPurchaseOrder[];
+    return supplierOrdersFor(selectedSupplier, state.supplierPurchaseOrders).sort(
+      (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime(),
+    );
+  }, [selectedSupplier, state.supplierPurchaseOrders]);
+
+  const selectedStats = selectedSupplier ? supplierStatsMap.get(selectedSupplier.id) : null;
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t.supTabSuppliers}
+              className="pl-9"
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">{filteredSuppliers.length}</p>
+        </div>
+        <div className="max-h-[70vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+          {filteredSuppliers.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-slate-400">{t.noData}</p>
+          ) : (
+            filteredSuppliers.map((supplier) => {
+              const stats = supplierStatsMap.get(supplier.id);
+              const active = selectedId === supplier.id;
+              return (
+                <button
+                  key={supplier.id}
+                  type="button"
+                  onClick={() => setSelectedId(supplier.id)}
+                  className={`flex w-full items-start gap-2 px-4 py-3 text-left transition-colors ${
+                    active
+                      ? 'bg-teal-50 dark:bg-teal-950/40'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/40'
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-800 dark:text-white">{supplier.name}</p>
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                      {(stats?.debt ?? 0) > 0 ? (
+                        <span className="font-medium text-red-600">{t.cdDebt}: {formatCurrency(stats?.debt ?? 0)}</span>
+                      ) : (
+                        <span className="text-emerald-600">✓ {t.slDebtPaid}</span>
+                      )}
+                      {(stats?.paid ?? 0) > 0 && (
+                        <span className="font-medium text-emerald-600">
+                          {t.colPaid}: {formatCurrency(stats?.paid ?? 0)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight size={14} className={`mt-1 shrink-0 ${active ? 'text-teal-500' : 'text-slate-300'}`} />
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        {!selectedSupplier ? (
+          <div className="flex h-full min-h-[320px] items-center justify-center px-6 text-center text-sm text-slate-400">
+            {t.supColSupplier}
+          </div>
+        ) : (
+          <>
+            <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+              <h3 className="text-base font-semibold text-slate-800 dark:text-white">{selectedSupplier.name}</h3>
+              {selectedSupplier.phone && (
+                <p className="mt-1 text-xs text-slate-400">{selectedSupplier.phone}</p>
+              )}
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  label={t.cdDebt}
+                  value={formatCurrency(selectedStats?.debt ?? 0)}
+                  color={
+                    (selectedStats?.debt ?? 0) > 0
+                      ? 'bg-red-50 border-red-100 dark:bg-red-950/40 dark:border-red-900'
+                      : 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900'
+                  }
+                />
+                <StatCard
+                  label={t.colPaid}
+                  value={formatCurrency(selectedStats?.paid ?? 0)}
+                  color="bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900"
+                />
+                <StatCard
+                  label={t.labelTotal}
+                  value={formatCurrency(selectedStats?.total ?? 0)}
+                  color="bg-slate-50 border-slate-100 dark:bg-slate-900/40 dark:border-slate-700"
+                />
+                <StatCard
+                  label={t.supTabHistory}
+                  value={`${selectedStats?.count ?? 0}`}
+                  color="bg-teal-50 border-teal-100 dark:bg-teal-950/40 dark:border-teal-900"
+                />
+              </div>
+            </div>
+            <div className="px-5 py-4">
+              <h4 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{t.prSupplierPurchaseHistory}</h4>
+              {supplierOrders.length === 0 ? (
+                <p className="py-10 text-center text-sm text-slate-400">{t.prSupplierNoOrders}</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                      <tr>
+                        <th className="px-3 py-2 text-left">{t.colDate}</th>
+                        <th className="px-3 py-2 text-left">{t.prProductType}</th>
+                        <th className="px-3 py-2 text-right">{t.supColQty}</th>
+                        <th className="px-3 py-2 text-right">{t.labelAmount}</th>
+                        <th className="px-3 py-2 text-right">{t.colPaid}</th>
+                        <th className="px-3 py-2 text-right">{t.colDebt}</th>
+                        <th className="px-3 py-2 text-left">{t.supPaymentType}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {supplierOrders.map((order) => (
+                        <tr key={order.id} className="border-t border-slate-100 dark:border-slate-700">
+                          <td className="px-3 py-2 whitespace-nowrap">{formatDate(order.orderedAt.slice(0, 10))}</td>
+                          <td className="px-3 py-2">{order.productName}</td>
+                          <td className="px-3 py-2 text-right">
+                            {formatNumber(order.quantity)} {order.quantityUnit === 'PIECES' ? t.supUnitPieces : t.prRmWeightUnitKg}
+                          </td>
+                          <td className="px-3 py-2 text-right font-medium">{formatCurrency(order.amountUzs)}</td>
+                          <td className="px-3 py-2 text-right text-emerald-600">{formatCurrency(order.paidAmountUzs)}</td>
+                          <td className="px-3 py-2 text-right">
+                            {order.debtAmountUzs > 0 ? (
+                              <span className="font-medium text-red-600">{formatCurrency(order.debtAmountUzs)}</span>
+                            ) : (
+                              <span className="text-emerald-600">✓</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-xs">
+                            {order.paymentType === 'CASH' ? t.supPaymentCash : t.supPaymentCredit}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ======================== MAIN PAYROLL PAGE ========================
+
+const PAYROLL_TABS = [
+  'vedomost',
+  'bank',
+  'kassa',
+  'clients',
+  'suppliers',
+  'employees',
+  'settings',
+] as const;
+
+type PayrollTab = (typeof PAYROLL_TABS)[number];
+
+function isPayrollTab(value: string | null): value is PayrollTab {
+  return value !== null && (PAYROLL_TABS as readonly string[]).includes(value);
+}
 
 export function Payroll() {
   const { t } = useApp();
-  const [activeTab, setActiveTab] = useState<
-    'vedomost' | 'bank' | 'kassa' | 'employees' | 'settings'
-  >('vedomost');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<PayrollTab>(
+    isPayrollTab(tabFromUrl) ? tabFromUrl : 'vedomost',
+  );
+
+  useEffect(() => {
+    if (isPayrollTab(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl, activeTab]);
+
+  const selectTab = (key: PayrollTab) => {
+    setActiveTab(key);
+    setSearchParams(key === 'vedomost' ? {} : { tab: key }, { replace: true });
+  };
 
   const tabs = [
     { key: 'vedomost', label: t.prTabVedomost, icon: FileText },
     { key: 'bank', label: t.prTabBank, icon: Landmark },
     { key: 'kassa', label: t.prTabKassa, icon: Wallet },
+    { key: 'clients', label: t.prTabClients, icon: UserPlus },
+    { key: 'suppliers', label: t.prTabSuppliers, icon: Truck },
     { key: 'employees', label: t.prTabEmployees, icon: Users },
     { key: 'settings', label: t.prTabSettings, icon: Settings },
   ] as const;
@@ -2703,7 +3414,7 @@ export function Payroll() {
         {tabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            onClick={() => setActiveTab(key)}
+            onClick={() => selectTab(key)}
             className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
               activeTab === key
                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
@@ -2720,6 +3431,8 @@ export function Payroll() {
       {activeTab === 'vedomost' && <VedomostTab />}
       {activeTab === 'bank' && <BankTab />}
       {activeTab === 'kassa' && <KassaTab />}
+      {activeTab === 'clients' && <ClientsTab />}
+      {activeTab === 'suppliers' && <SuppliersTab />}
       {activeTab === 'employees' && <EmployeesTab />}
       {activeTab === 'settings' && <SettingsTab />}
     </div>

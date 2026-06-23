@@ -1104,6 +1104,14 @@ export interface T {
   prTabRawOrders: string;
   prTabSettings: string;
   prTabKassa: string;
+  prTabClients: string;
+  prTabSuppliers: string;
+  prClientsSearch: string;
+  prClientPurchaseHistory: string;
+  prClientNoSales: string;
+  prSupplierPurchaseHistory: string;
+  prSupplierNoOrders: string;
+  prColPrepaid: string;
   prKassaBalance: string;
   prKassaTotalInflow: string;
   prKassaTotalOutflow: string;
@@ -1310,6 +1318,133 @@ export interface T {
   prVedColHintExempt: string;
   prVedColNetShort: string;
   prKpiLabelSocial: string;
+
+  // Statement import wizard (Excel ko'chirma)
+  siImportTitle: string;
+  siImportHint: string;
+  siImportAction: string;
+  siUploading: string;
+  siUploadSuccess: string;
+  siUploadError: string;
+  siStatementsList: string;
+  siNoStatements: string;
+  siReviewPending: string;
+  siAllReviewed: string;
+  siRowsTitle: string;
+  siColDate: string;
+  siColType: string;
+  siColAmount: string;
+  siColCounterparty: string;
+  siColAccount: string;
+  siColBankCode: string;
+  siColCompanyAccount: string;
+  siColCompanyBank: string;
+  siColCompanyStir: string;
+  siColPurpose: string;
+  siColStatus: string;
+  siColLink: string;
+  siColCreatedBy: string;
+  siColActions: string;
+  siTypeIncome: string;
+  siTypeExpense: string;
+  siStatusPending: string;
+  siStatusConfirmed: string;
+  siStatusSkipped: string;
+  siKindClient: string;
+  siKindSupplier: string;
+  siKindCompany: string;
+  siKindUnknown: string;
+  siWizardTitle: string;
+  siWizardStep: string;
+  siRowStir: string;
+  siQuestionClient: string;
+  siQuestionExpense: string;
+  siClientMatched: string;
+  siClientNotFound: string;
+  siSupplierMatched: string;
+  siSupplierNotFound: string;
+  siCompanyRowNote: string;
+  siSelectClient: string;
+  siSelectSupplier: string;
+  siSupplierOptional: string;
+  siSelectCategory: string;
+  siModeClient: string;
+  siModeKassa: string;
+  siModeExpense: string;
+  siQuestionKassa: string;
+  siKassaInflowHint: string;
+  prKassaBankInflow: string;
+  siConfirmYes: string;
+  siConfirmAndEdit: string;
+  siSkip: string;
+  siManual: string;
+  siCreateClient: string;
+  siCreateSupplier: string;
+  siCreateCategory: string;
+  siCategoryNotFound: string;
+  siCategoryMatched: string;
+  siNewName: string;
+  siNewPhone: string;
+  siNext: string;
+  siPrev: string;
+  siRowConfirmed: string;
+  siRowSkipped: string;
+  siRowDeleted: string;
+  siNeedClient: string;
+  siNeedCategory: string;
+  siUnclearHint: string;
+  siEditRowTitle: string;
+  siDeleteRowTitle: string;
+  siDeleteRowConfirm: string;
+  siDeleteStatementTitle: string;
+  siDeleteStatementConfirm: string;
+  siStatementDeleted: string;
+  siBankBalance: string;
+  siBankIncomeTotal: string;
+  siBankExpenseTotal: string;
+  siBankAccount: string;
+  siBankName: string;
+  siStir: string;
+  siSourceBank: string;
+  siSourceKassa: string;
+  siPendingBadge: string;
+  siCompanyAccountsTitle: string;
+  siCompanyAccountsHint: string;
+  siAccountNumber: string;
+  siAccountLabel: string;
+  siAddAccount: string;
+  siNoCompanyAccounts: string;
+  siAccountAdded: string;
+  siAccountDeleted: string;
+  siActiveBankAccount: string;
+  siSelectBankAccount: string;
+  siAccountActivated: string;
+  siAccountChangedBy: string;
+  siAllAccountsBalance: string;
+  siNoCompanyAccountsBalanceHint: string;
+  siOpenCompanyAccountsSettings: string;
+  siAccountActiveBadge: string;
+  siErrInvalidAmount: string;
+  siErrInvalidDate: string;
+  siErrValidation: string;
+  siErrKassaModeBackend: string;
+  siErrFileRequired: string;
+  siErrStatementNotFound: string;
+  siErrRowNotFound: string;
+  siErrRowAlreadyConfirmed: string;
+  siErrClientPhoneAllocate: string;
+  siErrSkipConfirmed: string;
+  siErrEditConfirmed: string;
+  siErrAccountRequired: string;
+  siErrAccountDuplicate: string;
+  siErrAccountNotFound: string;
+  siErrNameRequired: string;
+  siTableFullscreenEnter: string;
+  siTableFullscreenExit: string;
+  siTableScrollLeft: string;
+  siTableScrollRight: string;
+  siTableScrollHint: string;
+  siTablePageInfo: string;
 
   // Inventory page
   invTitle: string;
@@ -2471,6 +2606,14 @@ const uz_cyrillic: T = {
   prTabRawOrders: 'Хомашё буюртма',
   prTabSettings: 'Солиқ созламалари',
   prTabKassa: 'Касса',
+  prTabClients: 'Мижозлар',
+  prTabSuppliers: 'Етказиб берувчилар',
+  prClientsSearch: 'Мижоз қидириш…',
+  prClientPurchaseHistory: 'Сотиб олиш тарихи',
+  prClientNoSales: 'Сотувлар йўқ',
+  prSupplierPurchaseHistory: 'Харид тарихи',
+  prSupplierNoOrders: 'Харидлар йўқ',
+  prColPrepaid: 'Олдиндан тўлов',
   prKassaBalance: 'Умумий касса ҳисоби',
   prKassaTotalInflow: 'Жами кирим',
   prKassaTotalOutflow: 'Жами чиқим',
@@ -2672,6 +2815,134 @@ const uz_cyrillic: T = {
   prVedColHintExempt: 'чегирмайди',
   prVedColNetShort: 'B − S',
   prKpiLabelSocial: 'Ижт.',
+
+  // Statement import wizard
+  siImportTitle: 'Excel ко‘чирма юклаш',
+  siImportHint: 'Банк ко‘чирмаси (.xlsx) файлини шу ерга ташланг ёки танланг',
+  siImportAction: 'Файлни танлаш',
+  siUploading: 'Юкланмоқда...',
+  siUploadSuccess: 'Файл юкланди — қаторларни кўриб чиқинг',
+  siUploadError: 'Файлни юклашда хатолик',
+  siStatementsList: 'Юкланган ко‘чирмалар',
+  siNoStatements: 'Ҳали ко‘чирма юкланмаган',
+  siReviewPending: 'Қаторларни кўриб чиқиш',
+  siAllReviewed: 'Барча қаторлар кўриб чиқилган',
+  siRowsTitle: 'Ко‘чирма қаторлари',
+  siColDate: 'Сана',
+  siColType: 'Тури',
+  siColAmount: 'Сумма',
+  siColCounterparty: 'Контрагент',
+  siColAccount: 'Ҳисоб рақами',
+  siColBankCode: 'Банк коди',
+  siColCompanyAccount: 'Мижоз ҳисоби',
+  siColCompanyBank: 'Мижоз банки',
+  siColCompanyStir: 'Мижоз СТИР',
+  siColPurpose: 'Мақсади',
+  siColStatus: 'Ҳолати',
+  siColLink: 'Боғланган',
+  siColCreatedBy: 'Киритган',
+  siColActions: 'Амаллар',
+  siTypeIncome: 'Кирим',
+  siTypeExpense: 'Чиқим',
+  siStatusPending: 'Кутилмоқда',
+  siStatusConfirmed: 'Тасдиқланган',
+  siStatusSkipped: 'Ўтказиб юборилган',
+  siKindClient: 'Мижоз',
+  siKindSupplier: 'Етказиб берувчи',
+  siKindCompany: 'Корхона',
+  siKindUnknown: 'Номаълум',
+  siWizardTitle: 'Қаторни кўриб чиқиш',
+  siWizardStep: 'Қатор {current} / {total}',
+  siRowStir: 'СТИР / ИНН',
+  siQuestionClient: 'Бу мижозга кирим — тўғрими?',
+  siQuestionExpense: 'Бу чиқим — қаерга?',
+  siClientMatched: 'Тизимдаги мижоз топилди',
+  siClientNotFound: 'Бу мижоз тизимда йўқ',
+  siSupplierMatched: 'Тизимдаги етказиб берувчи топилди',
+  siSupplierNotFound: 'Бу етказиб берувчи тизимда йўқ',
+  siCompanyRowNote: 'Бу корхонанинг ўз ҳисоби (ички ҳаракат)',
+  siSelectClient: 'Мижозни танланг',
+  siSelectSupplier: 'Етказиб берувчини танланг',
+  siSupplierOptional: 'Етказиб берувчи (ихтиёрий)',
+  siSelectCategory: 'Харажат категорияси',
+  siModeClient: 'Мижозга кирим',
+  siModeKassa: 'Кассага кирим',
+  siModeExpense: 'Харажат (чиқим)',
+  siQuestionKassa: 'Бу банкдан кассага кирим — тўғрими?',
+  siKassaInflowHint: 'Мижозга богланмайди — умумий касса ҳисобига қўшилади',
+  prKassaBankInflow: 'Банкдан касса',
+  siConfirmYes: 'Ҳа, қўшилсин',
+  siConfirmAndEdit: 'Ўзгартириб қўшиш',
+  siSkip: 'Йўқ / Ўтказиб юбориш',
+  siManual: 'Қўлда киритиш',
+  siCreateClient: 'Янги мижоз яратиш',
+  siCreateSupplier: 'Янги етказиб берувчи яратиш',
+  siCreateCategory: 'Янги категория яратиш',
+  siCategoryNotFound: 'Мос категория йўқ — янги яратинг',
+  siCategoryMatched: 'Мос категория топилди',
+  siNewName: 'Номи',
+  siNewPhone: 'Телефон (ихтиёрий)',
+  siNext: 'Кейингиси',
+  siPrev: 'Олдингиси',
+  siRowConfirmed: 'Қатор тасдиқланди',
+  siRowSkipped: 'Қатор ўтказиб юборилди',
+  siRowDeleted: 'Қатор ўчирилди',
+  siNeedClient: 'Мижозни танланг ёки яратинг',
+  siNeedCategory: 'Харажат категориясини танланг ёки яратинг',
+  siUnclearHint: 'Тушунарсиз бўлса — қўлда тўғрилаб киритинг',
+  siEditRowTitle: 'Қаторни таҳрирлаш',
+  siDeleteRowTitle: 'Қаторни ўчириш',
+  siDeleteRowConfirm: 'Бу қатор ва у яратган ёзувлар (касса/харажат) ўчирилади. Давом этасизми?',
+  siDeleteStatementTitle: 'Кўчирмани ўчириш',
+  siDeleteStatementConfirm:
+    '«{name}» ва ичидаги барча қаторлар ўчирилади. Тасдиқланган қаторлар билан боғлиқ касса/харажат ёзувлари ҳам бекор қилинади. Давом этасизми?',
+  siStatementDeleted: 'Кўчирма ўчирилди',
+  siBankBalance: 'Банк ҳисобидаги маблағ',
+  siBankIncomeTotal: 'Жами кирим',
+  siBankExpenseTotal: 'Жами чиқим',
+  siBankAccount: 'Банк ҳисоб рақами',
+  siBankName: 'Банк номи',
+  siStir: 'СТИР / ИНН',
+  siSourceBank: 'Банк',
+  siSourceKassa: 'Касса',
+  siPendingBadge: '{count} та кутилмоқда',
+  siCompanyAccountsTitle: 'Корхона банк ҳисоблари',
+  siCompanyAccountsHint: 'Бу ҳисоб рақамлари ко‘чирмада корхонанинг ўзи деб ҳисобланади',
+  siAccountNumber: 'Ҳисоб рақами',
+  siAccountLabel: 'Изоҳ (ихтиёрий)',
+  siAddAccount: 'Қўшиш',
+  siNoCompanyAccounts: 'Ҳисоб рақамлари қўшилмаган',
+  siAccountAdded: 'Ҳисоб рақами қўшилди',
+  siAccountDeleted: 'Ҳисоб рақами ўчирилди',
+  siActiveBankAccount: 'Банк ҳисоби',
+  siSelectBankAccount: 'Ҳисобни танланг',
+  siAccountActivated: 'Банк ҳисоби ўзгартирилди',
+  siAccountChangedBy: 'Охирги ўзгартирувчи',
+  siAllAccountsBalance: 'Барча ҳисоблар бўйича (актив ҳисоб танланмаган)',
+  siNoCompanyAccountsBalanceHint: 'Бухгалтерия → «Солиқ созламалари» → «Корхона банк ҳисоблари» бўлимида ҳисоб рақамини қўшинг',
+  siOpenCompanyAccountsSettings: 'Созламаларга ўтиш',
+  siAccountActiveBadge: 'Актив',
+  siErrInvalidAmount: 'Сумма нотўғри ёки жуда кичик (камида 0,01)',
+  siErrInvalidDate: 'Сана нотўғри',
+  siErrValidation: 'Киритилган маълумотлар нотўғри',
+  siErrKassaModeBackend: 'Сервер эски версияда — backendni қайта ишга туширинг (kassaga kirim)',
+  siErrFileRequired: 'Файл танланмади',
+  siErrStatementNotFound: 'Кўчирма топилмади',
+  siErrRowNotFound: 'Қатор топилмади',
+  siErrRowAlreadyConfirmed: 'Қатор аллақачон тасдиқланган. Аввал бекор қилинг',
+  siErrClientPhoneAllocate: 'Мижоз учун телефон рақам ажратиб бўлмади',
+  siErrSkipConfirmed: 'Тасдиқланган қаторни ўтказиб юбориб бўлмайди. Аввал бекор қилинг',
+  siErrEditConfirmed: 'Тасдиқланган қаторни таҳрирлаш учун аввал бекор қилинг',
+  siErrAccountRequired: 'Ҳисоб рақами киритилмади',
+  siErrAccountDuplicate: 'Бу ҳисоб рақами аллақачон мавжуд',
+  siErrAccountNotFound: 'Ҳисоб рақами топилмади',
+  siErrNameRequired: 'Ном киритилмади',
+  siTableFullscreenEnter: 'Тўлиқ экран',
+  siTableFullscreenExit: 'Экрандан чиқиш (Esc)',
+  siTableScrollLeft: 'Устунлар — чапга',
+  siTableScrollRight: 'Устунлар — ўнгга',
+  siTableScrollHint: 'Устунлар',
+  siTablePageInfo: '{from}–{to} / {total}',
 
   invTitle: 'Инвентаризация',
   invSubtitle: 'Омборнинг тизим қолдиғи билан реал қолдиғини солиштириш',
@@ -3833,6 +4104,14 @@ const uz_latin: T = {
   prTabRawOrders: 'Xomashyo buyurtma',
   prTabSettings: 'Soliq sozlamalari',
   prTabKassa: 'Kassa',
+  prTabClients: 'Mijozlar',
+  prTabSuppliers: 'Yetkazib beruvchilar',
+  prClientsSearch: 'Mijoz qidirish…',
+  prClientPurchaseHistory: 'Sotib olish tarixi',
+  prClientNoSales: 'Sotuvlar yo‘q',
+  prSupplierPurchaseHistory: 'Xarid tarixi',
+  prSupplierNoOrders: 'Xaridlar yo‘q',
+  prColPrepaid: 'Oldindan to‘lov',
   prKassaBalance: 'Umumiy kassa hisobi',
   prKassaTotalInflow: 'Jami kirim',
   prKassaTotalOutflow: 'Jami chiqim',
@@ -4034,6 +4313,134 @@ const uz_latin: T = {
   prVedColHintExempt: 'chegirilmaydi',
   prVedColNetShort: 'B − S',
   prKpiLabelSocial: 'Ijt.',
+
+  // Statement import wizard
+  siImportTitle: 'Excel ko‘chirma yuklash',
+  siImportHint: 'Bank ko‘chirmasi (.xlsx) faylini shu yerga tashlang yoki tanlang',
+  siImportAction: 'Faylni tanlash',
+  siUploading: 'Yuklanmoqda...',
+  siUploadSuccess: 'Fayl yuklandi — qatorlarni ko‘rib chiqing',
+  siUploadError: 'Faylni yuklashda xatolik',
+  siStatementsList: 'Yuklangan ko‘chirmalar',
+  siNoStatements: 'Hali ko‘chirma yuklanmagan',
+  siReviewPending: 'Qatorlarni ko‘rib chiqish',
+  siAllReviewed: 'Barcha qatorlar ko‘rib chiqilgan',
+  siRowsTitle: 'Ko‘chirma qatorlari',
+  siColDate: 'Sana',
+  siColType: 'Turi',
+  siColAmount: 'Summa',
+  siColCounterparty: 'Kontragent',
+  siColAccount: 'Hisob raqami',
+  siColBankCode: 'Bank kodi',
+  siColCompanyAccount: 'Mijoz hisobi',
+  siColCompanyBank: 'Mijoz banki',
+  siColCompanyStir: 'Mijoz STIR',
+  siColPurpose: 'Maqsadi',
+  siColStatus: 'Holati',
+  siColLink: 'Bog‘langan',
+  siColCreatedBy: 'Kiritgan',
+  siColActions: 'Amallar',
+  siTypeIncome: 'Kirim',
+  siTypeExpense: 'Chiqim',
+  siStatusPending: 'Kutilmoqda',
+  siStatusConfirmed: 'Tasdiqlangan',
+  siStatusSkipped: 'O‘tkazib yuborilgan',
+  siKindClient: 'Mijoz',
+  siKindSupplier: 'Yetkazib beruvchi',
+  siKindCompany: 'Korxona',
+  siKindUnknown: 'Noma\u2019lum',
+  siWizardTitle: 'Qatorni ko‘rib chiqish',
+  siWizardStep: 'Qator {current} / {total}',
+  siRowStir: 'STIR / INN',
+  siQuestionClient: 'Bu mijozga kirim — to‘g‘rimi?',
+  siQuestionExpense: 'Bu chiqim — qayerga?',
+  siClientMatched: 'Tizimdagi mijoz topildi',
+  siClientNotFound: 'Bu mijoz tizimda yo‘q',
+  siSupplierMatched: 'Tizimdagi yetkazib beruvchi topildi',
+  siSupplierNotFound: 'Bu yetkazib beruvchi tizimda yo‘q',
+  siCompanyRowNote: 'Bu korxonaning o‘z hisobi (ichki harakat)',
+  siSelectClient: 'Mijozni tanlang',
+  siSelectSupplier: 'Yetkazib beruvchini tanlang',
+  siSupplierOptional: 'Yetkazib beruvchi (ixtiyoriy)',
+  siSelectCategory: 'Xarajat kategoriyasi',
+  siModeClient: 'Mijozga kirim',
+  siModeKassa: 'Kassaga kirim',
+  siModeExpense: 'Xarajat (chiqim)',
+  siQuestionKassa: 'Bu bankdan kassaga kirim — to‘g‘rimi?',
+  siKassaInflowHint: 'Mijozga bog‘lanmaydi — umumiy kassa hisobiga qo‘shiladi',
+  prKassaBankInflow: 'Bankdan kassa',
+  siConfirmYes: 'Ha, qo‘shilsin',
+  siConfirmAndEdit: 'O‘zgartirib qo‘shish',
+  siSkip: 'Yo‘q / O‘tkazib yuborish',
+  siManual: 'Qo‘lda kiritish',
+  siCreateClient: 'Yangi mijoz yaratish',
+  siCreateSupplier: 'Yangi yetkazib beruvchi yaratish',
+  siCreateCategory: 'Yangi kategoriya yaratish',
+  siCategoryNotFound: "Mos kategoriya yo'q — yangi yarating",
+  siCategoryMatched: 'Mos kategoriya topildi',
+  siNewName: 'Nomi',
+  siNewPhone: 'Telefon (ixtiyoriy)',
+  siNext: 'Keyingisi',
+  siPrev: 'Oldingisi',
+  siRowConfirmed: 'Qator tasdiqlandi',
+  siRowSkipped: 'Qator o‘tkazib yuborildi',
+  siRowDeleted: 'Qator o‘chirildi',
+  siNeedClient: 'Mijozni tanlang yoki yarating',
+  siNeedCategory: 'Xarajat kategoriyasini tanlang yoki yarating',
+  siUnclearHint: 'Tushunarsiz bo‘lsa — qo‘lda to‘g‘rilab kiriting',
+  siEditRowTitle: 'Qatorni tahrirlash',
+  siDeleteRowTitle: 'Qatorni o‘chirish',
+  siDeleteRowConfirm: 'Bu qator va u yaratgan yozuvlar (kassa/xarajat) o‘chiriladi. Davom etasizmi?',
+  siDeleteStatementTitle: 'Ko‘chirmani o‘chirish',
+  siDeleteStatementConfirm:
+    '«{name}» va ichidagi barcha qatorlar o‘chiriladi. Tasdiqlangan qatorlar bilan bog‘liq kassa/xarajat yozuvlari ham bekor qilinadi. Davom etasizmi?',
+  siStatementDeleted: 'Ko‘chirma o‘chirildi',
+  siBankBalance: 'Bank hisobidagi mablag‘',
+  siBankIncomeTotal: 'Jami kirim',
+  siBankExpenseTotal: 'Jami chiqim',
+  siBankAccount: 'Bank hisob raqami',
+  siBankName: 'Bank nomi',
+  siStir: 'STIR / INN',
+  siSourceBank: 'Bank',
+  siSourceKassa: 'Kassa',
+  siPendingBadge: '{count} ta kutilmoqda',
+  siCompanyAccountsTitle: 'Korxona bank hisoblari',
+  siCompanyAccountsHint: 'Bu hisob raqamlari ko‘chirmada korxonaning o‘zi deb hisoblanadi',
+  siAccountNumber: 'Hisob raqami',
+  siAccountLabel: 'Izoh (ixtiyoriy)',
+  siAddAccount: 'Qo‘shish',
+  siNoCompanyAccounts: 'Hisob raqamlari qo‘shilmagan',
+  siAccountAdded: 'Hisob raqami qo‘shildi',
+  siAccountDeleted: 'Hisob raqami o‘chirildi',
+  siActiveBankAccount: 'Bank hisobi',
+  siSelectBankAccount: 'Hisobni tanlang',
+  siAccountActivated: 'Bank hisobi o‘zgartirildi',
+  siAccountChangedBy: 'Oxirgi o‘zgartiruvchi',
+  siAllAccountsBalance: 'Barcha hisoblar bo‘yicha (aktiv hisob tanlanmagan)',
+  siNoCompanyAccountsBalanceHint: 'Buxgalteriya → «Soliq sozlamalari» → «Korxona bank hisoblari» bo‘limida hisob raqamini qo‘shing',
+  siOpenCompanyAccountsSettings: 'Sozlamalarga o‘tish',
+  siAccountActiveBadge: 'Aktiv',
+  siErrInvalidAmount: 'Summa noto‘g‘ri yoki juda kichik (kamida 0,01)',
+  siErrInvalidDate: 'Sana noto‘g‘ri',
+  siErrValidation: 'Kiritilgan ma’lumotlar noto‘g‘ri',
+  siErrKassaModeBackend: 'Server eski versiyada — backendni qayta ishga tushiring (kassaga kirim)',
+  siErrFileRequired: 'Fayl tanlanmadi',
+  siErrStatementNotFound: 'Ko‘chirma topilmadi',
+  siErrRowNotFound: 'Qator topilmadi',
+  siErrRowAlreadyConfirmed: 'Qator allaqachon tasdiqlangan. Avval bekor qiling',
+  siErrClientPhoneAllocate: 'Mijoz uchun telefon raqam ajratib bo‘lmadi',
+  siErrSkipConfirmed: 'Tasdiqlangan qatorni o‘tkazib yuborib bo‘lmaydi. Avval bekor qiling',
+  siErrEditConfirmed: 'Tasdiqlangan qatorni tahrirlash uchun avval bekor qiling',
+  siErrAccountRequired: 'Hisob raqami kiritilmadi',
+  siErrAccountDuplicate: 'Bu hisob raqami allaqachon mavjud',
+  siErrAccountNotFound: 'Hisob raqami topilmadi',
+  siErrNameRequired: 'Nom kiritilmadi',
+  siTableFullscreenEnter: "To'liq ekran",
+  siTableFullscreenExit: 'Ekrandan chiqish (Esc)',
+  siTableScrollLeft: 'Ustunlar — chapga',
+  siTableScrollRight: 'Ustunlar — o‘ngga',
+  siTableScrollHint: 'Ustunlar',
+  siTablePageInfo: '{from}–{to} / {total}',
 
   invTitle: 'Inventarizatsiya',
   invSubtitle: 'Omborning tizim qoldig‘ini real qoldiq bilan solishtirish',
@@ -5194,6 +5601,14 @@ const ru: T = {
   prTabRawOrders: 'Заказ сырья',
   prTabSettings: 'Налоговые ставки',
   prTabKassa: 'Касса',
+  prTabClients: 'Клиенты',
+  prTabSuppliers: 'Поставщики',
+  prClientsSearch: 'Поиск клиента…',
+  prClientPurchaseHistory: 'История покупок',
+  prClientNoSales: 'Нет продаж',
+  prSupplierPurchaseHistory: 'История закупок',
+  prSupplierNoOrders: 'Нет закупок',
+  prColPrepaid: 'Предоплата',
   prKassaBalance: 'Общий счёт кассы',
   prKassaTotalInflow: 'Всего приход',
   prKassaTotalOutflow: 'Всего расход',
@@ -5395,6 +5810,134 @@ const ru: T = {
   prVedColHintExempt: 'не удерж.',
   prVedColNetShort: 'Б − Н',
   prKpiLabelSocial: 'Соц.',
+
+  // Statement import wizard
+  siImportTitle: 'Загрузка выписки Excel',
+  siImportHint: 'Перетащите или выберите файл банковской выписки (.xlsx)',
+  siImportAction: 'Выбрать файл',
+  siUploading: 'Загрузка...',
+  siUploadSuccess: 'Файл загружен — проверьте строки',
+  siUploadError: 'Ошибка загрузки файла',
+  siStatementsList: 'Загруженные выписки',
+  siNoStatements: 'Выписки ещё не загружены',
+  siReviewPending: 'Проверить строки',
+  siAllReviewed: 'Все строки проверены',
+  siRowsTitle: 'Строки выписки',
+  siColDate: 'Дата',
+  siColType: 'Тип',
+  siColAmount: 'Сумма',
+  siColCounterparty: 'Контрагент',
+  siColAccount: 'Счёт',
+  siColBankCode: 'Код банка',
+  siColCompanyAccount: 'Счёт клиента',
+  siColCompanyBank: 'Банк клиента',
+  siColCompanyStir: 'ИНН клиента',
+  siColPurpose: 'Назначение',
+  siColStatus: 'Статус',
+  siColLink: 'Связано',
+  siColCreatedBy: 'Внёс',
+  siColActions: 'Действия',
+  siTypeIncome: 'Приход',
+  siTypeExpense: 'Расход',
+  siStatusPending: 'Ожидает',
+  siStatusConfirmed: 'Подтверждено',
+  siStatusSkipped: 'Пропущено',
+  siKindClient: 'Клиент',
+  siKindSupplier: 'Поставщик',
+  siKindCompany: 'Компания',
+  siKindUnknown: 'Неизвестно',
+  siWizardTitle: 'Проверка строки',
+  siWizardStep: 'Строка {current} / {total}',
+  siRowStir: 'ИНН / СТИР',
+  siQuestionClient: 'Это приход от клиента — верно?',
+  siQuestionExpense: 'Это расход — куда?',
+  siClientMatched: 'Клиент найден в системе',
+  siClientNotFound: 'Такого клиента нет в системе',
+  siSupplierMatched: 'Поставщик найден в системе',
+  siSupplierNotFound: 'Такого поставщика нет в системе',
+  siCompanyRowNote: 'Это собственный счёт компании (внутреннее движение)',
+  siSelectClient: 'Выберите клиента',
+  siSelectSupplier: 'Выберите поставщика',
+  siSupplierOptional: 'Поставщик (необязательно)',
+  siSelectCategory: 'Категория расхода',
+  siModeClient: 'Приход клиенту',
+  siModeKassa: 'Приход в кассу',
+  siModeExpense: 'Расход',
+  siQuestionKassa: 'Это поступление из банка в кассу — верно?',
+  siKassaInflowHint: 'Не привязано к клиенту — увеличивает общий баланс кассы',
+  prKassaBankInflow: 'Из банка в кассу',
+  siConfirmYes: 'Да, добавить',
+  siConfirmAndEdit: 'Изменить и добавить',
+  siSkip: 'Нет / Пропустить',
+  siManual: 'Ввести вручную',
+  siCreateClient: 'Создать клиента',
+  siCreateSupplier: 'Создать поставщика',
+  siCreateCategory: 'Создать категорию',
+  siCategoryNotFound: 'Нет подходящей категории — создайте новую',
+  siCategoryMatched: 'Подходящая категория найдена',
+  siNewName: 'Название',
+  siNewPhone: 'Телефон (необязательно)',
+  siNext: 'Далее',
+  siPrev: 'Назад',
+  siRowConfirmed: 'Строка подтверждена',
+  siRowSkipped: 'Строка пропущена',
+  siRowDeleted: 'Строка удалена',
+  siNeedClient: 'Выберите или создайте клиента',
+  siNeedCategory: 'Выберите или создайте категорию расхода',
+  siUnclearHint: 'Если непонятно — исправьте вручную',
+  siEditRowTitle: 'Редактировать строку',
+  siDeleteRowTitle: 'Удалить строку',
+  siDeleteRowConfirm: 'Эта строка и созданные ею записи (касса/расход) будут удалены. Продолжить?',
+  siDeleteStatementTitle: 'Удалить выписку',
+  siDeleteStatementConfirm:
+    '«{name}» и все строки внутри будут удалены. Связанные записи кассы/расходов по подтверждённым строкам тоже отменятся. Продолжить?',
+  siStatementDeleted: 'Выписка удалена',
+  siBankBalance: 'Средства на банковском счёте',
+  siBankIncomeTotal: 'Всего приход',
+  siBankExpenseTotal: 'Всего расход',
+  siBankAccount: 'Банковский счёт',
+  siBankName: 'Название банка',
+  siStir: 'ИНН / СТИР',
+  siSourceBank: 'Банк',
+  siSourceKassa: 'Касса',
+  siPendingBadge: '{count} ожидает',
+  siCompanyAccountsTitle: 'Банковские счета компании',
+  siCompanyAccountsHint: 'Эти счета считаются собственными счетами компании в выписке',
+  siAccountNumber: 'Номер счёта',
+  siAccountLabel: 'Примечание (необязательно)',
+  siAddAccount: 'Добавить',
+  siNoCompanyAccounts: 'Счета не добавлены',
+  siAccountAdded: 'Счёт добавлен',
+  siAccountDeleted: 'Счёт удалён',
+  siActiveBankAccount: 'Банковский счёт',
+  siSelectBankAccount: 'Выберите счёт',
+  siAccountActivated: 'Банковский счёт изменён',
+  siAccountChangedBy: 'Последнее изменение',
+  siAllAccountsBalance: 'По всем счетам (активный счёт не выбран)',
+  siNoCompanyAccountsBalanceHint: 'Добавьте счёт в Бухгалтерия → «Налоговые ставки» → «Банковские счета компании»',
+  siOpenCompanyAccountsSettings: 'Перейти в настройки',
+  siAccountActiveBadge: 'Активный',
+  siErrInvalidAmount: 'Сумма неверна или слишком мала (минимум 0,01)',
+  siErrInvalidDate: 'Неверная дата',
+  siErrValidation: 'Введённые данные неверны',
+  siErrKassaModeBackend: 'Сервер устарел — перезапустите backend (приход в кассу)',
+  siErrFileRequired: 'Файл не выбран',
+  siErrStatementNotFound: 'Выписка не найдена',
+  siErrRowNotFound: 'Строка не найдена',
+  siErrRowAlreadyConfirmed: 'Строка уже подтверждена. Сначала отмените',
+  siErrClientPhoneAllocate: 'Не удалось назначить телефон клиенту',
+  siErrSkipConfirmed: 'Подтверждённую строку нельзя пропустить. Сначала отмените',
+  siErrEditConfirmed: 'Для редактирования подтверждённой строки сначала отмените её',
+  siErrAccountRequired: 'Не указан номер счёта',
+  siErrAccountDuplicate: 'Этот номер счёта уже существует',
+  siErrAccountNotFound: 'Счёт не найден',
+  siErrNameRequired: 'Не указано название',
+  siTableFullscreenEnter: 'Полный экран',
+  siTableFullscreenExit: 'Выйти (Esc)',
+  siTableScrollLeft: 'Столбцы — влево',
+  siTableScrollRight: 'Столбцы — вправо',
+  siTableScrollHint: 'Столбцы',
+  siTablePageInfo: '{from}–{to} / {total}',
 
   invTitle: 'Инвентаризация',
   invSubtitle: 'Сверка системного остатка склада с фактическим',

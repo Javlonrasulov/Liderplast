@@ -421,6 +421,8 @@ export const ModelName = {
   SalaryRecord: 'SalaryRecord',
   BankVedomost: 'BankVedomost',
   BankTransaction: 'BankTransaction',
+  CompanyBankAccount: 'CompanyBankAccount',
+  CompanyBankAccountLog: 'CompanyBankAccountLog',
   UploadedFile: 'UploadedFile',
   UploadJob: 'UploadJob',
   CompanyAsset: 'CompanyAsset',
@@ -442,7 +444,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "kassaEntry" | "expenseCategory" | "expenseFundingSource" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
+    modelProps: "user" | "refreshToken" | "rawMaterial" | "semiProduct" | "finishedProduct" | "inventoryBalance" | "inventoryMovement" | "machine" | "semiProductRawMaterial" | "semiProductMachine" | "finishedProductSemiProduct" | "finishedProductMachine" | "productAuditLog" | "rawMaterialBag" | "bagConnectionSession" | "bagWriteoff" | "bagAuditLog" | "productionRecord" | "productionConsumption" | "shiftRecord" | "shiftMaterialUsage" | "client" | "order" | "orderItem" | "payment" | "kassaEntry" | "expenseCategory" | "expenseFundingSource" | "expense" | "rawMaterialPurchaseOrder" | "supplier" | "supplierPurchaseOrder" | "salarySetting" | "employeeProductRate" | "salaryRecord" | "bankVedomost" | "bankTransaction" | "companyBankAccount" | "companyBankAccountLog" | "uploadedFile" | "uploadJob" | "companyAsset" | "companyAssetActivityLog" | "companyAssetDocument" | "inventoryDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3184,6 +3186,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CompanyBankAccount: {
+      payload: Prisma.$CompanyBankAccountPayload<ExtArgs>
+      fields: Prisma.CompanyBankAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyBankAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyBankAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyBankAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyBankAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyBankAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyBankAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyBankAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyBankAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyBankAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        update: {
+          args: Prisma.CompanyBankAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyBankAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyBankAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyBankAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyBankAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyBankAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyBankAccount>
+        }
+        groupBy: {
+          args: Prisma.CompanyBankAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyBankAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyBankAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyBankAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    CompanyBankAccountLog: {
+      payload: Prisma.$CompanyBankAccountLogPayload<ExtArgs>
+      fields: Prisma.CompanyBankAccountLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyBankAccountLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyBankAccountLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyBankAccountLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyBankAccountLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyBankAccountLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyBankAccountLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyBankAccountLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyBankAccountLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyBankAccountLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        update: {
+          args: Prisma.CompanyBankAccountLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyBankAccountLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyBankAccountLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyBankAccountLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyBankAccountLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyBankAccountLogPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyBankAccountLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyBankAccountLog>
+        }
+        groupBy: {
+          args: Prisma.CompanyBankAccountLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyBankAccountLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyBankAccountLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyBankAccountLogCountAggregateOutputType> | number
+        }
+      }
+    }
     UploadedFile: {
       payload: Prisma.$UploadedFilePayload<ExtArgs>
       fields: Prisma.UploadedFileFieldRefs
@@ -4013,6 +4163,7 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  stir: 'stir',
   cashBalance: 'cashBalance',
   deliveryVehiclePlate: 'deliveryVehiclePlate',
   deliveryDriverName: 'deliveryDriverName',
@@ -4154,6 +4305,9 @@ export const SupplierScalarFieldEnum = {
   phone: 'phone',
   address: 'address',
   notes: 'notes',
+  bankAccount: 'bankAccount',
+  bankName: 'bankName',
+  stir: 'stir',
   isDeleted: 'isDeleted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -4246,6 +4400,7 @@ export type SalaryRecordScalarFieldEnum = (typeof SalaryRecordScalarFieldEnum)[k
 export const BankVedomostScalarFieldEnum = {
   id: 'id',
   fileName: 'fileName',
+  source: 'source',
   totalIncome: 'totalIncome',
   totalExpense: 'totalExpense',
   status: 'status',
@@ -4268,17 +4423,55 @@ export const BankTransactionScalarFieldEnum = {
   operationDate: 'operationDate',
   receiverName: 'receiverName',
   receiverAccount: 'receiverAccount',
+  receiverBankCode: 'receiverBankCode',
   receiverBankName: 'receiverBankName',
   receiverStir: 'receiverStir',
   paymentPurpose: 'paymentPurpose',
+  companyAccount: 'companyAccount',
+  companyBankName: 'companyBankName',
+  companyStir: 'companyStir',
   isSalary: 'isSalary',
   employeeId: 'employeeId',
   clientId: 'clientId',
+  supplierId: 'supplierId',
+  reviewStatus: 'reviewStatus',
+  counterpartyKind: 'counterpartyKind',
+  expenseId: 'expenseId',
+  kassaEntryId: 'kassaEntryId',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
+
+
+export const CompanyBankAccountScalarFieldEnum = {
+  id: 'id',
+  accountNumber: 'accountNumber',
+  label: 'label',
+  isActive: 'isActive',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyBankAccountScalarFieldEnum = (typeof CompanyBankAccountScalarFieldEnum)[keyof typeof CompanyBankAccountScalarFieldEnum]
+
+
+export const CompanyBankAccountLogScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  accountNumber: 'accountNumber',
+  label: 'label',
+  action: 'action',
+  performedById: 'performedById',
+  createdAt: 'createdAt'
+} as const
+
+export type CompanyBankAccountLogScalarFieldEnum = (typeof CompanyBankAccountLogScalarFieldEnum)[keyof typeof CompanyBankAccountLogScalarFieldEnum]
 
 
 export const UploadedFileScalarFieldEnum = {
@@ -4826,6 +5019,20 @@ export type ListEnumEmployeeRateTypeFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'BankStatementSource'
+ */
+export type EnumBankStatementSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankStatementSource'>
+    
+
+
+/**
+ * Reference to a field of type 'BankStatementSource[]'
+ */
+export type ListEnumBankStatementSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankStatementSource[]'>
+    
+
+
+/**
  * Reference to a field of type 'BankVedomostStatus'
  */
 export type EnumBankVedomostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankVedomostStatus'>
@@ -4850,6 +5057,48 @@ export type EnumBankTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'BankTransactionType[]'
  */
 export type ListEnumBankTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankTransactionType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankRowReviewStatus'
+ */
+export type EnumBankRowReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankRowReviewStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BankRowReviewStatus[]'
+ */
+export type ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankRowReviewStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankCounterpartyKind'
+ */
+export type EnumBankCounterpartyKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankCounterpartyKind'>
+    
+
+
+/**
+ * Reference to a field of type 'BankCounterpartyKind[]'
+ */
+export type ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankCounterpartyKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyBankAccountAction'
+ */
+export type EnumCompanyBankAccountActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyBankAccountAction'>
+    
+
+
+/**
+ * Reference to a field of type 'CompanyBankAccountAction[]'
+ */
+export type ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyBankAccountAction[]'>
     
 
 
@@ -5068,6 +5317,8 @@ export type GlobalOmitConfig = {
   salaryRecord?: Prisma.SalaryRecordOmit
   bankVedomost?: Prisma.BankVedomostOmit
   bankTransaction?: Prisma.BankTransactionOmit
+  companyBankAccount?: Prisma.CompanyBankAccountOmit
+  companyBankAccountLog?: Prisma.CompanyBankAccountLogOmit
   uploadedFile?: Prisma.UploadedFileOmit
   uploadJob?: Prisma.UploadJobOmit
   companyAsset?: Prisma.CompanyAssetOmit

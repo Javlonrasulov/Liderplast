@@ -73,6 +73,16 @@ export function todayYmd(now: Date = new Date()): string {
   return serverTodayCache ?? localTodayYmd(now);
 }
 
+/** API ga yuborish uchun sanani `YYYY-MM-DD` formatiga keltiradi */
+export function normalizeApiYmd(value: string, fallback?: string): string {
+  const head = value.trim().slice(0, 10);
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(head);
+  if (iso) return head;
+  const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(head);
+  if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  return fallback ?? todayYmd();
+}
+
 /** @deprecated Use {@link todayYmd}() instead. */
 export const TODAY = localTodayYmd();
 

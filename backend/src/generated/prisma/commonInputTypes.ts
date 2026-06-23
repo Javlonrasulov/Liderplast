@@ -698,11 +698,28 @@ export type EnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
 }
 
+export type EnumBankStatementSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankStatementSource | Prisma.EnumBankStatementSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel> | $Enums.BankStatementSource
+}
+
 export type EnumBankVedomostStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
   in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel> | $Enums.BankVedomostStatus
+}
+
+export type EnumBankStatementSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankStatementSource | Prisma.EnumBankStatementSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankStatementSourceWithAggregatesFilter<$PrismaModel> | $Enums.BankStatementSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel>
 }
 
 export type EnumBankVedomostStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -722,6 +739,20 @@ export type EnumBankTransactionTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel> | $Enums.BankTransactionType
 }
 
+export type EnumBankRowReviewStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankRowReviewStatus | Prisma.EnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel> | $Enums.BankRowReviewStatus
+}
+
+export type EnumBankCounterpartyKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankCounterpartyKind | Prisma.EnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  in?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel> | $Enums.BankCounterpartyKind
+}
+
 export type EnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
   in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
@@ -730,6 +761,43 @@ export type EnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
+}
+
+export type EnumBankRowReviewStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankRowReviewStatus | Prisma.EnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankRowReviewStatusWithAggregatesFilter<$PrismaModel> | $Enums.BankRowReviewStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel>
+}
+
+export type EnumBankCounterpartyKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankCounterpartyKind | Prisma.EnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  in?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankCounterpartyKindWithAggregatesFilter<$PrismaModel> | $Enums.BankCounterpartyKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel>
+}
+
+export type EnumCompanyBankAccountActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyBankAccountAction | Prisma.EnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel> | $Enums.CompanyBankAccountAction
+}
+
+export type EnumCompanyBankAccountActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyBankAccountAction | Prisma.EnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyBankAccountActionWithAggregatesFilter<$PrismaModel> | $Enums.CompanyBankAccountAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel>
 }
 
 export type EnumUploadStatusFilter<$PrismaModel = never> = {
@@ -1533,11 +1601,28 @@ export type NestedEnumEmployeeRateTypeWithAggregatesFilter<$PrismaModel = never>
   _max?: Prisma.NestedEnumEmployeeRateTypeFilter<$PrismaModel>
 }
 
+export type NestedEnumBankStatementSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankStatementSource | Prisma.EnumBankStatementSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel> | $Enums.BankStatementSource
+}
+
 export type NestedEnumBankVedomostStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.BankVedomostStatus | Prisma.EnumBankVedomostStatusFieldRefInput<$PrismaModel>
   in?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.BankVedomostStatus[] | Prisma.ListEnumBankVedomostStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumBankVedomostStatusFilter<$PrismaModel> | $Enums.BankVedomostStatus
+}
+
+export type NestedEnumBankStatementSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankStatementSource | Prisma.EnumBankStatementSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankStatementSource[] | Prisma.ListEnumBankStatementSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankStatementSourceWithAggregatesFilter<$PrismaModel> | $Enums.BankStatementSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankStatementSourceFilter<$PrismaModel>
 }
 
 export type NestedEnumBankVedomostStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -1557,6 +1642,20 @@ export type NestedEnumBankTransactionTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel> | $Enums.BankTransactionType
 }
 
+export type NestedEnumBankRowReviewStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankRowReviewStatus | Prisma.EnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel> | $Enums.BankRowReviewStatus
+}
+
+export type NestedEnumBankCounterpartyKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankCounterpartyKind | Prisma.EnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  in?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel> | $Enums.BankCounterpartyKind
+}
+
 export type NestedEnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.BankTransactionType | Prisma.EnumBankTransactionTypeFieldRefInput<$PrismaModel>
   in?: $Enums.BankTransactionType[] | Prisma.ListEnumBankTransactionTypeFieldRefInput<$PrismaModel>
@@ -1565,6 +1664,43 @@ export type NestedEnumBankTransactionTypeWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumBankTransactionTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumBankRowReviewStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankRowReviewStatus | Prisma.EnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankRowReviewStatus[] | Prisma.ListEnumBankRowReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankRowReviewStatusWithAggregatesFilter<$PrismaModel> | $Enums.BankRowReviewStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankRowReviewStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumBankCounterpartyKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BankCounterpartyKind | Prisma.EnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  in?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BankCounterpartyKind[] | Prisma.ListEnumBankCounterpartyKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBankCounterpartyKindWithAggregatesFilter<$PrismaModel> | $Enums.BankCounterpartyKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBankCounterpartyKindFilter<$PrismaModel>
+}
+
+export type NestedEnumCompanyBankAccountActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyBankAccountAction | Prisma.EnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel> | $Enums.CompanyBankAccountAction
+}
+
+export type NestedEnumCompanyBankAccountActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CompanyBankAccountAction | Prisma.EnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  in?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CompanyBankAccountAction[] | Prisma.ListEnumCompanyBankAccountActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCompanyBankAccountActionWithAggregatesFilter<$PrismaModel> | $Enums.CompanyBankAccountAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCompanyBankAccountActionFilter<$PrismaModel>
 }
 
 export type NestedEnumUploadStatusFilter<$PrismaModel = never> = {

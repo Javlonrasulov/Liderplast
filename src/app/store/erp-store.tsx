@@ -201,6 +201,7 @@ export interface Client {
   createdAt: string;
   bankAccount?: string;
   bankName?: string;
+  stir?: string;
   /** Chop etish — mijoz uchun saqlangan mashina raqami */
   deliveryVehiclePlate?: string;
   /** Chop etish — mijoz uchun saqlangan haydovchi */
@@ -275,7 +276,43 @@ export interface Supplier {
   phone?: string | null;
   address?: string | null;
   notes?: string | null;
+  bankAccount?: string | null;
+  bankName?: string | null;
+  stir?: string | null;
 }
+
+export interface CompanyBankAccount {
+  id: string;
+  accountNumber: string;
+  label?: string | null;
+  isActive: boolean;
+  balance: number;
+  totalIncome: number;
+  totalExpense: number;
+  createdByName?: string | null;
+  updatedByName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BankBalance {
+  balance: number;
+  totalIncome: number;
+  totalExpense: number;
+  accountId?: string | null;
+  accountNumber?: string | null;
+  accountLabel?: string | null;
+  updatedByName?: string | null;
+  updatedAt?: string | null;
+  allAccounts?: boolean;
+}
+
+export type StatementRowReviewStatus = 'pending' | 'confirmed' | 'skipped';
+export type StatementCounterpartyKind =
+  | 'unknown'
+  | 'client'
+  | 'supplier'
+  | 'company';
 
 export interface SupplierPurchaseOrder {
   id: string;
@@ -414,7 +451,7 @@ export interface Payment {
   createdAt: string;
 }
 
-export type KassaEntryType = 'client_inflow' | 'sale_deduction' | 'outflow';
+export type KassaEntryType = 'client_inflow' | 'bank_inflow' | 'sale_deduction' | 'outflow';
 
 export interface KassaEntry {
   id: string;
@@ -511,19 +548,33 @@ export interface BankTransaction {
   operationDate: string;
   receiverName?: string | null;
   receiverAccount?: string | null;
+  receiverBankCode?: string | null;
   receiverBankName?: string | null;
   receiverStir?: string | null;
   paymentPurpose?: string | null;
+  companyAccount?: string | null;
+  companyBankName?: string | null;
+  companyStir?: string | null;
   isSalary: boolean;
   employeeId?: string | null;
   employeeName?: string | null;
   clientId?: string | null;
   clientName?: string | null;
+  supplierId?: string | null;
+  supplierName?: string | null;
+  reviewStatus?: StatementRowReviewStatus;
+  counterpartyKind?: StatementCounterpartyKind;
+  expenseId?: string | null;
+  kassaEntryId?: string | null;
+  createdByName?: string | null;
+  updatedByName?: string | null;
+  updatedAt?: string;
 }
 
 export interface BankVedomost {
   id: string;
   fileName: string;
+  source?: 'bank' | 'kassa';
   totalIncome: number;
   totalExpense: number;
   status: 'draft' | 'parsed' | 'confirmed' | 'rejected';
@@ -533,6 +584,11 @@ export interface BankVedomost {
   transactionsCount: number;
   createdAt: string;
   updatedAt: string;
+  summary?: {
+    pendingCount: number;
+    confirmedCount: number;
+    skippedCount: number;
+  };
   transactions?: BankTransaction[];
   unresolvedEmployees?: Array<{
     receiverName?: string | null;
@@ -598,6 +654,8 @@ export interface ERPState {
   payments: Payment[];
   kassaSummary: KassaSummary;
   kassaEntries: KassaEntry[];
+  bankBalance: BankBalance;
+  companyBankAccounts: CompanyBankAccount[];
 }
 
 type ERPAction =
@@ -768,7 +826,16 @@ type ERPAction =
       payload: { id: string; amount?: number; comment?: string; date?: string };
     }
   | { type: 'DELETE_KASSA_OUTFLOW'; payload: string }
-  | { type: 'ADD_CLIENT'; payload: { name: string; phone?: string; bankAccount?: string; bankName?: string } }
+  | {
+      type: 'ADD_CLIENT';
+      payload: {
+        name: string;
+        phone?: string;
+        bankAccount?: string;
+        bankName?: string;
+        stir?: string;
+      };
+    }
   | {
       type: 'UPDATE_CLIENT';
       payload: {
@@ -777,6 +844,7 @@ type ERPAction =
         phone?: string;
         bankAccount?: string;
         bankName?: string;
+        stir?: string;
       };
     }
   | {
@@ -856,11 +924,28 @@ type ERPAction =
   | { type: 'SET_MONTH_STATUS'; payload: { month: string; status: 'paid' | 'unpaid' } }
   | {
       type: 'CREATE_SUPPLIER';
-      payload: { name: string; phone?: string; address?: string; notes?: string };
+      payload: {
+        name: string;
+        phone?: string;
+        address?: string;
+        notes?: string;
+        bankAccount?: string;
+        bankName?: string;
+        stir?: string;
+      };
     }
   | {
       type: 'UPDATE_SUPPLIER';
-      payload: { id: string; name: string; phone?: string; address?: string; notes?: string };
+      payload: {
+        id: string;
+        name: string;
+        phone?: string;
+        address?: string;
+        notes?: string;
+        bankAccount?: string;
+        bankName?: string;
+        stir?: string;
+      };
     }
   | {
       type: 'CREATE_SUPPLIER_PURCHASE_ORDER';
@@ -984,6 +1069,8 @@ const emptyState: ERPState = {
     totalSaleDeductions: 0,
   },
   kassaEntries: [],
+  bankBalance: { balance: 0, totalIncome: 0, totalExpense: 0, allAccounts: true },
+  companyBankAccounts: [],
 };
 
 const ERPContext = createContext<ERPContextValue | null>(null);
@@ -1358,6 +1445,7 @@ type BackendClient = {
   createdAt: string;
   bankAccount?: string | null;
   bankName?: string | null;
+  stir?: string | null;
   deliveryVehiclePlate?: string | null;
   deliveryDriverName?: string | null;
   orders?: BackendClientOrderStub[];
@@ -1395,7 +1483,7 @@ type BackendPayment = {
 
 type BackendKassaEntry = {
   id: string;
-  type: 'CLIENT_INFLOW' | 'SALE_DEDUCTION' | 'OUTFLOW';
+  type: 'CLIENT_INFLOW' | 'BANK_INFLOW' | 'SALE_DEDUCTION' | 'OUTFLOW';
   clientId?: string | null;
   orderId?: string | null;
   amount: number;
@@ -1455,6 +1543,35 @@ type BackendSupplier = {
   phone: string | null;
   address: string | null;
   notes: string | null;
+  bankAccount?: string | null;
+  bankName?: string | null;
+  stir?: string | null;
+};
+
+type BackendCompanyBankAccount = {
+  id: string;
+  accountNumber: string;
+  label?: string | null;
+  isActive: boolean;
+  balance: number;
+  totalIncome: number;
+  totalExpense: number;
+  createdByName?: string | null;
+  updatedByName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BackendBankBalance = {
+  balance: number;
+  totalIncome: number;
+  totalExpense: number;
+  accountId?: string | null;
+  accountNumber?: string | null;
+  accountLabel?: string | null;
+  updatedByName?: string | null;
+  updatedAt?: string | null;
+  allAccounts?: boolean;
 };
 
 type BackendSupplierPurchaseOrder = {
@@ -1566,19 +1683,33 @@ type BackendBankTransaction = {
   operationDate: string;
   receiverName?: string | null;
   receiverAccount?: string | null;
+  receiverBankCode?: string | null;
   receiverBankName?: string | null;
   receiverStir?: string | null;
   paymentPurpose?: string | null;
+  companyAccount?: string | null;
+  companyBankName?: string | null;
+  companyStir?: string | null;
   isSalary: boolean;
   employeeId?: string | null;
   employee?: { fullName: string } | null;
   clientId?: string | null;
-  client?: { name: string } | null;
+  client?: { id: string; name: string } | null;
+  supplierId?: string | null;
+  supplier?: { id: string; name: string } | null;
+  reviewStatus?: 'PENDING' | 'CONFIRMED' | 'SKIPPED';
+  counterpartyKind?: 'UNKNOWN' | 'CLIENT' | 'SUPPLIER' | 'COMPANY';
+  expenseId?: string | null;
+  kassaEntryId?: string | null;
+  createdBy?: { fullName: string } | null;
+  updatedBy?: { fullName: string } | null;
+  updatedAt?: string;
 };
 
 type BackendBankVedomost = {
   id: string;
   fileName: string;
+  source?: 'BANK' | 'KASSA';
   totalIncome: number;
   totalExpense: number;
   status: 'DRAFT' | 'PARSED' | 'CONFIRMED' | 'REJECTED';
@@ -1588,6 +1719,7 @@ type BackendBankVedomost = {
   createdAt: string;
   updatedAt: string;
   _count?: { transactions: number };
+  summary?: { pendingCount: number; confirmedCount: number; skippedCount: number };
   transactions?: BackendBankTransaction[];
   unresolvedEmployees?: Array<{
     receiverName?: string | null;
@@ -1644,21 +1776,39 @@ function mapBankTransaction(item: BackendBankTransaction): BankTransaction {
     operationDate: item.operationDate,
     receiverName: item.receiverName ?? null,
     receiverAccount: item.receiverAccount ?? null,
+    receiverBankCode: item.receiverBankCode ?? null,
     receiverBankName: item.receiverBankName ?? null,
     receiverStir: item.receiverStir ?? null,
     paymentPurpose: item.paymentPurpose ?? null,
+    companyAccount: item.companyAccount ?? null,
+    companyBankName: item.companyBankName ?? null,
+    companyStir: item.companyStir ?? null,
     isSalary: item.isSalary,
     employeeId: item.employeeId ?? null,
     employeeName: item.employee?.fullName ?? null,
     clientId: item.clientId ?? null,
     clientName: item.client?.name ?? null,
+    supplierId: item.supplierId ?? null,
+    supplierName: item.supplier?.name ?? null,
+    reviewStatus: item.reviewStatus
+      ? (item.reviewStatus.toLowerCase() as StatementRowReviewStatus)
+      : undefined,
+    counterpartyKind: item.counterpartyKind
+      ? (item.counterpartyKind.toLowerCase() as StatementCounterpartyKind)
+      : undefined,
+    expenseId: item.expenseId ?? null,
+    kassaEntryId: item.kassaEntryId ?? null,
+    createdByName: item.createdBy?.fullName ?? null,
+    updatedByName: item.updatedBy?.fullName ?? null,
+    updatedAt: item.updatedAt,
   };
 }
 
-function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
+export function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
   return {
     id: item.id,
     fileName: item.fileName,
+    source: item.source ? (item.source.toLowerCase() as 'bank' | 'kassa') : undefined,
     totalIncome: item.totalIncome,
     totalExpense: item.totalExpense,
     status: normalizeBankVedomostStatus(item.status),
@@ -1669,6 +1819,7 @@ function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
       item._count?.transactions ?? item.transactions?.length ?? 0,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
+    summary: item.summary,
     transactions: item.transactions?.map(mapBankTransaction),
     unresolvedEmployees: item.unresolvedEmployees,
     unresolvedClients: item.unresolvedClients,
@@ -1679,6 +1830,7 @@ function mapBankVedomost(item: BackendBankVedomost): BankVedomost {
 function mapKassaEntry(item: BackendKassaEntry): KassaEntry {
   const typeMap: Record<BackendKassaEntry['type'], KassaEntryType> = {
     CLIENT_INFLOW: 'client_inflow',
+    BANK_INFLOW: 'bank_inflow',
     SALE_DEDUCTION: 'sale_deduction',
     OUTFLOW: 'outflow',
   };
@@ -2145,6 +2297,9 @@ function mapSuppliers(rows: BackendSupplier[]): Supplier[] {
     phone: r.phone,
     address: r.address,
     notes: r.notes,
+    bankAccount: r.bankAccount ?? null,
+    bankName: r.bankName ?? null,
+    stir: r.stir ?? null,
   }));
 }
 
@@ -2269,6 +2424,8 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     supplierOrders,
     kassaSummary,
     kassaEntries,
+    bankBalance,
+    companyBankAccounts,
   ] = await Promise.all([
     allow('warehouseCatalog')
       ? safeLoad(apiRequest<CatalogResponse>('/warehouse/catalog'), {
@@ -2360,6 +2517,19 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     allow('salaryRows')
       ? safeLoad(apiRequest<BackendKassaEntry[]>('/finance/kassa/entries'), [] as BackendKassaEntry[])
       : skipped<BackendKassaEntry[]>([]),
+    allow('salaryRows')
+      ? safeLoad(apiRequest<BackendBankBalance>('/finance/bank-balance'), {
+          balance: 0,
+          totalIncome: 0,
+          totalExpense: 0,
+        })
+      : skipped<BackendBankBalance>({ balance: 0, totalIncome: 0, totalExpense: 0 }),
+    allow('salaryRows')
+      ? safeLoad(
+          apiRequest<BackendCompanyBankAccount[]>('/finance/company-bank-accounts'),
+          [] as BackendCompanyBankAccount[],
+        )
+      : skipped<BackendCompanyBankAccount[]>([]),
   ]);
 
   const expenseCategories = await expenseCategoriesPromise;
@@ -2500,6 +2670,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     createdAt: client.createdAt,
     bankAccount: client.bankAccount ?? undefined,
     bankName: client.bankName ?? undefined,
+    stir: client.stir ?? undefined,
     deliveryVehiclePlate: client.deliveryVehiclePlate ?? undefined,
     deliveryDriverName: client.deliveryDriverName ?? undefined,
   }));
@@ -2729,6 +2900,32 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     payments: mappedPayments,
     kassaSummary: kassaSummary ?? emptyState.kassaSummary,
     kassaEntries: (kassaEntries ?? []).map(mapKassaEntry),
+    bankBalance: bankBalance
+      ? {
+          balance: bankBalance.balance,
+          totalIncome: bankBalance.totalIncome,
+          totalExpense: bankBalance.totalExpense,
+          accountId: bankBalance.accountId ?? null,
+          accountNumber: bankBalance.accountNumber ?? null,
+          accountLabel: bankBalance.accountLabel ?? null,
+          updatedByName: bankBalance.updatedByName ?? null,
+          updatedAt: bankBalance.updatedAt ?? null,
+          allAccounts: bankBalance.allAccounts ?? false,
+        }
+      : emptyState.bankBalance,
+    companyBankAccounts: (companyBankAccounts ?? []).map((a) => ({
+      id: a.id,
+      accountNumber: a.accountNumber,
+      label: a.label ?? null,
+      isActive: a.isActive,
+      balance: a.balance,
+      totalIncome: a.totalIncome,
+      totalExpense: a.totalExpense,
+      createdByName: a.createdByName ?? null,
+      updatedByName: a.updatedByName ?? null,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+    })),
   };
 
   return { state, lookups };
@@ -2873,6 +3070,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               phone: action.payload.phone || undefined,
               bankAccount: action.payload.bankAccount,
               bankName: action.payload.bankName,
+              stir: action.payload.stir,
             }),
           });
           break;
@@ -2884,6 +3082,7 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               phone: action.payload.phone || undefined,
               bankAccount: action.payload.bankAccount,
               bankName: action.payload.bankName,
+              stir: action.payload.stir,
             }),
           });
           break;

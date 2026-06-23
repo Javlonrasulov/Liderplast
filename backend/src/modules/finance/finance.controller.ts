@@ -36,14 +36,20 @@ import { CreateKassaInflowDto } from './dto/create-kassa-inflow.dto.js';
 import { CreateKassaOutflowDto } from './dto/create-kassa-outflow.dto.js';
 import { UpdateKassaInflowDto } from './dto/update-kassa-inflow.dto.js';
 import { UpdateKassaOutflowDto } from './dto/update-kassa-outflow.dto.js';
+import { ConfirmStatementRowDto } from './dto/confirm-statement-row.dto.js';
+import { UpdateStatementRowDto } from './dto/update-statement-row.dto.js';
+import { CreateCompanyBankAccountDto } from './dto/create-company-bank-account.dto.js';
 import { FinanceService } from './finance.service.js';
 import { KassaService } from './kassa.service.js';
+import { StatementService } from './statement.service.js';
+import { BankStatementSource } from '../../generated/prisma/enums.js';
 
 @Controller('finance')
 export class FinanceController {
   constructor(
     private readonly financeService: FinanceService,
     private readonly kassaService: KassaService,
+    private readonly statementService: StatementService,
   ) {}
 
   @Post('expenses')
@@ -439,5 +445,122 @@ export class FinanceController {
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
   deleteKassaOutflow(@Param('id') id: string) {
     return this.kassaService.deleteOutflow(id);
+  }
+
+  // ===================== Statement import (interactive) =====================
+
+  @Post('statement/upload')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  @UseInterceptors(FileInterceptor('file'))
+  uploadStatement(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('source') source?: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    const resolvedSource =
+      source === 'kassa' ? BankStatementSource.KASSA : BankStatementSource.BANK;
+    return this.statementService.upload(file, resolvedSource, userId);
+  }
+
+  @Get('statements')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  listStatements(@Query('source') source?: string) {
+    const resolvedSource =
+      source === 'kassa'
+        ? BankStatementSource.KASSA
+        : source === 'bank'
+          ? BankStatementSource.BANK
+          : undefined;
+    return this.statementService.listStatements(resolvedSource);
+  }
+
+  @Get('statement/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getStatement(@Param('id') id: string) {
+    return this.statementService.getStatement(id);
+  }
+
+  @Get('bank-balance')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getBankBalance() {
+    return this.statementService.getBankBalance();
+  }
+
+  @Post('statement/row/:id/confirm')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  confirmStatementRow(
+    @Param('id') id: string,
+    @Body() dto: ConfirmStatementRowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.confirmRow(id, dto, userId);
+  }
+
+  @Post('statement/row/:id/skip')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  skipStatementRow(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.skipRow(id, userId);
+  }
+
+  @Patch('statement/row/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  updateStatementRow(
+    @Param('id') id: string,
+    @Body() dto: UpdateStatementRowDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.updateRow(id, dto, userId);
+  }
+
+  @Delete('statement/row/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteStatementRow(@Param('id') id: string) {
+    return this.statementService.deleteRow(id);
+  }
+
+  @Delete('statement/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteStatement(@Param('id') id: string) {
+    return this.statementService.deleteStatement(id);
+  }
+
+  @Get('company-bank-accounts')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  getCompanyBankAccounts() {
+    return this.statementService.getCompanyBankAccounts();
+  }
+
+  @Post('company-bank-accounts')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  addCompanyBankAccount(
+    @Body() dto: CreateCompanyBankAccountDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.addCompanyBankAccount(
+      dto.accountNumber,
+      dto.label,
+      userId,
+    );
+  }
+
+  @Patch('company-bank-accounts/:id/activate')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  activateCompanyBankAccount(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.activateCompanyBankAccount(id, userId);
+  }
+
+  @Delete('company-bank-accounts/:id')
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  deleteCompanyBankAccount(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.statementService.deleteCompanyBankAccount(id, userId);
   }
 }

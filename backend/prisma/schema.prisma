@@ -69,8 +69,30 @@ enum BankTransactionType {
   EXPENSE
 }
 
+/// Ko'chirma qaysi bo'limdan yuklangani
+enum BankStatementSource {
+  BANK
+  KASSA
+}
+
+/// Import qatorining ko'rib chiqilish holati
+enum BankRowReviewStatus {
+  PENDING
+  CONFIRMED
+  SKIPPED
+}
+
+/// Qator kontragentining turi
+enum BankCounterpartyKind {
+  UNKNOWN
+  CLIENT
+  SUPPLIER
+  COMPANY
+}
+
 enum KassaEntryType {
   CLIENT_INFLOW
+  BANK_INFLOW
   SALE_DEDUCTION
   OUTFLOW
 }
@@ -199,43 +221,45 @@ enum ProductAuditEntityType {
 }
 
 model User {
-  id                  String              @id @default(cuid())
-  fullName            String
-  phone               String              @unique
-  login               String?             @unique
-  customRoleLabel     String?
-  permissions         String[]            @default([])
-  canLogin            Boolean             @default(true)
-  passwordHash        String
-  position            String?
-  cardNumber          String?
-  stir                String?
-  role                Role                @default(WORKER)
-  salaryType          SalaryType          @default(FIXED)
-  salaryRate          Float               @default(0)
+  id                               String                     @id @default(cuid())
+  fullName                         String
+  phone                            String                     @unique
+  login                            String?                    @unique
+  customRoleLabel                  String?
+  permissions                      String[]                   @default([])
+  canLogin                         Boolean                    @default(true)
+  passwordHash                     String
+  position                         String?
+  cardNumber                       String?
+  stir                             String?
+  role                             Role                       @default(WORKER)
+  salaryType                       SalaryType                 @default(FIXED)
+  salaryRate                       Float                      @default(0)
   /// Smena hisobida: ishchining asosiy (belgilangan) smenasi, 1–20
-  preferredShiftNumber Int?
-  isActive            Boolean             @default(true)
+  preferredShiftNumber             Int?
+  isActive                         Boolean                    @default(true)
   /// Ishdan chiqish sanasi (buxgalteriya / tarix ko‘rinishi)
-  employmentEndedAt   DateTime?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  refreshTokens       RefreshToken[]
-  productions         ProductionRecord[]  @relation("WorkerProductions")
-  shiftRecords        ShiftRecord[]       @relation("ShiftWorker")
-  createdShiftRecords ShiftRecord[]       @relation("ShiftRecordCreator")
-  employeeProductRates EmployeeProductRate[]
-  salaryRecords       SalaryRecord[]
-  createdOrders       Order[]             @relation("OrderCreator")
-  createdExpenses     Expense[]           @relation("ExpenseCreator")
-  updatedExpenses     Expense[]           @relation("ExpenseUpdater")
-  uploadedFiles       UploadedFile[]      @relation("UploadedBy")
-  inventoryMovements  InventoryMovement[] @relation("MovementCreator")
-  bagAuditLogs        BagAuditLog[]       @relation("BagAuditCreator")
-  bagWriteoffs        BagWriteoff[]       @relation("BagWriteoffCreator")
-  productAuditLogs    ProductAuditLog[]   @relation("ProductAuditActor")
-  bankTransactions    BankTransaction[]
-  uploadedBankVedomosts BankVedomost[]
+  employmentEndedAt                DateTime?
+  createdAt                        DateTime                   @default(now())
+  updatedAt                        DateTime                   @updatedAt
+  refreshTokens                    RefreshToken[]
+  productions                      ProductionRecord[]         @relation("WorkerProductions")
+  shiftRecords                     ShiftRecord[]              @relation("ShiftWorker")
+  createdShiftRecords              ShiftRecord[]              @relation("ShiftRecordCreator")
+  employeeProductRates             EmployeeProductRate[]
+  salaryRecords                    SalaryRecord[]
+  createdOrders                    Order[]                    @relation("OrderCreator")
+  createdExpenses                  Expense[]                  @relation("ExpenseCreator")
+  updatedExpenses                  Expense[]                  @relation("ExpenseUpdater")
+  uploadedFiles                    UploadedFile[]             @relation("UploadedBy")
+  inventoryMovements               InventoryMovement[]        @relation("MovementCreator")
+  bagAuditLogs                     BagAuditLog[]              @relation("BagAuditCreator")
+  bagWriteoffs                     BagWriteoff[]              @relation("BagWriteoffCreator")
+  productAuditLogs                 ProductAuditLog[]          @relation("ProductAuditActor")
+  bankTransactions                 BankTransaction[]          @relation("BankTxEmployee")
+  createdBankTransactions          BankTransaction[]          @relation("BankTxCreator")
+  updatedBankTransactions          BankTransaction[]          @relation("BankTxUpdater")
+  uploadedBankVedomosts            BankVedomost[]
   rawMaterialPurchaseOrdersCreated RawMaterialPurchaseOrder[] @relation("RawMaterialOrderCreator")
   supplierPurchaseOrdersCreated    SupplierPurchaseOrder[]    @relation("SupplierPurchaseOrderCreator")
   assignedCompanyAssets            CompanyAsset[]             @relation("CompanyAssetAssignee")
@@ -246,6 +270,9 @@ model User {
   inventoryDocumentsCreated        InventoryDocument[]        @relation("InventoryDocumentCreator")
   kassaEntriesCreated              KassaEntry[]               @relation("KassaEntryCreator")
   kassaEntriesUpdated              KassaEntry[]               @relation("KassaEntryUpdater")
+  companyBankAccountsCreated       CompanyBankAccount[]       @relation("CompanyBankAccountCreator")
+  companyBankAccountsUpdated       CompanyBankAccount[]       @relation("CompanyBankAccountUpdater")
+  companyBankAccountLogs           CompanyBankAccountLog[]    @relation("CompanyBankAccountLogActor")
 
   @@index([stir])
 }
@@ -262,99 +289,103 @@ model RefreshToken {
 }
 
 model RawMaterial {
-  id           String                  @id @default(cuid())
-  name         String                  @unique
-  unit         String                  @default("kg")
-  kind         RawMaterialKind         @default(SIRO)
-  defaultBagWeightKg Float?
-  description  String?
-  purchasePrice    Float?
-  salePrice        Float?
-  priceCurrency    PurchaseOrderCurrency?
-  fxRateToUzs      Float?
-  isDeleted    Boolean                 @default(false)
-  status       EntityStatus            @default(COMPLETED)
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @updatedAt
-  balance      InventoryBalance?       @relation("RawMaterialBalance")
-  movements    InventoryMovement[]     @relation("RawMaterialMovement")
-  consumptions ProductionConsumption[] @relation("ConsumedRawMaterial")
-  bags         RawMaterialBag[]
-  bagAuditLogs BagAuditLog[]
-  semiProductLinks SemiProductRawMaterial[]
-  productAuditLogs ProductAuditLog[]   @relation("ProductAuditRawMaterial")
-  purchaseOrders   RawMaterialPurchaseOrder[]
+  id                     String                     @id @default(cuid())
+  name                   String                     @unique
+  unit                   String                     @default("kg")
+  kind                   RawMaterialKind            @default(SIRO)
+  defaultBagWeightKg     Float?
+  description            String?
+  purchasePrice          Float?
+  salePrice              Float?
+  priceCurrency          PurchaseOrderCurrency?
+  fxRateToUzs            Float?
+  isDeleted              Boolean                    @default(false)
+  status                 EntityStatus               @default(COMPLETED)
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  balance                InventoryBalance?          @relation("RawMaterialBalance")
+  movements              InventoryMovement[]        @relation("RawMaterialMovement")
+  consumptions           ProductionConsumption[]    @relation("ConsumedRawMaterial")
+  bags                   RawMaterialBag[]
+  bagAuditLogs           BagAuditLog[]
+  semiProductLinks       SemiProductRawMaterial[]
+  productAuditLogs       ProductAuditLog[]          @relation("ProductAuditRawMaterial")
+  purchaseOrders         RawMaterialPurchaseOrder[]
   supplierPurchaseOrders SupplierPurchaseOrder[]
-  paintShiftRecords ShiftRecord[]      @relation("ShiftPaintRawMaterial")
-  shiftMaterialUsages ShiftMaterialUsage[]
+  paintShiftRecords      ShiftRecord[]              @relation("ShiftPaintRawMaterial")
+  shiftMaterialUsages    ShiftMaterialUsage[]
 }
 
 model SemiProduct {
-  id             String                  @id @default(cuid())
-  name           String                  @unique
-  weightGram     Float
-  /** 1 qop/pachkada necha dona (qadoqlash) */
-  piecesPerBag   Int?
-  description    String?
-  purchasePrice    Float?
-  salePrice        Float?
-  priceCurrency    PurchaseOrderCurrency?
-  fxRateToUzs      Float?
-  isDeleted      Boolean                 @default(false)
-  status         EntityStatus            @default(COMPLETED)
-  createdAt      DateTime                @default(now())
-  updatedAt      DateTime                @updatedAt
-  balance        InventoryBalance?       @relation("SemiProductBalance")
-  movements      InventoryMovement[]     @relation("SemiProductMovement")
-  consumptions   ProductionConsumption[] @relation("ConsumedSemiProduct")
-  outputBatches  ProductionRecord[]      @relation("OutputSemiProduct")
-  orderItems     OrderItem[]             @relation("OrderSemiProduct")
-  rawMaterialLinks SemiProductRawMaterial[]
-  machineLinks     SemiProductMachine[]
-  finishedProductLinks FinishedProductSemiProduct[]
-  productAuditLogs ProductAuditLog[]     @relation("ProductAuditSemiProduct")
+  id                     String                       @id @default(cuid())
+  name                   String                       @unique
+  weightGram             Float
+  /**
+   * 1 qop/pachkada necha dona (qadoqlash)
+   */
+  piecesPerBag           Int?
+  description            String?
+  purchasePrice          Float?
+  salePrice              Float?
+  priceCurrency          PurchaseOrderCurrency?
+  fxRateToUzs            Float?
+  isDeleted              Boolean                      @default(false)
+  status                 EntityStatus                 @default(COMPLETED)
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  balance                InventoryBalance?            @relation("SemiProductBalance")
+  movements              InventoryMovement[]          @relation("SemiProductMovement")
+  consumptions           ProductionConsumption[]      @relation("ConsumedSemiProduct")
+  outputBatches          ProductionRecord[]           @relation("OutputSemiProduct")
+  orderItems             OrderItem[]                  @relation("OrderSemiProduct")
+  rawMaterialLinks       SemiProductRawMaterial[]
+  machineLinks           SemiProductMachine[]
+  finishedProductLinks   FinishedProductSemiProduct[]
+  productAuditLogs       ProductAuditLog[]            @relation("ProductAuditSemiProduct")
   supplierPurchaseOrders SupplierPurchaseOrder[]
 }
 
 model FinishedProduct {
-  id            String               @id @default(cuid())
-  name          String               @unique
-  volumeLiter   Float
-  piecesPerBag  Int?
-  description   String?
-  purchasePrice    Float?
-  salePrice        Float?
-  priceCurrency    PurchaseOrderCurrency?
-  fxRateToUzs      Float?
-  isDeleted     Boolean              @default(false)
-  status        EntityStatus         @default(COMPLETED)
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  balance       InventoryBalance?    @relation("FinishedProductBalance")
-  movements     InventoryMovement[]  @relation("FinishedProductMovement")
-  outputBatches ProductionRecord[]   @relation("OutputFinishedProduct")
-  orderItems    OrderItem[]          @relation("OrderFinishedProduct")
-  semiProductLinks FinishedProductSemiProduct[]
-  machineLinks  FinishedProductMachine[]
-  productAuditLogs ProductAuditLog[] @relation("ProductAuditFinishedProduct")
+  id                     String                       @id @default(cuid())
+  name                   String                       @unique
+  volumeLiter            Float
+  piecesPerBag           Int?
+  description            String?
+  purchasePrice          Float?
+  salePrice              Float?
+  priceCurrency          PurchaseOrderCurrency?
+  fxRateToUzs            Float?
+  isDeleted              Boolean                      @default(false)
+  status                 EntityStatus                 @default(COMPLETED)
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  balance                InventoryBalance?            @relation("FinishedProductBalance")
+  movements              InventoryMovement[]          @relation("FinishedProductMovement")
+  outputBatches          ProductionRecord[]           @relation("OutputFinishedProduct")
+  orderItems             OrderItem[]                  @relation("OrderFinishedProduct")
+  semiProductLinks       FinishedProductSemiProduct[]
+  machineLinks           FinishedProductMachine[]
+  productAuditLogs       ProductAuditLog[]            @relation("ProductAuditFinishedProduct")
   supplierPurchaseOrders SupplierPurchaseOrder[]
 }
 
 model InventoryBalance {
-  id                String           @id @default(cuid())
+  id                String            @id @default(cuid())
   itemType          InventoryItemType
-  quantity          Float            @default(0)
-  /** Qadoqlangan donalar (quantity ichidagi qism; qadoqlanmagan = quantity - packagedQuantity) */
-  packagedQuantity  Float            @default(0)
-  status            EntityStatus     @default(COMPLETED)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  rawMaterialId     String?          @unique
-  semiProductId     String?          @unique
-  finishedProductId String?          @unique
-  rawMaterial       RawMaterial?     @relation("RawMaterialBalance", fields: [rawMaterialId], references: [id], onDelete: SetNull)
-  semiProduct       SemiProduct?     @relation("SemiProductBalance", fields: [semiProductId], references: [id], onDelete: SetNull)
-  finishedProduct   FinishedProduct? @relation("FinishedProductBalance", fields: [finishedProductId], references: [id], onDelete: SetNull)
+  quantity          Float             @default(0)
+  /**
+   * Qadoqlangan donalar (quantity ichidagi qism; qadoqlanmagan = quantity - packagedQuantity)
+   */
+  packagedQuantity  Float             @default(0)
+  status            EntityStatus      @default(COMPLETED)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  rawMaterialId     String?           @unique
+  semiProductId     String?           @unique
+  finishedProductId String?           @unique
+  rawMaterial       RawMaterial?      @relation("RawMaterialBalance", fields: [rawMaterialId], references: [id], onDelete: SetNull)
+  semiProduct       SemiProduct?      @relation("SemiProductBalance", fields: [semiProductId], references: [id], onDelete: SetNull)
+  finishedProduct   FinishedProduct?  @relation("FinishedProductBalance", fields: [finishedProductId], references: [id], onDelete: SetNull)
 }
 
 model InventoryMovement {
@@ -380,20 +411,20 @@ model InventoryMovement {
 }
 
 model Machine {
-  id                 String             @id @default(cuid())
-  name               String             @unique
-  description        String?
-  stage              ProductionStage
-  powerKw            Float
-  maxCapacityPerHour Int
-  isActive           Boolean            @default(true)
-  status             EntityStatus       @default(COMPLETED)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  productions        ProductionRecord[]
-  shiftRecords       ShiftRecord[]
-  bagSessions        BagConnectionSession[]
-  semiProductLinks   SemiProductMachine[]
+  id                   String                   @id @default(cuid())
+  name                 String                   @unique
+  description          String?
+  stage                ProductionStage
+  powerKw              Float
+  maxCapacityPerHour   Int
+  isActive             Boolean                  @default(true)
+  status               EntityStatus             @default(COMPLETED)
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  productions          ProductionRecord[]
+  shiftRecords         ShiftRecord[]
+  bagSessions          BagConnectionSession[]
+  semiProductLinks     SemiProductMachine[]
   finishedProductLinks FinishedProductMachine[]
 }
 
@@ -412,12 +443,12 @@ model SemiProductRawMaterial {
 }
 
 model SemiProductMachine {
-  id              String       @id @default(cuid())
-  semiProductId   String
-  semiProduct     SemiProduct  @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
-  machineId       String
-  machine         Machine      @relation(fields: [machineId], references: [id], onDelete: Restrict)
-  createdAt       DateTime     @default(now())
+  id            String      @id @default(cuid())
+  semiProductId String
+  semiProduct   SemiProduct @relation(fields: [semiProductId], references: [id], onDelete: Cascade)
+  machineId     String
+  machine       Machine     @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  createdAt     DateTime    @default(now())
 
   @@unique([semiProductId, machineId])
   @@index([machineId])
@@ -487,56 +518,56 @@ model RawMaterialBag {
 }
 
 model BagConnectionSession {
-  id             String          @id @default(cuid())
+  id             String         @id @default(cuid())
   bagId          String
-  bag            RawMaterialBag  @relation(fields: [bagId], references: [id], onDelete: Cascade)
+  bag            RawMaterialBag @relation(fields: [bagId], references: [id], onDelete: Cascade)
   machineId      String?
-  machine        Machine?        @relation(fields: [machineId], references: [id], onDelete: SetNull)
-  connectedAt    DateTime        @default(now())
+  machine        Machine?       @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  connectedAt    DateTime       @default(now())
   disconnectedAt DateTime?
-  isActive       Boolean         @default(true)
-  createdAt      DateTime        @default(now())
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
 
   @@index([bagId, isActive])
   @@index([machineId])
 }
 
 model BagWriteoff {
-  id                String         @id @default(cuid())
-  bagId             String
-  bag               RawMaterialBag @relation(fields: [bagId], references: [id], onDelete: Cascade)
-  initialQuantityKg Float
+  id                  String         @id @default(cuid())
+  bagId               String
+  bag                 RawMaterialBag @relation(fields: [bagId], references: [id], onDelete: Cascade)
+  initialQuantityKg   Float
   remainingQuantityKg Float
-  connectedAt       DateTime?
-  disconnectedAt    DateTime?
-  reason            String?
-  writtenOffAt      DateTime       @default(now())
-  createdAt         DateTime       @default(now())
-  createdById       String?
-  createdBy         User?          @relation("BagWriteoffCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  connectedAt         DateTime?
+  disconnectedAt      DateTime?
+  reason              String?
+  writtenOffAt        DateTime       @default(now())
+  createdAt           DateTime       @default(now())
+  createdById         String?
+  createdBy           User?          @relation("BagWriteoffCreator", fields: [createdById], references: [id], onDelete: SetNull)
   /// Qop chiqimi bo‘yicha `Expense` (xarajatlar sahifasi)
-  expenseId         String?        @unique
-  expense           Expense?       @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  expenseId           String?        @unique
+  expense             Expense?       @relation(fields: [expenseId], references: [id], onDelete: SetNull)
 
   @@index([bagId])
   @@index([writtenOffAt])
 }
 
 model BagAuditLog {
-  id           String             @id @default(cuid())
-  bagId        String
-  bag          RawMaterialBag     @relation(fields: [bagId], references: [id], onDelete: Cascade)
+  id            String             @id @default(cuid())
+  bagId         String
+  bag           RawMaterialBag     @relation(fields: [bagId], references: [id], onDelete: Cascade)
   rawMaterialId String
-  rawMaterial  RawMaterial        @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
-  actionType   BagAuditActionType
-  quantityKg   Float?
-  note         String?
-  metadata     Json?
+  rawMaterial   RawMaterial        @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
+  actionType    BagAuditActionType
+  quantityKg    Float?
+  note          String?
+  metadata      Json?
   referenceType String?
-  referenceId  String?
-  createdById  String?
-  createdBy    User?              @relation("BagAuditCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  createdAt    DateTime           @default(now())
+  referenceId   String?
+  createdById   String?
+  createdBy     User?              @relation("BagAuditCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime           @default(now())
 
   @@index([bagId, createdAt])
   @@index([rawMaterialId, createdAt])
@@ -544,23 +575,23 @@ model BagAuditLog {
 }
 
 model ProductionRecord {
-  id                    String                  @id @default(cuid())
-  stage                 ProductionStage
-  status                EntityStatus            @default(COMPLETED)
-  workerId              String
-  worker                User                    @relation("WorkerProductions", fields: [workerId], references: [id], onDelete: Cascade)
-  machineId             String?
-  machine               Machine?                @relation(fields: [machineId], references: [id], onDelete: SetNull)
-  outputSemiProductId   String?
-  outputSemiProduct     SemiProduct?            @relation("OutputSemiProduct", fields: [outputSemiProductId], references: [id], onDelete: SetNull)
+  id                      String                  @id @default(cuid())
+  stage                   ProductionStage
+  status                  EntityStatus            @default(COMPLETED)
+  workerId                String
+  worker                  User                    @relation("WorkerProductions", fields: [workerId], references: [id], onDelete: Cascade)
+  machineId               String?
+  machine                 Machine?                @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  outputSemiProductId     String?
+  outputSemiProduct       SemiProduct?            @relation("OutputSemiProduct", fields: [outputSemiProductId], references: [id], onDelete: SetNull)
   outputFinishedProductId String?
-  outputFinishedProduct FinishedProduct?        @relation("OutputFinishedProduct", fields: [outputFinishedProductId], references: [id], onDelete: SetNull)
-  quantityProduced      Float
-  waste                 Float                   @default(0)
-  note                  String?
-  timestamp             DateTime                @default(now())
-  createdAt             DateTime                @default(now())
-  consumptions          ProductionConsumption[]
+  outputFinishedProduct   FinishedProduct?        @relation("OutputFinishedProduct", fields: [outputFinishedProductId], references: [id], onDelete: SetNull)
+  quantityProduced        Float
+  waste                   Float                   @default(0)
+  note                    String?
+  timestamp               DateTime                @default(now())
+  createdAt               DateTime                @default(now())
+  consumptions            ProductionConsumption[]
 }
 
 model ProductionConsumption {
@@ -576,102 +607,103 @@ model ProductionConsumption {
 }
 
 model ShiftRecord {
-  id            String        @id @default(cuid())
-  workerId      String
-  worker        User          @relation("ShiftWorker", fields: [workerId], references: [id], onDelete: Cascade)
-  createdById   String?
-  createdBy     User?         @relation("ShiftRecordCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  machineId     String?
-  machine       Machine?      @relation(fields: [machineId], references: [id], onDelete: SetNull)
-  shiftNumber   Int
-  date          DateTime
-  recordKind    ShiftRecordKind @default(PRODUCTION)
-  hoursWorked   Float
-  productLabel  String?
-  machineReading String?
-  producedQty   Int
-  defectCount   Int           @default(0)
-  bagCount      Int?
-  packCount     Int?
-  electricityKwh Float        @default(0)
-  notes         String?
-  paintUsed           Boolean       @default(false)
-  paintRawMaterialId  String?
-  paintRawMaterial    RawMaterial?  @relation("ShiftPaintRawMaterial", fields: [paintRawMaterialId], references: [id], onDelete: SetNull)
-  paintQuantityKg     Float?
-  status        EntityStatus  @default(COMPLETED)
-  createdAt     DateTime      @default(now())
-  shiftElectricityExpense Expense? @relation("ShiftElectricityExpense")
-  materialUsages ShiftMaterialUsage[]
+  id                      String               @id @default(cuid())
+  workerId                String
+  worker                  User                 @relation("ShiftWorker", fields: [workerId], references: [id], onDelete: Cascade)
+  createdById             String?
+  createdBy               User?                @relation("ShiftRecordCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  machineId               String?
+  machine                 Machine?             @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  shiftNumber             Int
+  date                    DateTime
+  recordKind              ShiftRecordKind      @default(PRODUCTION)
+  hoursWorked             Float
+  productLabel            String?
+  machineReading          String?
+  producedQty             Int
+  defectCount             Int                  @default(0)
+  bagCount                Int?
+  packCount               Int?
+  electricityKwh          Float                @default(0)
+  notes                   String?
+  paintUsed               Boolean              @default(false)
+  paintRawMaterialId      String?
+  paintRawMaterial        RawMaterial?         @relation("ShiftPaintRawMaterial", fields: [paintRawMaterialId], references: [id], onDelete: SetNull)
+  paintQuantityKg         Float?
+  status                  EntityStatus         @default(COMPLETED)
+  createdAt               DateTime             @default(now())
+  shiftElectricityExpense Expense?             @relation("ShiftElectricityExpense")
+  materialUsages          ShiftMaterialUsage[]
 }
 
 /// Smena (qolip) retsept bo‘yicha siro sarfi: reja vs haqiqiy (ortiqcha)
 model ShiftMaterialUsage {
-  id             String       @id @default(cuid())
-  shiftId        String
-  shift          ShiftRecord  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  rawMaterialId  String
-  rawMaterial    RawMaterial  @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
-  expectedKg     Float        @default(0)
-  actualKg       Float        @default(0)
-  deltaKg        Float        @default(0)
-  createdAt      DateTime     @default(now())
+  id            String      @id @default(cuid())
+  shiftId       String
+  shift         ShiftRecord @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  rawMaterialId String
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  expectedKg    Float       @default(0)
+  actualKg      Float       @default(0)
+  deltaKg       Float       @default(0)
+  createdAt     DateTime    @default(now())
 
   @@unique([shiftId, rawMaterialId])
   @@index([rawMaterialId])
 }
 
 model Client {
-  id        String       @id @default(cuid())
-  name      String
-  phone     String       @unique
-  address   String?
-  bankAccount String?
-  bankName  String?
+  id                   String            @id @default(cuid())
+  name                 String
+  phone                String            @unique
+  address              String?
+  bankAccount          String?
+  bankName             String?
+  stir                 String?
   /// Mijoz oldindan to‘lagan mablag‘ (kassa kirim)
-  cashBalance Float      @default(0)
+  cashBalance          Float             @default(0)
   /// Chop etish uchun — mijoz bo‘yicha default
   deliveryVehiclePlate String?
   deliveryDriverName   String?
-  status    EntityStatus @default(COMPLETED)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  orders    Order[]
-  payments  Payment[]
-  bankTransactions BankTransaction[]
-  kassaEntries KassaEntry[]
+  status               EntityStatus      @default(COMPLETED)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  orders               Order[]
+  payments             Payment[]
+  bankTransactions     BankTransaction[]
+  kassaEntries         KassaEntry[]
 }
 
 model Order {
-  id         String       @id @default(cuid())
-  clientId   String
-  client     Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  createdById String?
-  createdBy  User?        @relation("OrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  status     OrderStatus  @default(PENDING)
-  totalAmount Float       @default(0)
-  paidAmount Float        @default(0)
-  debtAmount Float        @default(0)
+  id           String       @id @default(cuid())
+  clientId     String
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdById  String?
+  createdBy    User?        @relation("OrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  status       OrderStatus  @default(PENDING)
+  totalAmount  Float        @default(0)
+  paidAmount   Float        @default(0)
+  debtAmount   Float        @default(0)
   /// Sotuv sanasi (UI dagi sana)
-  orderedAt  DateTime     @default(now())
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  items      OrderItem[]
-  payments   Payment[]
+  orderedAt    DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  items        OrderItem[]
+  payments     Payment[]
   kassaEntries KassaEntry[]
 
   @@index([orderedAt])
 }
 
 model OrderItem {
-  id                String           @id @default(cuid())
+  id                String                @id @default(cuid())
   orderId           String
-  order             Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order             Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productType       OrderProductType
   semiProductId     String?
-  semiProduct       SemiProduct?     @relation("OrderSemiProduct", fields: [semiProductId], references: [id], onDelete: SetNull)
+  semiProduct       SemiProduct?          @relation("OrderSemiProduct", fields: [semiProductId], references: [id], onDelete: SetNull)
   finishedProductId String?
-  finishedProduct   FinishedProduct? @relation("OrderFinishedProduct", fields: [finishedProductId], references: [id], onDelete: SetNull)
+  finishedProduct   FinishedProduct?      @relation("OrderFinishedProduct", fields: [finishedProductId], references: [id], onDelete: SetNull)
   quantity          Int
   price             Float
   currency          PurchaseOrderCurrency @default(UZS)
@@ -695,21 +727,22 @@ model Payment {
 
 /// Buxgalteriya → Kassa: mijoz kirimi, sotuvdan yechish, chiqim
 model KassaEntry {
-  id          String         @id @default(cuid())
-  type        KassaEntryType
-  clientId    String?
-  client      Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  orderId     String?
-  order       Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  amount      Float
-  comment     String?
-  entryDate   DateTime       @default(now())
-  createdById String?
-  createdBy   User?          @relation("KassaEntryCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedById String?
-  updatedBy   User?          @relation("KassaEntryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id              String           @id @default(cuid())
+  type            KassaEntryType
+  clientId        String?
+  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  orderId         String?
+  order           Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  amount          Float
+  comment         String?
+  entryDate       DateTime         @default(now())
+  createdById     String?
+  createdBy       User?            @relation("KassaEntryCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById     String?
+  updatedBy       User?            @relation("KassaEntryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  bankTransaction BankTransaction?
 
   @@index([type, entryDate])
   @@index([clientId])
@@ -717,12 +750,12 @@ model KassaEntry {
 }
 
 model ExpenseCategory {
-  id                String       @id @default(cuid())
+  id                String      @id @default(cuid())
   name              String
-  legacyExpenseType ExpenseType  @default(OTHER)
-  electricityCalc   Boolean      @default(false)
+  legacyExpenseType ExpenseType @default(OTHER)
+  electricityCalc   Boolean     @default(false)
   deletedAt         DateTime?
-  createdAt         DateTime     @default(now())
+  createdAt         DateTime    @default(now())
   expenses          Expense[]
 }
 
@@ -736,36 +769,37 @@ model ExpenseFundingSource {
 }
 
 model Expense {
-  id          String           @id @default(cuid())
-  title       String
-  type        ExpenseType
-  amount      Float
-  description String?
-  status      EntityStatus     @default(COMPLETED)
-  incurredAt  DateTime         @default(now())
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  createdById String?
-  createdBy   User?            @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedById String?
-  updatedBy   User?            @relation("ExpenseUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
-  categoryId  String?
-  category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  fundingSourceId String?
-  fundingSource   ExpenseFundingSource? @relation(fields: [fundingSourceId], references: [id], onDelete: SetNull)
-  sourceShiftId String?        @unique
-  sourceShift   ShiftRecord?     @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
+  id                       String                    @id @default(cuid())
+  title                    String
+  type                     ExpenseType
+  amount                   Float
+  description              String?
+  status                   EntityStatus              @default(COMPLETED)
+  incurredAt               DateTime                  @default(now())
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  createdById              String?
+  createdBy                User?                     @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById              String?
+  updatedBy                User?                     @relation("ExpenseUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  categoryId               String?
+  category                 ExpenseCategory?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  fundingSourceId          String?
+  fundingSource            ExpenseFundingSource?     @relation(fields: [fundingSourceId], references: [id], onDelete: SetNull)
+  sourceShiftId            String?                   @unique
+  sourceShift              ShiftRecord?              @relation("ShiftElectricityExpense", fields: [sourceShiftId], references: [id], onDelete: Cascade)
   rawMaterialPurchaseOrder RawMaterialPurchaseOrder?
   supplierPurchaseOrder    SupplierPurchaseOrder?
   bagWriteoff              BagWriteoff?
   companyAsset             CompanyAsset?
+  bankTransaction          BankTransaction?
 }
 
 /// Buxgalteriyada berilgan xom ashyo tashqi buyurtmasi (ombor kirimi alohida)
 model RawMaterialPurchaseOrder {
-  id             String                  @id @default(cuid())
+  id             String                 @id @default(cuid())
   rawMaterialId  String
-  rawMaterial    RawMaterial             @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  rawMaterial    RawMaterial            @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
   /// Har doim kg (tonna kiritilsa frontend 1000 ga ko‘paytiradi)
   quantityKg     Float
   currency       PurchaseOrderCurrency
@@ -775,14 +809,14 @@ model RawMaterialPurchaseOrder {
   amountOriginal Float
   /// Xarajatlar / foyda hisobi uchun so‘mdagi qiymat
   amountUzs      Float
-  expenseId      String                  @unique
-  expense        Expense                 @relation(fields: [expenseId], references: [id], onDelete: Restrict)
-  status         RawMaterialOrderStatus  @default(PENDING)
-  orderedAt      DateTime                @default(now())
+  expenseId      String                 @unique
+  expense        Expense                @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+  status         RawMaterialOrderStatus @default(PENDING)
+  orderedAt      DateTime               @default(now())
   fulfilledAt    DateTime?
   notes          String?
   createdById    String?
-  createdBy      User?                   @relation("RawMaterialOrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy      User?                  @relation("RawMaterialOrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([status, orderedAt])
   @@index([rawMaterialId])
@@ -790,15 +824,19 @@ model RawMaterialPurchaseOrder {
 
 /// Yetkazib beruvchi (postavchik)
 model Supplier {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String?
-  address   String?
-  notes     String?
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  purchaseOrders SupplierPurchaseOrder[]
+  id               String                  @id @default(cuid())
+  name             String
+  phone            String?
+  address          String?
+  notes            String?
+  bankAccount      String?
+  bankName         String?
+  stir             String?
+  isDeleted        Boolean                 @default(false)
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  purchaseOrders   SupplierPurchaseOrder[]
+  bankTransactions BankTransaction[]
 
   @@index([isDeleted, name])
 }
@@ -840,53 +878,53 @@ model SupplierPurchaseOrder {
 }
 
 model SalarySetting {
-  id                    String       @id @default(cuid())
-  incomeTaxPercent      Float        @default(12)
-  otherDeductionPercent Float        @default(0)
-  socialTaxPercent      Float        @default(0)
-  npsPercent            Float        @default(0)
+  id                     String       @id @default(cuid())
+  incomeTaxPercent       Float        @default(12)
+  otherDeductionPercent  Float        @default(0)
+  socialTaxPercent       Float        @default(0)
+  npsPercent             Float        @default(0)
   /// kVt·soat narxi (so‘m) — smena elektr sarfi xarajatiga
-  electricityPricePerKwh Float     @default(800)
-  status                EntityStatus @default(COMPLETED)
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  electricityPricePerKwh Float        @default(800)
+  status                 EntityStatus @default(COMPLETED)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
 }
 
 model EmployeeProductRate {
-  id          String           @id @default(cuid())
-  workerId    String
-  worker      User             @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  id           String           @id @default(cuid())
+  workerId     String
+  worker       User             @relation(fields: [workerId], references: [id], onDelete: Cascade)
   productLabel String
-  rateType    EmployeeRateType @default(FIXED)
-  rateValue   Float
-  baseAmount  Float?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  rateType     EmployeeRateType @default(FIXED)
+  rateValue    Float
+  baseAmount   Float?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   @@unique([workerId, productLabel])
   @@index([workerId])
 }
 
 model SalaryRecord {
-  id              String       @id @default(cuid())
-  workerId        String
-  worker          User         @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  month           String
-  workedDays      Int          @default(26)
+  id               String       @id @default(cuid())
+  workerId         String
+  worker           User         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  month            String
+  workedDays       Int          @default(26)
   producedQuantity Int
-  productionAmount Float       @default(0)
-  aklad           Float        @default(0)
-  bonus           Float        @default(0)
-  brutto          Float
-  incomeTax       Float
-  otherDeductions Float
-  socialTax       Float
-  nps             Float
-  netto           Float
-  isPaid          Boolean      @default(false)
-  status          EntityStatus @default(PENDING)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  productionAmount Float        @default(0)
+  aklad            Float        @default(0)
+  bonus            Float        @default(0)
+  brutto           Float
+  incomeTax        Float
+  otherDeductions  Float
+  socialTax        Float
+  nps              Float
+  netto            Float
+  isPaid           Boolean      @default(false)
+  status           EntityStatus @default(PENDING)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   @@unique([workerId, month])
 }
@@ -894,6 +932,7 @@ model SalaryRecord {
 model BankVedomost {
   id           String              @id @default(cuid())
   fileName     String
+  source       BankStatementSource @default(BANK)
   totalIncome  Float               @default(0)
   totalExpense Float               @default(0)
   status       BankVedomostStatus  @default(DRAFT)
@@ -908,9 +947,9 @@ model BankVedomost {
 }
 
 model BankTransaction {
-  id               String              @id @default(cuid())
+  id               String               @id @default(cuid())
   bankVedomostId   String
-  bankVedomost     BankVedomost        @relation(fields: [bankVedomostId], references: [id], onDelete: Cascade)
+  bankVedomost     BankVedomost         @relation(fields: [bankVedomostId], references: [id], onDelete: Cascade)
   type             BankTransactionType
   amount           Float
   documentDate     DateTime?
@@ -918,22 +957,78 @@ model BankTransaction {
   operationDate    DateTime
   receiverName     String?
   receiverAccount  String?
+  receiverBankCode String?
   receiverBankName String?
   receiverStir     String?
   paymentPurpose   String?
-  isSalary         Boolean             @default(false)
+  companyAccount   String?
+  companyBankName  String?
+  companyStir      String?
+  isSalary         Boolean              @default(false)
   employeeId       String?
-  employee         User?               @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  employee         User?                @relation("BankTxEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
   clientId         String?
-  client           Client?             @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  client           Client?              @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  supplierId       String?
+  supplier         Supplier?            @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  reviewStatus     BankRowReviewStatus  @default(PENDING)
+  counterpartyKind BankCounterpartyKind @default(UNKNOWN)
+  expenseId        String?              @unique
+  expense          Expense?             @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  kassaEntryId     String?              @unique
+  kassaEntry       KassaEntry?          @relation(fields: [kassaEntryId], references: [id], onDelete: SetNull)
+  createdById      String?
+  createdBy        User?                @relation("BankTxCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById      String?
+  updatedBy        User?                @relation("BankTxUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   @@index([bankVedomostId, operationDate])
   @@index([employeeId, isSalary])
   @@index([clientId])
+  @@index([supplierId])
   @@index([documentNumber, amount])
   @@index([receiverStir])
+  @@index([reviewStatus])
+}
+
+enum CompanyBankAccountAction {
+  ADDED
+  REMOVED
+  ACTIVATED
+  UPDATED
+}
+
+/// Korxonaning o'z bank hisob raqamlari (ko'chirmadan kontragentlarni ajratish uchun)
+model CompanyBankAccount {
+  id            String   @id @default(cuid())
+  accountNumber String   @unique
+  label         String?
+  isActive      Boolean  @default(false)
+  createdById   String?
+  createdBy     User?    @relation("CompanyBankAccountCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById   String?
+  updatedBy     User?    @relation("CompanyBankAccountUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  logs          CompanyBankAccountLog[]
+}
+
+model CompanyBankAccountLog {
+  id            String                    @id @default(cuid())
+  accountId     String?
+  account       CompanyBankAccount?       @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountNumber String?
+  label         String?
+  action        CompanyBankAccountAction
+  performedById String?
+  performedBy   User?                     @relation("CompanyBankAccountLogActor", fields: [performedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime                  @default(now())
+
+  @@index([accountId])
+  @@index([performedById])
+  @@index([createdAt])
 }
 
 model UploadedFile {
@@ -965,8 +1060,8 @@ model UploadJob {
 
 /// Korxona mulki (asosiy vositalar)
 model CompanyAsset {
-  id                    String                 @id @default(cuid())
-  inventoryNumber       String                 @unique
+  id                    String                    @id @default(cuid())
+  inventoryNumber       String                    @unique
   name                  String
   serialNumber          String?
   category              CompanyAssetCategory
@@ -979,24 +1074,24 @@ model CompanyAsset {
   initialValueUzs       Float
   warrantyUntil         DateTime?
   assignedUserId        String?
-  assignedUser          User?                  @relation("CompanyAssetAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedUser          User?                     @relation("CompanyAssetAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
   location              String?
-  condition             CompanyAssetCondition  @default(GOOD)
-  status                CompanyAssetStatus     @default(ACTIVE)
+  condition             CompanyAssetCondition     @default(GOOD)
+  status                CompanyAssetStatus        @default(ACTIVE)
   imageUrl              String?
   notes                 String?
-  expenseId             String?                @unique
-  expense               Expense?               @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  expenseId             String?                   @unique
+  expense               Expense?                  @relation(fields: [expenseId], references: [id], onDelete: SetNull)
   createdById           String?
-  createdBy             User?                  @relation("CompanyAssetCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy             User?                     @relation("CompanyAssetCreator", fields: [createdById], references: [id], onDelete: SetNull)
   updatedById           String?
-  updatedBy             User?                  @relation("CompanyAssetUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
-  isDeleted             Boolean                @default(false)
+  updatedBy             User?                     @relation("CompanyAssetUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  isDeleted             Boolean                   @default(false)
   deletedAt             DateTime?
   deletedById           String?
-  deletedBy             User?                  @relation("CompanyAssetDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  deletedBy             User?                     @relation("CompanyAssetDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
   activityLogs          CompanyAssetActivityLog[]
   documents             CompanyAssetDocument[]
 
@@ -1034,19 +1129,19 @@ model CompanyAssetDocument {
 
 /// Ombor inventarizatsiya hujjatlari (brauzer localStorage o‘rniga serverda)
 model InventoryDocument {
-  id            String                   @id @default(cuid())
-  docNumber     String                   @unique
-  warehouseId   String                   @default("main")
+  id            String                  @id @default(cuid())
+  docNumber     String                  @unique
+  warehouseId   String                  @default("main")
   warehouseName String
   dateFrom      String
   dateTo        String
-  status        InventoryDocumentStatus  @default(NOT_STARTED)
-  expenseIds    String[]                 @default([])
+  status        InventoryDocumentStatus @default(NOT_STARTED)
+  expenseIds    String[]                @default([])
   rows          Json
   createdById   String?
-  createdBy     User?                    @relation("InventoryDocumentCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
+  createdBy     User?                   @relation("InventoryDocumentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
   finishedAt    DateTime?
 
   @@index([status])

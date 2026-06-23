@@ -7,6 +7,7 @@ import type { Prisma } from '../../generated/prisma/client.js';
 import { KassaEntryType } from '../../generated/prisma/enums.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateKassaInflowDto } from './dto/create-kassa-inflow.dto.js';
+import { CreateKassaBankInflowDto } from './dto/create-kassa-bank-inflow.dto.js';
 import { CreateKassaOutflowDto } from './dto/create-kassa-outflow.dto.js';
 import { UpdateKassaInflowDto } from './dto/update-kassa-inflow.dto.js';
 import { UpdateKassaOutflowDto } from './dto/update-kassa-outflow.dto.js';
@@ -24,10 +25,15 @@ function parseEntryDate(value?: string): Date {
   if (!value?.trim()) {
     return new Date();
   }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return new Date(`${value.trim()}T12:00:00+05:00`);
+  const trimmed = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return new Date(`${trimmed}T12:00:00+05:00`);
   }
-  const parsed = new Date(value);
+  if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+    const [day, month, year] = trimmed.split('-');
+    return new Date(`${year}-${month}-${day}T12:00:00+05:00`);
+  }
+  const parsed = new Date(trimmed);
   if (Number.isNaN(parsed.getTime())) {
     throw new BadRequestException('Invalid entry date');
   }
@@ -58,8 +64,11 @@ export class KassaService {
       by: ['type'],
       _sum: { amount: true },
     });
-    const inflow =
+    const clientInflow =
       grouped.find((row) => row.type === KassaEntryType.CLIENT_INFLOW)?._sum.amount ?? 0;
+    const bankInflow =
+      grouped.find((row) => row.type === KassaEntryType.BANK_INFLOW)?._sum.amount ?? 0;
+    const inflow = clientInflow + bankInflow;
     const outflow =
       grouped.find((row) => row.type === KassaEntryType.OUTFLOW)?._sum.amount ?? 0;
     const saleDeductions =
@@ -103,6 +112,21 @@ export class KassaService {
       });
 
       return entry;
+    });
+  }
+
+  async createBankInflow(dto: CreateKassaBankInflowDto, createdById?: string) {
+    const entryDate = parseEntryDate(dto.entryDate);
+
+    return this.prisma.kassaEntry.create({
+      data: {
+        type: KassaEntryType.BANK_INFLOW,
+        amount: dto.amount,
+        comment: dto.comment?.trim() || null,
+        entryDate,
+        createdById,
+      },
+      include: kassaInclude,
     });
   }
 
@@ -166,7 +190,16 @@ export class KassaService {
 
   async deleteInflow(id: string) {
     const existing = await this.prisma.kassaEntry.findUnique({ where: { id } });
-    if (!existing || existing.type !== KassaEntryType.CLIENT_INFLOW) {
+    if (!existing) {
+      throw new NotFoundException('Kassa inflow not found');
+    }
+
+    if (existing.type === KassaEntryType.BANK_INFLOW) {
+      await this.prisma.kassaEntry.delete({ where: { id } });
+      return { success: true };
+    }
+
+    if (existing.type !== KassaEntryType.CLIENT_INFLOW) {
       throw new NotFoundException('Kassa inflow not found');
     }
     if (!existing.clientId) {

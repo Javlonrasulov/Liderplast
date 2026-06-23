@@ -53,8 +53,9 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
     shifts:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_shift'),
     clients: hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && (has('view_sales') || has('view_vedemost')),
-    orders:
-      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') && has('view_sales'),
+  orders:
+      hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
+      (has('view_sales') || has('view_vedemost')),
     payments: hasRole(user, 'DIRECTOR', 'ACCOUNTANT') && has('view_sales'),
     expenses:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') && has('view_expenses'),
@@ -63,10 +64,10 @@ export function getErpApiLoadPlan(user: SessionUser, has: HasPerm): ErpApiLoadPl
       has('view_company_assets'),
     supplierOrders:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
-      (has('view_suppliers') || has('view_expenses') || has('view_raw_material')),
+      (has('view_suppliers') || has('view_expenses') || has('view_raw_material') || has('view_vedemost')),
     suppliers:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER', 'WORKER') &&
-      (has('view_suppliers') || has('view_expenses') || has('view_raw_material')),
+      (has('view_suppliers') || has('view_expenses') || has('view_raw_material') || has('view_vedemost')),
     users:
       hasRole(user, 'DIRECTOR', 'ACCOUNTANT', 'MANAGER') &&
       (has('manage_users') || has('view_payroll') || has('manage_shift_workers')),

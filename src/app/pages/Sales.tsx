@@ -344,7 +344,7 @@ export function Sales() {
   };
 
   // ---- Client form ----
-  const [clientForm, setClientForm] = useState({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
+  const [clientForm, setClientForm] = useState({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '', stir: '' });
   const handleAddClient = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientForm.name.trim()) return;
@@ -355,9 +355,10 @@ export function Sales() {
         phone: normalizeUzPhoneForApi(clientForm.phone),
         bankAccount: clientForm.bankAccount.trim() || undefined,
         bankName: clientForm.bankName.trim() || undefined,
+        stir: clientForm.stir.trim() || undefined,
       },
     });
-    setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '' });
+    setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '', stir: '' });
   };
 
   // ---- History (navbar sana filtri bo‘yicha) ----
@@ -970,6 +971,10 @@ export function Sales() {
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelBankAccount}</label>
                 <input value={clientForm.bankAccount} onChange={e => setClientForm({ ...clientForm, bankAccount: e.target.value })} placeholder="20208000001234567890" className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.siStir}</label>
+                <input value={clientForm.stir} onChange={e => setClientForm({ ...clientForm, stir: e.target.value })} placeholder="123456789" className={INPUT_CLS} />
               </div>
               <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2"><Plus size={16} />{t.btnAdd}</button>
             </form>

@@ -860,7 +860,8 @@ export type $InventoryBalancePayload<ExtArgs extends runtime.Types.Extensions.In
     itemType: $Enums.InventoryItemType
     quantity: number
     /**
-     * * Qadoqlangan donalar (quantity ichidagi qism; qadoqlanmagan = quantity - packagedQuantity)
+     * *
+     *    * Qadoqlangan donalar (quantity ichidagi qism; qadoqlanmagan = quantity - packagedQuantity)
      */
     packagedQuantity: number
     status: $Enums.EntityStatus

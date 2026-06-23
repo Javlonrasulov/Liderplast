@@ -88,6 +88,8 @@ export const ModelName = {
   SalaryRecord: 'SalaryRecord',
   BankVedomost: 'BankVedomost',
   BankTransaction: 'BankTransaction',
+  CompanyBankAccount: 'CompanyBankAccount',
+  CompanyBankAccountLog: 'CompanyBankAccountLog',
   UploadedFile: 'UploadedFile',
   UploadJob: 'UploadJob',
   CompanyAsset: 'CompanyAsset',
@@ -458,6 +460,7 @@ export const ClientScalarFieldEnum = {
   address: 'address',
   bankAccount: 'bankAccount',
   bankName: 'bankName',
+  stir: 'stir',
   cashBalance: 'cashBalance',
   deliveryVehiclePlate: 'deliveryVehiclePlate',
   deliveryDriverName: 'deliveryDriverName',
@@ -599,6 +602,9 @@ export const SupplierScalarFieldEnum = {
   phone: 'phone',
   address: 'address',
   notes: 'notes',
+  bankAccount: 'bankAccount',
+  bankName: 'bankName',
+  stir: 'stir',
   isDeleted: 'isDeleted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -691,6 +697,7 @@ export type SalaryRecordScalarFieldEnum = (typeof SalaryRecordScalarFieldEnum)[k
 export const BankVedomostScalarFieldEnum = {
   id: 'id',
   fileName: 'fileName',
+  source: 'source',
   totalIncome: 'totalIncome',
   totalExpense: 'totalExpense',
   status: 'status',
@@ -713,17 +720,55 @@ export const BankTransactionScalarFieldEnum = {
   operationDate: 'operationDate',
   receiverName: 'receiverName',
   receiverAccount: 'receiverAccount',
+  receiverBankCode: 'receiverBankCode',
   receiverBankName: 'receiverBankName',
   receiverStir: 'receiverStir',
   paymentPurpose: 'paymentPurpose',
+  companyAccount: 'companyAccount',
+  companyBankName: 'companyBankName',
+  companyStir: 'companyStir',
   isSalary: 'isSalary',
   employeeId: 'employeeId',
   clientId: 'clientId',
+  supplierId: 'supplierId',
+  reviewStatus: 'reviewStatus',
+  counterpartyKind: 'counterpartyKind',
+  expenseId: 'expenseId',
+  kassaEntryId: 'kassaEntryId',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
+
+
+export const CompanyBankAccountScalarFieldEnum = {
+  id: 'id',
+  accountNumber: 'accountNumber',
+  label: 'label',
+  isActive: 'isActive',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyBankAccountScalarFieldEnum = (typeof CompanyBankAccountScalarFieldEnum)[keyof typeof CompanyBankAccountScalarFieldEnum]
+
+
+export const CompanyBankAccountLogScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  accountNumber: 'accountNumber',
+  label: 'label',
+  action: 'action',
+  performedById: 'performedById',
+  createdAt: 'createdAt'
+} as const
+
+export type CompanyBankAccountLogScalarFieldEnum = (typeof CompanyBankAccountLogScalarFieldEnum)[keyof typeof CompanyBankAccountLogScalarFieldEnum]
 
 
 export const UploadedFileScalarFieldEnum = {

@@ -164,6 +164,7 @@ export class CrmService {
       address?: string | null;
       bankAccount?: string | null;
       bankName?: string | null;
+      stir?: string | null;
       deliveryVehiclePlate?: string | null;
       deliveryDriverName?: string | null;
     } = {};
@@ -193,6 +194,10 @@ export class CrmService {
 
     if (dto.bankName !== undefined) {
       data.bankName = dto.bankName.trim() || null;
+    }
+
+    if (dto.stir !== undefined) {
+      data.stir = dto.stir.trim() || null;
     }
 
     if (dto.deliveryVehiclePlate !== undefined) {

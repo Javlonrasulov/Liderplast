@@ -24,6 +24,10 @@ export class UpdateClientDto {
 
   @IsOptional()
   @IsString()
+  stir?: string;
+
+  @IsOptional()
+  @IsString()
   deliveryVehiclePlate?: string;
 
   @IsOptional()

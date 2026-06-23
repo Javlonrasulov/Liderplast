@@ -2157,7 +2157,8 @@ export type $SemiProductPayload<ExtArgs extends runtime.Types.Extensions.Interna
     name: string
     weightGram: number
     /**
-     * * 1 qop/pachkada necha dona (qadoqlash)
+     * *
+     *    * 1 qop/pachkada necha dona (qadoqlash)
      */
     piecesPerBag: number | null
     description: string | null

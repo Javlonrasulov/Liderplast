@@ -29,7 +29,15 @@ const PHONE_INPUT_CLS =
   'w-full h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition placeholder:text-slate-400';
 
 function emptyForm() {
-  return { name: '', phone: emptyUzPhoneInput(), address: '', notes: '' };
+  return {
+    name: '',
+    phone: emptyUzPhoneInput(),
+    address: '',
+    notes: '',
+    bankAccount: '',
+    bankName: '',
+    stir: '',
+  };
 }
 
 function formFromSupplier(s: Supplier) {
@@ -38,6 +46,9 @@ function formFromSupplier(s: Supplier) {
     phone: s.phone ? formatUzPhoneInput(s.phone) : emptyUzPhoneInput(),
     address: s.address ?? '',
     notes: s.notes ?? '',
+    bankAccount: s.bankAccount ?? '',
+    bankName: s.bankName ?? '',
+    stir: s.stir ?? '',
   };
 }
 
@@ -71,6 +82,9 @@ export function AddSupplierDialog({
         phone: normalizeUzPhoneForApi(form.phone),
         address: form.address.trim() || undefined,
         notes: form.notes.trim() || undefined,
+        bankAccount: form.bankAccount.trim() || undefined,
+        bankName: form.bankName.trim() || undefined,
+        stir: form.stir.trim() || undefined,
       };
       if (isEdit && supplier) {
         await dispatch({ type: 'UPDATE_SUPPLIER', payload: { id: supplier.id, ...body } });
@@ -115,6 +129,29 @@ export function AddSupplierDialog({
             <Input
               value={form.address}
               onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{t.siBankAccount}</Label>
+              <Input
+                value={form.bankAccount}
+                onChange={(e) => setForm((p) => ({ ...p, bankAccount: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>{t.siStir}</Label>
+              <Input
+                value={form.stir}
+                onChange={(e) => setForm((p) => ({ ...p, stir: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div>
+            <Label>{t.siBankName}</Label>
+            <Input
+              value={form.bankName}
+              onChange={(e) => setForm((p) => ({ ...p, bankName: e.target.value }))}
             />
           </div>
           <div>

@@ -227,6 +227,16 @@ export type BankVedomost = Prisma.BankVedomostModel
  */
 export type BankTransaction = Prisma.BankTransactionModel
 /**
+ * Model CompanyBankAccount
+ * Korxonaning o'z bank hisob raqamlari (ko'chirmadan kontragentlarni ajratish uchun)
+ */
+export type CompanyBankAccount = Prisma.CompanyBankAccountModel
+/**
+ * Model CompanyBankAccountLog
+ * 
+ */
+export type CompanyBankAccountLog = Prisma.CompanyBankAccountLogModel
+/**
  * Model UploadedFile
  * 
  */

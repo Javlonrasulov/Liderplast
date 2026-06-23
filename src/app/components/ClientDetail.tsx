@@ -52,6 +52,7 @@ type ClientEditForm = {
   phone: string;
   bankAccount: string;
   bankName: string;
+  stir: string;
 };
 
 export function ClientDetail({ clientId, onBack, initialEditing = false }: ClientDetailProps) {
@@ -71,6 +72,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
     phone: emptyUzPhoneInput(),
     bankAccount: '',
     bankName: '',
+    stir: '',
   });
   const [editError, setEditError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -198,9 +200,10 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
       bankAccount: client.bankAccount ?? '',
       bankName: client.bankName ?? '',
+      stir: client.stir ?? '',
     });
     setEditError('');
-  }, [clientId, client?.name, client?.phone, client?.bankAccount, client?.bankName]);
+  }, [clientId, client?.name, client?.phone, client?.bankAccount, client?.bankName, client?.stir]);
 
   if (!client) return null;
 
@@ -244,6 +247,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
       bankAccount: client.bankAccount ?? '',
       bankName: client.bankName ?? '',
+      stir: client.stir ?? '',
     });
     setEditError('');
     setIsEditing(true);
@@ -256,6 +260,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       phone: formatUzPhoneDisplay(client.phone) || emptyUzPhoneInput(),
       bankAccount: client.bankAccount ?? '',
       bankName: client.bankName ?? '',
+      stir: client.stir ?? '',
     });
     setEditError('');
     setIsEditing(false);
@@ -278,6 +283,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
           phone: normalizeUzPhoneForApi(editForm.phone),
           bankAccount: editForm.bankAccount.trim() || undefined,
           bankName: editForm.bankName.trim() || undefined,
+          stir: editForm.stir.trim() || undefined,
         },
       });
       setIsEditing(false);
@@ -444,6 +450,15 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                   value={editForm.bankAccount}
                   onChange={e => setEditForm({ ...editForm, bankAccount: e.target.value })}
                   placeholder="20208000001234567890"
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 text-xs mb-1.5">{t.siStir}</label>
+                <input
+                  value={editForm.stir}
+                  onChange={e => setEditForm({ ...editForm, stir: e.target.value })}
+                  placeholder="123456789"
                   className={INPUT_CLS}
                 />
               </div>

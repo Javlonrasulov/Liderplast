@@ -20,4 +20,8 @@ export class CreateClientDto {
   @IsOptional()
   @IsString()
   bankName?: string;
+
+  @IsOptional()
+  @IsString()
+  stir?: string;
 }

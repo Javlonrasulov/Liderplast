@@ -101,8 +101,36 @@ export const BankTransactionType = {
 export type BankTransactionType = (typeof BankTransactionType)[keyof typeof BankTransactionType]
 
 
+export const BankStatementSource = {
+  BANK: 'BANK',
+  KASSA: 'KASSA'
+} as const
+
+export type BankStatementSource = (typeof BankStatementSource)[keyof typeof BankStatementSource]
+
+
+export const BankRowReviewStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  SKIPPED: 'SKIPPED'
+} as const
+
+export type BankRowReviewStatus = (typeof BankRowReviewStatus)[keyof typeof BankRowReviewStatus]
+
+
+export const BankCounterpartyKind = {
+  UNKNOWN: 'UNKNOWN',
+  CLIENT: 'CLIENT',
+  SUPPLIER: 'SUPPLIER',
+  COMPANY: 'COMPANY'
+} as const
+
+export type BankCounterpartyKind = (typeof BankCounterpartyKind)[keyof typeof BankCounterpartyKind]
+
+
 export const KassaEntryType = {
   CLIENT_INFLOW: 'CLIENT_INFLOW',
+  BANK_INFLOW: 'BANK_INFLOW',
   SALE_DEDUCTION: 'SALE_DEDUCTION',
   OUTFLOW: 'OUTFLOW'
 } as const
@@ -287,3 +315,13 @@ export const ProductAuditEntityType = {
 } as const
 
 export type ProductAuditEntityType = (typeof ProductAuditEntityType)[keyof typeof ProductAuditEntityType]
+
+
+export const CompanyBankAccountAction = {
+  ADDED: 'ADDED',
+  REMOVED: 'REMOVED',
+  ACTIVATED: 'ACTIVATED',
+  UPDATED: 'UPDATED'
+} as const
+
+export type CompanyBankAccountAction = (typeof CompanyBankAccountAction)[keyof typeof CompanyBankAccountAction]

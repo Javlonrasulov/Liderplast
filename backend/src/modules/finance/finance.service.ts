@@ -6,7 +6,7 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import * as XLSX from 'xlsx';
+import { parseBankStatementRows } from './bank-statement-parse.js';
 import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { WarehouseService } from '../warehouse/warehouse.service.js';
@@ -116,18 +116,7 @@ function resolveRateForShift(
   return undefined;
 }
 
-type ParsedBankRow = {
-  documentDate: Date | null;
-  documentNumber: string | null;
-  operationDate: Date | null;
-  debit: number;
-  credit: number;
-  receiverName: string | null;
-  receiverAccount: string | null;
-  receiverBankName: string | null;
-  receiverStir: string | null;
-  paymentPurpose: string | null;
-};
+type ParsedBankRow = import('./bank-statement-parse.js').ParsedBankStatementRow;
 
 type EmployeeMatchResult = {
   employee: { id: string; fullName: string; stir: string | null } | null;
@@ -165,92 +154,6 @@ function normalizeText(value?: string | null) {
 function normalizeDigits(value?: string | null) {
   const digits = value?.replace(/\D/g, '') ?? '';
   return digits || null;
-}
-
-function parseAmount(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-  const cleaned = String(value ?? '')
-    .replace(/\s+/g, '')
-    .replace(/,/g, '.')
-    .replace(/[^\d.-]/g, '');
-  const parsed = Number(cleaned);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function parseDateValue(value: unknown) {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return value;
-  }
-
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    const parsed = XLSX.SSF.parse_date_code(value);
-    if (parsed) {
-      return new Date(
-        Date.UTC(
-          parsed.y,
-          Math.max(0, parsed.m - 1),
-          parsed.d,
-          parsed.H ?? 0,
-          parsed.M ?? 0,
-          parsed.S ?? 0,
-        ),
-      );
-    }
-  }
-
-  const raw = String(value ?? '').trim();
-  if (!raw) {
-    return null;
-  }
-
-  const direct = new Date(raw);
-  if (!Number.isNaN(direct.getTime())) {
-    return direct;
-  }
-
-  const normalized = raw.replace(/[./]/g, '-');
-  const parts = normalized.split('-').map((item) => item.trim());
-  if (parts.length === 3) {
-    const [left, middle, right] = parts;
-    if (left.length === 4) {
-      const date = new Date(`${left}-${middle}-${right}T00:00:00.000Z`);
-      if (!Number.isNaN(date.getTime())) {
-        return date;
-      }
-    }
-    const date = new Date(`${right}-${middle}-${left}T00:00:00.000Z`);
-    if (!Number.isNaN(date.getTime())) {
-      return date;
-    }
-  }
-
-  return null;
-}
-
-function isEmptyRow(row: Record<string, unknown>) {
-  return Object.values(row).every((value) => `${value ?? ''}`.trim() === '');
-}
-
-function getFieldValue(row: Record<string, unknown>, aliases: string[]) {
-  const entries = Object.entries(row).map(([key, value]) => [normalizeText(key), value] as const);
-
-  for (const alias of aliases.map((item) => normalizeText(item))) {
-    const exact = entries.find(([key]) => key === alias);
-    if (exact) {
-      return exact[1];
-    }
-  }
-
-  for (const alias of aliases.map((item) => normalizeText(item))) {
-    const fuzzy = entries.find(([key]) => key.includes(alias) || alias.includes(key));
-    if (fuzzy) {
-      return fuzzy[1];
-    }
-  }
-
-  return null;
 }
 
 function getMonthRange(month: string) {
@@ -725,6 +628,9 @@ export class FinanceService {
         phone: dto.phone?.trim() || null,
         address: dto.address?.trim() || null,
         notes: dto.notes?.trim() || null,
+        bankAccount: dto.bankAccount?.trim() || null,
+        bankName: dto.bankName?.trim() || null,
+        stir: dto.stir?.trim() || null,
       },
     });
   }
@@ -747,6 +653,9 @@ export class FinanceService {
         phone: dto.phone?.trim() || null,
         address: dto.address?.trim() || null,
         notes: dto.notes?.trim() || null,
+        bankAccount: dto.bankAccount?.trim() || null,
+        bankName: dto.bankName?.trim() || null,
+        stir: dto.stir?.trim() || null,
       },
     });
   }
@@ -1946,9 +1855,13 @@ export class FinanceService {
             operationDate: row.operationDate,
             receiverName: row.receiverName,
             receiverAccount: row.receiverAccount,
+            receiverBankCode: row.receiverBankCode,
             receiverBankName: row.receiverBankName,
             receiverStir: normalizeDigits(row.receiverStir),
             paymentPurpose: row.paymentPurpose,
+            companyAccount: row.companyAccount,
+            companyBankName: row.companyBankName,
+            companyStir: normalizeDigits(row.companyStir),
             isSalary: Boolean(employeeMatch.employee),
             employeeId: employeeMatch.employee?.id ?? null,
             clientId: clientMatch.client?.id ?? null,
@@ -2206,9 +2119,13 @@ export class FinanceService {
         credit: transaction.type === BankTransactionType.INCOME ? transaction.amount : 0,
         receiverName: transaction.receiverName,
         receiverAccount: transaction.receiverAccount,
+        receiverBankCode: transaction.receiverBankCode,
         receiverBankName: transaction.receiverBankName,
         receiverStir: transaction.receiverStir,
         paymentPurpose: transaction.paymentPurpose,
+        companyAccount: transaction.companyAccount,
+        companyBankName: transaction.companyBankName,
+        companyStir: transaction.companyStir,
       };
 
       const employeeMatch =
@@ -2723,89 +2640,6 @@ export class FinanceService {
   }
 
   private parseOborotkaRows(buffer: Buffer): ParsedBankRow[] {
-    const workbook = XLSX.read(buffer, {
-      type: 'buffer',
-      cellDates: true,
-    });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) {
-      throw new Error('Workbook does not contain any sheet');
-    }
-
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
-      defval: null,
-      raw: false,
-    });
-
-    return rows
-      .filter((row) => !isEmptyRow(row))
-      .map((row) => ({
-        documentDate: parseDateValue(
-          getFieldValue(row, [
-            'document date',
-            'hujjat sanasi',
-            'дата документа',
-          ]),
-        ),
-        documentNumber: String(
-          getFieldValue(row, [
-            'document number',
-            'hujjat raqami',
-            'номер документа',
-          ]) ?? '',
-        ).trim() || null,
-        operationDate: parseDateValue(
-          getFieldValue(row, [
-            'operation date',
-            'operatsiya sanasi',
-            'дата операции',
-          ]),
-        ),
-        debit: parseAmount(
-          getFieldValue(row, ['debit', 'chiqim', 'расход', 'debet']),
-        ),
-        credit: parseAmount(
-          getFieldValue(row, ['credit', 'kirim', 'приход', 'kredit']),
-        ),
-        receiverName:
-          String(
-            getFieldValue(row, [
-              'receiver name',
-              'получатель',
-              'oluvchi',
-              'naimenovanie poluchatelya',
-            ]) ?? '',
-          ).trim() || null,
-        receiverAccount:
-          String(
-            getFieldValue(row, [
-              'receiver account',
-              'hisob raqami',
-              'счет получателя',
-            ]) ?? '',
-          ).trim() || null,
-        receiverBankName:
-          String(
-            getFieldValue(row, [
-              'receiver bank name',
-              'bank nomi',
-              'банк получателя',
-            ]) ?? '',
-          ).trim() || null,
-        receiverStir:
-          String(
-            getFieldValue(row, ['receiver stir', 'stir', 'inn', 'инн']) ?? '',
-          ).trim() || null,
-        paymentPurpose:
-          String(
-            getFieldValue(row, [
-              'payment purpose',
-              'tolov maqsadi',
-              'to lov maqsadi',
-              'назначение платежа',
-            ]) ?? '',
-          ).trim() || null,
-      }));
+    return parseBankStatementRows(buffer);
   }
 }

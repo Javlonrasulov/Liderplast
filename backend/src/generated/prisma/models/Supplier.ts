@@ -30,6 +30,9 @@ export type SupplierMinAggregateOutputType = {
   phone: string | null
   address: string | null
   notes: string | null
+  bankAccount: string | null
+  bankName: string | null
+  stir: string | null
   isDeleted: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +44,9 @@ export type SupplierMaxAggregateOutputType = {
   phone: string | null
   address: string | null
   notes: string | null
+  bankAccount: string | null
+  bankName: string | null
+  stir: string | null
   isDeleted: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +58,9 @@ export type SupplierCountAggregateOutputType = {
   phone: number
   address: number
   notes: number
+  bankAccount: number
+  bankName: number
+  stir: number
   isDeleted: number
   createdAt: number
   updatedAt: number
@@ -65,6 +74,9 @@ export type SupplierMinAggregateInputType = {
   phone?: true
   address?: true
   notes?: true
+  bankAccount?: true
+  bankName?: true
+  stir?: true
   isDeleted?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +88,9 @@ export type SupplierMaxAggregateInputType = {
   phone?: true
   address?: true
   notes?: true
+  bankAccount?: true
+  bankName?: true
+  stir?: true
   isDeleted?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +102,9 @@ export type SupplierCountAggregateInputType = {
   phone?: true
   address?: true
   notes?: true
+  bankAccount?: true
+  bankName?: true
+  stir?: true
   isDeleted?: true
   createdAt?: true
   updatedAt?: true
@@ -171,6 +189,9 @@ export type SupplierGroupByOutputType = {
   phone: string | null
   address: string | null
   notes: string | null
+  bankAccount: string | null
+  bankName: string | null
+  stir: string | null
   isDeleted: boolean
   createdAt: Date
   updatedAt: Date
@@ -203,10 +224,14 @@ export type SupplierWhereInput = {
   phone?: Prisma.StringNullableFilter<"Supplier"> | string | null
   address?: Prisma.StringNullableFilter<"Supplier"> | string | null
   notes?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  bankAccount?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  stir?: Prisma.StringNullableFilter<"Supplier"> | string | null
   isDeleted?: Prisma.BoolFilter<"Supplier"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderListRelationFilter
+  bankTransactions?: Prisma.BankTransactionListRelationFilter
 }
 
 export type SupplierOrderByWithRelationInput = {
@@ -215,10 +240,14 @@ export type SupplierOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  stir?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   purchaseOrders?: Prisma.SupplierPurchaseOrderOrderByRelationAggregateInput
+  bankTransactions?: Prisma.BankTransactionOrderByRelationAggregateInput
 }
 
 export type SupplierWhereUniqueInput = Prisma.AtLeast<{
@@ -230,10 +259,14 @@ export type SupplierWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringNullableFilter<"Supplier"> | string | null
   address?: Prisma.StringNullableFilter<"Supplier"> | string | null
   notes?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  bankAccount?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Supplier"> | string | null
+  stir?: Prisma.StringNullableFilter<"Supplier"> | string | null
   isDeleted?: Prisma.BoolFilter<"Supplier"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderListRelationFilter
+  bankTransactions?: Prisma.BankTransactionListRelationFilter
 }, "id">
 
 export type SupplierOrderByWithAggregationInput = {
@@ -242,6 +275,9 @@ export type SupplierOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankAccount?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  stir?: Prisma.SortOrderInput | Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -259,6 +295,9 @@ export type SupplierScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
+  bankAccount?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
+  bankName?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
+  stir?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Supplier"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Supplier"> | Date | string
@@ -270,10 +309,14 @@ export type SupplierCreateInput = {
   phone?: string | null
   address?: string | null
   notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
   isDeleted?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutSupplierInput
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutSupplierInput
 }
 
 export type SupplierUncheckedCreateInput = {
@@ -282,10 +325,14 @@ export type SupplierUncheckedCreateInput = {
   phone?: string | null
   address?: string | null
   notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
   isDeleted?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutSupplierInput
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutSupplierInput
 }
 
 export type SupplierUpdateInput = {
@@ -294,10 +341,14 @@ export type SupplierUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderUpdateManyWithoutSupplierNestedInput
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutSupplierNestedInput
 }
 
 export type SupplierUncheckedUpdateInput = {
@@ -306,10 +357,14 @@ export type SupplierUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrders?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutSupplierNestedInput
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutSupplierNestedInput
 }
 
 export type SupplierCreateManyInput = {
@@ -318,6 +373,9 @@ export type SupplierCreateManyInput = {
   phone?: string | null
   address?: string | null
   notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
   isDeleted?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -329,6 +387,9 @@ export type SupplierUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -340,6 +401,9 @@ export type SupplierUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,6 +415,9 @@ export type SupplierCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  bankAccount?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -362,6 +429,9 @@ export type SupplierMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  bankAccount?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -373,6 +443,9 @@ export type SupplierMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  bankAccount?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  stir?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -381,6 +454,11 @@ export type SupplierMinOrderByAggregateInput = {
 export type SupplierScalarRelationFilter = {
   is?: Prisma.SupplierWhereInput
   isNot?: Prisma.SupplierWhereInput
+}
+
+export type SupplierNullableScalarRelationFilter = {
+  is?: Prisma.SupplierWhereInput | null
+  isNot?: Prisma.SupplierWhereInput | null
 }
 
 export type SupplierCreateNestedOneWithoutPurchaseOrdersInput = {
@@ -397,15 +475,35 @@ export type SupplierUpdateOneRequiredWithoutPurchaseOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SupplierUpdateToOneWithWhereWithoutPurchaseOrdersInput, Prisma.SupplierUpdateWithoutPurchaseOrdersInput>, Prisma.SupplierUncheckedUpdateWithoutPurchaseOrdersInput>
 }
 
+export type SupplierCreateNestedOneWithoutBankTransactionsInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBankTransactionsInput, Prisma.SupplierUncheckedCreateWithoutBankTransactionsInput>
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBankTransactionsInput
+  connect?: Prisma.SupplierWhereUniqueInput
+}
+
+export type SupplierUpdateOneWithoutBankTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBankTransactionsInput, Prisma.SupplierUncheckedCreateWithoutBankTransactionsInput>
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBankTransactionsInput
+  upsert?: Prisma.SupplierUpsertWithoutBankTransactionsInput
+  disconnect?: Prisma.SupplierWhereInput | boolean
+  delete?: Prisma.SupplierWhereInput | boolean
+  connect?: Prisma.SupplierWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SupplierUpdateToOneWithWhereWithoutBankTransactionsInput, Prisma.SupplierUpdateWithoutBankTransactionsInput>, Prisma.SupplierUncheckedUpdateWithoutBankTransactionsInput>
+}
+
 export type SupplierCreateWithoutPurchaseOrdersInput = {
   id?: string
   name: string
   phone?: string | null
   address?: string | null
   notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
   isDeleted?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  bankTransactions?: Prisma.BankTransactionCreateNestedManyWithoutSupplierInput
 }
 
 export type SupplierUncheckedCreateWithoutPurchaseOrdersInput = {
@@ -414,9 +512,13 @@ export type SupplierUncheckedCreateWithoutPurchaseOrdersInput = {
   phone?: string | null
   address?: string | null
   notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
   isDeleted?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  bankTransactions?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutSupplierInput
 }
 
 export type SupplierCreateOrConnectWithoutPurchaseOrdersInput = {
@@ -441,9 +543,13 @@ export type SupplierUpdateWithoutPurchaseOrdersInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankTransactions?: Prisma.BankTransactionUpdateManyWithoutSupplierNestedInput
 }
 
 export type SupplierUncheckedUpdateWithoutPurchaseOrdersInput = {
@@ -452,9 +558,89 @@ export type SupplierUncheckedUpdateWithoutPurchaseOrdersInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bankTransactions?: Prisma.BankTransactionUncheckedUpdateManyWithoutSupplierNestedInput
+}
+
+export type SupplierCreateWithoutBankTransactionsInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  address?: string | null
+  notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
+  isDeleted?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  purchaseOrders?: Prisma.SupplierPurchaseOrderCreateNestedManyWithoutSupplierInput
+}
+
+export type SupplierUncheckedCreateWithoutBankTransactionsInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  address?: string | null
+  notes?: string | null
+  bankAccount?: string | null
+  bankName?: string | null
+  stir?: string | null
+  isDeleted?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  purchaseOrders?: Prisma.SupplierPurchaseOrderUncheckedCreateNestedManyWithoutSupplierInput
+}
+
+export type SupplierCreateOrConnectWithoutBankTransactionsInput = {
+  where: Prisma.SupplierWhereUniqueInput
+  create: Prisma.XOR<Prisma.SupplierCreateWithoutBankTransactionsInput, Prisma.SupplierUncheckedCreateWithoutBankTransactionsInput>
+}
+
+export type SupplierUpsertWithoutBankTransactionsInput = {
+  update: Prisma.XOR<Prisma.SupplierUpdateWithoutBankTransactionsInput, Prisma.SupplierUncheckedUpdateWithoutBankTransactionsInput>
+  create: Prisma.XOR<Prisma.SupplierCreateWithoutBankTransactionsInput, Prisma.SupplierUncheckedCreateWithoutBankTransactionsInput>
+  where?: Prisma.SupplierWhereInput
+}
+
+export type SupplierUpdateToOneWithWhereWithoutBankTransactionsInput = {
+  where?: Prisma.SupplierWhereInput
+  data: Prisma.XOR<Prisma.SupplierUpdateWithoutBankTransactionsInput, Prisma.SupplierUncheckedUpdateWithoutBankTransactionsInput>
+}
+
+export type SupplierUpdateWithoutBankTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchaseOrders?: Prisma.SupplierPurchaseOrderUpdateManyWithoutSupplierNestedInput
+}
+
+export type SupplierUncheckedUpdateWithoutBankTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stir?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchaseOrders?: Prisma.SupplierPurchaseOrderUncheckedUpdateManyWithoutSupplierNestedInput
 }
 
 
@@ -464,10 +650,12 @@ export type SupplierUncheckedUpdateWithoutPurchaseOrdersInput = {
 
 export type SupplierCountOutputType = {
   purchaseOrders: number
+  bankTransactions: number
 }
 
 export type SupplierCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrders?: boolean | SupplierCountOutputTypeCountPurchaseOrdersArgs
+  bankTransactions?: boolean | SupplierCountOutputTypeCountBankTransactionsArgs
 }
 
 /**
@@ -487,6 +675,13 @@ export type SupplierCountOutputTypeCountPurchaseOrdersArgs<ExtArgs extends runti
   where?: Prisma.SupplierPurchaseOrderWhereInput
 }
 
+/**
+ * SupplierCountOutputType without action
+ */
+export type SupplierCountOutputTypeCountBankTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankTransactionWhereInput
+}
+
 
 export type SupplierSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -494,10 +689,14 @@ export type SupplierSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   phone?: boolean
   address?: boolean
   notes?: boolean
+  bankAccount?: boolean
+  bankName?: boolean
+  stir?: boolean
   isDeleted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   purchaseOrders?: boolean | Prisma.Supplier$purchaseOrdersArgs<ExtArgs>
+  bankTransactions?: boolean | Prisma.Supplier$bankTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.SupplierCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["supplier"]>
 
@@ -507,6 +706,9 @@ export type SupplierSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   address?: boolean
   notes?: boolean
+  bankAccount?: boolean
+  bankName?: boolean
+  stir?: boolean
   isDeleted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -518,6 +720,9 @@ export type SupplierSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   address?: boolean
   notes?: boolean
+  bankAccount?: boolean
+  bankName?: boolean
+  stir?: boolean
   isDeleted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -529,14 +734,18 @@ export type SupplierSelectScalar = {
   phone?: boolean
   address?: boolean
   notes?: boolean
+  bankAccount?: boolean
+  bankName?: boolean
+  stir?: boolean
   isDeleted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SupplierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "address" | "notes" | "isDeleted" | "createdAt" | "updatedAt", ExtArgs["result"]["supplier"]>
+export type SupplierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "address" | "notes" | "bankAccount" | "bankName" | "stir" | "isDeleted" | "createdAt" | "updatedAt", ExtArgs["result"]["supplier"]>
 export type SupplierInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrders?: boolean | Prisma.Supplier$purchaseOrdersArgs<ExtArgs>
+  bankTransactions?: boolean | Prisma.Supplier$bankTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.SupplierCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SupplierIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -546,6 +755,7 @@ export type $SupplierPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Supplier"
   objects: {
     purchaseOrders: Prisma.$SupplierPurchaseOrderPayload<ExtArgs>[]
+    bankTransactions: Prisma.$BankTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -553,6 +763,9 @@ export type $SupplierPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     phone: string | null
     address: string | null
     notes: string | null
+    bankAccount: string | null
+    bankName: string | null
+    stir: string | null
     isDeleted: boolean
     createdAt: Date
     updatedAt: Date
@@ -951,6 +1164,7 @@ readonly fields: SupplierFieldRefs;
 export interface Prisma__SupplierClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   purchaseOrders<T extends Prisma.Supplier$purchaseOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Supplier$purchaseOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPurchaseOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankTransactions<T extends Prisma.Supplier$bankTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Supplier$bankTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1199,9 @@ export interface SupplierFieldRefs {
   readonly phone: Prisma.FieldRef<"Supplier", 'String'>
   readonly address: Prisma.FieldRef<"Supplier", 'String'>
   readonly notes: Prisma.FieldRef<"Supplier", 'String'>
+  readonly bankAccount: Prisma.FieldRef<"Supplier", 'String'>
+  readonly bankName: Prisma.FieldRef<"Supplier", 'String'>
+  readonly stir: Prisma.FieldRef<"Supplier", 'String'>
   readonly isDeleted: Prisma.FieldRef<"Supplier", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Supplier", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Supplier", 'DateTime'>
@@ -1402,6 +1619,30 @@ export type Supplier$purchaseOrdersArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.SupplierPurchaseOrderScalarFieldEnum | Prisma.SupplierPurchaseOrderScalarFieldEnum[]
+}
+
+/**
+ * Supplier.bankTransactions
+ */
+export type Supplier$bankTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankTransaction
+   */
+  select?: Prisma.BankTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankTransaction
+   */
+  omit?: Prisma.BankTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankTransactionInclude<ExtArgs> | null
+  where?: Prisma.BankTransactionWhereInput
+  orderBy?: Prisma.BankTransactionOrderByWithRelationInput | Prisma.BankTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.BankTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankTransactionScalarFieldEnum | Prisma.BankTransactionScalarFieldEnum[]
 }
 
 /**
