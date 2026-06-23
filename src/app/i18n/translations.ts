@@ -1326,6 +1326,25 @@ export interface T {
   siUploading: string;
   siUploadSuccess: string;
   siUploadError: string;
+  siUploadPartialWarning: string;
+  siUploadRejectedBanner: string;
+  siUploadEmptyRows: string;
+  siErrAllDuplicates: string;
+  siErrNoValidRows: string;
+  siErrNotExcel: string;
+  siErrExcelWrongFile: string;
+  siErrNoExcelRows: string;
+  siErrAllDuplicatesCount: string;
+  siErrNoValidRowsCount: string;
+  siErrNoValidRowsMixed: string;
+  siErrReadFailed: string;
+  siErrNoSheet: string;
+  siNoteSkippedInvalid: string;
+  siNoteSkippedDuplicate: string;
+  siErrKassaInsufficient: string;
+  siErrClientBalanceInsufficient: string;
+  siErrClientNotFound: string;
+  siErrClientRemoved: string;
   siStatementsList: string;
   siNoStatements: string;
   siReviewPending: string;
@@ -2823,6 +2842,25 @@ const uz_cyrillic: T = {
   siUploading: 'Юкланмоқда...',
   siUploadSuccess: 'Файл юкланди — қаторларни кўриб чиқинг',
   siUploadError: 'Файлни юклашда хатолик',
+  siUploadPartialWarning: 'Баъзи қаторлар ўтказиб юборилди: {details}',
+  siUploadRejectedBanner: 'Файл юкланди, лекин қаторлар очиқмади',
+  siUploadEmptyRows: 'Бу ко‘чирмада кўрсатиш учун қаторлар йўқ',
+  siErrAllDuplicates: 'Барча қаторлар илгари юкланган (такрорий ко‘чирма)',
+  siErrNoValidRows: 'Excelдан қаторлар ўқилмади — банк ко‘чирмаси форматида эканини текширинг',
+  siErrNotExcel: 'Файл Excel форматида эмас — банкдан .xlsx қилиб юкланг',
+  siErrExcelWrongFile: 'Файл Excel форматида эмас. Банкдан тўғридан-тўғри .xlsx қилиб юкланг',
+  siErrNoExcelRows: 'Excelда маълумот қаторлари топилмади. Кирим/чиқим ва сана ustunlari борлигини текширинг',
+  siErrAllDuplicatesCount: 'Барча {count} та қатор илгари юкланган — бу такрорий ко‘чирма',
+  siErrNoValidRowsCount: 'Қаторлар ўқилмади ({count} та яроқсиз). Банк ко‘чирмаси форматида эканини текширинг',
+  siErrNoValidRowsMixed: 'Яроқли қатор йўқ. Яроқсиз: {invalid}, такрорий: {duplicate}',
+  siErrReadFailed: 'Файлни ўқиб бўлмади',
+  siErrNoSheet: 'Excel варағи топилмади',
+  siNoteSkippedInvalid: 'Яроқсиз қаторлар ўтказиб юборилди: {count}',
+  siNoteSkippedDuplicate: 'Такрорий қаторлар ўтказиб юборилди: {count}',
+  siErrKassaInsufficient: 'Касса ҳисобида етарли маблағ йўқ',
+  siErrClientBalanceInsufficient: 'Мижоз ҳисобида етарли маблағ йўқ',
+  siErrClientNotFound: 'Мижоз топилмади',
+  siErrClientRemoved: 'Мижоз ўчирилган',
   siStatementsList: 'Юкланган ко‘чирмалар',
   siNoStatements: 'Ҳали ко‘чирма юкланмаган',
   siReviewPending: 'Қаторларни кўриб чиқиш',
@@ -2925,7 +2963,7 @@ const uz_cyrillic: T = {
   siErrInvalidAmount: 'Сумма нотўғри ёки жуда кичик (камида 0,01)',
   siErrInvalidDate: 'Сана нотўғри',
   siErrValidation: 'Киритилган маълумотлар нотўғри',
-  siErrKassaModeBackend: 'Сервер эски версияда — backendni қайта ишга туширинг (kassaga kirim)',
+  siErrKassaModeBackend: 'Сервер эски версияда — серверни қайта ишга туширинг (кассага кирим)',
   siErrFileRequired: 'Файл танланмади',
   siErrStatementNotFound: 'Кўчирма топилмади',
   siErrRowNotFound: 'Қатор топилмади',
@@ -4321,6 +4359,25 @@ const uz_latin: T = {
   siUploading: 'Yuklanmoqda...',
   siUploadSuccess: 'Fayl yuklandi — qatorlarni ko‘rib chiqing',
   siUploadError: 'Faylni yuklashda xatolik',
+  siUploadPartialWarning: 'Ba’zi qatorlar o‘tkazib yuborildi: {details}',
+  siUploadRejectedBanner: 'Fayl yuklandi, lekin qatorlar ochilmadi',
+  siUploadEmptyRows: 'Bu ko‘chirmada ko‘rsatish uchun qatorlar yo‘q',
+  siErrAllDuplicates: 'Barcha qatorlar ilgari yuklangan (takroriy ko‘chirma)',
+  siErrNoValidRows: 'Exceldan qatorlar o‘qilmadi — bank ko‘chirmasi formatida ekanini tekshiring',
+  siErrNotExcel: 'Fayl Excel formatida emas — bankdan .xlsx qilib yuklang',
+  siErrExcelWrongFile: 'Fayl Excel formatida emas. Bankdan to‘g‘ridan-to‘g‘ri .xlsx qilib yuklab oling',
+  siErrNoExcelRows: 'Excelda ma’lumot qatorlari topilmadi. Kirim/chiqim va sana ustunlari borligini tekshiring',
+  siErrAllDuplicatesCount: 'Barcha {count} ta qator ilgari yuklangan — bu takroriy ko‘chirma',
+  siErrNoValidRowsCount: 'Qatorlar o‘qilmadi ({count} ta yaroqsiz). Bank ko‘chirmasi formatida ekanini tekshiring',
+  siErrNoValidRowsMixed: 'Yaroqli qator yo‘q. Yaroqsiz: {invalid}, takroriy: {duplicate}',
+  siErrReadFailed: 'Faylni o‘qib bo‘lmadi',
+  siErrNoSheet: 'Excel varag‘i topilmadi',
+  siNoteSkippedInvalid: 'Yaroqsiz qatorlar o‘tkazib yuborildi: {count}',
+  siNoteSkippedDuplicate: 'Takroriy qatorlar o‘tkazib yuborildi: {count}',
+  siErrKassaInsufficient: 'Kassa hisobida yetarli mablag‘ yo‘q',
+  siErrClientBalanceInsufficient: 'Mijoz hisobida yetarli mablag‘ yo‘q',
+  siErrClientNotFound: 'Mijoz topilmadi',
+  siErrClientRemoved: 'Mijoz o‘chirilgan',
   siStatementsList: 'Yuklangan ko‘chirmalar',
   siNoStatements: 'Hali ko‘chirma yuklanmagan',
   siReviewPending: 'Qatorlarni ko‘rib chiqish',
@@ -4423,7 +4480,7 @@ const uz_latin: T = {
   siErrInvalidAmount: 'Summa noto‘g‘ri yoki juda kichik (kamida 0,01)',
   siErrInvalidDate: 'Sana noto‘g‘ri',
   siErrValidation: 'Kiritilgan ma’lumotlar noto‘g‘ri',
-  siErrKassaModeBackend: 'Server eski versiyada — backendni qayta ishga tushiring (kassaga kirim)',
+  siErrKassaModeBackend: 'Server eski versiyada — serverni qayta ishga tushiring (kassaga kirim)',
   siErrFileRequired: 'Fayl tanlanmadi',
   siErrStatementNotFound: 'Ko‘chirma topilmadi',
   siErrRowNotFound: 'Qator topilmadi',
@@ -5818,6 +5875,25 @@ const ru: T = {
   siUploading: 'Загрузка...',
   siUploadSuccess: 'Файл загружен — проверьте строки',
   siUploadError: 'Ошибка загрузки файла',
+  siUploadPartialWarning: 'Некоторые строки пропущены: {details}',
+  siUploadRejectedBanner: 'Файл загружен, но строки не открылись',
+  siUploadEmptyRows: 'В этой выписке нет строк для отображения',
+  siErrAllDuplicates: 'Все строки уже загружены (дубликат выписки)',
+  siErrNoValidRows: 'Строки не прочитаны — проверьте формат банковской выписки',
+  siErrNotExcel: 'Файл не в формате Excel — скачайте .xlsx из банка',
+  siErrExcelWrongFile: 'Файл не в формате Excel. Скачайте выписку из банка в формате .xlsx',
+  siErrNoExcelRows: 'В Excel не найдены строки данных. Проверьте столбцы приход/расход и дата',
+  siErrAllDuplicatesCount: 'Все {count} строк уже загружены — дубликат выписки',
+  siErrNoValidRowsCount: 'Строки не прочитаны ({count} недействительных). Проверьте формат выписки',
+  siErrNoValidRowsMixed: 'Нет подходящих строк. Недействительных: {invalid}, дубликатов: {duplicate}',
+  siErrReadFailed: 'Не удалось прочитать файл',
+  siErrNoSheet: 'Лист Excel не найден',
+  siNoteSkippedInvalid: 'Пропущено недействительных строк: {count}',
+  siNoteSkippedDuplicate: 'Пропущено дубликатов: {count}',
+  siErrKassaInsufficient: 'Недостаточно средств в кассе',
+  siErrClientBalanceInsufficient: 'Недостаточно средств на счёте клиента',
+  siErrClientNotFound: 'Клиент не найден',
+  siErrClientRemoved: 'Клиент удалён',
   siStatementsList: 'Загруженные выписки',
   siNoStatements: 'Выписки ещё не загружены',
   siReviewPending: 'Проверить строки',
@@ -5920,7 +5996,7 @@ const ru: T = {
   siErrInvalidAmount: 'Сумма неверна или слишком мала (минимум 0,01)',
   siErrInvalidDate: 'Неверная дата',
   siErrValidation: 'Введённые данные неверны',
-  siErrKassaModeBackend: 'Сервер устарел — перезапустите backend (приход в кассу)',
+  siErrKassaModeBackend: 'Сервер устарел — перезапустите сервер (приход в кассу)',
   siErrFileRequired: 'Файл не выбран',
   siErrStatementNotFound: 'Выписка не найдена',
   siErrRowNotFound: 'Строка не найдена',

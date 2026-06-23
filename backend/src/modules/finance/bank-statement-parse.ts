@@ -111,16 +111,72 @@ function readText(row: Record<string, unknown>, aliases: string[]) {
   return String(getFieldValue(row, aliases) ?? '').trim() || null;
 }
 
+const HEADER_DEBIT_MARKERS = ['debit', 'chiqim', 'rasxod', 'расход', 'debet', 'дебет'];
+const HEADER_CREDIT_MARKERS = ['credit', 'kirim', 'prihod', 'приход', 'kredit', 'кредит'];
+const HEADER_DATE_MARKERS = [
+  'operation date',
+  'operatsiya sanasi',
+  'дата операции',
+  'operatsiya sanasi',
+  'data operatsii',
+];
+
+function rowLooksLikeHeader(row: unknown): boolean {
+  if (!Array.isArray(row)) return false;
+  const cells = row.map((cell) => normalizeText(String(cell ?? '')));
+  const hasDebit = cells.some((cell) =>
+    HEADER_DEBIT_MARKERS.some((marker) => cell.includes(marker)),
+  );
+  const hasCredit = cells.some((cell) =>
+    HEADER_CREDIT_MARKERS.some((marker) => cell.includes(marker)),
+  );
+  const hasDate = cells.some((cell) =>
+    HEADER_DATE_MARKERS.some((marker) => cell.includes(marker)),
+  );
+  return (hasDebit && hasCredit) || (hasDate && (hasDebit || hasCredit));
+}
+
+function detectHeaderRowIndex(worksheet: XLSX.WorkSheet): number {
+  const matrix = XLSX.utils.sheet_to_json<(string | number | null)[]>(worksheet, {
+    header: 1,
+    defval: null,
+    raw: false,
+    blankrows: false,
+  });
+  for (let i = 0; i < Math.min(matrix.length, 40); i++) {
+    if (rowLooksLikeHeader(matrix[i])) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+export function isExcelBuffer(buffer: Buffer): boolean {
+  if (buffer.length < 4) return false;
+  if (buffer[0] === 0x50 && buffer[1] === 0x4b) return true;
+  if (buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0) {
+    return true;
+  }
+  return false;
+}
+
 export function parseBankStatementRows(buffer: Buffer): ParsedBankStatementRow[] {
+  if (!isExcelBuffer(buffer)) {
+    throw new Error('Fayl Excel formatida emas');
+  }
+
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   const firstSheetName = workbook.SheetNames[0];
   if (!firstSheetName) {
     throw new Error('Workbook does not contain any sheet');
   }
   const worksheet = workbook.Sheets[firstSheetName];
+  const headerRowIndex = detectHeaderRowIndex(worksheet);
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
     defval: null,
     raw: false,
+    range: headerRowIndex,
+    blankrows: false,
   });
 
   return rows
@@ -137,8 +193,12 @@ export function parseBankStatementRows(buffer: Buffer): ParsedBankStatementRow[]
       operationDate: parseDateValue(
         getFieldValue(row, ['operation date', 'operatsiya sanasi', 'дата операции']),
       ),
-      debit: parseAmount(getFieldValue(row, ['debit', 'chiqim', 'расход', 'debet'])),
-      credit: parseAmount(getFieldValue(row, ['credit', 'kirim', 'приход', 'kredit'])),
+      debit: parseAmount(
+        getFieldValue(row, ['debit', 'chiqim', 'rasxod', 'расход', 'debet', 'дебет', 'dt']),
+      ),
+      credit: parseAmount(
+        getFieldValue(row, ['credit', 'kirim', 'prihod', 'приход', 'kredit', 'кредит', 'kt']),
+      ),
       receiverName: readText(row, [
         'mablag larni oluvchining nomi',
         'oluvchining nomi',

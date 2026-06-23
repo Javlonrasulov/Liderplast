@@ -26,7 +26,7 @@ import type { BankTransaction, BankVedomost } from '../store/erp-store';
 type RawStatement = Parameters<typeof mapBankVedomost>[0];
 import { useApp } from '../i18n/app-context';
 import { SingleDatePicker } from './SingleDatePicker';
-import { translateStatementApiError } from '../utils/statement-api-errors';
+import { translateStatementApiError, translateStatementUploadDetails } from '../utils/statement-api-errors';
 import {
   formatCurrency,
   formatDate,
@@ -347,10 +347,19 @@ export function StatementImportWizard({ source }: { source: 'bank' | 'kassa' }) 
         { method: 'POST', body: formData },
       );
       const result = mapBankVedomost(raw);
-      toast.success(t.siUploadSuccess);
       setSelectedId(result.id);
       setDetail(result);
       await refresh();
+      if (result.errorMessage) {
+        toast.warning(
+          t.siUploadPartialWarning.replace(
+            '{details}',
+            translateStatementUploadDetails(result.errorMessage, t),
+          ),
+        );
+      } else {
+        toast.success(t.siUploadSuccess);
+      }
     } catch (err) {
       showApiError(err);
     } finally {
@@ -650,7 +659,7 @@ export function StatementImportWizard({ source }: { source: 'bank' | 'kassa' }) 
           <input
             ref={fileRef}
             type="file"
-            accept=".xlsx"
+            accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
             className="hidden"
             onChange={handleUpload}
           />
@@ -683,6 +692,11 @@ export function StatementImportWizard({ source }: { source: 'bank' | 'kassa' }) 
                       </div>
                       <p className="mt-0.5 text-[10px] text-slate-400">
                         {formatDateTime(item.createdAt)} · {item.transactionsCount} {t.siColType}
+                        {item.status === 'rejected' && (
+                          <span className="ml-1 font-semibold text-rose-600">
+                            · {t.prBankStatusRejected}
+                          </span>
+                        )}
                       </p>
                     </button>
                     <button
@@ -748,6 +762,25 @@ export function StatementImportWizard({ source }: { source: 'bank' | 'kassa' }) 
                   </button>
                 </div>
               </div>
+
+              {(detail.status === 'rejected' || allTableRows.length === 0) && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+                  <p className="font-semibold">{t.siUploadRejectedBanner}</p>
+                  <p className="mt-1">
+                    {detail.errorMessage
+                      ? translateStatementUploadDetails(detail.errorMessage, t)
+                      : t.siUploadEmptyRows}
+                  </p>
+                </div>
+              )}
+              {detail.status === 'parsed' && detail.errorMessage && allTableRows.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                  {t.siUploadPartialWarning.replace(
+                    '{details}',
+                    translateStatementUploadDetails(detail.errorMessage, t),
+                  )}
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center justify-between gap-2 shrink-0">
                 <div className="flex items-center gap-1">

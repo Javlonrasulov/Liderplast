@@ -16,7 +16,7 @@ import { FinanceService } from './finance.service.js';
 import { KassaService } from './kassa.service.js';
 import { ConfirmStatementRowDto } from './dto/confirm-statement-row.dto.js';
 import { UpdateStatementRowDto } from './dto/update-statement-row.dto.js';
-import { parseBankStatementRows, type ParsedBankStatementRow } from './bank-statement-parse.js';
+import { parseBankStatementRows, isExcelBuffer, type ParsedBankStatementRow } from './bank-statement-parse.js';
 
 const SALARY_PURPOSE_KEYWORDS = ['oylik', 'ish haqi', 'zarplata', 'salary'];
 const IMPORT_FUNDING_SOURCE_NAME = 'Bank/Import';
@@ -173,13 +173,25 @@ export class StatementService {
     });
 
     try {
-      if (!file.originalname.toLowerCase().endsWith('.xlsx')) {
-        throw new Error('Faqat .xlsx fayllar qo‘llab-quvvatlanadi');
+      const lowerName = file.originalname.toLowerCase();
+      const hasExcelExtension =
+        lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls');
+      if (!hasExcelExtension && !isExcelBuffer(file.buffer)) {
+        throw new Error(
+          'Faqat Excel fayllar (.xlsx, .xls) qo‘llab-quvvatlanadi. Telegramdan yuklab, Excel sifatida saqlang.',
+        );
+      }
+      if (!isExcelBuffer(file.buffer)) {
+        throw new Error(
+          'Fayl Excel formatida emas. Faylni bankdan to‘g‘ridan-to‘g‘ri .xlsx qilib yuklab oling.',
+        );
       }
 
       const rows = parseBankStatementRows(file.buffer);
       if (rows.length === 0) {
-        throw new Error('Faylning birinchi varag‘ida qatorlar topilmadi');
+        throw new Error(
+          'Excel faylida ma’lumot qatorlari topilmadi. Ustun sarlavhalari (kirim/chiqim, sana) borligini tekshiring.',
+        );
       }
 
       const [clients, suppliers, employees, companyAccounts, existing] =
@@ -314,7 +326,19 @@ export class StatementService {
       });
 
       if (data.length === 0) {
-        throw new Error('Tekshiruvdan keyin yaroqli qatorlar topilmadi');
+        if (skippedDuplicate > 0 && skippedInvalid === 0) {
+          throw new Error(
+            `Barcha qatorlar (${skippedDuplicate} ta) ilgari boshqa ko‘chirmada yuklangan. Bu fayl takror hisoblanadi.`,
+          );
+        }
+        if (skippedInvalid > 0 && skippedDuplicate === 0) {
+          throw new Error(
+            `Fayldan hech qanday qator o‘qilmadi (${skippedInvalid} ta yaroqsiz qator). Excel ustunlari bank ko‘chirmasi formatida ekanini tekshiring.`,
+          );
+        }
+        throw new Error(
+          `Yaroqli qator topilmadi. Yaroqsiz: ${skippedInvalid}, takroriy: ${skippedDuplicate}.`,
+        );
       }
 
       await this.prisma.bankTransaction.createMany({ data });
@@ -337,14 +361,16 @@ export class StatementService {
         },
       });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Faylni o‘qishda xatolik';
       await this.prisma.bankVedomost.update({
         where: { id: vedomost.id },
         data: {
           status: BankVedomostStatus.REJECTED,
-          errorMessage:
-            error instanceof Error ? error.message : 'Faylni o‘qishda xatolik',
+          errorMessage: message,
         },
       });
+      throw new BadRequestException(message);
     }
 
     return this.getStatement(vedomost.id);

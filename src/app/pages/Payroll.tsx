@@ -22,6 +22,7 @@ import {
   EMPTY_PLACEHOLDER,
   INLINE_SEP,
 } from '../utils/format';
+import { translateApiError } from '../utils/statement-api-errors';
 import type { Employee, EmployeeProductRate, KassaEntry, Sale, ShiftRecord, Supplier, SupplierPurchaseOrder } from '../store/erp-store';
 import {
   AlertDialog,
@@ -103,7 +104,7 @@ function BankAccountBalanceCard({ color }: { color: string }) {
       await refresh();
       toast.success(t.siAccountActivated);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setBusy(false);
     }
@@ -777,7 +778,7 @@ function BankTab() {
       await dispatch({ type: 'UPLOAD_OBOROTKA', payload: { file } });
       setUploadMessage(t.prBankUploadSuccess);
     } catch (error) {
-      setUploadMessage(error instanceof Error ? error.message : t.whRequestError);
+      setUploadMessage(translateApiError(error, t, t.whRequestError));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -2260,7 +2261,7 @@ function SettingsTab() {
       await refresh();
       toast.success(t.siAccountAdded);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setAccountBusy(false);
     }
@@ -2275,7 +2276,7 @@ function SettingsTab() {
       await refresh();
       toast.success(t.siAccountActivated);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setAccountBusy(false);
     }
@@ -2288,7 +2289,7 @@ function SettingsTab() {
       await refresh();
       toast.success(t.siAccountDeleted);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setAccountBusy(false);
     }
@@ -2502,7 +2503,7 @@ function KassaTab() {
           })),
         );
       } else {
-        toast.error(err instanceof Error ? err.message : t.whRequestError);
+        toast.error(translateApiError(err, t, t.whRequestError));
       }
     } finally {
       setClientsLoading(false);
@@ -2550,7 +2551,7 @@ function KassaTab() {
       await loadKassaClients();
       toast.success(t.prKassaAddInflow);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setSaving(false);
     }
@@ -2577,7 +2578,7 @@ function KassaTab() {
       setOutflowComment('');
       toast.success(t.prKassaAddOutflow);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setSaving(false);
     }
@@ -2627,7 +2628,7 @@ function KassaTab() {
       await loadKassaClients();
       toast.success(t.btnSave);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setSaving(false);
     }
@@ -2646,7 +2647,7 @@ function KassaTab() {
       await loadKassaClients();
       toast.success(t.whDeleteAction);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.whRequestError);
+      toast.error(translateApiError(err, t, t.whRequestError));
     } finally {
       setSaving(false);
     }
