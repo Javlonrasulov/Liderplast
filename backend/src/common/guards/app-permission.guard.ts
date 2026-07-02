@@ -183,6 +183,16 @@ function requiredPermissionGroups(
     },
     { test: /^\/finance\/expenses$/, method: 'POST', anyOf: ['view_expenses'] },
     {
+      test: /^\/finance\/expenses\/[^/]+$/,
+      method: 'PATCH',
+      anyOf: ['view_expenses'],
+    },
+    {
+      test: /^\/finance\/expenses\/[^/]+$/,
+      method: 'DELETE',
+      anyOf: ['view_expenses'],
+    },
+    {
       test: /^\/finance\/raw-material-purchase-orders$/,
       method: 'GET',
       anyOf: ['view_expenses', 'view_raw_material'],

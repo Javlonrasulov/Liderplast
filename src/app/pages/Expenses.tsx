@@ -31,6 +31,7 @@ import { formatExpenseHistoryNote } from '../utils/expense-history-note';
 import {
   EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF,
   isRawMaterialExternalOrderExpense,
+  isExpenseHistoryLocked,
   labelExpenseCategory,
   resolveExpenseCategoryNameFromState,
 } from '../utils/expense-category-label';
@@ -254,7 +255,7 @@ function ExpenseHistoryTableView({
               ? formatShiftExpenseTableNote(expense.description, t)
               : expense.description;
             const noteText = formatExpenseHistoryNote(rawNote, t);
-            const locked = isRawMaterialExternalOrderExpense(expense, categories);
+            const locked = isExpenseHistoryLocked(expense, categories);
             const auditLines = expenseUserAuditLines(expense, t);
             return (
               <tr
@@ -382,6 +383,8 @@ export function Expenses() {
   });
   const [expenseEditError, setExpenseEditError] = useState('');
   const [expenseDeleteId, setExpenseDeleteId] = useState<string | null>(null);
+  const [expenseDeleteError, setExpenseDeleteError] = useState('');
+  const [expenseDeleteBusy, setExpenseDeleteBusy] = useState(false);
 
   const categories = state.expenseCategories;
   const fundingSources = state.expenseFundingSources;
@@ -669,6 +672,7 @@ export function Expenses() {
   };
 
   const openExpenseEdit = (expense: Expense) => {
+    if (isExpenseHistoryLocked(expense, categories)) return;
     setExpenseEdit(expense);
     setExpenseEditError('');
     setExpenseEditForm({
@@ -719,14 +723,25 @@ export function Expenses() {
   };
 
   const requestDeleteExpense = (expense: Expense) => {
-    if (isRawMaterialExternalOrderExpense(expense, categories)) return;
+    if (isExpenseHistoryLocked(expense, categories)) return;
+    setExpenseDeleteError('');
     setExpenseDeleteId(expense.id);
   };
 
-  const confirmDeleteExpense = () => {
-    if (!expenseDeleteId) return;
-    void dispatch({ type: 'DELETE_EXPENSE', payload: expenseDeleteId });
-    setExpenseDeleteId(null);
+  const confirmDeleteExpense = async () => {
+    if (!expenseDeleteId || expenseDeleteBusy) return;
+    setExpenseDeleteError('');
+    setExpenseDeleteBusy(true);
+    try {
+      await dispatch({ type: 'DELETE_EXPENSE', payload: expenseDeleteId });
+      setExpenseDeleteId(null);
+      setSuccess('✓');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setExpenseDeleteError(err instanceof Error ? err.message : 'Error');
+    } finally {
+      setExpenseDeleteBusy(false);
+    }
   };
 
   return (
@@ -1677,7 +1692,10 @@ export function Expenses() {
       <AlertDialog
         open={Boolean(expenseDeleteId)}
         onOpenChange={(open) => {
-          if (!open) setExpenseDeleteId(null);
+          if (!open) {
+            setExpenseDeleteId(null);
+            setExpenseDeleteError('');
+          }
         }}
       >
         <AlertDialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
@@ -1687,12 +1705,19 @@ export function Expenses() {
               {t.exExpenseDeleteHint}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {expenseDeleteError ? (
+            <p className="text-sm text-red-600 dark:text-red-400">{expenseDeleteError}</p>
+          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
               {t.btnCancel}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDeleteExpense}
+              disabled={expenseDeleteBusy}
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDeleteExpense();
+              }}
               className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500/30"
             >
               {t.exCategoryDelete}

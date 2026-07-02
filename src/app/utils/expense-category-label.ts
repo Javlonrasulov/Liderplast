@@ -51,6 +51,19 @@ export function isRawMaterialExternalOrderExpense(
   return isRawMaterialExternalOrderCategory(expense.categoryId, dbName);
 }
 
+/** Tarixda tahrir/o‘chirish taqiqlangan (tashqi buyurtma yoki bog‘langan xarajat) */
+export function isExpenseHistoryLocked(
+  expense: {
+    categoryId: string;
+    categoryName?: string | null;
+    isPurchaseLinked?: boolean;
+  },
+  categories: { id: string; name: string }[],
+): boolean {
+  if (expense.isPurchaseLinked) return true;
+  return isRawMaterialExternalOrderExpense(expense, categories);
+}
+
 function isRawMaterialBagWriteoffCategory(categoryId: string, nameFromDb: string): boolean {
   if (categoryId === EXPENSE_CATEGORY_ID_RAW_MATERIAL_BAG_WRITEOFF) return true;
   const n = (nameFromDb ?? '').trim();

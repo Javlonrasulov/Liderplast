@@ -122,7 +122,7 @@ export class FinanceController {
   }
 
   @Patch('expenses/:id')
-  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   updateExpense(
     @Param('id') id: string,
     @Body() dto: UpdateExpenseDto,
@@ -132,7 +132,7 @@ export class FinanceController {
   }
 
   @Delete('expenses/:id')
-  @Roles(Role.DIRECTOR, Role.ACCOUNTANT)
+  @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   deleteExpense(@Param('id') id: string) {
     return this.financeService.deleteExpense(id);
   }

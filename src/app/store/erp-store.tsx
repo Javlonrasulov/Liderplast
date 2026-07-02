@@ -268,6 +268,8 @@ export interface Expense {
   updatedByName?: string;
   /** Smenadan avtomatik yaratilgan elektr xarajati */
   sourceShiftId?: string | null;
+  /** Tashqi / yetkazib beruvchi buyurtmasiga bog‘langan */
+  isPurchaseLinked?: boolean;
 }
 
 export interface Supplier {
@@ -1535,6 +1537,8 @@ type BackendExpense = {
   sourceShiftId?: string | null;
   createdBy?: { fullName: string } | null;
   updatedBy?: { fullName: string } | null;
+  rawMaterialPurchaseOrder?: { id: string } | null;
+  supplierPurchaseOrder?: { id: string } | null;
 };
 
 type BackendSupplier = {
@@ -2730,6 +2734,9 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     createdByName: expense.createdBy?.fullName?.trim() || undefined,
     updatedByName: expense.updatedBy?.fullName?.trim() || undefined,
     sourceShiftId: expense.sourceShiftId ?? undefined,
+    isPurchaseLinked: Boolean(
+      expense.rawMaterialPurchaseOrder || expense.supplierPurchaseOrder,
+    ),
   }));
 
   const mappedMachines: Machine[] = machines.map((machine) => ({

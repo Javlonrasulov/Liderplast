@@ -349,6 +349,8 @@ export class FinanceService {
         updatedBy: {
           omit: { passwordHash: true },
         },
+        rawMaterialPurchaseOrder: { select: { id: true } },
+        supplierPurchaseOrder: { select: { id: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -358,10 +360,16 @@ export class FinanceService {
     categoryId: string | null;
     category: { id: string; name: string } | null;
     rawMaterialPurchaseOrder: unknown | null;
+    supplierPurchaseOrder?: unknown | null;
   }) {
     if (expense.rawMaterialPurchaseOrder) {
       throw new BadRequestException(
         'Xom ashyo tashqi buyurtma xarajatini bu yerda o‘zgartirib yoki o‘chirib bo‘lmaydi.',
+      );
+    }
+    if (expense.supplierPurchaseOrder) {
+      throw new BadRequestException(
+        'Yetkazib beruvchi buyurtmasi xarajatini bu yerda o‘chirib bo‘lmaydi. Buyurtmani yetkazib beruvchilar bo‘limidan o‘chiring.',
       );
     }
     const categoryId = expense.categoryId ?? expense.category?.id ?? '';
@@ -387,6 +395,7 @@ export class FinanceService {
       include: {
         category: true,
         rawMaterialPurchaseOrder: true,
+        supplierPurchaseOrder: true,
       },
     });
     if (!existing) {
@@ -467,6 +476,7 @@ export class FinanceService {
       include: {
         category: true,
         rawMaterialPurchaseOrder: true,
+        supplierPurchaseOrder: true,
       },
     });
     if (!existing) {
@@ -474,7 +484,19 @@ export class FinanceService {
     }
     this.assertExpenseManuallyEditable(existing);
 
-    await this.prisma.expense.delete({ where: { id } });
+    try {
+      await this.prisma.expense.delete({ where: { id } });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2003'
+      ) {
+        throw new BadRequestException(
+          'Xarajat boshqa hujjat (buyurtma, bank yozuvi va hokazo) bilan bog‘langan — avval ularni o‘chiring yoki buyurtma bo‘limidan boshqaring.',
+        );
+      }
+      throw err;
+    }
     return { success: true };
   }
 
