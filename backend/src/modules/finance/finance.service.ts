@@ -477,6 +477,7 @@ export class FinanceService {
         category: true,
         rawMaterialPurchaseOrder: true,
         supplierPurchaseOrder: true,
+        bankTransaction: { select: { id: true } },
       },
     });
     if (!existing) {
@@ -485,7 +486,21 @@ export class FinanceService {
     this.assertExpenseManuallyEditable(existing);
 
     try {
-      await this.prisma.expense.delete({ where: { id } });
+      await this.prisma.$transaction(async (tx) => {
+        await tx.bankTransaction.updateMany({
+          where: { expenseId: id },
+          data: { expenseId: null },
+        });
+        await tx.bagWriteoff.updateMany({
+          where: { expenseId: id },
+          data: { expenseId: null },
+        });
+        await tx.companyAsset.updateMany({
+          where: { expenseId: id },
+          data: { expenseId: null },
+        });
+        await tx.expense.delete({ where: { id } });
+      });
     } catch (err) {
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&

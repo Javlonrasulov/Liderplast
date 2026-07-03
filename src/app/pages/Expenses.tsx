@@ -56,6 +56,9 @@ import {
   DialogTitle,
 } from '../components/ui/dialog';
 
+/** To‘liq ekran tarix (z-130) ustida tasdiqlash / tahrir modallari */
+const MODAL_OVER_FULLSCREEN = 'z-[140]';
+
 const CHART_BAR = [
   'bg-yellow-500',
   'bg-blue-500',
@@ -735,7 +738,7 @@ export function Expenses() {
     try {
       await dispatch({ type: 'DELETE_EXPENSE', payload: expenseDeleteId });
       setExpenseDeleteId(null);
-      setSuccess('✓');
+      setSuccess(t.exCategoryDelete + ' ✓');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setExpenseDeleteError(err instanceof Error ? err.message : 'Error');
@@ -1598,7 +1601,10 @@ export function Expenses() {
       </AlertDialog>
 
       <Dialog open={Boolean(expenseEdit)} onOpenChange={(open) => !open && setExpenseEdit(null)}>
-        <DialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+        <DialogContent
+          overlayClassName={MODAL_OVER_FULLSCREEN}
+          className={cn('sm:max-w-md border-slate-200 dark:border-slate-700', MODAL_OVER_FULLSCREEN)}
+        >
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">{t.exExpenseEditTitle}</DialogTitle>
           </DialogHeader>
@@ -1698,7 +1704,10 @@ export function Expenses() {
           }
         }}
       >
-        <AlertDialogContent className="sm:max-w-md border-slate-200 dark:border-slate-700">
+        <AlertDialogContent
+          overlayClassName={MODAL_OVER_FULLSCREEN}
+          className={cn('sm:max-w-md border-slate-200 dark:border-slate-700', MODAL_OVER_FULLSCREEN)}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-slate-900 dark:text-white">{t.exExpenseDeleteTitle}</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
