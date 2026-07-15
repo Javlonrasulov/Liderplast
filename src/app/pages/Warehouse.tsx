@@ -651,7 +651,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
   );
 
   const siroRawMaterials = useMemo(
-    () => rawMaterials.filter((rm) => rm.rawMaterialKind !== 'PAINT'),
+    () => rawMaterials.filter((rm) => (rm.rawMaterialKind ?? 'SIRO') === 'SIRO'),
     [rawMaterials],
   );
   const paintRawMaterials = useMemo(
@@ -1751,7 +1751,10 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
       setError(t.whNameRequired);
       return;
     }
-    if (!Number.isFinite(defaultBagWeightKg) || defaultBagWeightKg <= 0) {
+    if (
+      rawMaterialForm.rawMaterialKind !== 'PACKAGE' &&
+      (!Number.isFinite(defaultBagWeightKg) || defaultBagWeightKg <= 0)
+    ) {
       setError(t.rmDefaultBagWeightRequired);
       return;
     }
@@ -1779,7 +1782,9 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
           description: rawMaterialForm.description.trim() || undefined,
           unit: editingRawMaterial.unit,
           rawMaterialKind: rawMaterialForm.rawMaterialKind,
-          defaultBagWeightKg,
+          ...(rawMaterialForm.rawMaterialKind === 'PACKAGE'
+            ? {}
+            : { defaultBagWeightKg }),
           ...pricing,
         },
       });
@@ -3212,8 +3217,22 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                   >
                     {t.rmKindPaint}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'PACKAGE' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'PACKAGE'
+                        ? 'border-cyan-600 bg-cyan-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPackage}
+                  </button>
                 </div>
               </div>
+              {rawMaterialForm.rawMaterialKind !== 'PACKAGE' ? (
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                   {t.rmDefaultBagWeight}
@@ -3234,6 +3253,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 />
                 <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
               </div>
+              ) : null}
               <WarehouseProductPricingFieldsBlock
                 value={{
                   purchasePrice: rawMaterialForm.purchasePrice,
@@ -3332,8 +3352,22 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                   >
                     {t.rmKindPaint}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRawMaterialForm((prev) => ({ ...prev, rawMaterialKind: 'PACKAGE' }))
+                    }
+                    className={`flex-1 min-w-[7rem] rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      rawMaterialForm.rawMaterialKind === 'PACKAGE'
+                        ? 'border-cyan-600 bg-cyan-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPackage}
+                  </button>
                 </div>
               </div>
+              {rawMaterialForm.rawMaterialKind !== 'PACKAGE' ? (
               <div>
                 <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
                   {t.rmDefaultBagWeight}
@@ -3354,6 +3388,7 @@ export function Warehouse({ mode = 'semi' }: { mode?: WarehouseMode } = {}) {
                 />
                 <p className="mt-1 text-xs text-slate-400">{t.rmDefaultBagWeightHint}</p>
               </div>
+              ) : null}
               <WarehouseProductPricingFieldsBlock
                 value={{
                   purchasePrice: rawMaterialForm.purchasePrice,

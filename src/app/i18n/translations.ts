@@ -551,16 +551,22 @@ export interface T {
   rmRemaining: string;
   /** Kraska bo‘limidagi қолдиқ картаси учун */
   rmRemainingPaint: string;
+  rmRemainingPackage: string;
   rmStockLevel: string;
   rmNewEntry: string;
   rmIncomingTitleSiro: string;
   rmIncomingTitlePaint: string;
+  rmIncomingTitlePackage: string;
   rmIncomingTabSiro: string;
   rmIncomingTabPaint: string;
+  rmIncomingTabPackage: string;
   rmIncomingHintPaint: string;
+  rmIncomingHintPackage: string;
   rmPlaceholderDescPaint: string;
+  rmPlaceholderDescPackage: string;
   rmMetricsCaptionSiro: string;
   rmMetricsCaptionPaint: string;
+  rmMetricsCaptionPackage: string;
   rmAlertsTitlePaint: string;
   rmAlertsSubtitlePaint: string;
   rmSelectPaintRequired: string;
@@ -682,8 +688,12 @@ export interface T {
   rmKindLabel: string;
   rmKindSiro: string;
   rmKindPaint: string;
+  rmKindPackage: string;
   rmPaintHint: string;
+  rmPackageHint: string;
   rmCreatePaintButton: string;
+  rmCreatePackageButton: string;
+  rmHistoryCreatedBy: string;
   /** Raw Material page — section headings */
   rmSectionOverview: string;
   rmSectionOverviewDesc: string;
@@ -2078,11 +2088,15 @@ const uz_cyrillic: T = {
   rmKindLabel: 'Хомашё тури',
   rmKindSiro: 'PET / оддий хомашё',
   rmKindPaint: 'Краска / бўёқ',
+  rmKindPackage: 'Пакет',
   rmPaintHint:
     'Турни «краска» деб белгиланг — сменада фақат шу турдаги позициялар танланади.',
+  rmPackageHint: 'Пакет тури килограммда омборга кирим қилинади.',
   rmCreatePaintButton: 'Краскани сақлаш',
+  rmCreatePackageButton: 'Пакет турини сақлаш',
+  rmHistoryCreatedBy: 'Ким томонидан',
   rmSectionOverview: 'Умумий кўрсаткичлар',
-  rmSectionOverviewDesc: 'PET хомашё ва краска бўйича кирим, сарф ва қолдиқ',
+  rmSectionOverviewDesc: 'PET хомашё, краска ва пакет бўйича кирим, сарф ва қолдиқ',
   rmSectionAlerts: 'Огоҳлантиришлар',
   rmSectionAlertsDesc: 'Кам қолдиқ бўйича турлар',
   rmSectionCreateIncoming: 'Каталог ва омборга кирим',
@@ -2127,16 +2141,22 @@ const uz_cyrillic: T = {
   rmTotalOut: 'Жами ишлатилди',
   rmRemaining: 'Қолган хомашё',
   rmRemainingPaint: 'Қолган краска / бўёқ',
+  rmRemainingPackage: 'Қолган пакет',
   rmStockLevel: 'Омбор тўлиши',
   rmNewEntry: 'Янги хомашё кирими',
   rmIncomingTitleSiro: 'Янги хомашё кирими',
   rmIncomingTitlePaint: 'Янги краска кирими',
+  rmIncomingTitlePackage: 'Янги пакет кирими',
   rmIncomingTabSiro: 'PET хомашё',
   rmIncomingTabPaint: 'Краска',
+  rmIncomingTabPackage: 'Пакет',
   rmIncomingHintPaint: 'Кирим танланган краска/бўёқ позициясига ёзилади.',
+  rmIncomingHintPackage: 'Кирим каталогдан танланган пакет турига килограммда ёзилади.',
   rmPlaceholderDescPaint: 'Краска кирими...',
+  rmPlaceholderDescPackage: 'Пакет кирими...',
   rmMetricsCaptionSiro: 'PET хомашё',
   rmMetricsCaptionPaint: 'Краска / бўёқ',
+  rmMetricsCaptionPackage: 'Пакет',
   rmAlertsTitlePaint: 'Краска турлари бўйича огоҳлантириш',
   rmAlertsSubtitlePaint: 'Ҳар бир краска қолдиғи алоҳида назорат қилинади',
   rmSelectPaintRequired: 'Аввал «Краска / бўёқ» турида хомашё яратинг',
@@ -3594,11 +3614,15 @@ const uz_latin: T = {
   rmKindLabel: 'Xomashyo turi',
   rmKindSiro: 'PET / oddiy xomashyo',
   rmKindPaint: 'Kraska / bo‘yoq',
+  rmKindPackage: 'Paket',
   rmPaintHint:
     'Turni «kraska» deb belgilang — smenada faqat shu turdagi pozitsiyalar tanlanadi.',
+  rmPackageHint: 'Paket turi kilogrammda omborga kirim qilinadi.',
   rmCreatePaintButton: 'Kraskani saqlash',
+  rmCreatePackageButton: 'Paket turini saqlash',
+  rmHistoryCreatedBy: 'Kim tomonidan',
   rmSectionOverview: 'Umumiy ko‘rsatkichlar',
-  rmSectionOverviewDesc: 'PET xomashyo va kraska bo‘yicha kirim, sarf va qoldiq',
+  rmSectionOverviewDesc: 'PET xomashyo, kraska va paket bo‘yicha kirim, sarf va qoldiq',
   rmSectionAlerts: 'Ogohlantirishlar',
   rmSectionAlertsDesc: 'Kam qoldiq bo‘yicha turlar',
   rmSectionCreateIncoming: 'Katalog va omborga kirim',
@@ -3643,16 +3667,22 @@ const uz_latin: T = {
   rmTotalOut: 'Jami ishlatildi',
   rmRemaining: "Qolgan xomashyo",
   rmRemainingPaint: "Qolgan kraska / bo'yoq",
+  rmRemainingPackage: 'Qolgan paket',
   rmStockLevel: "Ombor to'lishi",
   rmNewEntry: 'Yangi xomashyo kirimi',
   rmIncomingTitleSiro: 'Yangi xomashyo kirimi',
   rmIncomingTitlePaint: 'Yangi kraska kirimi',
+  rmIncomingTitlePackage: 'Yangi paket kirimi',
   rmIncomingTabSiro: 'PET xomashyo',
   rmIncomingTabPaint: 'Kraska',
+  rmIncomingTabPackage: 'Paket',
   rmIncomingHintPaint: "Kirim tanlangan kraska/bo'yoq pozitsiyasiga yoziladi.",
+  rmIncomingHintPackage: 'Kirim katalogdan tanlangan paket turiga kilogrammda yoziladi.',
   rmPlaceholderDescPaint: 'Kraska kirimi...',
+  rmPlaceholderDescPackage: 'Paket kirimi...',
   rmMetricsCaptionSiro: 'PET xomashyo',
   rmMetricsCaptionPaint: "Kraska / bo'yoq",
+  rmMetricsCaptionPackage: 'Paket',
   rmAlertsTitlePaint: 'Kraska turlari bo\'yicha ogohlantirish',
   rmAlertsSubtitlePaint: "Har bir kraska qoldig'i alohida nazorat qilinadi",
   rmSelectPaintRequired: "Avval «Kraska / bo'yoq» turida xomashyo yarating",
@@ -5111,11 +5141,15 @@ const ru: T = {
   rmKindLabel: 'Тип сырья',
   rmKindSiro: 'PET / обычное сырьё',
   rmKindPaint: 'Краска / лак',
+  rmKindPackage: 'Пакет',
   rmPaintHint:
     'Отметьте тип «краска» — в смене будут доступны только позиции этого типа.',
+  rmPackageHint: 'Пакеты приходуются на склад в килограммах.',
   rmCreatePaintButton: 'Сохранить краску',
+  rmCreatePackageButton: 'Сохранить тип пакета',
+  rmHistoryCreatedBy: 'Кем добавлено',
   rmSectionOverview: 'Сводные показатели',
-  rmSectionOverviewDesc: 'Поступление, расход и остаток: PET и краска',
+  rmSectionOverviewDesc: 'Поступление, расход и остаток: PET, краска и пакеты',
   rmSectionAlerts: 'Предупреждения',
   rmSectionAlertsDesc: 'Типы сырья с низким остатком',
   rmSectionCreateIncoming: 'Справочник и поступление на склад',
@@ -5160,16 +5194,22 @@ const ru: T = {
   rmTotalOut: 'Всего использовано',
   rmRemaining: 'Остаток сырья',
   rmRemainingPaint: 'Остаток краски / красителя',
+  rmRemainingPackage: 'Остаток пакетов',
   rmStockLevel: 'Заполненность склада',
   rmNewEntry: 'Новое поступление сырья',
   rmIncomingTitleSiro: 'Новое поступление сырья (PET)',
   rmIncomingTitlePaint: 'Новое поступление краски',
+  rmIncomingTitlePackage: 'Новое поступление пакетов',
   rmIncomingTabSiro: 'PET / сырьё',
   rmIncomingTabPaint: 'Краска',
+  rmIncomingTabPackage: 'Пакет',
   rmIncomingHintPaint: 'Поступление будет записано на выбранную позицию краски.',
+  rmIncomingHintPackage: 'Поступление в килограммах будет записано на выбранный тип пакета.',
   rmPlaceholderDescPaint: 'Поступление краски...',
+  rmPlaceholderDescPackage: 'Поступление пакетов...',
   rmMetricsCaptionSiro: 'PET / сырьё',
   rmMetricsCaptionPaint: 'Краска / краситель',
+  rmMetricsCaptionPackage: 'Пакет',
   rmAlertsTitlePaint: 'Предупреждения по краске',
   rmAlertsSubtitlePaint: 'Остаток каждой позиции краски отслеживается отдельно',
   rmSelectPaintRequired: 'Сначала создайте сырьё с типом «краска»',

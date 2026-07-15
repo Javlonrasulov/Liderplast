@@ -22,7 +22,7 @@ import {
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
-import { formatNumber, formatDate, formatKgAmount, todayYmd } from '../utils/format';
+import { formatNumber, formatKgAmount, todayYmd } from '../utils/format';
 import { RawMaterialMovementHistoryTable } from '../components/RawMaterialMovementHistoryTable';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
@@ -117,7 +117,7 @@ export function RawMaterial() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [incomingRawMaterialId, setIncomingRawMaterialId] = useState('');
-  const [incomingKind, setIncomingKind] = useState<'SIRO' | 'PAINT'>('SIRO');
+  const [incomingKind, setIncomingKind] = useState<RawMaterialKind>('SIRO');
   const [historyOpen, setHistoryOpen] = useState(false);
   const [createTypeOpen, setCreateTypeOpen] = useState(false);
   const [rmTab, setRmTab] = useState<'catalog' | 'overview' | 'stock'>('stock');
@@ -148,6 +148,7 @@ export function RawMaterial() {
 
   const siroStockKg = stockByKind.siro;
   const paintStockKg = stockByKind.paint;
+  const packageStockKg = stockByKind.package;
 
   const lowStock = siroStockKg < 1000;
   const criticalStock = siroStockKg < 500;
@@ -206,13 +207,14 @@ export function RawMaterial() {
           : undefined;
         return {
           id: entry.id,
-          date: entry.date,
+          createdAt: entry.createdAt,
           type: entry.type,
           amount: entry.amount,
           description: entry.description,
           rawMaterialName:
             entry.rawMaterialName?.trim() || meta?.name || '—',
           materialKind: meta?.kind,
+          createdByName: entry.createdByName,
         };
       }),
     [filteredEntries, rawMaterialMetaById],
@@ -230,10 +232,13 @@ export function RawMaterial() {
       outgoing: t.rmOutgoing,
       kindSiro: t.rmKindSiro,
       kindPaint: t.rmKindPaint,
+      kindPackage: t.rmKindPackage,
+      createdBy: t.rmHistoryCreatedBy,
       unitKg: t.unitKg,
       balance: t.rmBalance,
       metricsSiro: t.rmMetricsCaptionSiro,
       metricsPaint: t.rmMetricsCaptionPaint,
+      metricsPackage: t.rmMetricsCaptionPackage,
       empty: t.noData,
     }),
     [t],
@@ -243,14 +248,12 @@ export function RawMaterial() {
     return state.warehouseProducts
       .filter((p): p is RawMaterialProduct => {
         if (p.itemType !== 'RAW_MATERIAL') return false;
-        return incomingKind === 'PAINT'
-          ? p.rawMaterialKind === 'PAINT'
-          : p.rawMaterialKind !== 'PAINT';
+        return (p.rawMaterialKind ?? 'SIRO') === incomingKind;
       })
       .map((p) => ({ id: p.id, name: p.name }));
   }, [state.warehouseProducts, incomingKind]);
 
-  const buildKindAlerts = (paintOnly: boolean) => {
+  const buildKindAlerts = (kind: Extract<RawMaterialKind, 'SIRO' | 'PAINT'>) => {
     const stockByName = new Map<string, number>();
     for (const item of state.warehouseStock) {
       if (item.itemType === 'RAW_MATERIAL' && item.itemName) {
@@ -260,8 +263,7 @@ export function RawMaterial() {
     return state.warehouseProducts
       .filter((item): item is RawMaterialProduct => {
         if (item.itemType !== 'RAW_MATERIAL') return false;
-        const isPaint = item.rawMaterialKind === 'PAINT';
-        return paintOnly ? isPaint : !isPaint;
+        return (item.rawMaterialKind ?? 'SIRO') === kind;
       })
       .map((item) => {
         const quantityKg = stockByName.get(item.name) ?? 0;
@@ -274,12 +276,12 @@ export function RawMaterial() {
   };
 
   const siroMaterialAlerts = useMemo(
-    () => buildKindAlerts(false),
+    () => buildKindAlerts('SIRO'),
     [state.warehouseProducts, state.warehouseStock],
   );
 
   const paintMaterialAlerts = useMemo(
-    () => buildKindAlerts(true),
+    () => buildKindAlerts('PAINT'),
     [state.warehouseProducts, state.warehouseStock],
   );
 
@@ -289,13 +291,14 @@ export function RawMaterial() {
     );
     return {
       total: raw.length,
-      siro: raw.filter((p) => p.rawMaterialKind !== 'PAINT').length,
+      siro: raw.filter((p) => (p.rawMaterialKind ?? 'SIRO') === 'SIRO').length,
       paint: raw.filter((p) => p.rawMaterialKind === 'PAINT').length,
+      package: raw.filter((p) => p.rawMaterialKind === 'PACKAGE').length,
     };
   }, [state.warehouseProducts]);
 
   const lowStockTypeCount = siroMaterialAlerts.length + paintMaterialAlerts.length;
-  const totalStockKg = siroStockKg + paintStockKg;
+  const totalStockKg = siroStockKg + paintStockKg + packageStockKg;
 
   const resolvedIncomingRawMaterialId = useMemo(() => {
     if (incomingCatalogItems.length === 0) return '';
@@ -343,19 +346,27 @@ export function RawMaterial() {
     setIncomingRawMaterialId('');
   }, [incomingKind]);
 
-  const runIncomingSubmit = (
+  const runIncomingSubmit = async (
     rawMaterialId: string,
     amountKg: number,
     description: string,
     date: string,
   ) => {
-    dispatch({
-      type: 'ADD_RAW_MATERIAL',
-      payload: { rawMaterialId, amount: amountKg, description, date },
-    });
-    setForm({ amount: '', unit: 'kg', description: '', date: todayYmd() });
-    setSuccess(`${formatKgAmount(amountKg)} ${t.unitKg} ${t.successAdded}`);
-    setTimeout(() => setSuccess(''), 3000);
+    try {
+      await dispatch({
+        type: 'ADD_RAW_MATERIAL',
+        payload: { rawMaterialId, amount: amountKg, description, date },
+      });
+      setForm({ amount: '', unit: 'kg', description: '', date: todayYmd() });
+      setSuccess(`${formatKgAmount(amountKg)} ${t.unitKg} ${t.successAdded}`);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? translateWarehouseApiError(err.message, t)
+          : t.whRequestError,
+      );
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -376,7 +387,13 @@ export function RawMaterial() {
       setError(t.labelAmount + '!');
       return;
     }
-    const description = form.description || t.rmDefaultIncomingNote;
+    const description =
+      form.description ||
+      (incomingKind === 'PAINT'
+        ? t.rmIncomingTitlePaint
+        : incomingKind === 'PACKAGE'
+          ? t.rmIncomingTitlePackage
+          : t.rmDefaultIncomingNote);
     const order = primaryPendingPurchaseOrder;
     if (
       order &&
@@ -391,7 +408,7 @@ export function RawMaterial() {
       });
       return;
     }
-    runIncomingSubmit(rawMaterialId, amountKg, description, form.date);
+    void runIncomingSubmit(rawMaterialId, amountKg, description, form.date);
   };
 
   const parseAmountInput = (raw: string) =>
@@ -401,8 +418,14 @@ export function RawMaterial() {
     form.unit === 'ton'
       ? parseAmountInput(form.amount || '0') * 1000
       : parseAmountInput(form.amount || '0');
-  const previewStockKg = incomingKind === 'PAINT' ? paintStockKg : siroStockKg;
+  const previewStockKg =
+    incomingKind === 'PAINT'
+      ? paintStockKg
+      : incomingKind === 'PACKAGE'
+        ? packageStockKg
+        : siroStockKg;
   const incomingAutoBagCount =
+    incomingKind === 'SIRO' &&
     incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
     incomingRawMaterial.defaultBagWeightKg &&
     incomingRawMaterial.defaultBagWeightKg > 0 &&
@@ -447,7 +470,7 @@ export function RawMaterial() {
         {rmTab === 'stock' && (
           <div className="mt-0 space-y-4 focus-visible:outline-none">
             <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmWarehouseStockPageDesc}</p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <RmStatCard
                 label={t.rmWarehouseStockTotal}
                 value={formatKgAmount(totalStockKg)}
@@ -478,6 +501,13 @@ export function RawMaterial() {
                 unit={t.unitKg}
                 icon={Droplets}
                 iconWrapClass="bg-violet-500"
+              />
+              <RmStatCard
+                label={t.rmRemainingPackage}
+                value={formatKgAmount(packageStockKg)}
+                unit={t.unitKg}
+                icon={Package}
+                iconWrapClass="bg-cyan-500"
               />
               <RmStatCard
                 label={t.rmSectionAlerts}
@@ -605,6 +635,49 @@ export function RawMaterial() {
             </div>
           </div>
           </div>
+          <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+            {t.rmMetricsCaptionPackage}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-600 flex items-center justify-center">
+                  <ArrowDownCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalIn}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatKgAmount(flowByKind.packageIn)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center">
+                  <ArrowUpCircle size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmTotalOut}</span>
+              </div>
+              <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                {formatKgAmount(flowByKind.packageOut)}{' '}
+                <span className="text-sm text-slate-400 font-normal">{t.unitKg}</span>
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center">
+                  <Package size={18} className="text-white" />
+                </div>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{t.rmRemainingPackage}</span>
+              </div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {formatKgAmount(packageStockKg)}{' '}
+                <span className="text-sm font-normal text-slate-400">{t.unitKg}</span>
+              </p>
+            </div>
+          </div>
+          </div>
         </div>
 
         <Collapsible
@@ -632,9 +705,10 @@ export function RawMaterial() {
               entries={historyTableEntries}
               labels={historyTableLabels}
               footer={{
-                balanceKg: siroStockKg + paintStockKg,
+                balanceKg: siroStockKg + paintStockKg + packageStockKg,
                 siroKg: siroStockKg,
                 paintKg: paintStockKg,
+                packageKg: packageStockKg,
                 lowStock,
               }}
             />
@@ -648,7 +722,7 @@ export function RawMaterial() {
         <div className="mt-0 space-y-4 focus-visible:outline-none">
           <p className="text-xs text-slate-500 dark:text-slate-400">{t.rmSectionCreateIncomingDesc}</p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <RmStatCard
               label={t.rmStatsCatalogTotal}
               value={formatNumber(catalogStats.total)}
@@ -666,6 +740,12 @@ export function RawMaterial() {
               value={formatNumber(catalogStats.paint)}
               icon={Droplets}
               iconWrapClass="bg-violet-500"
+            />
+            <RmStatCard
+              label={t.rmMetricsCaptionPackage}
+              value={formatNumber(catalogStats.package)}
+              icon={Package}
+              iconWrapClass="bg-cyan-500"
             />
             <RmStatCard
               label={t.rmPendingExternalOrdersTitle}
@@ -854,8 +934,23 @@ export function RawMaterial() {
                   >
                     {t.rmKindPaint}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, rawMaterialKind: 'PACKAGE' })}
+                    className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                      createForm.rawMaterialKind === 'PACKAGE'
+                        ? 'border-cyan-600 bg-cyan-600 text-white'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {t.rmKindPackage}
+                  </button>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{t.rmPaintHint}</p>
+                {createForm.rawMaterialKind !== 'SIRO' ? (
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {createForm.rawMaterialKind === 'PAINT' ? t.rmPaintHint : t.rmPackageHint}
+                  </p>
+                ) : null}
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
@@ -869,7 +964,11 @@ export function RawMaterial() {
               </div>
               <button type="submit" className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
                 <Plus size={16} />
-                {createForm.rawMaterialKind === 'PAINT' ? t.rmCreatePaintButton : t.rmCreateTypeButton}
+                {createForm.rawMaterialKind === 'PAINT'
+                  ? t.rmCreatePaintButton
+                  : createForm.rawMaterialKind === 'PACKAGE'
+                    ? t.rmCreatePackageButton
+                    : t.rmCreateTypeButton}
               </button>
             </form>
         </div>
@@ -881,7 +980,11 @@ export function RawMaterial() {
                 <Plus size={16} className="text-white" />
               </div>
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm">
-                {incomingKind === 'PAINT' ? t.rmIncomingTitlePaint : t.rmIncomingTitleSiro}
+                {incomingKind === 'PAINT'
+                  ? t.rmIncomingTitlePaint
+                  : incomingKind === 'PACKAGE'
+                    ? t.rmIncomingTitlePackage
+                    : t.rmIncomingTitleSiro}
               </h3>
             </div>
             {pendingExternalOrders.length > 0 && (
@@ -962,6 +1065,17 @@ export function RawMaterial() {
               >
                 {t.rmIncomingTabPaint}
               </button>
+              <button
+                type="button"
+                onClick={() => setIncomingKind('PACKAGE')}
+                className={`flex-1 min-w-[8rem] rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                  incomingKind === 'PACKAGE'
+                    ? 'border-cyan-600 bg-cyan-600 text-white'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                }`}
+              >
+                {t.rmIncomingTabPackage}
+              </button>
             </div>
 
             {success && (
@@ -992,7 +1106,11 @@ export function RawMaterial() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-slate-400 mt-1">
-                  {incomingKind === 'PAINT' ? t.rmIncomingHintPaint : t.rmIncomingHint}
+                  {incomingKind === 'PAINT'
+                    ? t.rmIncomingHintPaint
+                    : incomingKind === 'PACKAGE'
+                      ? t.rmIncomingHintPackage
+                      : t.rmIncomingHint}
                 </p>
                 {incomingKind === 'SIRO' &&
                   incomingRawMaterial?.itemType === 'RAW_MATERIAL' &&
@@ -1050,7 +1168,13 @@ export function RawMaterial() {
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder={incomingKind === 'PAINT' ? t.rmPlaceholderDescPaint : t.rmPlaceholderDesc}
+                  placeholder={
+                    incomingKind === 'PAINT'
+                      ? t.rmPlaceholderDescPaint
+                      : incomingKind === 'PACKAGE'
+                        ? t.rmPlaceholderDescPackage
+                        : t.rmPlaceholderDesc
+                  }
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
               </div>
 
@@ -1123,7 +1247,7 @@ export function RawMaterial() {
               onClick={() => {
                 const p = incomingQtyMismatchPayload;
                 if (!p) return;
-                runIncomingSubmit(p.rawMaterialId, p.amountKg, p.description, p.date);
+                void runIncomingSubmit(p.rawMaterialId, p.amountKg, p.description, p.date);
                 setIncomingQtyMismatchPayload(null);
               }}
               className="bg-indigo-600 hover:bg-indigo-700"

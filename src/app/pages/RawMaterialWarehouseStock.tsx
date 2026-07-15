@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Droplets,
   Palette,
+  Package,
   AlertTriangle,
   Pencil,
   Trash2,
@@ -158,7 +159,8 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
       (p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL',
     );
     return [...raw].sort((a, b) => {
-      const order = (k: RawMaterialKind | undefined) => (k === 'PAINT' ? 1 : 0);
+      const order = (k: RawMaterialKind | undefined) =>
+        k === 'PAINT' ? 1 : k === 'PACKAGE' ? 2 : 0;
       const d = order(a.rawMaterialKind) - order(b.rawMaterialKind);
       if (d !== 0) return d;
       return a.name.localeCompare(b.name);
@@ -172,7 +174,7 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
 
   const lowSiro = useMemo(() => {
     return rows
-      .filter((rm) => rm.rawMaterialKind !== 'PAINT')
+      .filter((rm) => (rm.rawMaterialKind ?? 'SIRO') === 'SIRO')
       .map((rm) => ({ rm, kg: qtyByName.get(rm.name) ?? 0 }))
       .filter((x) => x.kg < LOW_SIRO_KG)
       .sort((a, b) => a.kg - b.kg);
@@ -193,8 +195,9 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
     return rows.map((rm) => {
       const kg = qtyByName.get(rm.name) ?? 0;
       const isPaint = rm.rawMaterialKind === 'PAINT';
+      const isPackage = rm.rawMaterialKind === 'PACKAGE';
       const max = isPaint ? 2000 : 5000;
-      const low = isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG;
+      const low = isPackage ? false : isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG;
       const purchaseDisplay = formatWarehousePurchasePriceDisplay(
         rm,
         empty,
@@ -204,14 +207,14 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
       );
       const totals = warehouseProductPurchaseTotals(rm, kg, cbuUsdFx, cbuEurFx);
       const bagWeight =
-        rm.defaultBagWeightKg != null && rm.defaultBagWeightKg > 0
+        !isPackage && rm.defaultBagWeightKg != null && rm.defaultBagWeightKg > 0
           ? `${formatKgAmount(rm.defaultBagWeightKg)} ${t.unitKg}`
           : '—';
 
       return {
         id: rm.id,
         kind: (rm.rawMaterialKind ?? 'SIRO') as RawMaterialKind,
-        typeLabel: isPaint ? t.rmKindPaint : t.rmKindSiro,
+        typeLabel: isPaint ? t.rmKindPaint : isPackage ? t.rmKindPackage : t.rmKindSiro,
         name: rm.name,
         description: rm.description?.trim() || undefined,
         quantityKg: kg,
@@ -242,7 +245,12 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
     const q = stockSearch.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter((rm) => {
-      const typeLabel = rm.rawMaterialKind === 'PAINT' ? t.rmKindPaint : t.rmKindSiro;
+      const typeLabel =
+        rm.rawMaterialKind === 'PAINT'
+          ? t.rmKindPaint
+          : rm.rawMaterialKind === 'PACKAGE'
+            ? t.rmKindPackage
+            : t.rmKindSiro;
       return (
         rm.name.toLowerCase().includes(q) ||
         typeLabel.toLowerCase().includes(q) ||
@@ -600,17 +608,22 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
             {filteredRows.map((rm) => {
             const kg = qtyByName.get(rm.name) ?? 0;
             const isPaint = rm.rawMaterialKind === 'PAINT';
+            const isPackage = rm.rawMaterialKind === 'PACKAGE';
             const max = isPaint ? 2000 : 5000;
-            const low = isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG;
+            const low = isPackage ? false : isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG;
             const pct = calcPercent(kg, max);
             const barColor = low
               ? 'bg-amber-500 dark:bg-amber-500'
               : isPaint
                 ? 'bg-fuchsia-500 dark:bg-fuchsia-500'
+                : isPackage
+                  ? 'bg-cyan-500 dark:bg-cyan-500'
                 : 'bg-blue-500 dark:bg-blue-500';
-            const Icon = isPaint ? Palette : Droplets;
+            const Icon = isPaint ? Palette : isPackage ? Package : Droplets;
             const iconWrap = isPaint
               ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+              : isPackage
+                ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300'
               : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
 
             return (
@@ -628,7 +641,7 @@ export function RawMaterialWarehouseStock({ hideTopSummary = false }: { hideTopS
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-slate-900 dark:text-white">{rm.name}</p>
                       <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                        {rm.rawMaterialKind === 'PAINT' ? t.rmKindPaint : t.rmKindSiro}
+                        {isPaint ? t.rmKindPaint : isPackage ? t.rmKindPackage : t.rmKindSiro}
                       </p>
                       {rm.description?.trim() ? (
                         <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{rm.description}</p>

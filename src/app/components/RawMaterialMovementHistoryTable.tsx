@@ -1,15 +1,16 @@
 import React from 'react';
 import type { RawMaterialKind } from '../store/erp-store';
-import { formatDate, formatKgAmount, formatRawMaterialMovementQty } from '../utils/format';
+import { formatDateTime, formatKgAmount, formatRawMaterialMovementQty } from '../utils/format';
 
 export type RawMaterialMovementHistoryEntry = {
   id: string;
-  date: string;
+  createdAt: string;
   type: 'incoming' | 'outgoing';
   amount: number;
   description: string;
   rawMaterialName: string;
   materialKind?: RawMaterialKind;
+  createdByName?: string;
 };
 
 type Labels = {
@@ -23,10 +24,13 @@ type Labels = {
   outgoing: string;
   kindSiro: string;
   kindPaint: string;
+  kindPackage: string;
+  createdBy: string;
   unitKg: string;
   balance: string;
   metricsSiro: string;
   metricsPaint: string;
+  metricsPackage: string;
   empty: string;
 };
 
@@ -34,6 +38,7 @@ type FooterTotals = {
   balanceKg: number;
   siroKg: number;
   paintKg: number;
+  packageKg: number;
   lowStock: boolean;
 };
 
@@ -50,9 +55,13 @@ function movementBadgeClass(incoming: boolean) {
 }
 
 function kindBadgeClass(kind: RawMaterialKind | undefined) {
-  return kind === 'PAINT'
-    ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-200'
-    : 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200';
+  if (kind === 'PAINT') {
+    return 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-200';
+  }
+  if (kind === 'PACKAGE') {
+    return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200';
+  }
+  return 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200';
 }
 
 export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Props) {
@@ -67,7 +76,7 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900/40">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[880px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[1020px] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-100 via-indigo-50 to-slate-100 dark:border-slate-700 dark:from-slate-800 dark:via-indigo-950/40 dark:to-slate-800">
               {[
@@ -76,6 +85,7 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
                 labels.colType,
                 labels.colProduct,
                 labels.colAmount,
+                labels.createdBy,
                 labels.colNote,
               ].map((heading, i) => (
                 <th
@@ -98,7 +108,11 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
                 ? 'text-blue-700 dark:text-blue-300'
                 : 'text-orange-700 dark:text-orange-300';
               const kindLabel =
-                entry.materialKind === 'PAINT' ? labels.kindPaint : labels.kindSiro;
+                entry.materialKind === 'PAINT'
+                  ? labels.kindPaint
+                  : entry.materialKind === 'PACKAGE'
+                    ? labels.kindPackage
+                    : labels.kindSiro;
 
               return (
                 <tr
@@ -113,7 +127,7 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
                     {index + 1}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-slate-700 dark:text-slate-200">
-                    {formatDate(entry.date)}
+                    {formatDateTime(entry.createdAt)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5">
                     <span
@@ -141,6 +155,9 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
                     {qty.amount}{' '}
                     <span className="text-xs font-normal opacity-80">{unitLabel}</span>
                   </td>
+                  <td className="min-w-[10rem] px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300">
+                    {entry.createdByName?.trim() || '—'}
+                  </td>
                   <td className="max-w-[16rem] px-3 py-2.5 text-xs leading-snug text-slate-600 dark:text-slate-300">
                     {entry.description.trim() || '—'}
                   </td>
@@ -163,10 +180,11 @@ export function RawMaterialMovementHistoryTable({ entries, labels, footer }: Pro
                 </span>
                 <div className="mt-0.5 text-[10px] font-normal text-slate-500 dark:text-slate-400">
                   {labels.metricsSiro}: {formatKgAmount(footer.siroKg)} · {labels.metricsPaint}:{' '}
-                  {formatKgAmount(footer.paintKg)}
+                  {formatKgAmount(footer.paintKg)} · {labels.metricsPackage}:{' '}
+                  {formatKgAmount(footer.packageKg)}
                 </div>
               </td>
-              <td />
+              <td colSpan={2} />
             </tr>
           </tfoot>
         </table>

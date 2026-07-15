@@ -132,6 +132,7 @@ enum ExpenseType {
 enum RawMaterialKind {
   SIRO
   PAINT
+  PACKAGE
 }
 
 enum RawMaterialOrderStatus {

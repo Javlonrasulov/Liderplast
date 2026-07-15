@@ -61,7 +61,7 @@ export class UpdateProductDto {
   defaultBagWeightKg?: number;
 
   @IsOptional()
-  @IsIn(['SIRO', 'PAINT'])
+  @IsIn(['SIRO', 'PAINT', 'PACKAGE'])
   rawMaterialKind?: RawMaterialKind;
 
   @IsOptional()

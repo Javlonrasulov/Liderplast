@@ -14,6 +14,7 @@ import {
   ExpenseType,
   InventoryItemType,
   MovementType,
+  RawMaterialKind,
   RawMaterialOrderStatus,
 } from '../../generated/prisma/enums.js';
 
@@ -217,6 +218,9 @@ export class RawMaterialBagsService implements OnModuleInit {
       });
       if (!rawMaterial) {
         throw new NotFoundException('Raw material not found');
+      }
+      if (rawMaterial.kind !== RawMaterialKind.SIRO) {
+        throw new BadRequestException('Bags are available only for SIRO raw materials');
       }
 
       const balance = await this.getRawMaterialBalance(tx, dto.rawMaterialId);
@@ -593,11 +597,15 @@ export class RawMaterialBagsService implements OnModuleInit {
       where: { id: params.rawMaterialId },
       select: {
         id: true,
+        kind: true,
         defaultBagWeightKg: true,
       },
     });
     if (!rawMaterial) {
       throw new NotFoundException('Raw material not found');
+    }
+    if (rawMaterial.kind !== RawMaterialKind.SIRO) {
+      return { bagCount: 0 };
     }
 
     const bagWeightKg = rawMaterial.defaultBagWeightKg ?? 0;

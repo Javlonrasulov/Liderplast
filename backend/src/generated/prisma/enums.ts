@@ -190,7 +190,8 @@ export type ExpenseType = (typeof ExpenseType)[keyof typeof ExpenseType]
 
 export const RawMaterialKind = {
   SIRO: 'SIRO',
-  PAINT: 'PAINT'
+  PAINT: 'PAINT',
+  PACKAGE: 'PACKAGE'
 } as const
 
 export type RawMaterialKind = (typeof RawMaterialKind)[keyof typeof RawMaterialKind]

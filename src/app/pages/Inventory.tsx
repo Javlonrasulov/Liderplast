@@ -333,94 +333,6 @@ export function Inventory() {
     if (!current) return;
 
     try {
-      const pickLastSalePrice = (category: 'semi' | 'final', productName: string): number => {
-        const sales = state.sales ?? [];
-        const filtered = sales.filter(
-          (s) => s.productCategory === category && s.productType === productName,
-        );
-        if (filtered.length === 0) return 0;
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        return filtered[0]?.pricePerUnit ?? 0;
-      };
-
-      const pickLastRawMaterialUnitPriceUzs = (rawMaterialId: string): number => {
-        const orders = state.supplierPurchaseOrders ?? [];
-        const filtered = orders.filter(
-          (o) =>
-            o.rawMaterialId === rawMaterialId &&
-            o.quantityKg != null &&
-            o.quantityKg > 0,
-        );
-        if (filtered.length === 0) return 0;
-        filtered.sort((a, b) => {
-          const ta = new Date(b.fulfilledAt ?? b.orderedAt).getTime();
-          const tb = new Date(a.fulfilledAt ?? a.orderedAt).getTime();
-          return ta - tb;
-        });
-        const last = filtered[0];
-        if (!last) return 0;
-        return last.amountUzs / (last.quantityKg ?? 1);
-      };
-
-      const ensureExpenseCategoryId = async (name: string): Promise<string> => {
-        const trimmed = name.trim();
-        const existing = (state.expenseCategories ?? []).find(
-          (c) => c.name.trim().toLowerCase() === trimmed.toLowerCase(),
-        );
-        if (existing) return existing.id;
-
-        const body = JSON.stringify({ name: trimmed });
-        try {
-          const created = await apiRequest<{ id: string }>('/finance/expenses/categories', {
-            method: 'POST',
-            body,
-          });
-          return created.id;
-        } catch {
-          const created = await apiRequest<{ id: string }>('/finance/expense-categories', {
-            method: 'POST',
-            body,
-          });
-          return created.id;
-        }
-      };
-
-      const inventoryExpenseCategoryId = await ensureExpenseCategoryId(
-        'Inventarizatsiya chiqim',
-      );
-
-      const createdExpenseIds: string[] = [];
-
-      // Shortage -> auto expense (amount is positive; it's an expense)
-      for (const row of current.rows) {
-        const diff = row.realQuantityEnd - row.systemQuantityEnd;
-        if (!Number.isFinite(diff) || diff >= 0) continue;
-        if (isNegligibleInventoryDiff(diff, row.unit)) continue;
-
-        const qty = Math.abs(diff);
-        const unitPrice =
-          row.category === 'RAW_MATERIAL'
-            ? pickLastRawMaterialUnitPriceUzs(row.productId)
-            : row.category === 'SEMI_PRODUCT'
-              ? pickLastSalePrice('semi', row.productName)
-              : pickLastSalePrice('final', row.productName);
-
-        const amount = qty * (Number.isFinite(unitPrice) ? unitPrice : 0);
-        if (!Number.isFinite(amount) || amount < 1) continue;
-
-        const created = await apiRequest<{ id: string }>('/finance/expenses', {
-          method: 'POST',
-          body: JSON.stringify({
-            title: `Inventarizatsiya chiqim: ${row.productName}`,
-            categoryId: inventoryExpenseCategoryId,
-            amount,
-            description: `${row.productName} • ${qty} ${row.unit === 'kg' ? 'kg' : 'pcs'} × ${unitPrice}`,
-            incurredAt: current.dateTo || current.dateFrom || todayYmd(),
-          }),
-        });
-        createdExpenseIds.push(created.id);
-      }
-
       // Hujjatdagi «hisobda» emas, serverdagi joriy qoldiqdan realga moslashtiramiz —
       // aks holda qoldiq allaqachon 0 bo‘lsa ham system farqi uchun CONSUMPTION yuboriladi va 400 beradi.
       const stockRows = await apiRequest<WarehouseStockSnapshot[]>(
@@ -499,10 +411,6 @@ export function Inventory() {
             rows: finalRows,
             status: 'COMPLETED',
             finishedAt: new Date().toISOString(),
-            expenseIds:
-              createdExpenseIds.length > 0
-                ? [...(r.expenseIds ?? []), ...createdExpenseIds]
-                : r.expenseIds,
           };
         },
         { immediate: true },

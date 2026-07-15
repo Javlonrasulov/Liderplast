@@ -58,9 +58,13 @@ function fillBadgeClass(pct: number) {
 }
 
 function kindBadgeClass(kind: RawMaterialKind) {
-  return kind === 'PAINT'
-    ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-200'
-    : 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200';
+  if (kind === 'PAINT') {
+    return 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-200';
+  }
+  if (kind === 'PACKAGE') {
+    return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200';
+  }
+  return 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200';
 }
 
 export function RawMaterialOverviewStockTable({

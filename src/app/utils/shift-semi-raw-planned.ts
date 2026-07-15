@@ -32,7 +32,7 @@ export function getPlannedSemiRawRows(
       (p): p is RawMaterialProduct =>
         p.itemType === 'RAW_MATERIAL' && p.id === rm.rawMaterialId,
     );
-    if (meta?.rawMaterialKind === 'PAINT') continue;
+    if (meta?.rawMaterialKind && meta.rawMaterialKind !== 'SIRO') continue;
     const plannedKg = (rm.amountGram * materialUnits) / 1000;
     if (plannedKg <= 0) continue;
     out.push({ rawMaterialId: rm.rawMaterialId, name: rm.name, plannedKg });

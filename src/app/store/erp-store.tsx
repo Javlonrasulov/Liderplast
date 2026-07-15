@@ -27,6 +27,7 @@ export interface RawMaterialEntry {
   /** Кирим/чиқим қайси хомашё учун — SIRO/PAINT ажратиши учун */
   rawMaterialId?: string;
   rawMaterialName?: string;
+  createdByName?: string;
 }
 
 export interface RawMaterialBagSession {
@@ -108,8 +109,8 @@ export type WarehouseItemType =
   | 'SEMI_PRODUCT'
   | 'FINISHED_PRODUCT';
 
-/** SIRO = PET / оддий хомашё; PAINT = краска (қоплар одатда фақат SIRO) */
-export type RawMaterialKind = 'SIRO' | 'PAINT';
+/** SIRO = PET; PAINT = краска; PACKAGE = пакет хомашёси */
+export type RawMaterialKind = 'SIRO' | 'PAINT' | 'PACKAGE';
 
 export interface ProductAuditInfo {
   createdAt?: string;
@@ -1146,6 +1147,7 @@ type WarehouseHistoryItem = {
   rawMaterial?: { id: string; name: string } | null;
   semiProduct?: { id: string; name: string } | null;
   finishedProduct?: { id: string; name: string } | null;
+  createdBy?: { id: string; fullName: string } | null;
 };
 
 type BackendBagSession = {
@@ -1347,7 +1349,7 @@ export function buildShiftRecordsToProductionHistory(
           );
           for (const rm of semi.rawMaterials) {
             const raw = rawById.get(rm.rawMaterialId);
-            if (raw?.rawMaterialKind === 'PAINT') continue;
+            if (raw?.rawMaterialKind && raw.rawMaterialKind !== 'SIRO') continue;
             const plannedKg = (rm.amountGram * materialUnits) / 1000;
             if (plannedKg <= 0) continue;
             const usage = usageByRm.get(rm.rawMaterialId);
@@ -1905,43 +1907,62 @@ function resolveRawEntryKind(
       (x): x is RawMaterialProduct =>
         x.itemType === 'RAW_MATERIAL' && x.id === entry.rawMaterialId,
     );
-    return p?.rawMaterialKind === 'PAINT' ? 'PAINT' : 'SIRO';
+    return p?.rawMaterialKind ?? 'SIRO';
   }
   const byName = products.find(
     (x): x is RawMaterialProduct =>
       x.itemType === 'RAW_MATERIAL' && x.name === entry.description,
   );
-  return byName?.rawMaterialKind === 'PAINT' ? 'PAINT' : 'SIRO';
+  return byName?.rawMaterialKind ?? 'SIRO';
 }
 
-/** Қолдиқ: сиро ва краска алоҳида */
+/** Қолдиқ: PET, краска ва пакет алоҳида */
 export function computeRawMaterialStockByKind(
   entries: RawMaterialEntry[],
   products: WarehouseProduct[],
-): { siro: number; paint: number } {
+): { siro: number; paint: number; package: number } {
   let siro = 0;
   let paint = 0;
+  let packageKg = 0;
   for (const entry of entries) {
     const delta = entry.type === 'incoming' ? entry.amount : -entry.amount;
-    if (resolveRawEntryKind(entry, products) === 'PAINT') paint += delta;
+    const kind = resolveRawEntryKind(entry, products);
+    if (kind === 'PAINT') paint += delta;
+    else if (kind === 'PACKAGE') packageKg += delta;
     else siro += delta;
   }
-  return { siro, paint };
+  return { siro, paint, package: packageKg };
 }
 
 /** Кирим/чиқим жами: тур бўйича */
 export function computeRawMaterialFlowByKind(
   entries: RawMaterialEntry[],
   products: WarehouseProduct[],
-): { siroIn: number; siroOut: number; paintIn: number; paintOut: number } {
-  const out = { siroIn: 0, siroOut: 0, paintIn: 0, paintOut: 0 };
+): {
+  siroIn: number;
+  siroOut: number;
+  paintIn: number;
+  paintOut: number;
+  packageIn: number;
+  packageOut: number;
+} {
+  const out = {
+    siroIn: 0,
+    siroOut: 0,
+    paintIn: 0,
+    paintOut: 0,
+    packageIn: 0,
+    packageOut: 0,
+  };
   for (const entry of entries) {
-    const paint = resolveRawEntryKind(entry, products) === 'PAINT';
+    const kind = resolveRawEntryKind(entry, products);
     if (entry.type === 'incoming') {
-      if (paint) out.paintIn += entry.amount;
+      if (kind === 'PAINT') out.paintIn += entry.amount;
+      else if (kind === 'PACKAGE') out.packageIn += entry.amount;
       else out.siroIn += entry.amount;
     } else {
-      if (paint) out.paintOut += entry.amount;
+      if (kind === 'PAINT') out.paintOut += entry.amount;
+      else if (kind === 'PACKAGE') out.packageOut += entry.amount;
       else out.siroOut += entry.amount;
     }
   }
@@ -2552,6 +2573,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       createdAt: item.createdAt,
       rawMaterialId: item.rawMaterial?.id,
       rawMaterialName: item.rawMaterial?.name,
+      createdByName: item.createdBy?.fullName ?? undefined,
     }));
 
   const rawMaterialEntries: RawMaterialEntry[] =

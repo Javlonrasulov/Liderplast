@@ -311,7 +311,8 @@ export function Layout() {
   const pageTitle = PAGE_TITLES[location.pathname] || 'Lider Plast ERP';
 
   const rawMaterialSidebarRows = useMemo(() => {
-    const order = (k: RawMaterialKind | undefined) => (k === 'PAINT' ? 1 : 0);
+    const order = (k: RawMaterialKind | undefined) =>
+      k === 'PAINT' ? 1 : k === 'PACKAGE' ? 2 : 0;
     return state.warehouseProducts
       .filter((p): p is RawMaterialProduct => p.itemType === 'RAW_MATERIAL')
       .sort((a, b) => {
@@ -322,17 +323,25 @@ export function Layout() {
       .map((rm) => {
         const kg = rawMaterialStockByProductName[rm.name] ?? 0;
         const isPaint = rm.rawMaterialKind === 'PAINT';
+        const isPackage = rm.rawMaterialKind === 'PACKAGE';
         return {
           id: rm.id,
           name: rm.name,
-          kindLabel: isPaint ? t.rmKindPaint : t.rmKindSiro,
+          kindLabel: isPaint ? t.rmKindPaint : isPackage ? t.rmKindPackage : t.rmKindSiro,
           kg,
           isPaint,
-          isLow: isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG,
+          isPackage,
+          isLow: isPackage ? false : isPaint ? kg < LOW_PAINT_KG : kg < LOW_SIRO_KG,
           barMax: isPaint ? 2000 : 3500,
         };
       });
-  }, [state.warehouseProducts, rawMaterialStockByProductName, t.rmKindPaint, t.rmKindSiro]);
+  }, [
+    state.warehouseProducts,
+    rawMaterialStockByProductName,
+    t.rmKindPaint,
+    t.rmKindPackage,
+    t.rmKindSiro,
+  ]);
 
   const lowStock = rawMaterialSidebarRows.some((row) => row.isLow);
   const showExpensesElectricityNav =
@@ -542,7 +551,9 @@ export function Layout() {
                   ? 'bg-amber-500'
                   : row.isPaint
                     ? 'bg-fuchsia-500'
-                    : 'bg-emerald-500';
+                    : row.isPackage
+                      ? 'bg-cyan-500'
+                      : 'bg-emerald-500';
                 const qtyColor = row.isLow
                   ? 'text-amber-500 dark:text-amber-400'
                   : 'text-emerald-600 dark:text-emerald-400';
