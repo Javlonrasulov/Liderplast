@@ -480,9 +480,10 @@ export function Expenses() {
   const [expenseDeleteId, setExpenseDeleteId] = useState<string | null>(null);
   const [expenseDeleteError, setExpenseDeleteError] = useState('');
   const [expenseDeleteBusy, setExpenseDeleteBusy] = useState(false);
-  /** Umumiy xarajatlar / tarix — default yopiq */
+  /** Umumiy xarajatlar — default yopiq */
   const [overviewOpen, setOverviewOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  /** Pul manbai hisobotidagi tarix — default yopiq */
+  const [fundingHistoryOpen, setFundingHistoryOpen] = useState(false);
   const [formCurrency, setFormCurrency] = useState<'UZS' | 'USD'>('UZS');
   const [formFxRate, setFormFxRate] = useState('');
   const [fxFromBank, setFxFromBank] = useState(true);
@@ -1379,49 +1380,64 @@ export function Expenses() {
           </div>
         </div>
         {fundingSourceStats.length > 0 && (
-          <div className="border-t border-slate-200/80 px-5 pb-5 dark:border-slate-700/80 lg:px-6 lg:pb-6">
-            <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-white">{t.exHistory}</h4>
-            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    {[t.colDate, t.exFundingSourceName, t.colType, t.exColAmount].map((h) => (
-                      <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-slate-500">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {statsSortedExpenses
-                    .filter((e) => e.fundingSourceId)
-                    .slice(0, 20)
-                    .map((expense) => {
-                      const dbName = resolveExpenseCategoryNameFromState(
-                        expense.categoryId,
-                        expense.categoryName,
-                        categories,
-                      );
-                      const categoryLabel =
-                        expense.type === 'electricity' || expense.electricityCalc
-                          ? t.exElectricity
-                          : labelExpenseCategory(expense.categoryId, dbName, t);
-                      return (
-                        <tr key={expense.id} className="border-t border-slate-100 dark:border-slate-700">
-                          <td className="px-3 py-2 text-xs text-slate-500">{formatDate(expense.date)}</td>
-                          <td className="px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                            {expense.fundingSourceName ?? '—'}
-                          </td>
-                          <td className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200">{categoryLabel}</td>
-                          <td className="px-3 py-2 text-right align-top">
-                            <ExpenseMoneyDetails expense={expense} t={t} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
+          <div className="border-t border-slate-200/80 dark:border-slate-700/80">
+            <button
+              type="button"
+              onClick={() => setFundingHistoryOpen((v) => !v)}
+              className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-700/30 lg:px-6"
+              aria-expanded={fundingHistoryOpen}
+            >
+              <h4 className="text-sm font-semibold text-slate-800 dark:text-white">{t.exHistory}</h4>
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                {fundingHistoryOpen ? t.exSectionCollapse : t.exSectionExpand}
+                {fundingHistoryOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </span>
+            </button>
+            {fundingHistoryOpen ? (
+              <div className="px-5 pb-5 dark:border-slate-700/80 lg:px-6 lg:pb-6">
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-600">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-700/50">
+                        {[t.colDate, t.exFundingSourceName, t.colType, t.exColAmount].map((h) => (
+                          <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-slate-500">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsSortedExpenses
+                        .filter((e) => e.fundingSourceId)
+                        .slice(0, 20)
+                        .map((expense) => {
+                          const dbName = resolveExpenseCategoryNameFromState(
+                            expense.categoryId,
+                            expense.categoryName,
+                            categories,
+                          );
+                          const categoryLabel =
+                            expense.type === 'electricity' || expense.electricityCalc
+                              ? t.exElectricity
+                              : labelExpenseCategory(expense.categoryId, dbName, t);
+                          return (
+                            <tr key={expense.id} className="border-t border-slate-100 dark:border-slate-700">
+                              <td className="px-3 py-2 text-xs text-slate-500">{formatDate(expense.date)}</td>
+                              <td className="px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                                {expense.fundingSourceName ?? '—'}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200">{categoryLabel}</td>
+                              <td className="px-3 py-2 text-right align-top">
+                                <ExpenseMoneyDetails expense={expense} t={t} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -1827,57 +1843,40 @@ export function Expenses() {
 
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between gap-2 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={() => setHistoryOpen((v) => !v)}
-              className="flex min-w-0 flex-1 items-center gap-2 text-left"
-              aria-expanded={historyOpen}
-            >
-              {historyOpen ? (
-                <ChevronDown size={18} className="shrink-0 text-slate-500" />
-              ) : (
-                <ChevronRight size={18} className="shrink-0 text-slate-500" />
-              )}
+            <div className="flex min-w-0 items-center gap-2">
               <h3 className="text-slate-800 dark:text-white font-semibold text-sm min-w-0 truncate">
                 {t.exHistory}
               </h3>
               <span className="hidden text-xs text-slate-400 sm:inline">
                 ({filteredExpenses.length} {t.totalRecords})
               </span>
-              <span className="ml-auto shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 sm:ml-2">
-                {historyOpen ? t.exSectionCollapse : t.exSectionExpand}
-              </span>
-            </button>
-            {historyOpen ? (
-              <div className="flex shrink-0 items-center gap-2">
-                {isFiltered && (
-                  <span className="hidden text-xs text-indigo-600 dark:text-indigo-400 sm:inline">
-                    {t.dfShowing} {filterLabel}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setHistoryFullscreen(true)}
-                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                  title={t.exHistoryFullscreenEnter}
-                  aria-label={t.exHistoryFullscreenEnter}
-                >
-                  <Maximize2 size={18} />
-                </button>
-              </div>
-            ) : null}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {isFiltered && (
+                <span className="hidden text-xs text-indigo-600 dark:text-indigo-400 sm:inline">
+                  {t.dfShowing} {filterLabel}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setHistoryFullscreen(true)}
+                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                title={t.exHistoryFullscreenEnter}
+                aria-label={t.exHistoryFullscreenEnter}
+              >
+                <Maximize2 size={18} />
+              </button>
+            </div>
           </div>
-          {historyOpen ? (
-            <ExpenseHistoryTableView
-              expenses={filteredExpenses}
-              categories={categories}
-              t={t}
-              totalFiltered={totalTableFiltered}
-              wideNote={false}
-              onEdit={openExpenseEdit}
-              onDelete={requestDeleteExpense}
-            />
-          ) : null}
+          <ExpenseHistoryTableView
+            expenses={filteredExpenses}
+            categories={categories}
+            t={t}
+            totalFiltered={totalTableFiltered}
+            wideNote={false}
+            onEdit={openExpenseEdit}
+            onDelete={requestDeleteExpense}
+          />
         </div>
       </div>
 
