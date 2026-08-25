@@ -938,6 +938,21 @@ export interface T {
   /** Тарих жадвали — to‘liq ekran */
   exHistoryFullscreenEnter: string;
   exHistoryFullscreenExit: string;
+  /** Yopiq bo‘limni ochish / yopish */
+  exSectionExpand: string;
+  exSectionCollapse: string;
+  exCurrencyLabel: string;
+  exFxRateLabel: string;
+  exFxFromBank: string;
+  exFxManual: string;
+  exAmountInUzsHint: string;
+  exDisplayUzs: string;
+  exDisplayUsd: string;
+  exUsdRateMissing: string;
+  /** Tarix: kiritilgan valyuta summasi / kurs / so‘m */
+  exHistoryOriginal: string;
+  exHistoryFxShort: string;
+  exHistoryUzsEq: string;
   /** Тарих жадвали — амаллар устуни */
   exHistoryColActions: string;
   exHistoryColUser: string;
@@ -1047,6 +1062,10 @@ export interface T {
   layoutMaterialLow: string;
   layoutAdmin: string;
   layoutSiroRemaining: string;
+  /** Topbar matn rangi tanlovchisi */
+  textColor: string;
+  textColorDefault: string;
+  textColorBlack: string;
 
   // Client Detail
   cdBack: string;
@@ -2478,6 +2497,19 @@ const uz_cyrillic: T = {
   exHistory: 'Харажатлар Тарихи',
   exHistoryFullscreenEnter: 'Тўлиқ экран',
   exHistoryFullscreenExit: 'Ёпиш (Esc)',
+  exSectionExpand: 'Очиш',
+  exSectionCollapse: 'Ёпиш',
+  exCurrencyLabel: 'Валюта',
+  exFxRateLabel: 'Курс (1 USD = ? сўм)',
+  exFxFromBank: 'МБ курси',
+  exFxManual: 'Қўлда',
+  exAmountInUzsHint: '≈ {amount}',
+  exDisplayUzs: 'сўм',
+  exDisplayUsd: 'USD',
+  exUsdRateMissing: 'USD курси йўқ — МБдан юкланг ёки қўлда киритинг',
+  exHistoryOriginal: 'Киритилган',
+  exHistoryFxShort: 'Курс',
+  exHistoryUzsEq: 'Сўмда',
   exHistoryColActions: 'Амаллар',
   exHistoryColUser: 'Фойдаланувчи',
   exAuditCreated: 'Киритди: {name}',
@@ -2579,6 +2611,9 @@ const uz_cyrillic: T = {
   layoutMaterialLow: 'Хомашё кам!',
   layoutAdmin: 'Лидер Пласт',
   layoutSiroRemaining: 'Хомашё қолдиғи',
+  textColor: 'Матн ранги',
+  textColorDefault: 'Стандарт',
+  textColorBlack: 'Қора',
 
   // Client Detail
   cdBack: 'Орқага',
@@ -4004,6 +4039,19 @@ const uz_latin: T = {
   exHistory: 'Xarajatlar Tarixi',
   exHistoryFullscreenEnter: "To'liq ekran",
   exHistoryFullscreenExit: 'Yopish (Esc)',
+  exSectionExpand: 'Ochish',
+  exSectionCollapse: 'Yopish',
+  exCurrencyLabel: 'Valyuta',
+  exFxRateLabel: "Kurs (1 USD = ? so'm)",
+  exFxFromBank: 'MB kursi',
+  exFxManual: "Qo'lda",
+  exAmountInUzsHint: '≈ {amount}',
+  exDisplayUzs: "so'm",
+  exDisplayUsd: 'USD',
+  exUsdRateMissing: "USD kursi yo'q — MBdan yuklang yoki qo'lda kiriting",
+  exHistoryOriginal: 'Kiritilgan',
+  exHistoryFxShort: 'Kurs',
+  exHistoryUzsEq: "So'mda",
   exHistoryColActions: 'Amallar',
   exHistoryColUser: 'Foydalanuvchi',
   exAuditCreated: 'Kiritdi: {name}',
@@ -4106,6 +4154,9 @@ const uz_latin: T = {
   layoutMaterialLow: 'Xomashyo kam!',
   layoutAdmin: 'Lider Plast',
   layoutSiroRemaining: "Xomashyo qoldig'i",
+  textColor: 'Matn rangi',
+  textColorDefault: 'Standart',
+  textColorBlack: 'Qora',
 
   // Client Detail
   cdBack: 'Orqaga',
@@ -5530,6 +5581,19 @@ const ru: T = {
   exHistory: 'История расходов',
   exHistoryFullscreenEnter: 'На весь экран',
   exHistoryFullscreenExit: 'Закрыть (Esc)',
+  exSectionExpand: 'Открыть',
+  exSectionCollapse: 'Скрыть',
+  exCurrencyLabel: 'Валюта',
+  exFxRateLabel: 'Курс (1 USD = ? сум)',
+  exFxFromBank: 'Курс ЦБ',
+  exFxManual: 'Вручную',
+  exAmountInUzsHint: '≈ {amount}',
+  exDisplayUzs: 'сум',
+  exDisplayUsd: 'USD',
+  exUsdRateMissing: 'Нет курса USD — загрузите с ЦБ или введите вручную',
+  exHistoryOriginal: 'Внесено',
+  exHistoryFxShort: 'Курс',
+  exHistoryUzsEq: 'В сумах',
   exHistoryColActions: 'Действия',
   exHistoryColUser: 'Пользователь',
   exAuditCreated: 'Внёс: {name}',
@@ -5632,6 +5696,9 @@ const ru: T = {
   layoutMaterialLow: 'Сырьё заканчивается!',
   layoutAdmin: 'Lider Plast',
   layoutSiroRemaining: 'Остаток сырья',
+  textColor: 'Цвет текста',
+  textColorDefault: 'Стандарт',
+  textColorBlack: 'Чёрный',
 
   // Client Detail
   cdBack: 'Назад',

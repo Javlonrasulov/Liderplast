@@ -2126,7 +2126,6 @@ function EmployeesTab() {
                       <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prColDefect}</th>
                       <th className="whitespace-nowrap px-2 py-2.5 font-medium">{t.prColKwh}</th>
                       <th className="min-w-[6.5rem] px-2 py-2.5 font-medium">{t.prColPaint}</th>
-                      <th className="min-w-[4rem] px-2 py-2.5 font-medium">{t.prColCounter}</th>
                       <th className="min-w-[6rem] px-2 py-2.5 font-medium">{t.labelDesc}</th>
                     </tr>
                   </thead>
@@ -2161,9 +2160,6 @@ function EmployeesTab() {
                             {fmtDec(row.electricityKwh)}
                           </td>
                           <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{paintStr}</td>
-                          <td className="max-w-[6rem] truncate px-2 py-2 text-slate-600 dark:text-slate-400" title={row.machineReading}>
-                            {row.machineReading || EMPTY_PLACEHOLDER}
-                          </td>
                           <td
                             className="max-w-[8rem] truncate px-2 py-2 text-slate-500 dark:text-slate-500"
                             title={row.notes}
@@ -2185,7 +2181,7 @@ function EmployeesTab() {
                       <td className="whitespace-nowrap px-2 py-2.5 tabular-nums">
                         {fmtDec(selectedShiftTotals.kwh)}
                       </td>
-                      <td colSpan={3} className="px-2 py-2.5 text-slate-400" />
+                      <td colSpan={2} className="px-2 py-2.5 text-slate-400" />
                     </tr>
                   </tfoot>
                 </table>

@@ -258,7 +258,11 @@ export interface Expense {
   fundingSourceId?: string;
   fundingSourceName?: string;
   electricityCalc?: boolean;
+  /** Har doim so‘m */
   amount: number;
+  currency?: 'UZS' | 'USD';
+  fxRateToUzs?: number;
+  amountOriginal?: number;
   description: string;
   machineId?: string;
   hours?: number;
@@ -417,7 +421,6 @@ export interface ShiftRecord {
   productType: string;
   bagCount?: number;
   packCount?: number;
-  machineReading: string;
   producedQty: number;
   defectCount: number;
   electricityKwh: number;
@@ -780,6 +783,8 @@ type ERPAction =
         categoryId: string;
         fundingSourceId: string;
         amount: number;
+        currency?: 'UZS' | 'USD';
+        fxRateToUzs?: number;
         description: string;
         machineId?: string;
         hours?: number;
@@ -800,6 +805,8 @@ type ERPAction =
         categoryId?: string;
         fundingSourceId?: string;
         amount?: number;
+        currency?: 'UZS' | 'USD';
+        fxRateToUzs?: number;
         description?: string;
         date?: string;
       };
@@ -871,7 +878,6 @@ type ERPAction =
         machineId?: string;
         hoursWorked?: number;
         productType?: string;
-        machineReading?: string;
         producedQty?: number;
         defectCount?: number;
         electricityKwh?: number;
@@ -1229,7 +1235,6 @@ type BackendShiftRecord = {
   bagCount?: number | null;
   packCount?: number | null;
   productLabel?: string | null;
-  machineReading?: string | null;
   notes?: string | null;
   createdAt: string;
   paintUsed?: boolean;
@@ -1527,6 +1532,9 @@ type BackendExpense = {
   id: string;
   type: 'ELECTRICITY' | 'CAPS' | 'PACKAGING' | 'OTHER';
   amount: number;
+  currency?: 'UZS' | 'USD' | 'EUR';
+  fxRateToUzs?: number;
+  amountOriginal?: number | null;
   title: string;
   description?: string | null;
   incurredAt: string;
@@ -2750,6 +2758,10 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     fundingSourceName: expense.fundingSource?.name ?? undefined,
     electricityCalc: expense.category?.electricityCalc ?? expense.type === 'ELECTRICITY',
     amount: expense.amount,
+    currency: expense.currency === 'USD' ? 'USD' : 'UZS',
+    fxRateToUzs: expense.fxRateToUzs ?? 1,
+    amountOriginal:
+      expense.amountOriginal != null ? expense.amountOriginal : expense.amount,
     description: expense.description ?? expense.title,
     createdAt: expense.createdAt,
     updatedAt: expense.updatedAt,
@@ -2783,7 +2795,6 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
     productType: shift.productLabel ?? '',
     bagCount: shift.bagCount ?? undefined,
     packCount: shift.packCount ?? undefined,
-    machineReading: shift.machineReading ?? '',
     producedQty: shift.producedQty,
     defectCount: shift.defectCount,
     electricityKwh: shift.electricityKwh,
@@ -3195,6 +3206,8 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               categoryId: action.payload.categoryId,
               fundingSourceId: action.payload.fundingSourceId,
               amount: action.payload.amount,
+              currency: action.payload.currency ?? 'UZS',
+              fxRateToUzs: action.payload.fxRateToUzs ?? 1,
               description: action.payload.description,
               incurredAt: action.payload.date,
             }),
@@ -3211,6 +3224,12 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           }
           if (action.payload.amount !== undefined) {
             body.amount = action.payload.amount;
+          }
+          if (action.payload.currency !== undefined) {
+            body.currency = action.payload.currency;
+          }
+          if (action.payload.fxRateToUzs !== undefined) {
+            body.fxRateToUzs = action.payload.fxRateToUzs;
           }
           if (action.payload.description !== undefined) {
             body.description = action.payload.description;
@@ -3659,7 +3678,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
               recordKind: action.payload.recordKind ?? 'PRODUCTION',
               hoursWorked: action.payload.hoursWorked,
               productLabel: action.payload.productType,
-              machineReading: action.payload.machineReading,
               producedQty: action.payload.producedQty,
               defectCount: action.payload.defectCount,
               electricityKwh: action.payload.electricityKwh,
@@ -3684,7 +3702,6 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           if (p.machineId !== undefined) body.machineId = p.machineId || null;
           if (p.hoursWorked !== undefined) body.hoursWorked = p.hoursWorked;
           if (p.productType !== undefined) body.productLabel = p.productType;
-          if (p.machineReading !== undefined) body.machineReading = p.machineReading;
           if (p.producedQty !== undefined) body.producedQty = p.producedQty;
           if (p.defectCount !== undefined) body.defectCount = p.defectCount;
           if (p.electricityKwh !== undefined) body.electricityKwh = p.electricityKwh;

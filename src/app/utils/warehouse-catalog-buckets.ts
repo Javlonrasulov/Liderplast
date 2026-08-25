@@ -1,13 +1,16 @@
-import type {
-  FinishedProductCatalogItem,
-  SemiProductCatalogItem,
-} from '../store/erp-store';
+/**
+ * Katalogdagi yarim tayyor / tayyor mahsulot slot kalitlari.
+ * erp-store dan import qilinmaydi — aylanma bog‘lanish (TDZ) oldini olish uchun.
+ */
+
+type SemiLike = { weightGram?: number; name?: string };
+type FinalLike = { volumeLiter?: number; name?: string };
 
 /**
  * Katalogdagi yarim tayyor учун слот калити: 18г / 20г алоҳида, бошқа вазнлар `25g` каби.
  * (Аввалги `>=19.5 → 20g` 25гни 20гга улаб юборardi.)
  */
-export function semiBucketFromCatalog(product: SemiProductCatalogItem): string {
+export function semiBucketFromCatalog(product: SemiLike): string {
   const w = product.weightGram;
   if (typeof w === 'number' && Number.isFinite(w) && w > 0) {
     const r = Math.round(w);
@@ -31,7 +34,7 @@ export function semiBucketFromCatalog(product: SemiProductCatalogItem): string {
 
 /** Katalogdagi tayyor mahsulotni 0.5L / 1L / 5L slotiga bog‘lash; standart bo‘lmagan hajm uchun null */
 export function finalBucketFromCatalog(
-  product: FinishedProductCatalogItem,
+  product: FinalLike,
 ): '0.5L' | '1L' | '5L' | null {
   const v = product.volumeLiter;
   if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) return null;
@@ -57,7 +60,7 @@ export function inferVolumeLiterFromFinishedProductName(name: string): number | 
 }
 
 /** Tayyor mahsulot qoldig‘i sloti: standart 0.5L/1L/5L yoki `2.2L` / katalog nomi */
-export function finalStockSlotFromCatalog(product: FinishedProductCatalogItem): string {
+export function finalStockSlotFromCatalog(product: FinalLike): string {
   const std = finalBucketFromCatalog(product);
   if (std) return std;
   const v = product.volumeLiter;

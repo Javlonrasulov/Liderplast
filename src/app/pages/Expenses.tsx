@@ -14,6 +14,8 @@ import {
   X,
   TrendingUp,
   Wallet,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { useERP, type Expense, type ExpenseCategory } from '../store/erp-store';
 import type { T } from '../i18n/translations';
@@ -26,6 +28,8 @@ import {
   parseDigitsFromAmountInput,
   todayYmd,
 } from '../utils/format';
+import { useCbuRates } from '../hooks/use-cbu-rates';
+import { cbuUsdRate } from '../utils/sales-currency';
 import { formatShiftExpenseTableNote } from '../utils/shift-expense-description';
 import { formatExpenseHistoryNote } from '../utils/expense-history-note';
 import {
@@ -190,6 +194,66 @@ function isElectricityCategory(c: ExpenseCategory) {
   return c.electricityCalc || c.legacyExpenseType === 'electricity';
 }
 
+function formatUsdMoney(amount: number): string {
+  if (!Number.isFinite(amount)) return '$0';
+  return (
+    '$' +
+    new Intl.NumberFormat('ru-RU', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  );
+}
+
+function formatExpenseDisplay(amountUzs: number, mode: 'UZS' | 'USD', usdRate: number): string {
+  if (mode === 'USD') {
+    if (!(usdRate > 0)) return '—';
+    return formatUsdMoney(amountUzs / usdRate);
+  }
+  return formatCurrency(amountUzs);
+}
+
+/** Tarix jadvali: kiritilgan valyuta + kurs + so‘m ekvivalenti */
+function ExpenseMoneyDetails({ expense, t }: { expense: Expense; t: T }) {
+  const currency = expense.currency === 'USD' ? 'USD' : 'UZS';
+  const original =
+    expense.amountOriginal != null && Number.isFinite(expense.amountOriginal)
+      ? expense.amountOriginal
+      : expense.amount;
+  const fx = expense.fxRateToUzs != null && expense.fxRateToUzs > 0 ? expense.fxRateToUzs : 1;
+  const uzs = expense.amount;
+
+  if (currency === 'UZS') {
+    return (
+      <div className="text-right">
+        <div className="text-sm font-semibold tabular-nums text-red-600 dark:text-red-400">
+          {formatCurrency(uzs)}
+        </div>
+        <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          UZS
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-w-[9.5rem] text-right">
+      <div className="text-[10px] text-slate-400">{t.exHistoryOriginal}</div>
+      <div className="text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
+        {formatUsdMoney(original)}
+      </div>
+      <div className="mt-0.5 space-y-0.5 text-[10px] leading-snug text-slate-500 dark:text-slate-400">
+        <div>
+          {t.exHistoryFxShort}: {formatNumber(fx)}
+        </div>
+        <div className="font-semibold tabular-nums text-red-600 dark:text-red-400">
+          {t.exHistoryUzsEq}: {formatCurrency(uzs)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function expenseUserAuditLines(expense: Expense, t: T): string[] {
   const lines: string[] = [];
   const created = expense.createdByName?.trim();
@@ -231,11 +295,29 @@ function ExpenseHistoryTableView({
       <table className="w-full">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-700/50">
-            {[t.colDate, t.colType, t.exHistoryColFundingSource, t.exColAmount, t.exHistoryColUser, t.colNote, t.exHistoryColActions].map((h, i) => (
+            {[
+              t.colDate,
+              t.colType,
+              t.exHistoryColFundingSource,
+              t.exColAmount,
+              t.exHistoryColUser,
+              t.colNote,
+              t.exHistoryColActions,
+            ].map((h, i) => (
               <th
                 key={h}
                 className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 ${
-                  i === 5 ? noteCol : i === 6 ? 'text-right w-24' : i === 4 ? 'hidden sm:table-cell' : i === 2 ? 'hidden lg:table-cell' : ''
+                  i === 5
+                    ? noteCol
+                    : i === 6
+                      ? 'text-right w-24'
+                      : i === 3
+                        ? 'text-right min-w-[10rem]'
+                        : i === 4
+                          ? 'hidden sm:table-cell min-w-[8rem]'
+                          : i === 2
+                            ? 'hidden lg:table-cell'
+                            : ''
                 }`}
               >
                 {h}
@@ -283,8 +365,15 @@ function ExpenseHistoryTableView({
                     <span className="text-slate-400">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right text-sm font-semibold text-red-600 dark:text-red-400">
-                  {formatCurrency(expense.amount)}
+                <td className="px-4 py-3 align-top">
+                  <ExpenseMoneyDetails expense={expense} t={t} />
+                  {auditLines.length > 0 ? (
+                    <div className="mt-1.5 space-y-0.5 text-left text-[10px] leading-snug text-slate-500 sm:hidden">
+                      {auditLines.map((line) => (
+                        <div key={line}>{line}</div>
+                      ))}
+                    </div>
+                  ) : null}
                 </td>
                 <td className="hidden px-4 py-3 text-xs text-slate-600 dark:text-slate-300 sm:table-cell">
                   {auditLines.length > 0 ? (
@@ -383,11 +472,24 @@ export function Expenses() {
     amount: '',
     description: '',
     date: todayYmd(),
+    currency: 'UZS' as 'UZS' | 'USD',
+    fxRate: '1',
   });
+  const [expenseEditFxFromBank, setExpenseEditFxFromBank] = useState(true);
   const [expenseEditError, setExpenseEditError] = useState('');
   const [expenseDeleteId, setExpenseDeleteId] = useState<string | null>(null);
   const [expenseDeleteError, setExpenseDeleteError] = useState('');
   const [expenseDeleteBusy, setExpenseDeleteBusy] = useState(false);
+  /** Umumiy xarajatlar / tarix — default yopiq */
+  const [overviewOpen, setOverviewOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [formCurrency, setFormCurrency] = useState<'UZS' | 'USD'>('UZS');
+  const [formFxRate, setFormFxRate] = useState('');
+  const [fxFromBank, setFxFromBank] = useState(true);
+  const [overviewCurrency, setOverviewCurrency] = useState<'UZS' | 'USD'>('UZS');
+
+  const { usd: cbuUsd, loading: cbuLoading, error: cbuError, refetch: refetchCbu } = useCbuRates();
+  const bankUsdRate = cbuUsdRate(cbuUsd);
 
   const categories = state.expenseCategories;
   const fundingSources = state.expenseFundingSources;
@@ -446,6 +548,23 @@ export function Expenses() {
     }
   }, [fundingSources, activeFundingSourceId]);
 
+  useEffect(() => {
+    if (formCurrency !== 'USD') return;
+    if (!fxFromBank) return;
+    if (bankUsdRate > 0) {
+      setFormFxRate(String(bankUsdRate));
+    }
+  }, [formCurrency, fxFromBank, bankUsdRate]);
+
+  useEffect(() => {
+    if (!expenseEdit) return;
+    if (expenseEditForm.currency !== 'USD') return;
+    if (!expenseEditFxFromBank) return;
+    if (bankUsdRate > 0) {
+      setExpenseEditForm((prev) => ({ ...prev, fxRate: String(bankUsdRate) }));
+    }
+  }, [expenseEdit, expenseEditForm.currency, expenseEditFxFromBank, bankUsdRate]);
+
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const isElectricity = activeCategory ? isElectricityCategory(activeCategory) : false;
 
@@ -470,6 +589,9 @@ export function Expenses() {
 
   const totalTableFiltered = filteredExpenses.reduce((s, e) => s + e.amount, 0);
   const totalForStats = statsSortedExpenses.reduce((s, e) => s + e.amount, 0);
+  const overviewUsdRate = bankUsdRate > 0 ? bankUsdRate : 0;
+  const fmtOverview = (uzs: number) =>
+    formatExpenseDisplay(uzs, overviewCurrency, overviewUsdRate);
 
   const categoryStats = useMemo(() => {
     const map = new Map<string, { id: string; name: string; amount: number }>();
@@ -583,19 +705,47 @@ export function Expenses() {
       setError(t.exExternalOrderManualBlocked);
       return;
     }
-    const digits = form.amount.replace(/\D/g, '');
-    const num = parseInt(digits, 10);
-    if (!digits || !Number.isFinite(num) || num <= 0) {
-      setError(t.labelAmount + '!');
-      return;
+
+    let amountOriginal = 0;
+    if (formCurrency === 'UZS') {
+      const digits = form.amount.replace(/\D/g, '');
+      amountOriginal = parseInt(digits, 10);
+      if (!digits || !Number.isFinite(amountOriginal) || amountOriginal <= 0) {
+        setError(t.labelAmount + '!');
+        return;
+      }
+    } else {
+      const cleaned = form.amount.replace(/\s/g, '').replace(',', '.');
+      amountOriginal = parseFloat(cleaned);
+      if (!Number.isFinite(amountOriginal) || amountOriginal <= 0) {
+        setError(t.labelAmount + '!');
+        return;
+      }
     }
+
+    let fx = 1;
+    if (formCurrency === 'USD') {
+      fx = parseFloat(String(formFxRate).replace(',', '.'));
+      if (!Number.isFinite(fx) || fx <= 0) {
+        setError(t.exUsdRateMissing);
+        return;
+      }
+    }
+
+    const amountUzs =
+      formCurrency === 'UZS'
+        ? amountOriginal
+        : Math.round(amountOriginal * fx * 100) / 100;
+
     try {
       await dispatch({
         type: 'ADD_EXPENSE',
         payload: {
           categoryId: activeCategoryId,
           fundingSourceId: activeFundingSourceId,
-          amount: num,
+          amount: amountOriginal,
+          currency: formCurrency,
+          fxRateToUzs: fx,
           description: form.description,
           date: form.date,
         },
@@ -605,7 +755,13 @@ export function Expenses() {
         description: '',
         date: todayYmd(),
       });
-      setSuccess(`${t.successAdded}: ${formatCurrency(num)}`);
+      setSuccess(
+        `${t.successAdded}: ${
+          formCurrency === 'USD'
+            ? `${formatUsdMoney(amountOriginal)} (${formatCurrency(amountUzs)})`
+            : formatCurrency(amountUzs)
+        }`,
+      );
       setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error');
@@ -676,14 +832,31 @@ export function Expenses() {
 
   const openExpenseEdit = (expense: Expense) => {
     if (isExpenseHistoryLocked(expense, categories)) return;
+    const currency = expense.currency === 'USD' ? 'USD' : 'UZS';
+    const original =
+      expense.amountOriginal != null && Number.isFinite(expense.amountOriginal)
+        ? expense.amountOriginal
+        : expense.amount;
+    const fx =
+      currency === 'USD' && expense.fxRateToUzs && expense.fxRateToUzs > 0
+        ? expense.fxRateToUzs
+        : bankUsdRate > 0
+          ? bankUsdRate
+          : 1;
     setExpenseEdit(expense);
     setExpenseEditError('');
+    setExpenseEditFxFromBank(currency === 'USD');
     setExpenseEditForm({
       categoryId: expense.categoryId,
       fundingSourceId: expense.fundingSourceId ?? fundingSources[0]?.id ?? '',
-      amount: String(Math.round(expense.amount)),
+      amount:
+        currency === 'USD'
+          ? String(original)
+          : String(Math.round(original)),
       description: expense.description ?? '',
       date: expense.date,
+      currency,
+      fxRate: String(fx),
     });
   };
 
@@ -691,12 +864,33 @@ export function Expenses() {
     e.preventDefault();
     if (!expenseEdit) return;
     setExpenseEditError('');
-    const digits = expenseEditForm.amount.replace(/\D/g, '');
-    const num = parseInt(digits, 10);
-    if (!digits || !Number.isFinite(num) || num <= 0) {
-      setExpenseEditError(t.labelAmount + '!');
-      return;
+
+    let amountOriginal = 0;
+    if (expenseEditForm.currency === 'UZS') {
+      const digits = expenseEditForm.amount.replace(/\D/g, '');
+      amountOriginal = parseInt(digits, 10);
+      if (!digits || !Number.isFinite(amountOriginal) || amountOriginal <= 0) {
+        setExpenseEditError(t.labelAmount + '!');
+        return;
+      }
+    } else {
+      const cleaned = expenseEditForm.amount.replace(/\s/g, '').replace(',', '.');
+      amountOriginal = parseFloat(cleaned);
+      if (!Number.isFinite(amountOriginal) || amountOriginal <= 0) {
+        setExpenseEditError(t.labelAmount + '!');
+        return;
+      }
     }
+
+    let fx = 1;
+    if (expenseEditForm.currency === 'USD') {
+      fx = parseFloat(String(expenseEditForm.fxRate).replace(',', '.'));
+      if (!Number.isFinite(fx) || fx <= 0) {
+        setExpenseEditError(t.exUsdRateMissing);
+        return;
+      }
+    }
+
     if (!expenseEditForm.categoryId) {
       setExpenseEditError(t.exNoCategories);
       return;
@@ -712,7 +906,9 @@ export function Expenses() {
           id: expenseEdit.id,
           categoryId: expenseEditForm.categoryId,
           fundingSourceId: expenseEditForm.fundingSourceId,
-          amount: num,
+          amount: amountOriginal,
+          currency: expenseEditForm.currency,
+          fxRateToUzs: fx,
           description: expenseEditForm.description,
           date: expenseEditForm.date,
         },
@@ -749,27 +945,73 @@ export function Expenses() {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      {/* Умумий харажатлар — yangi dashboard */}
+      {/* Умумий харажатлар — default yopiq */}
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800">
-        {/* Hero header */}
-        <div className="border-b border-red-100/80 bg-gradient-to-br from-red-50 via-white to-orange-50/60 px-5 py-6 dark:border-red-900/30 dark:from-red-950/25 dark:via-slate-800 dark:to-slate-800 sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <button
+          type="button"
+          onClick={() => setOverviewOpen((v) => !v)}
+          className="flex w-full items-center justify-between gap-3 border-b border-red-100/80 bg-gradient-to-br from-red-50 via-white to-orange-50/60 px-5 py-4 text-left transition-colors hover:from-red-50/90 dark:border-red-900/30 dark:from-red-950/25 dark:via-slate-800 dark:to-slate-800 sm:px-6"
+          aria-expanded={overviewOpen}
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400">
+              <BarChart3 size={18} />
+            </div>
             <div className="min-w-0">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400">
-                  <BarChart3 size={18} />
-                </div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
-                  {t.exTotalLabel.replace(':', '')}
-                </h2>
-              </div>
-              <p className="text-3xl font-bold tabular-nums tracking-tight text-red-700 dark:text-red-300 sm:text-4xl">
-                {formatCurrency(totalForStats)}
-              </p>
-              <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                {t.exPageStatsNote}
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                {t.exTotalLabel.replace(':', '')}
+              </h2>
+              <p className="truncate text-lg font-bold tabular-nums text-red-700 dark:text-red-300 sm:text-xl">
+                {fmtOverview(totalForStats)}
               </p>
             </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <div
+              className="inline-flex rounded-xl border border-slate-200 bg-white/80 p-0.5 dark:border-slate-600 dark:bg-slate-800"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              {(
+                [
+                  { key: 'UZS' as const, label: t.exDisplayUzs },
+                  { key: 'USD' as const, label: t.exDisplayUsd },
+                ] as const
+              ).map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOverviewCurrency(key);
+                    if (key === 'USD' && !(bankUsdRate > 0)) void refetchCbu();
+                  }}
+                  className={cn(
+                    'rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors',
+                    overviewCurrency === key
+                      ? 'bg-red-600 text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              {overviewOpen ? t.exSectionCollapse : t.exSectionExpand}
+              {overviewOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            </span>
+          </div>
+        </button>
+
+        {overviewOpen ? (
+          <>
+        {/* Hero details */}
+        <div className="border-b border-red-100/80 bg-gradient-to-br from-red-50/40 via-white to-orange-50/30 px-5 py-5 dark:border-red-900/20 dark:from-red-950/15 dark:via-slate-800 dark:to-slate-800 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <p className="max-w-2xl text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {t.exPageStatsNote}
+            </p>
             <div className="flex shrink-0 flex-wrap gap-2">
               {categoryStats.slice(0, 3).map((row) => (
                 <div
@@ -798,7 +1040,7 @@ export function Expenses() {
                       key={row.id}
                       className={`h-full transition-all duration-500 first:rounded-l-full last:rounded-r-full ${chartBarClassForCategory(row.id, i)}`}
                       style={{ width: `${pct}%` }}
-                      title={`${row.name}: ${formatCurrency(row.amount)}`}
+                      title={`${row.name}: ${fmtOverview(row.amount)}`}
                     />
                   ) : null;
                 })}
@@ -839,7 +1081,7 @@ export function Expenses() {
                       {t.exColAmount}
                     </span>
                     <span className="max-w-[5.5rem] text-center text-xs font-bold tabular-nums leading-tight text-slate-800 dark:text-slate-100">
-                      {formatCurrency(totalForStats)}
+                      {fmtOverview(totalForStats)}
                     </span>
                   </div>
                 </div>
@@ -856,7 +1098,7 @@ export function Expenses() {
                           <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{row.name}</span>
                         </div>
                         <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                          {pct}% · {formatCurrency(row.value)}
+                          {pct}% · {fmtOverview(row.value)}
                         </span>
                       </div>
                     );
@@ -873,7 +1115,7 @@ export function Expenses() {
             ) : (
               <CategoryExpenseRankedBars
                 items={categoryChartRows}
-                formatValue={formatCurrency}
+                formatValue={fmtOverview}
                 total={totalForStats}
                 maxItems={5}
               />
@@ -939,7 +1181,7 @@ export function Expenses() {
                   data={expenseTrend.data}
                   series={expenseTrend.series}
                   height={260}
-                  formatValue={formatCurrency}
+                  formatValue={fmtOverview}
                 />
               </div>
             </>
@@ -1009,7 +1251,7 @@ export function Expenses() {
                           <td className="px-3 py-2 text-xs text-slate-500">{idx + 1}</td>
                           <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{row.name}</td>
                           <td className="px-3 py-2 text-right font-semibold text-red-600 dark:text-red-400">
-                            {formatCurrency(row.amount)}
+                            {fmtOverview(row.amount)}
                           </td>
                           <td className="hidden px-3 py-2 text-right text-slate-600 dark:text-slate-300 sm:table-cell">
                             {pct.toFixed(1)}%
@@ -1056,7 +1298,7 @@ export function Expenses() {
                           <span className="font-medium text-slate-800 dark:text-slate-100">{row.name}</span>
                           <span className="text-slate-500 dark:text-slate-400">
                             {' '}
-                            — {pct}% · {formatCurrency(row.value)}
+                            — {pct}% · {fmtOverview(row.value)}
                           </span>
                         </span>
                       </div>
@@ -1073,12 +1315,14 @@ export function Expenses() {
               <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-600 dark:bg-slate-900/20">
                 <CategoryExpenseHorizontalBars
                   items={categoryChartRows}
-                  formatValue={formatCurrency}
+                  formatValue={fmtOverview}
                   total={totalForStats}
                 />
               </div>
             ))}
         </div>
+          </>
+        ) : null}
       </div>
 
       {/* Pul manbai bo'yicha hisobot */}
@@ -1169,8 +1413,8 @@ export function Expenses() {
                             {expense.fundingSourceName ?? '—'}
                           </td>
                           <td className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200">{categoryLabel}</td>
-                          <td className="px-3 py-2 text-right font-semibold text-red-600 dark:text-red-400">
-                            {formatCurrency(expense.amount)}
+                          <td className="px-3 py-2 text-right align-top">
+                            <ExpenseMoneyDetails expense={expense} t={t} />
                           </td>
                         </tr>
                       );
@@ -1261,23 +1505,133 @@ export function Expenses() {
                 />
               </div>
               <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.exCurrencyLabel}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { key: 'UZS' as const, label: 'UZS' },
+                      { key: 'USD' as const, label: 'USD' },
+                    ] as const
+                  ).map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setFormCurrency(key);
+                        if (key === 'USD') {
+                          setFxFromBank(true);
+                          if (bankUsdRate > 0) setFormFxRate(String(bankUsdRate));
+                          else void refetchCbu();
+                        } else {
+                          setFormFxRate('1');
+                        }
+                      }}
+                      className={cn(
+                        'rounded-xl border py-2 text-sm font-semibold transition-all',
+                        formCurrency === key
+                          ? 'border-slate-700 bg-slate-800 text-white dark:border-slate-500 dark:bg-slate-600'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">
-                  {t.exColAmount} ({t.unitSum})
+                  {t.exColAmount} ({formCurrency === 'USD' ? 'USD' : t.unitSum})
                 </label>
                 <input
                   type="text"
-                  inputMode="numeric"
+                  inputMode={formCurrency === 'USD' ? 'decimal' : 'numeric'}
                   autoComplete="off"
-                  value={displayGroupedIntInput(form.amount)}
+                  value={
+                    formCurrency === 'UZS'
+                      ? displayGroupedIntInput(form.amount)
+                      : form.amount
+                  }
                   onChange={(e) => {
-                    const d = parseDigitsFromAmountInput(e.target.value);
-                    if (d.length > 15) return;
-                    setForm({ ...form, amount: d });
+                    if (formCurrency === 'UZS') {
+                      const d = parseDigitsFromAmountInput(e.target.value);
+                      if (d.length > 15) return;
+                      setForm({ ...form, amount: d });
+                    } else {
+                      const raw = e.target.value.replace(/[^\d.,]/g, '');
+                      setForm({ ...form, amount: raw });
+                    }
                   }}
                   placeholder="0"
                   className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
+                {formCurrency === 'USD' && form.amount && (() => {
+                  const n = parseFloat(form.amount.replace(',', '.'));
+                  const fx = parseFloat(String(formFxRate).replace(',', '.'));
+                  if (!(n > 0) || !(fx > 0)) return null;
+                  return (
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {t.exAmountInUzsHint.replace(
+                        '{amount}',
+                        formatCurrency(Math.round(n * fx * 100) / 100),
+                      )}
+                    </p>
+                  );
+                })()}
               </div>
+              {formCurrency === 'USD' ? (
+                <div>
+                  <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                    {t.exFxRateLabel}
+                  </label>
+                  <div className="mb-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFxFromBank(true);
+                        if (bankUsdRate > 0) setFormFxRate(String(bankUsdRate));
+                        else void refetchCbu();
+                      }}
+                      className={cn(
+                        'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium',
+                        fxFromBank
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200'
+                          : 'border-slate-200 text-slate-600 dark:border-slate-600 dark:text-slate-300',
+                      )}
+                    >
+                      {t.exFxFromBank}
+                      {bankUsdRate > 0 ? `: ${formatNumber(bankUsdRate)}` : cbuLoading ? '…' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFxFromBank(false)}
+                      className={cn(
+                        'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium',
+                        !fxFromBank
+                          ? 'border-indigo-500 bg-indigo-50 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                          : 'border-slate-200 text-slate-600 dark:border-slate-600 dark:text-slate-300',
+                      )}
+                    >
+                      {t.exFxManual}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={formFxRate}
+                    onChange={(e) => {
+                      setFxFromBank(false);
+                      setFormFxRate(e.target.value.replace(/[^\d.,]/g, ''));
+                    }}
+                    placeholder={bankUsdRate > 0 ? String(bankUsdRate) : '12000'}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                  />
+                  {cbuError ? (
+                    <p className="mt-1 text-xs text-amber-600">{t.exUsdRateMissing}</p>
+                  ) : null}
+                </div>
+              ) : null}
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 text-sm mb-1.5">{t.labelDesc}</label>
                 <input
@@ -1473,36 +1827,57 @@ export function Expenses() {
 
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between gap-2 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-slate-800 dark:text-white font-semibold text-sm min-w-0">{t.exHistory}</h3>
-            <div className="flex shrink-0 items-center gap-2">
-              {isFiltered && (
-                <span className="hidden text-xs text-indigo-600 dark:text-indigo-400 sm:inline">
-                  {t.dfShowing} {filterLabel}
-                </span>
+            <button
+              type="button"
+              onClick={() => setHistoryOpen((v) => !v)}
+              className="flex min-w-0 flex-1 items-center gap-2 text-left"
+              aria-expanded={historyOpen}
+            >
+              {historyOpen ? (
+                <ChevronDown size={18} className="shrink-0 text-slate-500" />
+              ) : (
+                <ChevronRight size={18} className="shrink-0 text-slate-500" />
               )}
-              <span className="text-xs text-slate-400 hidden sm:inline">
-                {filteredExpenses.length} {t.totalRecords}
+              <h3 className="text-slate-800 dark:text-white font-semibold text-sm min-w-0 truncate">
+                {t.exHistory}
+              </h3>
+              <span className="hidden text-xs text-slate-400 sm:inline">
+                ({filteredExpenses.length} {t.totalRecords})
               </span>
-              <button
-                type="button"
-                onClick={() => setHistoryFullscreen(true)}
-                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                title={t.exHistoryFullscreenEnter}
-                aria-label={t.exHistoryFullscreenEnter}
-              >
-                <Maximize2 size={18} />
-              </button>
-            </div>
+              <span className="ml-auto shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 sm:ml-2">
+                {historyOpen ? t.exSectionCollapse : t.exSectionExpand}
+              </span>
+            </button>
+            {historyOpen ? (
+              <div className="flex shrink-0 items-center gap-2">
+                {isFiltered && (
+                  <span className="hidden text-xs text-indigo-600 dark:text-indigo-400 sm:inline">
+                    {t.dfShowing} {filterLabel}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setHistoryFullscreen(true)}
+                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                  title={t.exHistoryFullscreenEnter}
+                  aria-label={t.exHistoryFullscreenEnter}
+                >
+                  <Maximize2 size={18} />
+                </button>
+              </div>
+            ) : null}
           </div>
-          <ExpenseHistoryTableView
-            expenses={filteredExpenses}
-            categories={categories}
-            t={t}
-            totalFiltered={totalTableFiltered}
-            wideNote={false}
-            onEdit={openExpenseEdit}
-            onDelete={requestDeleteExpense}
-          />
+          {historyOpen ? (
+            <ExpenseHistoryTableView
+              expenses={filteredExpenses}
+              categories={categories}
+              t={t}
+              totalFiltered={totalTableFiltered}
+              wideNote={false}
+              onEdit={openExpenseEdit}
+              onDelete={requestDeleteExpense}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -1649,21 +2024,152 @@ export function Expenses() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
-                {t.exColAmount} ({t.unitSum})
+                {t.exCurrencyLabel}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    { key: 'UZS' as const, label: 'UZS' },
+                    { key: 'USD' as const, label: 'USD' },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setExpenseEditForm((prev) => ({
+                        ...prev,
+                        currency: key,
+                        fxRate:
+                          key === 'USD'
+                            ? bankUsdRate > 0
+                              ? String(bankUsdRate)
+                              : prev.fxRate
+                            : '1',
+                      }));
+                      if (key === 'USD') {
+                        setExpenseEditFxFromBank(true);
+                        if (!(bankUsdRate > 0)) void refetchCbu();
+                      }
+                    }}
+                    className={cn(
+                      'rounded-xl border py-2 text-sm font-semibold transition-all',
+                      expenseEditForm.currency === key
+                        ? 'border-slate-700 bg-slate-800 text-white dark:border-slate-500 dark:bg-slate-600'
+                        : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                {t.exColAmount} ({expenseEditForm.currency === 'USD' ? 'USD' : t.unitSum})
               </label>
               <input
                 type="text"
-                inputMode="numeric"
+                inputMode={expenseEditForm.currency === 'USD' ? 'decimal' : 'numeric'}
                 autoComplete="off"
-                value={displayGroupedIntInput(expenseEditForm.amount)}
+                value={
+                  expenseEditForm.currency === 'UZS'
+                    ? displayGroupedIntInput(expenseEditForm.amount)
+                    : expenseEditForm.amount
+                }
                 onChange={(e) => {
-                  const d = parseDigitsFromAmountInput(e.target.value);
-                  if (d.length > 15) return;
-                  setExpenseEditForm((prev) => ({ ...prev, amount: d }));
+                  if (expenseEditForm.currency === 'UZS') {
+                    const d = parseDigitsFromAmountInput(e.target.value);
+                    if (d.length > 15) return;
+                    setExpenseEditForm((prev) => ({ ...prev, amount: d }));
+                  } else {
+                    const raw = e.target.value.replace(/[^\d.,]/g, '');
+                    setExpenseEditForm((prev) => ({ ...prev, amount: raw }));
+                  }
                 }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
               />
+              {expenseEditForm.currency === 'USD' && expenseEditForm.amount
+                ? (() => {
+                    const n = parseFloat(expenseEditForm.amount.replace(',', '.'));
+                    const fx = parseFloat(String(expenseEditForm.fxRate).replace(',', '.'));
+                    if (!(n > 0) || !(fx > 0)) return null;
+                    return (
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        {t.exAmountInUzsHint.replace(
+                          '{amount}',
+                          formatCurrency(Math.round(n * fx * 100) / 100),
+                        )}
+                      </p>
+                    );
+                  })()
+                : null}
             </div>
+            {expenseEditForm.currency === 'USD' ? (
+              <div>
+                <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                  {t.exFxRateLabel}
+                </label>
+                <div className="mb-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpenseEditFxFromBank(true);
+                      if (bankUsdRate > 0) {
+                        setExpenseEditForm((prev) => ({
+                          ...prev,
+                          fxRate: String(bankUsdRate),
+                        }));
+                      } else {
+                        void refetchCbu();
+                      }
+                    }}
+                    className={cn(
+                      'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium',
+                      expenseEditFxFromBank
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200'
+                        : 'border-slate-200 text-slate-600 dark:border-slate-600 dark:text-slate-300',
+                    )}
+                  >
+                    {t.exFxFromBank}
+                    {bankUsdRate > 0
+                      ? `: ${formatNumber(bankUsdRate)}`
+                      : cbuLoading
+                        ? '…'
+                        : ''}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpenseEditFxFromBank(false)}
+                    className={cn(
+                      'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium',
+                      !expenseEditFxFromBank
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                        : 'border-slate-200 text-slate-600 dark:border-slate-600 dark:text-slate-300',
+                    )}
+                  >
+                    {t.exFxManual}
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={expenseEditForm.fxRate}
+                  onChange={(e) => {
+                    setExpenseEditFxFromBank(false);
+                    setExpenseEditForm((prev) => ({
+                      ...prev,
+                      fxRate: e.target.value.replace(/[^\d.,]/g, ''),
+                    }));
+                  }}
+                  placeholder={bankUsdRate > 0 ? String(bankUsdRate) : '12000'}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                />
+                {cbuError ? (
+                  <p className="mt-1 text-xs text-amber-600">{t.exUsdRateMissing}</p>
+                ) : null}
+              </div>
+            ) : null}
             <div>
               <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">{t.labelDesc}</label>
               <input

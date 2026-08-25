@@ -43,10 +43,6 @@ export class UpdateShiftRecordDto {
   productLabel?: string;
 
   @IsOptional()
-  @IsString()
-  machineReading?: string;
-
-  @IsOptional()
   @IsInt()
   @Min(0)
   producedQty?: number;

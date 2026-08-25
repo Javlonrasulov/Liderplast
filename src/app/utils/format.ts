@@ -116,6 +116,21 @@ export function formatKgAmount(kg: number): string {
   }).format(kg);
 }
 
+/** Sotuv/ombor narxi: UZS butun, USD/EUR kichik kasrlar (0,012) saqlanadi. */
+export function formatSaleUnitPrice(
+  price: number,
+  currency: 'UZS' | 'USD' | 'EUR' | string = 'UZS',
+): string {
+  if (!Number.isFinite(price)) return '0';
+  if (currency === 'UZS') {
+    return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(price));
+  }
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 6,
+  }).format(price);
+}
+
 /**
  * Xomashyo harakati: 1 kg dan kichik miqdorlar gramm ko‘rinishida (masalan 29 g).
  */

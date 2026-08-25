@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
+import { useTheme } from 'next-themes';
 import { startServerTodaySync, subscribeServerToday } from '../api/server-date';
+import { useAuth } from '../auth/auth-context';
 import { Language, T, translations } from './translations';
 import { parseYmdLocal, todayYmd, toLocalDateString, formatChartDateRangeLabel } from '../utils/format';
+import {
+  applyTextColor,
+  type TextColorId,
+  readTextColorForLogin,
+  saveTextColor,
+} from '../utils/text-color';
+
+export type { TextColorId };
 
 // ======================== DATE FILTER ========================
 
@@ -126,6 +136,8 @@ interface AppContextValue {
   chartRangeLabel: string;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
+  textColor: TextColorId;
+  setTextColor: (id: TextColorId) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -146,6 +158,11 @@ function readStoredLang(): Language {
 export function AppProvider({ children }: { children: ReactNode }) {
   /** Re-render when server `today` syncs from API (navbar calendar max date). */
   const [, setServerTodayRevision] = useState(0);
+  const { user } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const loginKey =
+    user?.login?.trim() || user?.phone?.trim() || user?.id || null;
+
   const [lang, setLangState] = useState<Language>(readStoredLang);
 
   const setLang = (l: Language) => {
@@ -168,8 +185,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return 'md';
     }
   });
+  const [textColor, setTextColorState] = useState<TextColorId>(() =>
+    readTextColorForLogin(null),
+  );
 
   const t = useMemo(() => withRawMaterialFallbacks(translations[lang]), [lang]);
+
+  /** Login o‘zgaganda shu foydalanuvchi uchun saqlangan matn rangini yuklash */
+  useEffect(() => {
+    setTextColorState(readTextColorForLogin(loginKey));
+  }, [loginKey]);
 
   useEffect(() => {
     const unsubListener = subscribeServerToday(() => {
@@ -192,7 +217,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [fontSize]);
 
+  useEffect(() => {
+    applyTextColor(textColor, resolvedTheme === 'dark');
+  }, [textColor, resolvedTheme]);
+
   const setFontSize = (size: FontSize) => setFontSizeState(size);
+
+  const setTextColor = useCallback(
+    (id: TextColorId) => {
+      setTextColorState(id);
+      saveTextColor(id, loginKey);
+    },
+    [loginKey],
+  );
 
   const setPreset = (preset: DatePreset) => {
     if (preset === 'custom') {
@@ -244,7 +281,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, isFiltered, filterLabel, chartRangeLabel, fontSize, setFontSize }}>
+    <AppContext.Provider value={{ lang, setLang, t, dateFilter, setPreset, setCustomRange, filterData, isFiltered, filterLabel, chartRangeLabel, fontSize, setFontSize, textColor, setTextColor }}>
       {children}
     </AppContext.Provider>
   );

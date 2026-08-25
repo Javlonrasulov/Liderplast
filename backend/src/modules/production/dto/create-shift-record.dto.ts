@@ -64,10 +64,6 @@ export class CreateShiftRecordDto {
   @IsString()
   productLabel?: string;
 
-  @IsOptional()
-  @IsString()
-  machineReading?: string;
-
   @IsInt()
   @Min(0)
   producedQty!: number;

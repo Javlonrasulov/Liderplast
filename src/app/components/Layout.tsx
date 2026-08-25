@@ -9,12 +9,11 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useERP, type RawMaterialKind, type RawMaterialProduct } from '../store/erp-store';
-import { useApp } from '../i18n/app-context';
+import { useApp, type FontSize, type TextColorId } from '../i18n/app-context';
 import { formatKgAmount } from '../utils/format';
 import { DateFilterPicker } from './DateFilterPicker';
 import { ExpensesElectricityNavButton } from './ExpensesElectricityNavButton';
 import { Language } from '../i18n/translations';
-import { type FontSize } from '../i18n/app-context';
 import { useAuth } from '../auth/auth-context';
 import { AccountCredentialsDialog } from '../auth/AccountCredentialsDialog';
 import type { AppPermissionKey } from '../auth/permission-keys';
@@ -135,6 +134,98 @@ function FontSizeControl() {
         <span className="text-[15px] font-bold leading-none">A</span>
         <span className="text-[9px] font-bold leading-none ml-px">+</span>
       </button>
+    </div>
+  );
+}
+
+function TextColorPicker() {
+  const { t, textColor, setTextColor } = useApp();
+  const { resolvedTheme } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const isDark = resolvedTheme === 'dark';
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const options: { id: TextColorId; label: string; swatch: string }[] = [
+    {
+      id: 'default',
+      label: t.textColorDefault,
+      swatch: 'linear-gradient(135deg, #64748b 0%, #0f172a 100%)',
+    },
+    {
+      id: 'black',
+      label: t.textColorBlack,
+      swatch: isDark ? '#ffffff' : '#000000',
+    },
+  ];
+
+  const triggerColor =
+    textColor === 'black' ? (isDark ? '#ffffff' : '#000000') : undefined;
+
+  return (
+    <div className="relative shrink-0" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        title={t.textColor}
+        aria-label={t.textColor}
+        aria-expanded={open}
+        className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
+          textColor !== 'default' || open
+            ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
+            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+        }`}
+      >
+        <span
+          className="text-[15px] font-extrabold leading-none tracking-tight"
+          style={triggerColor ? { color: triggerColor } : undefined}
+          aria-hidden
+        >
+          A
+        </span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[90] w-[min(12rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+          <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            {t.textColor}
+          </p>
+          <div className="flex flex-col gap-0.5">
+            {options.map((opt) => {
+              const active = textColor === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setTextColor(opt.id);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+                    active
+                      ? 'border border-indigo-300 bg-indigo-50 text-indigo-800 dark:border-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-200'
+                      : 'border border-transparent text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <span
+                    className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-200 dark:border-slate-600"
+                    style={{ background: opt.swatch }}
+                  />
+                  <span className="min-w-0 flex-1 font-medium">{opt.label}</span>
+                  {active ? <Check size={14} className="shrink-0 text-indigo-500" /> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -667,6 +758,11 @@ export function Layout() {
                       <FontSizeControl />
                     </div>
 
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t.textColor}</span>
+                      <TextColorPicker />
+                    </div>
+
                     <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between gap-2">
                       <button
                         type="button"
@@ -713,6 +809,8 @@ export function Layout() {
               <div className="hidden shrink-0 min-[380px]:block">
                 <FontSizeControl />
               </div>
+
+              <TextColorPicker />
 
               <LanguageDropdown />
 

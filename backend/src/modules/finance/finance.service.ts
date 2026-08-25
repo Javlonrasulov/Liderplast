@@ -291,6 +291,33 @@ export class FinanceService {
     client.bankName = client.bankName ?? nextBankName;
   }
 
+  private resolveExpenseMoney(params: {
+    amountInput: number;
+    currency?: PurchaseOrderCurrency | string | null;
+    fxRateToUzs?: number | null;
+  }) {
+    const currency =
+      params.currency === PurchaseOrderCurrency.USD
+        ? PurchaseOrderCurrency.USD
+        : PurchaseOrderCurrency.UZS;
+    const amountOriginal = params.amountInput;
+    if (!Number.isFinite(amountOriginal) || amountOriginal < 0) {
+      throw new BadRequestException('Invalid amount');
+    }
+    let fx = params.fxRateToUzs ?? 1;
+    if (currency === PurchaseOrderCurrency.UZS) {
+      fx = 1;
+    }
+    if (!Number.isFinite(fx) || fx <= 0) {
+      throw new BadRequestException('Invalid exchange rate');
+    }
+    const amountUzs =
+      currency === PurchaseOrderCurrency.UZS
+        ? amountOriginal
+        : Math.round(amountOriginal * fx * 100) / 100;
+    return { currency, fxRateToUzs: fx, amountOriginal, amountUzs };
+  }
+
   async createExpense(dto: CreateExpenseDto, createdById?: string) {
     const category = await this.prisma.expenseCategory.findUnique({
       where: { id: dto.categoryId },
@@ -312,6 +339,12 @@ export class FinanceService {
       throw new BadRequestException('Pul manbai topilmadi yoki faol emas');
     }
 
+    const money = this.resolveExpenseMoney({
+      amountInput: dto.amount,
+      currency: dto.currency,
+      fxRateToUzs: dto.fxRateToUzs,
+    });
+
     const incurredAt = dto.incurredAt ? new Date(dto.incurredAt) : new Date();
 
     return this.prisma.expense.create({
@@ -320,7 +353,10 @@ export class FinanceService {
         type: category.legacyExpenseType,
         categoryId: category.id,
         fundingSourceId: fundingSource.id,
-        amount: dto.amount,
+        amount: money.amountUzs,
+        currency: money.currency,
+        fxRateToUzs: money.fxRateToUzs,
+        amountOriginal: money.amountOriginal,
         description: dto.description,
         incurredAt,
         createdById,
@@ -439,10 +475,34 @@ export class FinanceService {
         ? nextDescription.trim().slice(0, 160)
         : existing.title;
 
+    const moneyPatch =
+      dto.amount !== undefined ||
+      dto.currency !== undefined ||
+      dto.fxRateToUzs !== undefined
+        ? this.resolveExpenseMoney({
+            amountInput:
+              dto.amount !== undefined
+                ? dto.amount
+                : (existing.amountOriginal ?? existing.amount),
+            currency: dto.currency ?? existing.currency,
+            fxRateToUzs:
+              dto.fxRateToUzs !== undefined
+                ? dto.fxRateToUzs
+                : existing.fxRateToUzs,
+          })
+        : null;
+
     return this.prisma.expense.update({
       where: { id },
       data: {
-        ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+        ...(moneyPatch
+          ? {
+              amount: moneyPatch.amountUzs,
+              currency: moneyPatch.currency,
+              fxRateToUzs: moneyPatch.fxRateToUzs,
+              amountOriginal: moneyPatch.amountOriginal,
+            }
+          : {}),
         ...(dto.description !== undefined
           ? { description: dto.description, title }
           : {}),

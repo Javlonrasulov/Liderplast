@@ -28,10 +28,14 @@ export type AggregateExpense = {
 
 export type ExpenseAvgAggregateOutputType = {
   amount: number | null
+  fxRateToUzs: number | null
+  amountOriginal: number | null
 }
 
 export type ExpenseSumAggregateOutputType = {
   amount: number | null
+  fxRateToUzs: number | null
+  amountOriginal: number | null
 }
 
 export type ExpenseMinAggregateOutputType = {
@@ -39,6 +43,9 @@ export type ExpenseMinAggregateOutputType = {
   title: string | null
   type: $Enums.ExpenseType | null
   amount: number | null
+  currency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
+  amountOriginal: number | null
   description: string | null
   status: $Enums.EntityStatus | null
   incurredAt: Date | null
@@ -56,6 +63,9 @@ export type ExpenseMaxAggregateOutputType = {
   title: string | null
   type: $Enums.ExpenseType | null
   amount: number | null
+  currency: $Enums.PurchaseOrderCurrency | null
+  fxRateToUzs: number | null
+  amountOriginal: number | null
   description: string | null
   status: $Enums.EntityStatus | null
   incurredAt: Date | null
@@ -73,6 +83,9 @@ export type ExpenseCountAggregateOutputType = {
   title: number
   type: number
   amount: number
+  currency: number
+  fxRateToUzs: number
+  amountOriginal: number
   description: number
   status: number
   incurredAt: number
@@ -89,10 +102,14 @@ export type ExpenseCountAggregateOutputType = {
 
 export type ExpenseAvgAggregateInputType = {
   amount?: true
+  fxRateToUzs?: true
+  amountOriginal?: true
 }
 
 export type ExpenseSumAggregateInputType = {
   amount?: true
+  fxRateToUzs?: true
+  amountOriginal?: true
 }
 
 export type ExpenseMinAggregateInputType = {
@@ -100,6 +117,9 @@ export type ExpenseMinAggregateInputType = {
   title?: true
   type?: true
   amount?: true
+  currency?: true
+  fxRateToUzs?: true
+  amountOriginal?: true
   description?: true
   status?: true
   incurredAt?: true
@@ -117,6 +137,9 @@ export type ExpenseMaxAggregateInputType = {
   title?: true
   type?: true
   amount?: true
+  currency?: true
+  fxRateToUzs?: true
+  amountOriginal?: true
   description?: true
   status?: true
   incurredAt?: true
@@ -134,6 +157,9 @@ export type ExpenseCountAggregateInputType = {
   title?: true
   type?: true
   amount?: true
+  currency?: true
+  fxRateToUzs?: true
+  amountOriginal?: true
   description?: true
   status?: true
   incurredAt?: true
@@ -238,6 +264,9 @@ export type ExpenseGroupByOutputType = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency: $Enums.PurchaseOrderCurrency
+  fxRateToUzs: number
+  amountOriginal: number | null
   description: string | null
   status: $Enums.EntityStatus
   incurredAt: Date
@@ -278,6 +307,9 @@ export type ExpenseWhereInput = {
   title?: Prisma.StringFilter<"Expense"> | string
   type?: Prisma.EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
   amount?: Prisma.FloatFilter<"Expense"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"Expense"> | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFilter<"Expense"> | number
+  amountOriginal?: Prisma.FloatNullableFilter<"Expense"> | number | null
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
@@ -305,6 +337,9 @@ export type ExpenseOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   type?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
@@ -336,6 +371,9 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Expense"> | string
   type?: Prisma.EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
   amount?: Prisma.FloatFilter<"Expense"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"Expense"> | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFilter<"Expense"> | number
+  amountOriginal?: Prisma.FloatNullableFilter<"Expense"> | number | null
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
@@ -362,6 +400,9 @@ export type ExpenseOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   type?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
@@ -387,6 +428,9 @@ export type ExpenseScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Expense"> | string
   type?: Prisma.EnumExpenseTypeWithAggregatesFilter<"Expense"> | $Enums.ExpenseType
   amount?: Prisma.FloatWithAggregatesFilter<"Expense"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyWithAggregatesFilter<"Expense"> | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatWithAggregatesFilter<"Expense"> | number
+  amountOriginal?: Prisma.FloatNullableWithAggregatesFilter<"Expense"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
@@ -404,6 +448,9 @@ export type ExpenseCreateInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -426,6 +473,9 @@ export type ExpenseUncheckedCreateInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -448,6 +498,9 @@ export type ExpenseUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -470,6 +523,9 @@ export type ExpenseUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -492,6 +548,9 @@ export type ExpenseCreateManyInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -509,6 +568,9 @@ export type ExpenseUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -521,6 +583,9 @@ export type ExpenseUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -553,6 +618,9 @@ export type ExpenseCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   type?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
@@ -567,6 +635,8 @@ export type ExpenseCountOrderByAggregateInput = {
 
 export type ExpenseAvgOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrder
 }
 
 export type ExpenseMaxOrderByAggregateInput = {
@@ -574,6 +644,9 @@ export type ExpenseMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   type?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
@@ -591,6 +664,9 @@ export type ExpenseMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   type?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   incurredAt?: Prisma.SortOrder
@@ -605,6 +681,8 @@ export type ExpenseMinOrderByAggregateInput = {
 
 export type ExpenseSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  fxRateToUzs?: Prisma.SortOrder
+  amountOriginal?: Prisma.SortOrder
 }
 
 export type ExpenseScalarRelationFilter = {
@@ -893,6 +971,9 @@ export type ExpenseCreateWithoutCreatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -914,6 +995,9 @@ export type ExpenseUncheckedCreateWithoutCreatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -945,6 +1029,9 @@ export type ExpenseCreateWithoutUpdatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -966,6 +1053,9 @@ export type ExpenseUncheckedCreateWithoutUpdatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1016,6 +1106,9 @@ export type ExpenseScalarWhereInput = {
   title?: Prisma.StringFilter<"Expense"> | string
   type?: Prisma.EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
   amount?: Prisma.FloatFilter<"Expense"> | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFilter<"Expense"> | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFilter<"Expense"> | number
+  amountOriginal?: Prisma.FloatNullableFilter<"Expense"> | number | null
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Expense"> | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
@@ -1049,6 +1142,9 @@ export type ExpenseCreateWithoutBagWriteoffInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1070,6 +1166,9 @@ export type ExpenseUncheckedCreateWithoutBagWriteoffInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1107,6 +1206,9 @@ export type ExpenseUpdateWithoutBagWriteoffInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1128,6 +1230,9 @@ export type ExpenseUncheckedUpdateWithoutBagWriteoffInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1149,6 +1254,9 @@ export type ExpenseCreateWithoutSourceShiftInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1170,6 +1278,9 @@ export type ExpenseUncheckedCreateWithoutSourceShiftInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1207,6 +1318,9 @@ export type ExpenseUpdateWithoutSourceShiftInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1228,6 +1342,9 @@ export type ExpenseUncheckedUpdateWithoutSourceShiftInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1249,6 +1366,9 @@ export type ExpenseCreateWithoutCategoryInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1270,6 +1390,9 @@ export type ExpenseUncheckedCreateWithoutCategoryInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1317,6 +1440,9 @@ export type ExpenseCreateWithoutFundingSourceInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1338,6 +1464,9 @@ export type ExpenseUncheckedCreateWithoutFundingSourceInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1385,6 +1514,9 @@ export type ExpenseCreateWithoutRawMaterialPurchaseOrderInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1406,6 +1538,9 @@ export type ExpenseUncheckedCreateWithoutRawMaterialPurchaseOrderInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1443,6 +1578,9 @@ export type ExpenseUpdateWithoutRawMaterialPurchaseOrderInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1464,6 +1602,9 @@ export type ExpenseUncheckedUpdateWithoutRawMaterialPurchaseOrderInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1485,6 +1626,9 @@ export type ExpenseCreateWithoutSupplierPurchaseOrderInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1506,6 +1650,9 @@ export type ExpenseUncheckedCreateWithoutSupplierPurchaseOrderInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1543,6 +1690,9 @@ export type ExpenseUpdateWithoutSupplierPurchaseOrderInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1564,6 +1714,9 @@ export type ExpenseUncheckedUpdateWithoutSupplierPurchaseOrderInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1585,6 +1738,9 @@ export type ExpenseCreateWithoutBankTransactionInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1606,6 +1762,9 @@ export type ExpenseUncheckedCreateWithoutBankTransactionInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1643,6 +1802,9 @@ export type ExpenseUpdateWithoutBankTransactionInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1664,6 +1826,9 @@ export type ExpenseUncheckedUpdateWithoutBankTransactionInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1685,6 +1850,9 @@ export type ExpenseCreateWithoutCompanyAssetInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1706,6 +1874,9 @@ export type ExpenseUncheckedCreateWithoutCompanyAssetInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1743,6 +1914,9 @@ export type ExpenseUpdateWithoutCompanyAssetInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1764,6 +1938,9 @@ export type ExpenseUncheckedUpdateWithoutCompanyAssetInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1785,6 +1962,9 @@ export type ExpenseCreateManyCreatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1801,6 +1981,9 @@ export type ExpenseCreateManyUpdatedByInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1817,6 +2000,9 @@ export type ExpenseUpdateWithoutCreatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1838,6 +2024,9 @@ export type ExpenseUncheckedUpdateWithoutCreatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1859,6 +2048,9 @@ export type ExpenseUncheckedUpdateManyWithoutCreatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1875,6 +2067,9 @@ export type ExpenseUpdateWithoutUpdatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1896,6 +2091,9 @@ export type ExpenseUncheckedUpdateWithoutUpdatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1917,6 +2115,9 @@ export type ExpenseUncheckedUpdateManyWithoutUpdatedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1933,6 +2134,9 @@ export type ExpenseCreateManyCategoryInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -1949,6 +2153,9 @@ export type ExpenseUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1970,6 +2177,9 @@ export type ExpenseUncheckedUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1991,6 +2201,9 @@ export type ExpenseUncheckedUpdateManyWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2007,6 +2220,9 @@ export type ExpenseCreateManyFundingSourceInput = {
   title: string
   type: $Enums.ExpenseType
   amount: number
+  currency?: $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: number
+  amountOriginal?: number | null
   description?: string | null
   status?: $Enums.EntityStatus
   incurredAt?: Date | string
@@ -2023,6 +2239,9 @@ export type ExpenseUpdateWithoutFundingSourceInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2044,6 +2263,9 @@ export type ExpenseUncheckedUpdateWithoutFundingSourceInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2065,6 +2287,9 @@ export type ExpenseUncheckedUpdateManyWithoutFundingSourceInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumPurchaseOrderCurrencyFieldUpdateOperationsInput | $Enums.PurchaseOrderCurrency
+  fxRateToUzs?: Prisma.FloatFieldUpdateOperationsInput | number
+  amountOriginal?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   incurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2083,6 +2308,9 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   title?: boolean
   type?: boolean
   amount?: boolean
+  currency?: boolean
+  fxRateToUzs?: boolean
+  amountOriginal?: boolean
   description?: boolean
   status?: boolean
   incurredAt?: boolean
@@ -2110,6 +2338,9 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   title?: boolean
   type?: boolean
   amount?: boolean
+  currency?: boolean
+  fxRateToUzs?: boolean
+  amountOriginal?: boolean
   description?: boolean
   status?: boolean
   incurredAt?: boolean
@@ -2132,6 +2363,9 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   title?: boolean
   type?: boolean
   amount?: boolean
+  currency?: boolean
+  fxRateToUzs?: boolean
+  amountOriginal?: boolean
   description?: boolean
   status?: boolean
   incurredAt?: boolean
@@ -2154,6 +2388,9 @@ export type ExpenseSelectScalar = {
   title?: boolean
   type?: boolean
   amount?: boolean
+  currency?: boolean
+  fxRateToUzs?: boolean
+  amountOriginal?: boolean
   description?: boolean
   status?: boolean
   incurredAt?: boolean
@@ -2166,7 +2403,7 @@ export type ExpenseSelectScalar = {
   sourceShiftId?: boolean
 }
 
-export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "amount" | "description" | "status" | "incurredAt" | "createdAt" | "updatedAt" | "createdById" | "updatedById" | "categoryId" | "fundingSourceId" | "sourceShiftId", ExtArgs["result"]["expense"]>
+export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "amount" | "currency" | "fxRateToUzs" | "amountOriginal" | "description" | "status" | "incurredAt" | "createdAt" | "updatedAt" | "createdById" | "updatedById" | "categoryId" | "fundingSourceId" | "sourceShiftId", ExtArgs["result"]["expense"]>
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Expense$createdByArgs<ExtArgs>
   updatedBy?: boolean | Prisma.Expense$updatedByArgs<ExtArgs>
@@ -2212,7 +2449,22 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     title: string
     type: $Enums.ExpenseType
+    /**
+     * Har doim so‘m (hisobot / jami uchun)
+     */
     amount: number
+    /**
+     * Kiritilgan valyuta (UZS yoki USD)
+     */
+    currency: $Enums.PurchaseOrderCurrency
+    /**
+     * 1 USD = necha so‘m (UZS uchun 1)
+     */
+    fxRateToUzs: number
+    /**
+     * Tanlangan valyutadagi summa (UZS bo‘lsa amount bilan bir xil)
+     */
+    amountOriginal: number | null
     description: string | null
     status: $Enums.EntityStatus
     incurredAt: Date
@@ -2660,6 +2912,9 @@ export interface ExpenseFieldRefs {
   readonly title: Prisma.FieldRef<"Expense", 'String'>
   readonly type: Prisma.FieldRef<"Expense", 'ExpenseType'>
   readonly amount: Prisma.FieldRef<"Expense", 'Float'>
+  readonly currency: Prisma.FieldRef<"Expense", 'PurchaseOrderCurrency'>
+  readonly fxRateToUzs: Prisma.FieldRef<"Expense", 'Float'>
+  readonly amountOriginal: Prisma.FieldRef<"Expense", 'Float'>
   readonly description: Prisma.FieldRef<"Expense", 'String'>
   readonly status: Prisma.FieldRef<"Expense", 'EntityStatus'>
   readonly incurredAt: Prisma.FieldRef<"Expense", 'DateTime'>

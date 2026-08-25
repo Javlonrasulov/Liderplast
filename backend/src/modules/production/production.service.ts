@@ -1109,7 +1109,6 @@ export class ProductionService {
           recordKind,
           hoursWorked: dto.hoursWorked,
           productLabel: dto.productLabel,
-          machineReading: dto.machineReading,
           producedQty,
           defectCount: dto.defectCount ?? 0,
           bagCount,
@@ -1278,9 +1277,6 @@ export class ProductionService {
           ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
           ...(dto.hoursWorked !== undefined ? { hoursWorked: dto.hoursWorked } : {}),
           ...(dto.productLabel !== undefined ? { productLabel: dto.productLabel } : {}),
-          ...(dto.machineReading !== undefined
-            ? { machineReading: dto.machineReading }
-            : {}),
           ...(dto.producedQty !== undefined ? { producedQty: dto.producedQty } : {}),
           ...(dto.defectCount !== undefined ? { defectCount: dto.defectCount } : {}),
           electricityKwh: 0,

@@ -117,7 +117,6 @@ const TR = {
     labelMachine: 'Аппарат',
     labelHours: 'Ишлаган соат',
     labelProduct: 'Маҳсулот тури',
-    labelReading: 'Аппарат кўрсатгичи',
     labelProduced: 'Тайёр маҳсулот (дона)',
     labelDefect: 'Брак сони (дона)',
     labelNotes: 'Изоҳ',
@@ -137,7 +136,7 @@ const TR = {
     colProduct: 'Маҳсулот',
     colMachine: 'Аппарат',
     colHours: 'Соат',
-    colReading: 'Аппарат кўрсатгичи',
+    colReading: 'Пачка сони',
     colDefect: 'Брак',
     colProduced: 'Тайёр маҳсулот',
     colKwh: 'Ток (кВт·с)',
@@ -154,7 +153,6 @@ const TR = {
     historyColKind: 'Тури',
     kindProduction: 'Ишлаб чиқариш',
     placeholderWorker: 'Ишчи танланг ёки киритинг...',
-    placeholderReading: 'м: 43,069 / 41,203',
     placeholderNotes: 'Ихтиёрий изоҳ...',
     shiftTime1: '06:00 – 18:00',
     shiftTime2: '18:00 – 06:00',
@@ -280,7 +278,6 @@ const TR = {
     labelMachine: 'Apparat',
     labelHours: 'Ishlagan soat',
     labelProduct: 'Mahsulot turi',
-    labelReading: 'Apparat ko\'rsatgichi',
     labelProduced: 'Tayyor mahsulot (dona)',
     labelDefect: 'Brak soni (dona)',
     labelNotes: 'Izoh',
@@ -300,7 +297,7 @@ const TR = {
     colProduct: 'Mahsulot',
     colMachine: 'Apparat',
     colHours: 'Soat',
-    colReading: 'Apparat ko\'rsatgichi',
+    colReading: 'Pachka soni',
     colDefect: 'Brak',
     colProduced: 'Tayyor mahsulot',
     colKwh: 'Tok (kWh)',
@@ -317,7 +314,6 @@ const TR = {
     historyColKind: 'Turi',
     kindProduction: 'Ishlab chiqarish',
     placeholderWorker: 'Ishchi tanlang yoki kiriting...',
-    placeholderReading: 'm: 43,069 / 41,203',
     placeholderNotes: 'Ixtiyoriy izoh...',
     shiftTime1: '06:00 – 18:00',
     shiftTime2: '18:00 – 06:00',
@@ -443,7 +439,6 @@ const TR = {
     labelMachine: 'Аппарат',
     labelHours: 'Часов работы',
     labelProduct: 'Вид продукта',
-    labelReading: 'Показатель аппарата',
     labelProduced: 'Готовой продукции (шт)',
     labelDefect: 'Кол-во брака (шт)',
     labelNotes: 'Примечание',
@@ -463,7 +458,7 @@ const TR = {
     colProduct: 'Продукт',
     colMachine: 'Аппарат',
     colHours: 'Часы',
-    colReading: 'Показатель',
+    colReading: 'Пачек',
     colDefect: 'Брак',
     colProduced: 'Готово',
     colKwh: 'эл. (кВт·ч)',
@@ -480,7 +475,6 @@ const TR = {
     historyColKind: 'Тип',
     kindProduction: 'Производство',
     placeholderWorker: 'Выберите или введите имя...',
-    placeholderReading: 'пр: 43,069 / 41,203',
     placeholderNotes: 'Примечание (необязательно)...',
     shiftTime1: '06:00 – 18:00',
     shiftTime2: '18:00 – 06:00',
@@ -589,7 +583,6 @@ function getShiftLabel(defs: ShiftDefinition[], number: number, t: (typeof TR)['
 function formatShiftReadingDisplay(
   r: {
     recordKind?: string;
-    machineReading?: string;
     bagCount?: number;
     packCount?: number;
   },
@@ -599,7 +592,7 @@ function formatShiftReadingDisplay(
     const packs = r.packCount ?? 0;
     return `${packs} ${t.labelPackCount.toLowerCase()}`;
   }
-  return r.machineReading?.trim() || '—';
+  return '—';
 }
 
 /** Smena sanasi bo‘yicha: eng yangisi birinchi (23.05 → 22.05 → …) */
@@ -913,7 +906,6 @@ export function ShiftWork() {
     machineId: '',
     hoursWorked: '',
     productType: '18g',
-    machineReading: '',
     producedQty: '',
     defectCount: '0',
     notes: '',
@@ -1044,7 +1036,6 @@ export function ShiftWork() {
     machineId: string;
     hoursWorked: string;
     productType: string;
-    machineReading: string;
     producedQty: string;
     defectCount: string;
     notes: string;
@@ -1068,7 +1059,6 @@ export function ShiftWork() {
       machineId: defaultMachineId,
       hoursWorked: '',
       productType: defaultProductType,
-      machineReading: '',
       producedQty: '',
       defectCount: '0',
       notes: '',
@@ -1120,7 +1110,6 @@ export function ShiftWork() {
       (Boolean(ln.hoursWorked.trim()) && hours > 0) ||
       hasProduced ||
       hasDefect ||
-      Boolean(ln.machineReading.trim()) ||
       Boolean(ln.notes.trim()) ||
       ln.paintUsed
     );
@@ -1214,7 +1203,6 @@ export function ShiftWork() {
         machineId: mid,
         hoursWorked: String(r.hoursWorked),
         productType: r.productType || '',
-        machineReading: r.machineReading,
         producedQty: String(r.producedQty),
         defectCount: String(r.defectCount),
         notes: r.notes,
@@ -1289,7 +1277,6 @@ export function ShiftWork() {
           machineId: recordEditForm.machineId,
           hoursWorked: hours,
           productType: recordEditForm.productType,
-          machineReading: recordEditForm.machineReading,
           producedQty: produced,
           defectCount: defectEdit,
           electricityKwh: 0,
@@ -1511,7 +1498,6 @@ export function ShiftWork() {
             machineId: ln.machineId,
             hoursWorked: hours,
             productType: ln.productType,
-            machineReading: ln.machineReading,
             producedQty: Math.max(0, parseNonNegativeInt(ln.producedQty) || 0),
             defectCount: Math.max(0, parseNonNegativeInt(ln.defectCount) || 0),
             electricityKwh: 0,
@@ -1537,7 +1523,6 @@ export function ShiftWork() {
             machineId: '',
             hoursWorked: hours,
             productType: ln.productType,
-            machineReading: '',
             producedQty,
             defectCount: 0,
             electricityKwh: 0,
@@ -2226,9 +2211,6 @@ export function ShiftWork() {
                             <Clock size={10} className="text-slate-400 shrink-0" />
                             {hoursLabel}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono truncate max-w-[6rem]">
-                            {ln.machineReading.trim() || '—'}
-                          </span>
                           {defect > 0 ? (
                             <span className="text-red-600 dark:text-red-400 font-bold text-xs">
                               {defect}
@@ -2393,18 +2375,6 @@ export function ShiftWork() {
                           )}
                         </div>
                       )}
-
-                      {/* Machine reading */}
-                      <div>
-                        <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1.5">{t.labelReading}</label>
-                        <input
-                          type="text"
-                          value={ln.machineReading}
-                          onChange={(e) => updateLine(ln.id, { machineReading: e.target.value })}
-                          placeholder={t.placeholderReading}
-                          className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/80 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"
-                        />
-                      </div>
 
                       {/* Produced + Defect */}
                       <div className="grid grid-cols-2 gap-3">
@@ -3598,15 +3568,6 @@ export function ShiftWork() {
                   </div>
                 );
               })()}
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelReading}</label>
-                <input
-                  type="text"
-                  value={recordEditForm.machineReading}
-                  onChange={(e) => setRecordEditForm({ ...recordEditForm, machineReading: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm font-mono"
-                />
-              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 text-xs font-medium mb-1">{t.labelProduced}</label>

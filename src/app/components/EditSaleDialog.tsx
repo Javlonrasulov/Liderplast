@@ -151,6 +151,7 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
         name: sale.clientName,
         phone: '',
         debt: 0,
+        cashBalance: 0,
         createdAt: sale.createdAt,
       });
     }
@@ -173,6 +174,7 @@ export function EditSaleDialog({ sale, open, onOpenChange }: Props) {
           name: sale.clientName,
           phone: '',
           debt: 0,
+          cashBalance: 0,
           createdAt: sale.createdAt,
         },
         ...list,

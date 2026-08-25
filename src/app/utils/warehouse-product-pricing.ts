@@ -1,6 +1,6 @@
 import type { SaleCurrency } from '../store/erp-store';
-import { formatNumber } from './format';
-import { formatSaleUnitPrice, unitPriceInUzs } from './sales-currency';
+import { formatNumber, formatSaleUnitPrice } from './format';
+import { unitPriceInUzs } from './sales-currency';
 
 export type WarehouseProductPricingFields = {
   purchasePrice: string;

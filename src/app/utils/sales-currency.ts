@@ -1,5 +1,8 @@
 import type { SaleCurrency } from '../store/erp-store';
 import { parseCbuRate } from '../hooks/use-cbu-rates';
+import { formatSaleUnitPrice } from './format';
+
+export { formatSaleUnitPrice } from './format';
 
 export type WarehouseSalePriceSource = {
   salePrice?: number;
@@ -109,17 +112,6 @@ export function unitPriceInUzs(
 }
 
 /** Sotuv narxi — UZS butun, USD/EUR kichik kasrlar saqlanadi (masalan 0,012). */
-export function formatSaleUnitPrice(price: number, currency: SaleCurrency): string {
-  if (!Number.isFinite(price)) return '0';
-  if (currency === 'UZS') {
-    return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(price));
-  }
-  return new Intl.NumberFormat('ru-RU', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 6,
-  }).format(price);
-}
-
 export function formatSalePriceLabel(price: number, currency: SaleCurrency): string {
   return `${formatSaleUnitPrice(price, currency)} ${currency}`;
 }

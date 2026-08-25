@@ -620,7 +620,6 @@ model ShiftRecord {
   recordKind              ShiftRecordKind      @default(PRODUCTION)
   hoursWorked             Float
   productLabel            String?
-  machineReading          String?
   producedQty             Int
   defectCount             Int                  @default(0)
   bagCount                Int?
@@ -773,7 +772,14 @@ model Expense {
   id                       String                    @id @default(cuid())
   title                    String
   type                     ExpenseType
+  /// Har doim so‘m (hisobot / jami uchun)
   amount                   Float
+  /// Kiritilgan valyuta (UZS yoki USD)
+  currency                 PurchaseOrderCurrency     @default(UZS)
+  /// 1 USD = necha so‘m (UZS uchun 1)
+  fxRateToUzs              Float                     @default(1)
+  /// Tanlangan valyutadagi summa (UZS bo‘lsa amount bilan bir xil)
+  amountOriginal           Float?
   description              String?
   status                   EntityStatus              @default(COMPLETED)
   incurredAt               DateTime                  @default(now())
