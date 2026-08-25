@@ -1,1 +1,1 @@
-﻿ALTER TABLE "ShiftRecord" DROP COLUMN IF EXISTS "machineReading";
+ALTER TABLE "ShiftRecord" DROP COLUMN IF EXISTS "machineReading";
