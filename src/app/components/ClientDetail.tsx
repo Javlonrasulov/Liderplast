@@ -84,12 +84,38 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [pmSuccess, setPmSuccess] = useState('');
   const [pmError, setPmError] = useState('');
 
+  const client = state.clients.find((c) => c.id === clientId);
+
+  const clientSales = useMemo(
+    () =>
+      [...state.sales]
+        .filter((s) => s.clientId === clientId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [state.sales, clientId],
+  );
+  const clientSaleIds = useMemo(() => clientSales.map((s) => s.id), [clientSales]);
+  const allClientSalesSelected =
+    clientSales.length > 0 && selectedSaleIds.size === clientSales.length;
+
+  const clientPayments = useMemo(
+    () =>
+      [...state.payments]
+        .filter((p) => p.clientId === clientId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [state.payments, clientId],
+  );
+
+  const totalPurchases = clientSales.reduce((s, x) => s + x.total, 0);
+  const totalPaid =
+    clientSales.reduce((s, x) => s + x.paid, 0) +
+    clientPayments.reduce((s, x) => s + x.amount, 0);
+
   const handleDownloadSalePdf = useCallback(
     async (sale: (typeof state.sales)[number]) => {
-      const client = state.clients.find((c) => c.id === sale.clientId);
+      const saleClient = state.clients.find((c) => c.id === sale.clientId);
       const toastId = toast.loading(`${t.aktDownloadPdf}…`);
       try {
-        await downloadSaleDeliveryNotePdf(sale, state.sales, clientDeliveryMeta(client));
+        await downloadSaleDeliveryNotePdf(sale, state.sales, clientDeliveryMeta(saleClient));
         toast.success(t.aktDownloadPdf, { id: toastId });
       } catch (err) {
         console.error('[client] PDF download failed', err);
@@ -160,16 +186,6 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
     t.slSelectSalesForPdf,
   ]);
 
-  const client = state.clients.find(c => c.id === clientId);
-
-  const clientSales = useMemo(
-    () => [...state.sales].filter(s => s.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [state.sales, clientId]
-  );
-  const clientSaleIds = useMemo(() => clientSales.map((s) => s.id), [clientSales]);
-  const allClientSalesSelected =
-    clientSales.length > 0 && selectedSaleIds.size === clientSales.length;
-
   useEffect(() => {
     setSelectedSaleIds((prev) => {
       const next = new Set([...prev].filter((id) => clientSaleIds.includes(id)));
@@ -181,13 +197,6 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   useEffect(() => {
     setSelectedSaleIds(new Set());
   }, [clientId]);
-  const clientPayments = useMemo(
-    () => [...state.payments].filter(p => p.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [state.payments, clientId]
-  );
-
-  const totalPurchases = clientSales.reduce((s, x) => s + x.total, 0);
-  const totalPaid = clientSales.reduce((s, x) => s + x.paid, 0) + clientPayments.reduce((s, x) => s + x.amount, 0);
 
   useEffect(() => {
     setIsEditing(initialEditing);
