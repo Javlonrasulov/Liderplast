@@ -485,26 +485,51 @@ export class ProductionService {
 
     const machine = params.machine;
     const rawOverrides = params.rawMaterialActualKg ?? {};
-    if (
-      Object.keys(rawOverrides).length > 0 &&
-      machine.stage !== ProductionStage.SEMI
-    ) {
+
+    // Aparat stage emas — mahsulot nomi bo‘yicha yo‘l tanlanadi
+    // (yarim tayyor Видивка bilan tanlansa ham ishlashi uchun).
+    const semi = await tx.semiProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+      include: {
+        rawMaterialLinks: { include: { rawMaterial: true } },
+      },
+    });
+    const finished = await tx.finishedProduct.findFirst({
+      where: {
+        name: { equals: label, mode: 'insensitive' },
+        isDeleted: false,
+      },
+      include: {
+        semiProductLinks: true,
+        machineLinks: true,
+      },
+    });
+
+    let useSemi: boolean;
+    if (semi && finished) {
+      useSemi = machine.stage === ProductionStage.SEMI;
+    } else if (semi) {
+      useSemi = true;
+    } else if (finished) {
+      useSemi = false;
+    } else {
+      throw new BadRequestException(
+        machine.stage === ProductionStage.SEMI
+          ? shiftInventoryErr('SEMI_NOT_FOUND', label)
+          : shiftInventoryErr('FINISHED_NOT_FOUND', label),
+      );
+    }
+
+    if (Object.keys(rawOverrides).length > 0 && !useSemi) {
       throw new BadRequestException(
         shiftInventoryErr('RAW_OVERRIDE_SEMI_ONLY'),
       );
     }
 
-    if (machine.stage === ProductionStage.SEMI) {
-      const semi = await tx.semiProduct.findFirst({
-        where: {
-          name: { equals: label, mode: 'insensitive' },
-          isDeleted: false,
-        },
-        include: {
-          rawMaterialLinks: { include: { rawMaterial: true } },
-        },
-      });
-
+    if (useSemi) {
       if (!semi) {
         throw new BadRequestException(
           shiftInventoryErr('SEMI_NOT_FOUND', label),
@@ -645,26 +670,15 @@ export class ProductionService {
       return;
     }
 
-    const finished = await tx.finishedProduct.findFirst({
-      where: {
-        name: { equals: label, mode: 'insensitive' },
-        isDeleted: false,
-      },
-      include: {
-        semiProductLinks: true,
-        machineLinks: true,
-      },
-    });
-
     if (!finished) {
       throw new BadRequestException(
         shiftInventoryErr('FINISHED_NOT_FOUND', label),
       );
     }
 
-    const machineOk = finished.machineLinks.some(
-      (l) => l.machineId === machine.id,
-    );
+    const machineOk =
+      finished.machineLinks.length === 0 ||
+      finished.machineLinks.some((l) => l.machineId === machine.id);
     if (!machineOk) {
       throw new BadRequestException(shiftInventoryErr('MACHINE_NOT_LINKED'));
     }
