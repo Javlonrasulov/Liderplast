@@ -88,6 +88,9 @@ export function AktSverka({ clientId }: AktSverkaProps) {
 
     const clientSales = state.sales.filter(s => s.clientId === clientId);
     const clientPayments = state.payments.filter(p => p.clientId === clientId);
+    const clientKassaInflows = state.kassaEntries.filter(
+      (e) => e.type === 'client_inflow' && e.clientId === clientId,
+    );
 
     // Opening balance: sum of all debits/credits BEFORE dateFrom
     let openingBalance = 0;
@@ -96,6 +99,9 @@ export function AktSverka({ clientId }: AktSverkaProps) {
     }
     for (const payment of clientPayments) {
       if (payment.date < dateFrom) openingBalance -= payment.amount;
+    }
+    for (const entry of clientKassaInflows) {
+      if (entry.date < dateFrom) openingBalance -= entry.amount;
     }
 
     // Transactions within date range
@@ -132,6 +138,21 @@ export function AktSverka({ clientId }: AktSverkaProps) {
       }
     }
 
+    for (const entry of clientKassaInflows) {
+      if (entry.date >= dateFrom && entry.date <= dateTo) {
+        const note = entry.comment?.trim();
+        txs.push({
+          id: entry.id,
+          date: entry.date,
+          type: 'payment',
+          docNumber: entry.id.toUpperCase(),
+          description: note ? `${t.aktKassaInflow}: ${note}` : t.aktKassaInflow,
+          debit: 0,
+          credit: entry.amount,
+        });
+      }
+    }
+
     // Sort by date
     txs.sort((a, b) => a.date.localeCompare(b.date));
 
@@ -150,7 +171,7 @@ export function AktSverka({ clientId }: AktSverkaProps) {
       transactions: withBalance,
       summary: { openingBalance, totalDebit, totalCredit, closingBalance },
     };
-  }, [clientId, client, state.sales, state.payments, dateFrom, dateTo]);
+  }, [clientId, client, state.sales, state.payments, state.kassaEntries, dateFrom, dateTo, t.aktKassaInflow]);
 
   // ── Generate handler ─────────────────────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
@@ -363,7 +384,7 @@ export function AktSverka({ clientId }: AktSverkaProps) {
                 {formatCurrency(summary.totalCredit)}
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
-                {state.payments.filter(p => p.clientId === clientId && p.date >= dateFrom && p.date <= dateTo).length} та
+                {transactions.filter((tx) => tx.type === 'payment').length} та
               </p>
             </div>
 

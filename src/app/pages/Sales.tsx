@@ -37,6 +37,7 @@ import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
 import { SaleHistoryFilters } from '../components/SaleHistoryFilters';
 import {
   applySaleHistoryFilters,
+  buildSaleHistoryPdfFilterLines,
   collectSaleProductOptions,
   EMPTY_SALE_HISTORY_FILTER,
   type SaleHistoryFilterValue,
@@ -497,7 +498,28 @@ export function Sales() {
     setPdfBulkLoading(true);
     const toastId = toast.loading(`${t.slDownloadSelectedPdf}…`);
     try {
-      await downloadSalesDeliveryNotesPdf(selected, state.sales, t.slBulkPdfSummaryTitle);
+      const filterLines = buildSaleHistoryPdfFilterLines(
+        historyFilter,
+        {
+          allClients: t.slFilterClientAll,
+          allProducts: t.slFilterProductAll,
+          paymentAll: t.slFilterPaymentAll,
+          paymentPaid: t.slFilterPaymentPaid,
+          paymentDebt: t.slFilterPaymentDebt,
+          clientsLabel: t.slFilterClient,
+          productsLabel: t.slFilterProduct,
+          datesLabel: t.slPdfFilterDates,
+          paymentLabel: t.slFilterPayment,
+          formatDate,
+        },
+        historyClientOptions,
+      );
+      await downloadSalesDeliveryNotesPdf(
+        selected,
+        state.sales,
+        t.slBulkPdfSummaryTitle,
+        filterLines,
+      );
       toast.success(t.slDownloadSelectedPdf, { id: toastId });
     } catch (err) {
       console.error('[sales] bulk PDF download failed', err);

@@ -22,6 +22,7 @@ import { SaleHistoryBulkToolbar } from './SaleHistoryBulkToolbar';
 import { SaleHistoryFilters } from './SaleHistoryFilters';
 import {
   applySaleHistoryFilters,
+  buildSaleHistoryPdfFilterLines,
   collectSaleProductOptions,
   EMPTY_SALE_HISTORY_FILTER,
   type SaleHistoryFilterValue,
@@ -192,7 +193,31 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
     setPdfBulkLoading(true);
     const toastId = toast.loading(`${t.slDownloadSelectedPdf}…`);
     try {
-      await downloadSalesDeliveryNotesPdf(selected, state.sales, t.slBulkPdfSummaryTitle);
+      const filterLines = buildSaleHistoryPdfFilterLines(
+        {
+          ...salesFilter,
+          clientIds: client ? [client.id] : salesFilter.clientIds,
+        },
+        {
+          allClients: t.slFilterClientAll,
+          allProducts: t.slFilterProductAll,
+          paymentAll: t.slFilterPaymentAll,
+          paymentPaid: t.slFilterPaymentPaid,
+          paymentDebt: t.slFilterPaymentDebt,
+          clientsLabel: t.slFilterClient,
+          productsLabel: t.slFilterProduct,
+          datesLabel: t.slPdfFilterDates,
+          paymentLabel: t.slFilterPayment,
+          formatDate,
+        },
+        client ? [{ id: client.id, name: client.name }] : [],
+      );
+      await downloadSalesDeliveryNotesPdf(
+        selected,
+        state.sales,
+        t.slBulkPdfSummaryTitle,
+        filterLines,
+      );
       toast.success(t.slDownloadSelectedPdf, { id: toastId });
     } catch (err) {
       console.error('[client] bulk PDF download failed', err);
@@ -201,12 +226,23 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       setPdfBulkLoading(false);
     }
   }, [
+    client,
     clientSales,
+    salesFilter,
     selectedSaleIds,
     state.sales,
     t.slBulkPdfSummaryTitle,
     t.slDownloadSelectedPdf,
+    t.slFilterClient,
+    t.slFilterClientAll,
+    t.slFilterPayment,
+    t.slFilterPaymentAll,
+    t.slFilterPaymentDebt,
+    t.slFilterPaymentPaid,
+    t.slFilterProduct,
+    t.slFilterProductAll,
     t.slPdfDownloadFailed,
+    t.slPdfFilterDates,
     t.slSelectSalesForPdf,
   ]);
 
@@ -217,10 +253,6 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
       return next;
     });
   }, [clientSaleIds]);
-
-  useEffect(() => {
-    setSelectedSaleIds(new Set());
-  }, [clientId]);
 
   useEffect(() => {
     setIsEditing(initialEditing);

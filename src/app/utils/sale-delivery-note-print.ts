@@ -287,7 +287,8 @@ export async function downloadSalesDeliveryNotesPdf(
   sales: Sale[],
   allSales: Sale[] = [],
   summaryTitle?: string,
+  filterLines?: string[],
 ): Promise<void> {
   const { downloadSalesDeliveryNotesPdfMake } = await import('./sale-delivery-note-pdfmake');
-  await downloadSalesDeliveryNotesPdfMake(sales, allSales, summaryTitle);
+  await downloadSalesDeliveryNotesPdfMake(sales, allSales, summaryTitle, filterLines);
 }

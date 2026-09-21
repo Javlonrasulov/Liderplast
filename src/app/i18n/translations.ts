@@ -933,6 +933,8 @@ export interface T {
   slFilterPaymentPaid: string;
   slFilterPaymentDebt: string;
   slFilterClear: string;
+  slFilterSelectedCount: string;
+  slPdfFilterDates: string;
 
   // Expenses
   exTitle: string;
@@ -1109,6 +1111,7 @@ export interface T {
   aktBalance: string;
   aktSaleType: string;
   aktPaymentType: string;
+  aktKassaInflow: string;
   aktEmpty: string;
   aktPeriod: string;
   aktGenerating: string;
@@ -2506,6 +2509,8 @@ const uz_cyrillic: T = {
   slFilterPaymentPaid: 'Тўланган',
   slFilterPaymentDebt: 'Қарздор',
   slFilterClear: 'Тозалаш',
+  slFilterSelectedCount: '{n} та танланди',
+  slPdfFilterDates: 'Сана',
 
   exTitle: 'Харажатлар',
   exElectricity: 'Электр Энергия',
@@ -2669,6 +2674,7 @@ const uz_cyrillic: T = {
   aktBalance: 'Қолдиқ',
   aktSaleType: 'Соtuv',
   aktPaymentType: 'Тўлов',
+  aktKassaInflow: 'Касса кирими (нақд)',
   aktEmpty: 'Кўрсатилган давр учун ҳужжатлар топилмади',
   aktPeriod: 'Давр',
   aktGenerating: 'Яратилмоқда...',
@@ -4060,6 +4066,8 @@ const uz_latin: T = {
   slFilterPaymentPaid: "To'langan",
   slFilterPaymentDebt: 'Qarzdor',
   slFilterClear: 'Tozalash',
+  slFilterSelectedCount: '{n} ta tanlandi',
+  slPdfFilterDates: 'Sana',
 
   exTitle: 'Xarajatlar',
   exElectricity: 'Elektr Energiya',
@@ -4224,6 +4232,7 @@ const uz_latin: T = {
   aktBalance: 'Qoldiq',
   aktSaleType: 'Sotuv',
   aktPaymentType: 'To\'lov',
+  aktKassaInflow: 'Kassa kirimi (naqd)',
   aktEmpty: 'Ko\'rsatilgan davr uchun hujjatlar topilmadi',
   aktPeriod: 'Davr',
   aktGenerating: 'Yaratilmoqda...',
@@ -5614,6 +5623,8 @@ const ru: T = {
   slFilterPaymentPaid: 'Оплачено',
   slFilterPaymentDebt: 'С долгом',
   slFilterClear: 'Очистить',
+  slFilterSelectedCount: 'Выбрано: {n}',
+  slPdfFilterDates: 'Дата',
 
   exTitle: 'Расходы',
   exElectricity: 'Электроэнергия',
@@ -5778,6 +5789,7 @@ const ru: T = {
   aktBalance: 'Остаток',
   aktSaleType: 'Продажа',
   aktPaymentType: 'Оплата',
+  aktKassaInflow: 'Приход в кассу (наличные)',
   aktEmpty: 'За указанный период документы не найдены',
   aktPeriod: 'Период',
   aktGenerating: 'Формируется...',

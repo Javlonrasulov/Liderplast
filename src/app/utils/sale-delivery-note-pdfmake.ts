@@ -175,7 +175,12 @@ function sortSalesChronologically(sales: Sale[]) {
   });
 }
 
-function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: string) {
+function buildSummarySection(
+  sales: Sale[],
+  allSales: Sale[],
+  summaryTitle: string,
+  filterLines: string[] = [],
+) {
   const sorted = sortSalesChronologically(sales);
   const header = [
     { text: '№', bold: true, alignment: 'center', fillColor: '#e8eef5' },
@@ -252,6 +257,21 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
     },
   ]);
 
+  const filterBlock =
+    filterLines.length > 0
+      ? filterLines.map((line, idx) => ({
+          text: line,
+          fontSize: 8,
+          color: '#334155',
+          margin: [0, idx === 0 ? 2 : 0, 0, idx === filterLines.length - 1 ? 8 : 1] as [
+            number,
+            number,
+            number,
+            number,
+          ],
+        }))
+      : [];
+
   return [
     { text: SALE_NOTE_ORG_NAME, bold: true, fontSize: 12, margin: [0, 0, 0, 4] },
     {
@@ -266,8 +286,9 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
       fontSize: 8,
       alignment: 'center',
       color: '#555555',
-      margin: [0, 0, 0, 10],
+      margin: [0, 0, 0, filterLines.length > 0 ? 4 : 10],
     },
+    ...filterBlock,
     {
       table: {
         headerRows: 1,
@@ -290,9 +311,16 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
   ];
 }
 
-function buildBulkDocDefinition(sales: Sale[], allSales: Sale[], summaryTitle: string) {
+function buildBulkDocDefinition(
+  sales: Sale[],
+  allSales: Sale[],
+  summaryTitle: string,
+  filterLines: string[] = [],
+) {
   const sorted = sortSalesChronologically(sales);
-  const content: object[] = [...buildSummarySection(sorted, allSales, summaryTitle)];
+  const content: object[] = [
+    ...buildSummarySection(sorted, allSales, summaryTitle, filterLines),
+  ];
 
   if (sorted.length > 0) {
     content.push({ text: '', pageBreak: 'after' });
@@ -339,15 +367,16 @@ export async function downloadSalesDeliveryNotesPdfMake(
   sales: Sale[],
   allSales: Sale[] = [],
   summaryTitle = 'Сводка реализаций',
+  filterLines: string[] = [],
 ): Promise<void> {
   if (sales.length === 0) {
     throw new Error('Hech qanday sotuv tanlanmagan');
   }
   const base = allSales.length > 0 ? allSales : sales;
-  if (sales.length === 1) {
+  if (sales.length === 1 && filterLines.length === 0) {
     await downloadSaleDeliveryNotePdfMake(sales[0], base);
     return;
   }
-  const doc = buildBulkDocDefinition(sales, base, summaryTitle);
+  const doc = buildBulkDocDefinition(sales, base, summaryTitle, filterLines);
   await downloadPdfDefinition(doc, bulkPdfFilename(sales.length));
 }
