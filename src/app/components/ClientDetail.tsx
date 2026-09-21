@@ -19,6 +19,13 @@ import {
   downloadSalesDeliveryNotesPdf,
 } from '../utils/sale-delivery-note-print';
 import { SaleHistoryBulkToolbar } from './SaleHistoryBulkToolbar';
+import { SaleHistoryFilters } from './SaleHistoryFilters';
+import {
+  applySaleHistoryFilters,
+  collectSaleProductOptions,
+  EMPTY_SALE_HISTORY_FILTER,
+  type SaleHistoryFilterValue,
+} from '../utils/sale-history-filters';
 import { Checkbox } from './ui/checkbox';
 import { PhoneInput } from './PhoneInput';
 import {
@@ -64,6 +71,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
   const [selectedSaleIds, setSelectedSaleIds] = useState<Set<string>>(() => new Set());
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
+  const [salesFilter, setSalesFilter] = useState<SaleHistoryFilterValue>(EMPTY_SALE_HISTORY_FILTER);
   const [editingSale, setEditingSale] = useState<(typeof state.sales)[number] | null>(null);
   const [saleToPrint, setSaleToPrint] = useState<(typeof state.sales)[number] | null>(null);
   const [isEditing, setIsEditing] = useState(initialEditing);
@@ -86,12 +94,28 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
 
   const client = state.clients.find((c) => c.id === clientId);
 
-  const clientSales = useMemo(
+  useEffect(() => {
+    setSalesFilter(EMPTY_SALE_HISTORY_FILTER);
+    setSelectedSaleIds(new Set());
+  }, [clientId]);
+
+  const clientSalesBase = useMemo(
     () =>
       [...state.sales]
         .filter((s) => s.clientId === clientId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [state.sales, clientId],
+  );
+  const clientProductOptions = useMemo(
+    () => collectSaleProductOptions(clientSalesBase),
+    [clientSalesBase],
+  );
+  const clientSales = useMemo(
+    () =>
+      applySaleHistoryFilters(clientSalesBase, salesFilter, {
+        includeClientFilter: false,
+      }),
+    [clientSalesBase, salesFilter],
   );
   const clientSaleIds = useMemo(() => clientSales.map((s) => s.id), [clientSales]);
   const allClientSalesSelected =
@@ -105,9 +129,9 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
     [state.payments, clientId],
   );
 
-  const totalPurchases = clientSales.reduce((s, x) => s + x.total, 0);
+  const totalPurchases = clientSalesBase.reduce((s, x) => s + x.total, 0);
   const totalPaid =
-    clientSales.reduce((s, x) => s + x.paid, 0) +
+    clientSalesBase.reduce((s, x) => s + x.paid, 0) +
     clientPayments.reduce((s, x) => s + x.amount, 0);
 
   const handleDownloadSalePdf = useCallback(
@@ -306,7 +330,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
   // ── Tabs config ───────────────────────────────────────────────────────────────
   const tabs: { key: Tab; label: string; icon: React.ElementType; count?: number }[] = [
     { key: 'info', label: t.cdInfo, icon: User },
-    { key: 'sales', label: t.cdSales, icon: ShoppingCart, count: clientSales.length },
+    { key: 'sales', label: t.cdSales, icon: ShoppingCart, count: clientSalesBase.length },
     { key: 'payments', label: t.cdPayments, icon: Wallet, count: clientPayments.length },
     { key: 'akt', label: t.cdAkt, icon: Scale },
   ];
@@ -597,7 +621,7 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[
-                { label: 'Jami operatsiyalar', value: `${clientSales.length} ta`, color: 'text-indigo-600 dark:text-indigo-400' },
+                { label: 'Jami operatsiyalar', value: `${clientSalesBase.length} ta`, color: 'text-indigo-600 dark:text-indigo-400' },
                 { label: t.cdTotalPurchases, value: formatCurrency(totalPurchases), color: 'text-slate-800 dark:text-white' },
                 { label: t.colPaid, value: formatCurrency(totalPaid), color: 'text-emerald-600 dark:text-emerald-400' },
                 { label: t.slClientCashBalance, value: formatCurrency(client.cashBalance ?? 0), color: 'text-indigo-600 dark:text-indigo-400' },
@@ -627,20 +651,34 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
             <span className="text-xs text-slate-400">{clientSales.length} ta</span>
           </div>
 
-          {clientSales.length === 0 ? (
+          {clientSalesBase.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400">
               <ShoppingCart size={36} className="opacity-20 mb-3" />
               <p className="text-sm">{t.cdNoSales}</p>
             </div>
           ) : (
             <>
-              <SaleHistoryBulkToolbar
-                allSelected={allClientSalesSelected}
-                onToggleAll={toggleAllClientSales}
-                selectedCount={selectedSaleIds.size}
-                onBulkDownload={() => void handleBulkDownloadClientSalesPdf()}
-                downloading={pdfBulkLoading}
+              <SaleHistoryFilters
+                value={salesFilter}
+                onChange={setSalesFilter}
+                onClear={() => setSalesFilter(EMPTY_SALE_HISTORY_FILTER)}
+                productOptions={clientProductOptions}
               />
+              {clientSales.length > 0 && (
+                <SaleHistoryBulkToolbar
+                  allSelected={allClientSalesSelected}
+                  onToggleAll={toggleAllClientSales}
+                  selectedCount={selectedSaleIds.size}
+                  onBulkDownload={() => void handleBulkDownloadClientSalesPdf()}
+                  downloading={pdfBulkLoading}
+                />
+              )}
+              {clientSales.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                  <p className="text-sm">{t.noData}</p>
+                </div>
+              ) : (
+              <>
               {/* Desktop table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
@@ -834,6 +872,8 @@ export function ClientDetail({ clientId, onBack, initialEditing = false }: Clien
                   );
                 })}
               </div>
+              </>
+              )}
             </>
           )}
         </div>

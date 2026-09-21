@@ -8,9 +8,15 @@ import {
   SALE_NOTE_ORG_NAME,
 } from './sale-delivery-note-shared';
 import { deliveryMetaPdfRows, type SaleDeliveryPrintMeta } from './sale-delivery-print-meta';
-import { formatSaleHistoryPriceDetail } from './sales-currency';
+import {
+  formatNomenclatureUnitPrice,
+  formatSaleHistoryPriceDetail,
+} from './sales-currency';
 
 const PDF_PRICE_LABELS = { unitPiece: 'шт', fxRate: 'курс' };
+/** Roboto vfs da → / ✓ yo‘q — PDF uchun ASCII */
+const PDF_ARROW = '=';
+const PDF_NO_DEBT = '0 сум';
 
 function signCell(label: string, lineHeight = 28) {
   return {
@@ -36,17 +42,26 @@ function signCell(label: string, lineHeight = 28) {
 function buildCopyContent(sale: Sale, documentNumber: string, delivery?: SaleDeliveryPrintMeta) {
   const items = saleItemsForDocument(sale);
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalSum = items.reduce((sum, item) => sum + item.total, 0);
   const docDate = formatDate(sale.date);
 
-  const itemRows = items.map((item, index) => [
-    { text: String(index + 1), alignment: 'center' },
-    { text: item.productType },
-    { text: String(index + 1), alignment: 'center' },
-    { text: 'шт', alignment: 'center' },
-    { text: formatNumber(item.quantity), alignment: 'right' },
-    { text: '', alignment: 'center' },
-    { text: '', alignment: 'center' },
-  ]);
+  const itemRows = items.map((item, index) => {
+    const line = saleLineFromItem(item);
+    return [
+      { text: String(index + 1), alignment: 'center' },
+      { text: item.productType },
+      // Haqiqiy artikul yo‘q — indeksni nomenklatura raqami deb ko‘rsatmaymiz
+      { text: '—', alignment: 'center' },
+      { text: 'шт', alignment: 'center' },
+      { text: formatNumber(item.quantity), alignment: 'right' },
+      {
+        text: formatNomenclatureUnitPrice(line, formatNumber, PDF_PRICE_LABELS.fxRate),
+        alignment: 'right',
+        fontSize: 7,
+      },
+      { text: formatCurrency(item.total), alignment: 'right' },
+    ];
+  });
 
   return [
     { text: SALE_NOTE_ORG_NAME, bold: true, fontSize: 12, margin: [0, 0, 0, 4] },
@@ -78,7 +93,7 @@ function buildCopyContent(sale: Sale, documentNumber: string, delivery?: SaleDel
     {
       table: {
         headerRows: 1,
-        widths: [18, '*', 42, 28, 48, 32, 32],
+        widths: [18, '*', 36, 28, 42, 78, 54],
         body: [
           [
             { text: '№', bold: true, alignment: 'center', fillColor: '#f5f5f5' },
@@ -97,7 +112,7 @@ function buildCopyContent(sale: Sale, documentNumber: string, delivery?: SaleDel
             {},
             { text: formatNumber(totalQty), alignment: 'right', bold: true },
             {},
-            {},
+            { text: formatCurrency(totalSum), alignment: 'right', bold: true },
           ],
         ],
       },
@@ -194,6 +209,7 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
         formatNumber,
         formatCurrency,
         PDF_PRICE_LABELS,
+        { arrow: PDF_ARROW },
       );
       const isFirst = itemIdx === 0;
       body.push([
@@ -208,7 +224,7 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
         isFirst ? { text: formatCurrency(sale.paid), alignment: 'right' } : { text: '' },
         isFirst
           ? {
-              text: debt > 0 ? formatCurrency(debt) : '✓',
+              text: debt > 0 ? formatCurrency(debt) : PDF_NO_DEBT,
               alignment: 'right',
               color: debt > 0 ? '#b91c1c' : '#15803d',
             }
@@ -229,7 +245,7 @@ function buildSummarySection(sales: Sale[], allSales: Sale[], summaryTitle: stri
     { text: formatCurrency(grandTotal), alignment: 'right', bold: true },
     { text: formatCurrency(grandPaid), alignment: 'right', bold: true },
     {
-      text: grandDebt > 0 ? formatCurrency(grandDebt) : '✓',
+      text: grandDebt > 0 ? formatCurrency(grandDebt) : PDF_NO_DEBT,
       alignment: 'right',
       bold: true,
       color: grandDebt > 0 ? '#b91c1c' : '#15803d',

@@ -921,6 +921,18 @@ export interface T {
   slCompanyName: string;
   slDebtStatusYes: string;
   slDebtStatusNo: string;
+  slFilterTitle: string;
+  slFilterDateFrom: string;
+  slFilterDateTo: string;
+  slFilterClient: string;
+  slFilterClientAll: string;
+  slFilterProduct: string;
+  slFilterProductAll: string;
+  slFilterPayment: string;
+  slFilterPaymentAll: string;
+  slFilterPaymentPaid: string;
+  slFilterPaymentDebt: string;
+  slFilterClear: string;
 
   // Expenses
   exTitle: string;
@@ -2482,6 +2494,18 @@ const uz_cyrillic: T = {
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Қарзи бор',
   slDebtStatusNo: 'Қарзи йўқ',
+  slFilterTitle: 'Фильтр',
+  slFilterDateFrom: 'Санадан',
+  slFilterDateTo: 'Санагача',
+  slFilterClient: 'Клиент',
+  slFilterClientAll: 'Барча клиентлар',
+  slFilterProduct: 'Маҳсулот',
+  slFilterProductAll: 'Барча маҳсулотлар',
+  slFilterPayment: 'Тўлов ҳолати',
+  slFilterPaymentAll: 'Ҳаммаси',
+  slFilterPaymentPaid: 'Тўланган',
+  slFilterPaymentDebt: 'Қарздор',
+  slFilterClear: 'Тозалаш',
 
   exTitle: 'Харажатлар',
   exElectricity: 'Электр Энергия',
@@ -4024,6 +4048,18 @@ const uz_latin: T = {
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Qarzi bor',
   slDebtStatusNo: "Qarzi yo'q",
+  slFilterTitle: 'Filtr',
+  slFilterDateFrom: 'Sanadan',
+  slFilterDateTo: 'Sanagacha',
+  slFilterClient: 'Klient',
+  slFilterClientAll: 'Barcha klientlar',
+  slFilterProduct: 'Mahsulot',
+  slFilterProductAll: 'Barcha mahsulotlar',
+  slFilterPayment: "To'lov holati",
+  slFilterPaymentAll: 'Hammasi',
+  slFilterPaymentPaid: "To'langan",
+  slFilterPaymentDebt: 'Qarzdor',
+  slFilterClear: 'Tozalash',
 
   exTitle: 'Xarajatlar',
   exElectricity: 'Elektr Energiya',
@@ -5566,6 +5602,18 @@ const ru: T = {
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Есть долг',
   slDebtStatusNo: 'Долга нет',
+  slFilterTitle: 'Фильтр',
+  slFilterDateFrom: 'Дата с',
+  slFilterDateTo: 'Дата по',
+  slFilterClient: 'Клиент',
+  slFilterClientAll: 'Все клиенты',
+  slFilterProduct: 'Продукт',
+  slFilterProductAll: 'Все продукты',
+  slFilterPayment: 'Статус оплаты',
+  slFilterPaymentAll: 'Все',
+  slFilterPaymentPaid: 'Оплачено',
+  slFilterPaymentDebt: 'С долгом',
+  slFilterClear: 'Очистить',
 
   exTitle: 'Расходы',
   exElectricity: 'Электроэнергия',

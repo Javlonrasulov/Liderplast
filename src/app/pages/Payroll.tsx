@@ -23,6 +23,7 @@ import {
   INLINE_SEP,
 } from '../utils/format';
 import { translateApiError } from '../utils/statement-api-errors';
+import { SingleDatePicker } from '../components/SingleDatePicker';
 import type { Employee, EmployeeProductRate, KassaEntry, Sale, ShiftRecord, Supplier, SupplierPurchaseOrder } from '../store/erp-store';
 import {
   AlertDialog,
@@ -2525,9 +2526,9 @@ function KassaTab() {
       toast.error(t.prKassaSelectClient);
       return;
     }
-    const amount = parseDigitsFromAmountInput(inflowAmount);
-    if (amount <= 0) {
-      toast.error(t.prKassaAmount);
+    const amount = Number(parseDigitsFromAmountInput(inflowAmount));
+    if (!Number.isFinite(amount) || amount < 0.01) {
+      toast.error(t.siErrInvalidAmount);
       return;
     }
     setSaving(true);
@@ -2555,9 +2556,9 @@ function KassaTab() {
 
   const handleAddOutflow = async (e: React.FormEvent) => {
     e.preventDefault();
-    const amount = parseDigitsFromAmountInput(outflowAmount);
-    if (amount <= 0) {
-      toast.error(t.prKassaAmount);
+    const amount = Number(parseDigitsFromAmountInput(outflowAmount));
+    if (!Number.isFinite(amount) || amount < 0.01) {
+      toast.error(t.siErrInvalidAmount);
       return;
     }
     setSaving(true);
@@ -2591,9 +2592,9 @@ function KassaTab() {
 
   const handleSaveEdit = async () => {
     if (!editEntry) return;
-    const amount = parseDigitsFromAmountInput(editAmount);
-    if (amount <= 0) {
-      toast.error(t.prKassaAmount);
+    const amount = Number(parseDigitsFromAmountInput(editAmount));
+    if (!Number.isFinite(amount) || amount < 0.01) {
+      toast.error(t.siErrInvalidAmount);
       return;
     }
     setSaving(true);
@@ -2723,7 +2724,7 @@ function KassaTab() {
             </div>
             <div>
               <Label>{t.prKassaDate}</Label>
-              <Input type="date" value={inflowDate} onChange={(e) => setInflowDate(e.target.value)} />
+              <SingleDatePicker value={inflowDate} onChange={setInflowDate} />
             </div>
             <div className="sm:col-span-2">
               <Label>{t.prKassaComment}</Label>
@@ -2806,7 +2807,7 @@ function KassaTab() {
             </div>
             <div>
               <Label>{t.prKassaDate}</Label>
-              <Input type="date" value={outflowDate} onChange={(e) => setOutflowDate(e.target.value)} />
+              <SingleDatePicker value={outflowDate} onChange={setOutflowDate} />
             </div>
             <div className="sm:col-span-2">
               <Label>{t.prKassaComment}</Label>
@@ -2892,7 +2893,7 @@ function KassaTab() {
             </div>
             <div>
               <Label>{t.prKassaDate}</Label>
-              <Input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+              <SingleDatePicker value={editDate} onChange={setEditDate} menuZClassName="z-[200]" />
             </div>
             <div>
               <Label>{t.prKassaComment}</Label>

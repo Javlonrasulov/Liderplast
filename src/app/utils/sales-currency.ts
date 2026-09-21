@@ -142,7 +142,10 @@ export function formatSaleHistoryPriceDetail(
   formatNumber: (n: number) => string,
   formatCurrency: (n: number) => string,
   labels: { unitPiece: string; fxRate: string },
+  /** PDF (Roboto) uchun `→` o‘rniga ASCII, masalan `=` */
+  options?: { arrow?: string },
 ): string {
+  const arrow = options?.arrow ?? '→';
   const unitPrice = formatSaleUnitPrice(line.pricePerUnit, line.currency);
   if (line.currency === 'UZS') {
     return `${unitPrice} so'm × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
@@ -150,7 +153,20 @@ export function formatSaleHistoryPriceDetail(
   const fx = effectiveSaleFxRate(line);
   const head = `${unitPrice} ${line.currency} × ${formatNumber(line.quantity)} ${labels.unitPiece}`;
   if (fx != null) {
-    return `${head} · ${labels.fxRate} ${formatNumber(fx)} → ${formatCurrency(line.total)}`;
+    return `${head} · ${labels.fxRate} ${formatNumber(fx)} ${arrow} ${formatCurrency(line.total)}`;
   }
-  return `${head} → ${formatCurrency(line.total)}`;
+  return `${head} ${arrow} ${formatCurrency(line.total)}`;
+}
+
+/** Реализация номенклатуры — Цена ustuni (valyuta + kurs) */
+export function formatNomenclatureUnitPrice(
+  line: SaleLineForDisplay,
+  formatNumber: (n: number) => string,
+  fxRateLabel = 'kurs',
+): string {
+  const label = formatSalePriceLabel(line.pricePerUnit, line.currency);
+  if (line.currency === 'UZS') return label;
+  const fx = effectiveSaleFxRate(line);
+  if (fx == null) return label;
+  return `${label} (${fxRateLabel} ${formatNumber(fx)})`;
 }

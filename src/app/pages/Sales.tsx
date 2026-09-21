@@ -34,6 +34,13 @@ import {
 } from '../utils/sale-delivery-note-print';
 import { ClientDetail } from '../components/ClientDetail';
 import { SaleHistoryBulkToolbar } from '../components/SaleHistoryBulkToolbar';
+import { SaleHistoryFilters } from '../components/SaleHistoryFilters';
+import {
+  applySaleHistoryFilters,
+  collectSaleProductOptions,
+  EMPTY_SALE_HISTORY_FILTER,
+  type SaleHistoryFilterValue,
+} from '../utils/sale-history-filters';
 import { EditSaleDialog } from '../components/EditSaleDialog';
 import {
   SalePrintDeliveryDialog,
@@ -94,6 +101,7 @@ export function Sales() {
   const [pdfBulkLoading, setPdfBulkLoading] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [saleToPrint, setSaleToPrint] = useState<Sale | null>(null);
+  const [historyFilter, setHistoryFilter] = useState<SaleHistoryFilterValue>(EMPTY_SALE_HISTORY_FILTER);
 
   // ---- Order form ----
   const [clientId, setClientId] = useState(state.clients[0]?.id || '');
@@ -361,13 +369,30 @@ export function Sales() {
     setClientForm({ name: '', phone: emptyUzPhoneInput(), bankAccount: '', bankName: '', stir: '' });
   };
 
-  // ---- History (navbar sana filtri bo‘yicha) ----
-  const historySales = useMemo(
+  // ---- History (navbar sana filtri + lokal filtrlar) ----
+  const historySalesBase = useMemo(
     () =>
       filterData([...state.sales]).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     [state.sales, filterData],
+  );
+  const historyProductOptions = useMemo(
+    () => collectSaleProductOptions(historySalesBase),
+    [historySalesBase],
+  );
+  const historyClientOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const sale of historySalesBase) {
+      if (sale.clientId && sale.clientName) map.set(sale.clientId, sale.clientName);
+    }
+    return [...map.entries()]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  }, [historySalesBase]);
+  const historySales = useMemo(
+    () => applySaleHistoryFilters(historySalesBase, historyFilter),
+    [historySalesBase, historyFilter],
   );
   const historySaleIds = useMemo(() => historySales.map((s) => s.id), [historySales]);
   const allHistorySelected =
@@ -1091,6 +1116,13 @@ export function Sales() {
               {t.dfShowing} {filterLabel}
             </p>
           )}
+          <SaleHistoryFilters
+            value={historyFilter}
+            onChange={setHistoryFilter}
+            onClear={() => setHistoryFilter(EMPTY_SALE_HISTORY_FILTER)}
+            productOptions={historyProductOptions}
+            clientOptions={historyClientOptions}
+          />
           {historySales.length > 0 && (
             <SaleHistoryBulkToolbar
               allSelected={allHistorySelected}
