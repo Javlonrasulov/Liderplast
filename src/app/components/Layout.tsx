@@ -23,6 +23,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui
 const LOW_SIRO_KG = 1000;
 const LOW_PAINT_KG = 200;
 
+const RAW_STOCK_UNIT_STORAGE = 'erp_sidebar_raw_stock_unit';
+
 const LANG_OPTIONS: { value: Language; short: string; label: string; flag: string }[] = [
   { value: 'uz_cyrillic', short: 'КИ', label: 'Ўзбек (Кирил)', flag: '🇺🇿' },
   { value: 'uz_latin', short: 'LT', label: "O'zbek (Lotin)", flag: '🇺🇿' },
@@ -434,6 +436,17 @@ export function Layout() {
     t.rmKindSiro,
   ]);
 
+  const [rawStockUnit, setRawStockUnit] = useState<'kg' | 't'>(() =>
+    localStorage.getItem(RAW_STOCK_UNIT_STORAGE) === 't' ? 't' : 'kg',
+  );
+  const toggleRawStockUnit = () => {
+    setRawStockUnit((prev) => {
+      const next = prev === 'kg' ? 't' : 'kg';
+      localStorage.setItem(RAW_STOCK_UNIT_STORAGE, next);
+      return next;
+    });
+  };
+
   const lowStock = rawMaterialSidebarRows.some((row) => row.isLow);
   const showExpensesElectricityNav =
     location.pathname === '/expenses' && hasPermission('view_expenses');
@@ -632,9 +645,30 @@ export function Layout() {
         {/* Raw material stock by catalog type */}
         {!collapsed && rawMaterialSidebarRows.length > 0 && (
           <div className="mx-3 mb-3 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700/50 dark:bg-slate-800">
-            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              {t.layoutSiroRemaining}
-            </p>
+            <button
+              type="button"
+              onClick={toggleRawStockUnit}
+              title={t.layoutRawStockUnitToggle}
+              className="mb-2.5 flex w-full items-center justify-between gap-2 text-left"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                {t.layoutSiroRemaining}
+              </span>
+              <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-slate-200 text-[10px] font-semibold dark:border-slate-600">
+                {(['kg', 't'] as const).map((unit) => (
+                  <span
+                    key={unit}
+                    className={`px-1.5 py-0.5 ${
+                      rawStockUnit === unit
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {unit === 'kg' ? t.layoutUnitKg : t.layoutUnitTon}
+                  </span>
+                ))}
+              </span>
+            </button>
             <div className="space-y-2.5">
               {rawMaterialSidebarRows.map((row) => {
                 const barPct = Math.min(100, (row.kg / row.barMax) * 100);
@@ -660,9 +694,16 @@ export function Layout() {
                           {row.kindLabel}
                         </p>
                       </div>
-                      <span className={`shrink-0 text-xs font-semibold tabular-nums ${qtyColor}`}>
-                        {formatKgAmount(row.kg)} kg
-                      </span>
+                      <button
+                        type="button"
+                        onClick={toggleRawStockUnit}
+                        title={t.layoutRawStockUnitToggle}
+                        className={`shrink-0 text-xs font-semibold tabular-nums ${qtyColor}`}
+                      >
+                        {rawStockUnit === 't'
+                          ? `${formatKgAmount(row.kg / 1000)} ${t.layoutUnitTon}`
+                          : `${formatKgAmount(row.kg)} ${t.layoutUnitKg}`}
+                      </button>
                     </div>
                     <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                       <div

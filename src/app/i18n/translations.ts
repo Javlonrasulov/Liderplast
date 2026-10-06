@@ -1076,6 +1076,9 @@ export interface T {
   layoutMaterialLow: string;
   layoutAdmin: string;
   layoutSiroRemaining: string;
+  layoutUnitKg: string;
+  layoutUnitTon: string;
+  layoutRawStockUnitToggle: string;
   /** Topbar matn rangi tanlovchisi */
   textColor: string;
   textColorDefault: string;
@@ -2640,6 +2643,9 @@ const uz_cyrillic: T = {
   layoutMaterialLow: 'Хомашё кам!',
   layoutAdmin: 'Лидер Пласт',
   layoutSiroRemaining: 'Хомашё қолдиғи',
+  layoutUnitKg: 'kg',
+  layoutUnitTon: 't',
+  layoutRawStockUnitToggle: 'Кг / тонна алмаштириш',
   textColor: 'Матн ранги',
   textColorDefault: 'Стандарт',
   textColorBlack: 'Қора',
@@ -4198,6 +4204,9 @@ const uz_latin: T = {
   layoutMaterialLow: 'Xomashyo kam!',
   layoutAdmin: 'Lider Plast',
   layoutSiroRemaining: "Xomashyo qoldig'i",
+  layoutUnitKg: 'kg',
+  layoutUnitTon: 't',
+  layoutRawStockUnitToggle: 'Kg / tonna almashtirish',
   textColor: 'Matn rangi',
   textColorDefault: 'Standart',
   textColorBlack: 'Qora',
@@ -5755,6 +5764,9 @@ const ru: T = {
   layoutMaterialLow: 'Сырьё заканчивается!',
   layoutAdmin: 'Lider Plast',
   layoutSiroRemaining: 'Остаток сырья',
+  layoutUnitKg: 'кг',
+  layoutUnitTon: 'т',
+  layoutRawStockUnitToggle: 'Переключить кг / тонны',
   textColor: 'Цвет текста',
   textColorDefault: 'Стандарт',
   textColorBlack: 'Чёрный',
