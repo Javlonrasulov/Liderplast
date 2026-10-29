@@ -9,6 +9,12 @@ export function translateWarehouseApiError(message: string, t: T): string {
   if (code === WAREHOUSE_ERR_STOCK_REMAINS) return t.whErrDeleteStockRemains;
   if (code === WAREHOUSE_ERR_RAW_BAGS) return t.whErrDeleteRawBags;
   const lower = code.toLowerCase();
+  if (lower.includes('linked to a supplier purchase order') || lower.includes('linked to another document')) {
+    return t.rmIncomingErrLinked;
+  }
+  if (lower.includes('incoming bags are already in use')) return t.rmIncomingErrBagsUsed;
+  if (lower.includes('auto bag quantity exceeds')) return t.rmIncomingErrBagsMismatch;
+  if (lower.includes('stock cannot go negative')) return t.rmIncomingErrStockNegative;
   if (lower.includes('product not found')) return t.whErrProductNotFound;
   if (lower.includes('raw materials were not found')) {
     return t.whErrRawMaterialsNotFound;

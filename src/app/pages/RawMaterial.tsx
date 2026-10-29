@@ -21,9 +21,20 @@ import {
   computeRawMaterialStockByKind,
 } from '../store/erp-store';
 import { useApp } from '../i18n/app-context';
+import { useAuth } from '../auth/auth-context';
 import { translateWarehouseApiError } from '../utils/warehouse-api-errors';
 import { formatNumber, formatKgAmount, todayYmd } from '../utils/format';
-import { RawMaterialMovementHistoryTable } from '../components/RawMaterialMovementHistoryTable';
+import {
+  RawMaterialMovementHistoryTable,
+  type RawMaterialMovementHistoryEntry,
+} from '../components/RawMaterialMovementHistoryTable';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 import { SingleDatePicker } from '../components/SingleDatePicker';
 import {
   Select,
@@ -131,6 +142,22 @@ export function RawMaterial() {
         date: string;
       }
   >(null);
+  const { user, hasPermission } = useAuth();
+  const canEditIncoming =
+    user?.role === 'ADMIN' ||
+    user?.role === 'DIRECTOR' ||
+    hasPermission('view_warehouse') ||
+    hasPermission('view_raw_material');
+  const canDeleteIncoming = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
+  const [editingIncoming, setEditingIncoming] = useState<RawMaterialMovementHistoryEntry | null>(
+    null,
+  );
+  const [incomingEditForm, setIncomingEditForm] = useState({ amount: '', description: '' });
+  const [deletingIncoming, setDeletingIncoming] = useState<RawMaterialMovementHistoryEntry | null>(
+    null,
+  );
+  const [incomingSubmitting, setIncomingSubmitting] = useState(false);
+  const [incomingDialogError, setIncomingDialogError] = useState('');
 
   const stockByKind = useMemo(
     () => computeRawMaterialStockByKind(state.rawMaterialEntries, state.warehouseProducts),
@@ -199,13 +226,27 @@ export function RawMaterial() {
     return m;
   }, [state.warehouseProducts]);
 
+  const supplierOrderIds = useMemo(
+    () => new Set(state.supplierPurchaseOrders.map((order) => order.id)),
+    [state.supplierPurchaseOrders],
+  );
+
   const historyTableEntries = useMemo(
-    () =>
+    (): RawMaterialMovementHistoryEntry[] =>
       filteredEntries.map((entry) => {
         const meta = entry.rawMaterialId
           ? rawMaterialMetaById.get(entry.rawMaterialId)
           : undefined;
+        const linkedToSupplierOrder = [...entry.description.matchAll(/\(([^()\s]+)\)/g)].some(
+          (match) => supplierOrderIds.has(match[1]),
+        );
         return {
+          editable:
+            entry.type === 'incoming' &&
+            Boolean(entry.rawMaterialId) &&
+            !entry.referenceType &&
+            !entry.id.startsWith('stock-') &&
+            !linkedToSupplierOrder,
           id: entry.id,
           createdAt: entry.createdAt,
           type: entry.type,
@@ -217,8 +258,72 @@ export function RawMaterial() {
           createdByName: entry.createdByName,
         };
       }),
-    [filteredEntries, rawMaterialMetaById],
+    [filteredEntries, rawMaterialMetaById, supplierOrderIds],
   );
+
+  const openIncomingEdit = (entry: RawMaterialMovementHistoryEntry) => {
+    setIncomingDialogError('');
+    setEditingIncoming(entry);
+    setIncomingEditForm({ amount: String(entry.amount), description: entry.description });
+  };
+
+  const closeIncomingEdit = () => {
+    if (incomingSubmitting) return;
+    setEditingIncoming(null);
+    setIncomingDialogError('');
+  };
+
+  const submitIncomingEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingIncoming) return;
+    const amountKg = parseFloat(incomingEditForm.amount.replace(',', '.').trim());
+    if (!Number.isFinite(amountKg) || amountKg <= 0) {
+      setIncomingDialogError(t.labelAmount + '!');
+      return;
+    }
+    setIncomingSubmitting(true);
+    setIncomingDialogError('');
+    try {
+      await dispatch({
+        type: 'UPDATE_RAW_MATERIAL_INCOMING',
+        payload: {
+          id: editingIncoming.id,
+          amount: amountKg,
+          description: incomingEditForm.description.trim(),
+        },
+      });
+      setEditingIncoming(null);
+      setSuccess(t.rmIncomingUpdated);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setIncomingDialogError(
+        err instanceof Error ? translateWarehouseApiError(err.message, t) : t.whRequestError,
+      );
+    } finally {
+      setIncomingSubmitting(false);
+    }
+  };
+
+  const confirmIncomingDelete = async () => {
+    if (!deletingIncoming) return;
+    setIncomingSubmitting(true);
+    setIncomingDialogError('');
+    try {
+      await dispatch({
+        type: 'DELETE_RAW_MATERIAL_INCOMING',
+        payload: { id: deletingIncoming.id },
+      });
+      setDeletingIncoming(null);
+      setSuccess(t.rmIncomingDeleted);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setIncomingDialogError(
+        err instanceof Error ? translateWarehouseApiError(err.message, t) : t.whRequestError,
+      );
+    } finally {
+      setIncomingSubmitting(false);
+    }
+  };
 
   const historyTableLabels = useMemo(
     () => ({
@@ -240,6 +345,8 @@ export function RawMaterial() {
       metricsPaint: t.rmMetricsCaptionPaint,
       metricsPackage: t.rmMetricsCaptionPackage,
       empty: t.noData,
+      edit: t.whEdit,
+      delete: t.suDelete,
     }),
     [t],
   );
@@ -711,6 +818,15 @@ export function RawMaterial() {
                 packageKg: packageStockKg,
                 lowStock,
               }}
+              onEdit={canEditIncoming ? openIncomingEdit : undefined}
+              onDelete={
+                canDeleteIncoming
+                  ? (entry) => {
+                      setIncomingDialogError('');
+                      setDeletingIncoming(entry);
+                    }
+                  : undefined
+              }
             />
           </CollapsibleContent>
         </Collapsible>
@@ -1253,6 +1369,107 @@ export function RawMaterial() {
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               {t.btnConfirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={Boolean(editingIncoming)} onOpenChange={(open) => !open && closeIncomingEdit()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.rmIncomingEditTitle}</DialogTitle>
+            <DialogDescription>{editingIncoming?.rawMaterialName}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitIncomingEdit} className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                {t.labelAmount} ({t.unitKg})
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                inputMode="decimal"
+                value={incomingEditForm.amount}
+                onChange={(e) => setIncomingEditForm({ ...incomingEditForm, amount: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm text-slate-600 dark:text-slate-400">
+                {t.labelDesc}
+              </label>
+              <input
+                type="text"
+                value={incomingEditForm.description}
+                onChange={(e) =>
+                  setIncomingEditForm({ ...incomingEditForm, description: e.target.value })
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+            {incomingDialogError ? (
+              <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400">
+                {incomingDialogError}
+              </p>
+            ) : null}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeIncomingEdit}
+                disabled={incomingSubmitting}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {t.btnCancel}
+              </button>
+              <button
+                type="submit"
+                disabled={incomingSubmitting}
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {t.btnSave}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={Boolean(deletingIncoming)}
+        onOpenChange={(open) => {
+          if (!open && !incomingSubmitting) {
+            setDeletingIncoming(null);
+            setIncomingDialogError('');
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.rmIncomingDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingIncoming
+                ? t.rmIncomingDeleteDesc
+                    .replace('{name}', deletingIncoming.rawMaterialName)
+                    .replace('{kg}', formatKgAmount(deletingIncoming.amount))
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {incomingDialogError ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400">
+              {incomingDialogError}
+            </p>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={incomingSubmitting}>{t.btnCancel}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={incomingSubmitting}
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmIncomingDelete();
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {t.suDelete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

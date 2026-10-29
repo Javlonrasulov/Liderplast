@@ -20,6 +20,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { InventoryMovementDto } from './dto/inventory-movement.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
+import { UpdateRawMaterialIncomingDto } from './dto/update-raw-material-incoming.dto.js';
 import { WarehouseService } from './warehouse.service.js';
 import { CreateRawMaterialPurchaseOrderDto } from '../finance/dto/create-raw-material-purchase-order.dto.js';
 import { FinanceService } from '../finance/finance.service.js';
@@ -92,6 +93,22 @@ export class WarehouseController {
       },
       userId,
     );
+  }
+
+  @Patch('incoming/:id')
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT, Role.WORKER)
+  updateIncoming(
+    @Param('id') id: string,
+    @Body() dto: UpdateRawMaterialIncomingDto,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.warehouseService.updateRawMaterialIncoming(id, dto, userId);
+  }
+
+  @Delete('incoming/:id')
+  @Roles(Role.ADMIN, Role.DIRECTOR)
+  deleteIncoming(@Param('id') id: string) {
+    return this.warehouseService.deleteRawMaterialIncoming(id);
   }
 
   @Post('consume')

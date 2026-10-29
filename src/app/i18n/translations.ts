@@ -694,6 +694,15 @@ export interface T {
   rmCreatePaintButton: string;
   rmCreatePackageButton: string;
   rmHistoryCreatedBy: string;
+  rmIncomingEditTitle: string;
+  rmIncomingDeleteTitle: string;
+  rmIncomingDeleteDesc: string;
+  rmIncomingUpdated: string;
+  rmIncomingDeleted: string;
+  rmIncomingErrLinked: string;
+  rmIncomingErrBagsUsed: string;
+  rmIncomingErrStockNegative: string;
+  rmIncomingErrBagsMismatch: string;
   /** Raw Material page — section headings */
   rmSectionOverview: string;
   rmSectionOverviewDesc: string;
@@ -2132,6 +2141,15 @@ const uz_cyrillic: T = {
   rmCreatePaintButton: 'Краскани сақлаш',
   rmCreatePackageButton: 'Пакет турини сақлаш',
   rmHistoryCreatedBy: 'Ким томонидан',
+  rmIncomingEditTitle: 'Хомашё киримини таҳрирлаш',
+  rmIncomingDeleteTitle: 'Киримни ўчириш',
+  rmIncomingDeleteDesc: '«{name}» — {kg} кг кирим ўчирилади ва омбор қолдиғидан айрилади.',
+  rmIncomingUpdated: 'Кирим янгиланди',
+  rmIncomingDeleted: 'Кирим ўчирилди',
+  rmIncomingErrLinked: 'Бу кирим етказиб берувчи буюртмасига боғланган — уни «Етказиб берувчи» бўлимида ўзгартиринг.',
+  rmIncomingErrBagsUsed: 'Бу кирим қоплари ишлатилган (уланган ёки сарфланган) — миқдорни ўзгартириб ёки ўчириб бўлмайди.',
+  rmIncomingErrStockNegative: 'Бу хомашёдан аллақачон сарфланган — қолдиқ манфий бўлиб қолади.',
+  rmIncomingErrBagsMismatch: 'Омбордаги қолдиқ ва қоплардаги миқдор мос келмаяпти — аввал қоплар бўлимини текширинг.',
   rmSectionOverview: 'Умумий кўрсаткичлар',
   rmSectionOverviewDesc: 'PET хомашё, краска ва пакет бўйича кирим, сарф ва қолдиқ',
   rmSectionAlerts: 'Огоҳлантиришлар',
@@ -3692,6 +3710,15 @@ const uz_latin: T = {
   rmCreatePaintButton: 'Kraskani saqlash',
   rmCreatePackageButton: 'Paket turini saqlash',
   rmHistoryCreatedBy: 'Kim tomonidan',
+  rmIncomingEditTitle: 'Xomashyo kirimini tahrirlash',
+  rmIncomingDeleteTitle: 'Kirimni o‘chirish',
+  rmIncomingDeleteDesc: '«{name}» — {kg} kg kirim o‘chiriladi va ombor qoldig‘idan ayriladi.',
+  rmIncomingUpdated: 'Kirim yangilandi',
+  rmIncomingDeleted: 'Kirim o‘chirildi',
+  rmIncomingErrLinked: 'Bu kirim yetkazib beruvchi buyurtmasiga bog‘langan — uni «Yetkazib beruvchi» bo‘limida o‘zgartiring.',
+  rmIncomingErrBagsUsed: 'Bu kirim qoplari ishlatilgan (ulangan yoki sarflangan) — miqdorni o‘zgartirib yoki o‘chirib bo‘lmaydi.',
+  rmIncomingErrStockNegative: 'Bu xomashyodan allaqachon sarflangan — qoldiq manfiy bo‘lib qoladi.',
+  rmIncomingErrBagsMismatch: 'Ombordagi qoldiq va qoplardagi miqdor mos kelmayapti — avval qoplar bo‘limini tekshiring.',
   rmSectionOverview: 'Umumiy ko‘rsatkichlar',
   rmSectionOverviewDesc: 'PET xomashyo, kraska va paket bo‘yicha kirim, sarf va qoldiq',
   rmSectionAlerts: 'Ogohlantirishlar',
@@ -5253,6 +5280,15 @@ const ru: T = {
   rmCreatePaintButton: 'Сохранить краску',
   rmCreatePackageButton: 'Сохранить тип пакета',
   rmHistoryCreatedBy: 'Кем добавлено',
+  rmIncomingEditTitle: 'Изменить приход сырья',
+  rmIncomingDeleteTitle: 'Удалить приход',
+  rmIncomingDeleteDesc: '«{name}» — приход {kg} кг будет удалён и вычтен из остатка склада.',
+  rmIncomingUpdated: 'Приход обновлён',
+  rmIncomingDeleted: 'Приход удалён',
+  rmIncomingErrLinked: 'Этот приход связан с заказом поставщика — измените его в разделе «Поставщики».',
+  rmIncomingErrBagsUsed: 'Мешки этого прихода уже используются (подключены или расходованы) — изменить количество или удалить нельзя.',
+  rmIncomingErrStockNegative: 'Это сырьё уже израсходовано — остаток станет отрицательным.',
+  rmIncomingErrBagsMismatch: 'Остаток на складе не совпадает с количеством в мешках — сначала проверьте раздел мешков.',
   rmSectionOverview: 'Сводные показатели',
   rmSectionOverviewDesc: 'Поступление, расход и остаток: PET, краска и пакеты',
   rmSectionAlerts: 'Предупреждения',

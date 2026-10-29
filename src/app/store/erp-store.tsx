@@ -28,6 +28,8 @@ export interface RawMaterialEntry {
   rawMaterialId?: string;
   rawMaterialName?: string;
   createdByName?: string;
+  /** Smena/ishlab chiqarish kabi hujjatga bog‘langan harakat — qo‘lda tahrirlanmaydi */
+  referenceType?: string;
 }
 
 export interface RawMaterialBagSession {
@@ -675,6 +677,14 @@ type ERPAction =
       };
     }
   | {
+      type: 'UPDATE_RAW_MATERIAL_INCOMING';
+      payload: { id: string; amount: number; description: string };
+    }
+  | {
+      type: 'DELETE_RAW_MATERIAL_INCOMING';
+      payload: { id: string };
+    }
+  | {
       type: 'ADD_WAREHOUSE_PRODUCT';
       payload: {
         itemType: WarehouseItemType;
@@ -1149,6 +1159,7 @@ type WarehouseHistoryItem = {
   movementType: 'INCOMING' | 'CONSUMPTION' | 'PRODUCTION_OUTPUT' | 'ADJUSTMENT';
   quantity: number;
   note?: string | null;
+  referenceType?: string | null;
   createdAt: string;
   rawMaterial?: { id: string; name: string } | null;
   semiProduct?: { id: string; name: string } | null;
@@ -2582,6 +2593,7 @@ async function loadStateFromApi(loadPlan?: ErpApiLoadPlan) {
       rawMaterialId: item.rawMaterial?.id,
       rawMaterialName: item.rawMaterial?.name,
       createdByName: item.createdBy?.fullName ?? undefined,
+      referenceType: item.referenceType ?? undefined,
     }));
 
   const rawMaterialEntries: RawMaterialEntry[] =
@@ -3038,6 +3050,20 @@ export function ERPProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
+        case 'UPDATE_RAW_MATERIAL_INCOMING':
+          await apiRequest(`/warehouse/incoming/${action.payload.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              quantity: action.payload.amount,
+              note: action.payload.description,
+            }),
+          });
+          break;
+        case 'DELETE_RAW_MATERIAL_INCOMING':
+          await apiRequest(`/warehouse/incoming/${action.payload.id}`, {
+            method: 'DELETE',
+          });
+          break;
         case 'ADD_WAREHOUSE_PRODUCT':
           await apiRequest('/warehouse/products', {
             method: 'POST',

@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  BagAuditActionType,
+  BagStatus,
   EntityStatus,
   InventoryItemType,
   MovementType,
@@ -22,6 +24,7 @@ import {
   SemiProductRawMaterialInputDto,
 } from './dto/product-relations.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
+import { UpdateRawMaterialIncomingDto } from './dto/update-raw-material-incoming.dto.js';
 import { RawMaterialBagsService } from '../raw-material-bags/raw-material-bags.service.js';
 
 type Tx = Prisma.TransactionClient;
@@ -445,6 +448,188 @@ export class WarehouseService {
 
   emitWarehouseMovement(result: Awaited<ReturnType<typeof this.applyMovementTx>>) {
     this.realtimeGateway.emitWarehouseUpdated(result);
+  }
+
+  async updateRawMaterialIncoming(
+    id: string,
+    dto: UpdateRawMaterialIncomingDto,
+    updatedById?: string,
+  ) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const movement = await this.getEditableRawIncomingTx(tx, id);
+      const rawMaterialId = movement.rawMaterialId!;
+      const nextQuantity = dto.quantity ?? movement.quantity;
+      const delta = nextQuantity - movement.quantity;
+      let updatedBalance: Awaited<
+        ReturnType<typeof tx.inventoryBalance.update>
+      > | null = null;
+
+      if (Math.abs(delta) > 1e-9) {
+        const bags = await this.getIncomingAutoBagsTx(tx, movement.id);
+        this.assertIncomingBagsUnused(bags);
+        updatedBalance = await this.shiftRawMaterialBalanceTx(
+          tx,
+          rawMaterialId,
+          delta,
+        );
+        if (bags.length > 0) {
+          await tx.rawMaterialBag.deleteMany({
+            where: { id: { in: bags.map((bag) => bag.id) } },
+          });
+          await this.rawMaterialBagsService.createAutoBagsForIncomingTx(tx, {
+            rawMaterialId,
+            totalQuantityKg: nextQuantity,
+            createdById: updatedById,
+            referenceType: 'warehouse-incoming',
+            referenceId: movement.id,
+          });
+        }
+      }
+
+      const updatedMovement = await tx.inventoryMovement.update({
+        where: { id: movement.id },
+        data: {
+          quantity: nextQuantity,
+          newQuantity: movement.previousQuantity + nextQuantity,
+          ...(dto.note !== undefined ? { note: dto.note.trim() || null } : {}),
+        },
+      });
+
+      return { movement: updatedMovement, updatedBalance };
+    });
+
+    this.realtimeGateway.emitWarehouseUpdated(result);
+    return result;
+  }
+
+  async deleteRawMaterialIncoming(id: string) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const movement = await this.getEditableRawIncomingTx(tx, id);
+      const bags = await this.getIncomingAutoBagsTx(tx, movement.id);
+      this.assertIncomingBagsUnused(bags);
+
+      const updatedBalance = await this.shiftRawMaterialBalanceTx(
+        tx,
+        movement.rawMaterialId!,
+        -movement.quantity,
+      );
+      if (bags.length > 0) {
+        await tx.rawMaterialBag.deleteMany({
+          where: { id: { in: bags.map((bag) => bag.id) } },
+        });
+      }
+      await tx.inventoryMovement.delete({ where: { id: movement.id } });
+
+      return { movement, updatedBalance, deleted: true };
+    });
+
+    this.realtimeGateway.emitWarehouseUpdated(result);
+    return { ok: true };
+  }
+
+  /** Faqat qo‘lda kiritilgan xomashyo kirimi — buyurtma/smena hujjatlariga bog‘langanlari emas. */
+  private async getEditableRawIncomingTx(tx: Tx, id: string) {
+    const movement = await tx.inventoryMovement.findUnique({ where: { id } });
+    if (!movement) {
+      throw new NotFoundException('Inventory movement not found');
+    }
+    if (
+      movement.itemType !== InventoryItemType.RAW_MATERIAL ||
+      movement.movementType !== MovementType.INCOMING ||
+      !movement.rawMaterialId
+    ) {
+      throw new BadRequestException(
+        'Only raw material incoming movements can be edited',
+      );
+    }
+    if (movement.referenceType) {
+      throw new BadRequestException(
+        'Movement is linked to another document and cannot be edited',
+      );
+    }
+
+    const markerIds = [...(movement.note ?? '').matchAll(/\(([^()\s]+)\)/g)].map(
+      (match) => match[1],
+    );
+    if (markerIds.length > 0) {
+      const [supplierOrder, rawOrder] = await Promise.all([
+        tx.supplierPurchaseOrder.findFirst({
+          where: { id: { in: markerIds } },
+          select: { id: true },
+        }),
+        tx.rawMaterialPurchaseOrder.findFirst({
+          where: { id: { in: markerIds } },
+          select: { id: true },
+        }),
+      ]);
+      if (supplierOrder || rawOrder) {
+        throw new BadRequestException(
+          'Movement is linked to a supplier purchase order and cannot be edited here',
+        );
+      }
+    }
+
+    return movement;
+  }
+
+  private async getIncomingAutoBagsTx(tx: Tx, movementId: string) {
+    const logs = await tx.bagAuditLog.findMany({
+      where: {
+        referenceType: 'warehouse-incoming',
+        referenceId: movementId,
+        actionType: BagAuditActionType.CREATED,
+      },
+      select: { bagId: true },
+    });
+    const bagIds = [...new Set(logs.map((log) => log.bagId))];
+    if (bagIds.length === 0) return [];
+    return tx.rawMaterialBag.findMany({
+      where: { id: { in: bagIds } },
+      include: { _count: { select: { sessions: true, writeoffs: true } } },
+    });
+  }
+
+  private assertIncomingBagsUnused(
+    bags: Array<{
+      status: BagStatus;
+      initialQuantityKg: number;
+      currentQuantityKg: number;
+      _count: { sessions: number; writeoffs: number };
+    }>,
+  ) {
+    const used = bags.some(
+      (bag) =>
+        bag.status !== BagStatus.IN_STORAGE ||
+        Math.abs(bag.currentQuantityKg - bag.initialQuantityKg) > 0.0001 ||
+        bag._count.sessions > 0 ||
+        bag._count.writeoffs > 0,
+    );
+    if (used) {
+      throw new BadRequestException(
+        'Incoming bags are already in use and cannot be changed',
+      );
+    }
+  }
+
+  private async shiftRawMaterialBalanceTx(
+    tx: Tx,
+    rawMaterialId: string,
+    delta: number,
+  ) {
+    const balance = await tx.inventoryBalance.findFirst({
+      where: { rawMaterialId },
+    });
+    if (!balance) {
+      throw new NotFoundException('Inventory balance not found');
+    }
+    const nextQuantity = Math.round((balance.quantity + delta) * 1e6) / 1e6;
+    if (nextQuantity < -0.0001) {
+      throw new BadRequestException('Stock cannot go negative');
+    }
+    return tx.inventoryBalance.update({
+      where: { id: balance.id },
+      data: { quantity: Math.max(0, nextQuantity), status: EntityStatus.COMPLETED },
+    });
   }
 
   private async applyMovementTx(
