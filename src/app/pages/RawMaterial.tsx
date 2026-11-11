@@ -148,7 +148,7 @@ export function RawMaterial() {
     user?.role === 'DIRECTOR' ||
     hasPermission('view_warehouse') ||
     hasPermission('view_raw_material');
-  const canDeleteIncoming = user?.role === 'ADMIN' || user?.role === 'DIRECTOR';
+  const canDeleteIncoming = canEditIncoming;
   const [editingIncoming, setEditingIncoming] = useState<RawMaterialMovementHistoryEntry | null>(
     null,
   );

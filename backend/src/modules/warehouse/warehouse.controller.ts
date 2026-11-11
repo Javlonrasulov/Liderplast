@@ -106,7 +106,7 @@ export class WarehouseController {
   }
 
   @Delete('incoming/:id')
-  @Roles(Role.ADMIN, Role.DIRECTOR)
+  @Roles(Role.ADMIN, Role.DIRECTOR, Role.MANAGER, Role.ACCOUNTANT, Role.WORKER)
   deleteIncoming(@Param('id') id: string) {
     return this.warehouseService.deleteRawMaterialIncoming(id);
   }
