@@ -624,6 +624,32 @@ export class CrmService {
     return order;
   }
 
+  async deleteOrder(id: string, deletedById?: string) {
+    const existing = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+    if (!existing) {
+      throw new NotFoundException('Order not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await this.restoreOrderItemsToStock(tx, id, existing.items, deletedById);
+      await this.kassaService.reverseSaleBalanceDeduction(tx, id);
+      await tx.payment.deleteMany({ where: { orderId: id } });
+      await tx.kassaEntry.deleteMany({ where: { orderId: id } });
+      await tx.order.delete({ where: { id } });
+    });
+
+    this.realtimeGateway.emitOrderUpdated({ id, deleted: true });
+    this.realtimeGateway.emitWarehouseUpdated({
+      source: 'order_delete',
+      orderId: id,
+    });
+
+    return { success: true };
+  }
+
   async createPayment(dto: CreatePaymentDto) {
     const client = await this.prisma.client.findUnique({
       where: { id: dto.clientId },

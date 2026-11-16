@@ -787,6 +787,7 @@ type ERPAction =
   | { type: 'ADD_SALE'; payload: { clientId: string; clientName: string; productCategory: 'semi' | 'final'; productType: string; quantity: number; pricePerUnit: number; paid: number; date: string } }
   | { type: 'ADD_SALE_ORDER'; payload: { clientId: string; clientName: string; date: string; items: SaleOrderItem[]; paid: number } }
   | { type: 'UPDATE_SALE_ORDER'; payload: { id: string; clientId: string; date: string; items: SaleOrderItem[]; paid: number } }
+  | { type: 'DELETE_SALE_ORDER'; payload: string }
   | {
       type: 'ADD_EXPENSE';
       payload: {
@@ -3220,6 +3221,11 @@ export function ERPProvider({ children }: { children: ReactNode }) {
                 fxRateToUzs: item.fxRateToUzs,
               })),
             }),
+          });
+          break;
+        case 'DELETE_SALE_ORDER':
+          await apiRequest(`/orders/${action.payload}`, {
+            method: 'DELETE',
           });
           break;
         case 'ADD_EXPENSE': {

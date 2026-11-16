@@ -62,6 +62,15 @@ export class CrmController {
     return this.crmService.updateOrder(id, dto, userId);
   }
 
+  @Delete('orders/:id')
+  @Roles(Role.DIRECTOR, Role.MANAGER)
+  deleteOrder(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+  ) {
+    return this.crmService.deleteOrder(id, userId);
+  }
+
   @Post('payments')
   @Roles(Role.DIRECTOR, Role.ACCOUNTANT, Role.MANAGER)
   createPayment(@Body() dto: CreatePaymentDto) {

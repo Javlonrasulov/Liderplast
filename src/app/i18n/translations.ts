@@ -927,6 +927,11 @@ export interface T {
   slDeleteClientTitle: string;
   slDeleteClientHint: string;
   slDeleteClientAction: string;
+  slDeleteSaleTitle: string;
+  slDeleteSaleHint: string;
+  slDeleteSaleAction: string;
+  slSaleDeleted: string;
+  slSaleDeleteFailed: string;
   slCompanyName: string;
   slDebtStatusYes: string;
   slDebtStatusNo: string;
@@ -2515,6 +2520,12 @@ const uz_cyrillic: T = {
   slDeleteClientHint:
     'Клиент рўйхатдан олинади; аввалги сотувлар ва тўловлар тарихи сақланади.',
   slDeleteClientAction: 'Ҳа, рўйхатдан олиб ташлаш',
+  slDeleteSaleTitle: 'Сотувни ўчирамизми?',
+  slDeleteSaleHint:
+    'Сотув тарихдан ўчирилади; маҳсулотлар омборга қайтарилади ва шу буюртмага боғлиқ тўловлар ҳам ўчирилади.',
+  slDeleteSaleAction: 'Ҳа, ўчириш',
+  slSaleDeleted: 'Сотув ўчирилди',
+  slSaleDeleteFailed: 'Сотувни ўчириб бўлмади',
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Қарзи бор',
   slDebtStatusNo: 'Қарзи йўқ',
@@ -2663,7 +2674,7 @@ const uz_cyrillic: T = {
   layoutSiroRemaining: 'Хомашё қолдиғи',
   layoutUnitKg: 'kg',
   layoutUnitTon: 't',
-  layoutRawStockUnitToggle: 'Кг / тонна алмаштириш',
+  layoutRawStockUnitToggle: 'Ушбу хомашё учун кг / тонна',
   textColor: 'Матн ранги',
   textColorDefault: 'Стандарт',
   textColorBlack: 'Қора',
@@ -4084,6 +4095,12 @@ const uz_latin: T = {
   slDeleteClientHint:
     "Klient ro'yxatdan olinadi; avvalgi sotuvlar va to'lovlar tarixi saqlanadi.",
   slDeleteClientAction: "Ha, ro'yxatdan olib tashlash",
+  slDeleteSaleTitle: "Sotuvni o'chiramizmi?",
+  slDeleteSaleHint:
+    "Sotuv tarixdan o'chiriladi; mahsulotlar omborga qaytariladi va shu buyurtmaga bog'liq to'lovlar ham o'chiriladi.",
+  slDeleteSaleAction: "Ha, o'chirish",
+  slSaleDeleted: "Sotuv o'chirildi",
+  slSaleDeleteFailed: "Sotuvni o'chirib bo'lmadi",
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Qarzi bor',
   slDebtStatusNo: "Qarzi yo'q",
@@ -4233,7 +4250,7 @@ const uz_latin: T = {
   layoutSiroRemaining: "Xomashyo qoldig'i",
   layoutUnitKg: 'kg',
   layoutUnitTon: 't',
-  layoutRawStockUnitToggle: 'Kg / tonna almashtirish',
+  layoutRawStockUnitToggle: 'Shu xomashyo uchun kg / tonna',
   textColor: 'Matn rangi',
   textColorDefault: 'Standart',
   textColorBlack: 'Qora',
@@ -5653,6 +5670,12 @@ const ru: T = {
   slDeleteClientHint:
     'Клиент исчезнет из списка; история продаж и платежей сохранится.',
   slDeleteClientAction: 'Да, удалить',
+  slDeleteSaleTitle: 'Удалить продажу?',
+  slDeleteSaleHint:
+    'Продажа будет удалена из истории; товары вернутся на склад, платежи по этому заказу тоже удалятся.',
+  slDeleteSaleAction: 'Да, удалить',
+  slSaleDeleted: 'Продажа удалена',
+  slSaleDeleteFailed: 'Не удалось удалить продажу',
   slCompanyName: 'LiderPlast',
   slDebtStatusYes: 'Есть долг',
   slDebtStatusNo: 'Долга нет',
@@ -5802,7 +5825,7 @@ const ru: T = {
   layoutSiroRemaining: 'Остаток сырья',
   layoutUnitKg: 'кг',
   layoutUnitTon: 'т',
-  layoutRawStockUnitToggle: 'Переключить кг / тонны',
+  layoutRawStockUnitToggle: 'Кг / тонны для этого сырья',
   textColor: 'Цвет текста',
   textColorDefault: 'Стандарт',
   textColorBlack: 'Чёрный',

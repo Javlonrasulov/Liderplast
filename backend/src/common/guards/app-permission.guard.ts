@@ -173,6 +173,11 @@ function requiredPermissionGroups(
     { test: /^\/clients$/, method: 'POST', anyOf: ['view_sales'] },
     { test: /^\/orders$/, method: 'GET', anyOf: ['view_sales'] },
     { test: /^\/orders$/, method: 'POST', anyOf: ['view_sales'] },
+    {
+      test: /^\/orders\/[^/]+$/,
+      method: ['PATCH', 'DELETE'],
+      anyOf: ['view_sales'],
+    },
     { test: /^\/payments$/, method: 'GET', anyOf: ['view_sales'] },
     { test: /^\/payments$/, method: 'POST', anyOf: ['view_sales'] },
     {

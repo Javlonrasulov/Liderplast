@@ -421,6 +421,7 @@ export function Sales() {
   const [selectedClientDetail, setSelectedClientDetail] = useState<string | null>(null);
   const [clientDetailEditing, setClientDetailEditing] = useState(false);
   const [clientIdToDelete, setClientIdToDelete] = useState<string | null>(null);
+  const [saleIdToDelete, setSaleIdToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (clientId && !state.clients.some((c) => c.id === clientId)) {
@@ -439,6 +440,30 @@ export function Sales() {
       /* refresh / error surfaced via ERP context */
     } finally {
       setClientIdToDelete(null);
+    }
+  };
+
+  const handleConfirmDeleteSale = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!saleIdToDelete) return;
+    const id = saleIdToDelete;
+    const toastId = toast.loading(`${t.slDeleteSaleAction}…`);
+    try {
+      await dispatch({ type: 'DELETE_SALE_ORDER', payload: id });
+      setSelectedSaleIds((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      if (editingSale?.id === id) setEditingSale(null);
+      if (saleToPrint?.id === id) setSaleToPrint(null);
+      toast.success(t.slSaleDeleted, { id: toastId });
+    } catch (err) {
+      console.error('[sales] delete failed', err);
+      toast.error(t.slSaleDeleteFailed, { id: toastId });
+    } finally {
+      setSaleIdToDelete(null);
     }
   };
 
@@ -1232,6 +1257,15 @@ export function Sales() {
                               </button>
                               <button
                                 type="button"
+                                disabled={isLoading}
+                                onClick={() => setSaleIdToDelete(sale.id)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                                title={t.slDeleteSaleTitle}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handlePrintSale(sale)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/40 transition-colors"
                                 title={t.prPrint}
@@ -1308,6 +1342,28 @@ export function Sales() {
               onClick={(e) => void handleConfirmDeleteClient(e)}
             >
               {t.slDeleteClientAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={Boolean(saleIdToDelete)} onOpenChange={(open) => !open && setSaleIdToDelete(null)}>
+        <AlertDialogContent className="border-slate-200 dark:border-slate-700 sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">{t.slDeleteSaleTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+              {t.slDeleteSaleHint}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700">
+              {t.btnCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+              onClick={(e) => void handleConfirmDeleteSale(e)}
+            >
+              {t.slDeleteSaleAction}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

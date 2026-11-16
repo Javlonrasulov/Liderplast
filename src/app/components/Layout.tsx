@@ -23,7 +23,25 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui
 const LOW_SIRO_KG = 1000;
 const LOW_PAINT_KG = 200;
 
-const RAW_STOCK_UNIT_STORAGE = 'erp_sidebar_raw_stock_unit';
+const RAW_STOCK_UNIT_STORAGE = 'erp_sidebar_raw_stock_unit_by_id';
+
+type RawStockUnit = 'kg' | 't';
+
+function loadRawStockUnits(): Record<string, RawStockUnit> {
+  try {
+    const raw = localStorage.getItem(RAW_STOCK_UNIT_STORAGE);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const out: Record<string, RawStockUnit> = {};
+    for (const [id, unit] of Object.entries(parsed as Record<string, unknown>)) {
+      if (unit === 'kg' || unit === 't') out[id] = unit;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
 
 const LANG_OPTIONS: { value: Language; short: string; label: string; flag: string }[] = [
   { value: 'uz_cyrillic', short: 'КИ', label: 'Ўзбек (Кирил)', flag: '🇺🇿' },
@@ -436,13 +454,12 @@ export function Layout() {
     t.rmKindSiro,
   ]);
 
-  const [rawStockUnit, setRawStockUnit] = useState<'kg' | 't'>(() =>
-    localStorage.getItem(RAW_STOCK_UNIT_STORAGE) === 't' ? 't' : 'kg',
-  );
-  const toggleRawStockUnit = () => {
-    setRawStockUnit((prev) => {
-      const next = prev === 'kg' ? 't' : 'kg';
-      localStorage.setItem(RAW_STOCK_UNIT_STORAGE, next);
+  const [rawStockUnits, setRawStockUnits] = useState<Record<string, RawStockUnit>>(loadRawStockUnits);
+  const toggleRawStockUnit = (id: string) => {
+    setRawStockUnits((prev) => {
+      const nextUnit: RawStockUnit = (prev[id] ?? 'kg') === 'kg' ? 't' : 'kg';
+      const next = { ...prev, [id]: nextUnit };
+      localStorage.setItem(RAW_STOCK_UNIT_STORAGE, JSON.stringify(next));
       return next;
     });
   };
@@ -645,32 +662,12 @@ export function Layout() {
         {/* Raw material stock by catalog type */}
         {!collapsed && rawMaterialSidebarRows.length > 0 && (
           <div className="mx-3 mb-3 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700/50 dark:bg-slate-800">
-            <button
-              type="button"
-              onClick={toggleRawStockUnit}
-              title={t.layoutRawStockUnitToggle}
-              className="mb-2.5 flex w-full items-center justify-between gap-2 text-left"
-            >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                {t.layoutSiroRemaining}
-              </span>
-              <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-slate-200 text-[10px] font-semibold dark:border-slate-600">
-                {(['kg', 't'] as const).map((unit) => (
-                  <span
-                    key={unit}
-                    className={`px-1.5 py-0.5 ${
-                      rawStockUnit === unit
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-slate-500 dark:text-slate-400'
-                    }`}
-                  >
-                    {unit === 'kg' ? t.layoutUnitKg : t.layoutUnitTon}
-                  </span>
-                ))}
-              </span>
-            </button>
+            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              {t.layoutSiroRemaining}
+            </p>
             <div className="space-y-2.5">
               {rawMaterialSidebarRows.map((row) => {
+                const unit = rawStockUnits[row.id] ?? 'kg';
                 const barPct = Math.min(100, (row.kg / row.barMax) * 100);
                 const barColor = row.isLow
                   ? 'bg-amber-500'
@@ -696,11 +693,11 @@ export function Layout() {
                       </div>
                       <button
                         type="button"
-                        onClick={toggleRawStockUnit}
+                        onClick={() => toggleRawStockUnit(row.id)}
                         title={t.layoutRawStockUnitToggle}
                         className={`shrink-0 text-xs font-semibold tabular-nums ${qtyColor}`}
                       >
-                        {rawStockUnit === 't'
+                        {unit === 't'
                           ? `${formatKgAmount(row.kg / 1000)} ${t.layoutUnitTon}`
                           : `${formatKgAmount(row.kg)} ${t.layoutUnitKg}`}
                       </button>
