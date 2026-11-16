@@ -691,16 +691,38 @@ export function Layout() {
                           {row.kindLabel}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => toggleRawStockUnit(row.id)}
-                        title={t.layoutRawStockUnitToggle}
-                        className={`shrink-0 text-xs font-semibold tabular-nums ${qtyColor}`}
-                      >
-                        {unit === 't'
-                          ? `${formatKgAmount(row.kg / 1000)} ${t.layoutUnitTon}`
-                          : `${formatKgAmount(row.kg)} ${t.layoutUnitKg}`}
-                      </button>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <span className={`text-xs font-semibold tabular-nums ${qtyColor}`}>
+                          {unit === 't'
+                            ? formatKgAmount(row.kg / 1000)
+                            : formatKgAmount(row.kg)}
+                        </span>
+                        <span
+                          role="group"
+                          aria-label={t.layoutRawStockUnitToggle}
+                          className="inline-flex overflow-hidden rounded-md border border-slate-200 text-[10px] font-semibold dark:border-slate-600"
+                        >
+                          {(['kg', 't'] as const).map((u) => (
+                            <button
+                              key={u}
+                              type="button"
+                              onClick={() => {
+                                if ((rawStockUnits[row.id] ?? 'kg') !== u) {
+                                  toggleRawStockUnit(row.id);
+                                }
+                              }}
+                              title={t.layoutRawStockUnitToggle}
+                              className={`px-1.5 py-0.5 transition-colors ${
+                                unit === u
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700'
+                              }`}
+                            >
+                              {u === 'kg' ? t.layoutUnitKg : t.layoutUnitTon}
+                            </button>
+                          ))}
+                        </span>
+                      </div>
                     </div>
                     <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                       <div
